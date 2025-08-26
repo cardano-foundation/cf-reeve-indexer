@@ -1,0 +1,65 @@
+[
+    {
+        "id": 1,
+        "name": "ONE",
+        "description": "",
+        "charts": [
+            {
+                "width": 0.0,
+                "height": 0.0,
+                "metric": "BALANCE_SHEET",
+                "subMetric": "TOTAL_ASSETS",
+                "xpos": 0.0,
+                "ypos": 0.0
+            },
+            {
+                "width": 0.0,
+                "height": 0.0,
+                "metric": "BALANCE_SHEET",
+                "subMetric": "TOTAL_LIABILITIES",
+                "xpos": 0.0,
+                "ypos": 0.0
+            },
+            {
+                "width": 0.0,
+                "height": 0.0,
+                "metric": "INCOME_STATEMENT",
+                "subMetric": "PROFIT_OF_THE_YEAR",
+                "xpos": 0.0,
+                "ypos": 0.0
+            },
+            {
+                "width": 0.0,
+                "height": 0.0,
+                "metric": "BALANCE_SHEET",
+                "subMetric": "ASSET_CATEGORIES",
+                "xpos": 0.0,
+                "ypos": 0.0
+            },
+            {
+                "width": 0.0,
+                "height": 0.0,
+                "metric": "BALANCE_SHEET",
+                "subMetric": "BALANCE_SHEET_OVERVIEW",
+                "xpos": 0.0,
+                "ypos": 0.0
+            },
+            {
+                "width": 0.0,
+                "height": 0.0,
+                "metric": "INCOME_STATEMENT",
+                "subMetric": "INCOME_STREAMS",
+                "xpos": 0.0,
+                "ypos": 0.0
+            },
+            {
+                "width": 0.0,
+                "height": 0.0,
+                "metric": "INCOME_STATEMENT",
+                "subMetric": "TOTAL_EXPENSES",
+                "xpos": 0.0,
+                "ypos": 0.0
+            }
+        ]
+    }
+]

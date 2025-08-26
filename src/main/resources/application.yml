@@ -19,6 +19,7 @@ spring:
       ddl-auto: update
 reeve:
   label: 1447
+  dashboard-folder-path: ./dashboards
 store:
   cardano:
     host: backbone.mainnet.cardanofoundation.org

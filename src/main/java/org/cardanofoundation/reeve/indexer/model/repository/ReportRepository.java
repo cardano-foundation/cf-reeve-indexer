@@ -1,6 +1,8 @@
 package org.cardanofoundation.reeve.indexer.model.repository;
 
 import java.util.List;
+import java.util.Set;
+
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +23,13 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             @Param("organisationId") String organisationId, @Param("subType") String subType,
             @Param("interval") Interval interval, @Param("year") Short year,
             @Param("period") Short period);
+
+
+    @Query("""
+            SELECT r FROM ReportEntity r
+            WHERE r.organisationId = :organisationId
+            AND r.subType = :reportType
+            AND r.year >= :startYear AND r.year <= :endYear
+            """)
+    Set<ReportEntity> findByTypeAndWithinYearRange(@Param("organisationId") String organisationId, @Param("reportType") String reportType, @Param("startYear") int startYear, @Param("endYear") int endYear);
 }
