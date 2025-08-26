@@ -1,42 +1,159 @@
-### ⚠️ Work-in-progress ⚠️
+# Reeve Indexing Example
 
-# Reeve verifier
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-green.svg)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org/)
 
-This repository is currently just a Proof-of-concept. In the future it's possible to become more, but for now it's just a PoC .
+A comprehensive example application demonstrating how to index, verify, and visualize [Reeve](https://reeve.technology) on-chain financial data from the Cardano blockchain. This project showcases blockchain data integration with modern web technologies.
 
-The idea of this repository is to provide a simple way and an example how to verify [Reeve](https://reeve.technology) onChain data.
-Reeve is an application introduced from the Cardano Foundation to provide trust and transparency about financial data of organisations. The backend code of Reeve can be found here: [GitHub](https://github.com/cardano-foundation/cf-reeve-platform)
+## 🎯 Project Overview
 
-This repository uses [Yaci Store](https://github.com/bloxbean/yaci-store) as a modular indexer. 
-Since we are only interested in the metadata it is a perfect fit and we don't need to index everything from the blockchain.
-We are using the metadata store and overwrite the Event processing to parse our own data.
+Reeve is a transparency and accountability platform developed by the Cardano Foundation that publishes financial data of organizations directly onto the Cardano blockchain. This repository provides a complete solution for:
 
-An example of a Reeve transaction can be found here: [Cardano Explorer](https://explorer.cardano.org/transaction/99a20f54f25bf9168719cb2ce00e25ab01c4a458e0500cf3a699a7c8ce3c0cdf)
+- **Indexing** Reeve transactions from Cardano mainnet
+- **Parsing and storing** financial reports and organizational data
+- **Exposing REST APIs** for data access
+- **Visualizing data** through a modern React frontend
 
+### 🔗 Related Links
 
-### What it is doing
-Reeve uses the metadata label `1447` for its transactions and transactions/reports of the Cardano Foundation were published on mainnet. That's why we are filtering the metadata events for this particaluar metadata label.
-Additionally, we are filtering for an `organisationID`, since we only want to verify the data of one specific organisation.
-The process can be found in the [CustomMetadataStorage.java](src/main/java/org/cardanofoundation/reeve/indexer/yaci/CustomMetadataStorage.java) class.
-Then the events are parsed and stored in the database. Via a simple API a frontend picks it up and displays the data.
+- [Reeve Platform](https://reeve.technology) - Official Reeve website
+- [Reeve Backend Repository](https://github.com/cardano-foundation/cf-reeve-platform) - Official Cardano Foundation Reeve implementation
+- [Yaci Store](https://github.com/bloxbean/yaci-store) - Modular Cardano indexer used in this project
+- [Example Reeve Transaction](https://explorer.cardano.org/transaction/99a20f54f25bf9168719cb2ce00e25ab01c4a458e0500cf3a699a7c8ce3c0cdf) - Live transaction on Cardano Explorer
 
-### How to run it
+## 🚀 Quick Start
 
-#### Starting the backend 
-The easiest way is to run it with docker.
-```bash
-docker compose up
+### Prerequisites
+
+- **Java 21** or higher
+- **Node.js 18+** and npm
+- **Docker & Docker Compose** (recommended)
+- **Git**
+
+### Option 1: Docker Compose (Recommended)
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd reeve-indexing-example
+   ```
+
+2. **Start the application:**
+   ```bash
+   docker compose up
+   ```
+
+3. **Access the applications:**
+   - Backend API: http://localhost:9000
+   - OpenAPI Documentation: http://localhost:9000/swagger-ui.html
+   - Database: localhost:5432 (postgres/postgres)
+   - Frontend: http://localhost:5173
+
+### Option 2: Local Development
+
+1. **Start PostgreSQL database:**
+   ```bash
+   docker run --name postgres-reeve -e POSTGRES_DB=reeve-verifier -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:15-alpine
+   ```
+
+2. **Run the backend:**
+   ```bash
+   ./gradlew clean bootRun
+   ```
+
+3. **Run the frontend:**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+## 📖 Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+- [**API Documentation**](docs/api.md) - REST API endpoints and usage
+- [**Architecture Guide**](docs/architecture.md) - Detailed system architecture
+- [**Configuration Guide**](docs/configuration.md) - Application configuration options
+- [**Development Guide**](docs/development.md) - Development setup and guidelines
+- [**Deployment Guide**](docs/deployment.md) - Production deployment instructions
+
+## 🔧 Technology Stack
+
+### Backend
+- **Spring Boot 3.5.4** - Application framework
+- **Spring Data JPA** - Database abstraction
+- **Yaci Store** - Cardano blockchain indexer
+- **PostgreSQL** - Primary database
+- **OpenAPI 3** - API documentation
+- **Lombok** - Code generation
+
+### Frontend
+- **React 18** - UI framework
+- **TypeScript** - Type-safe JavaScript
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Radix UI** - Accessible component primitives
+
+### Infrastructure
+- **Docker** - Containerization
+- **Gradle** - Build automation
+- **Flyway** - Database migrations
+
+## 📊 Features
+
+### Data Indexing
+- Real-time indexing of Reeve transactions (metadata label `1447`)
+- Automatic parsing of financial reports and organizational data
+- Configurable sync starting point
+- Parallel processing support
+
+### REST API
+- **Organizations**: List and search organizations
+- **Reports**: Financial reports with filtering by type, period, and organization
+- **Transactions**: Detailed transaction data with pagination
+- **OpenAPI Documentation**: Interactive API explorer
+
+### Frontend Features
+- Modern, responsive design
+- Organization browsing and filtering
+- Financial report visualization
+- Transaction details and history
+- Real-time data updates
+
+## 🛠️ Configuration
+
+Key configuration options in `application.yml`:
+
+```yaml
+reeve:
+  label: 1447  # Reeve metadata label
+
+store:
+  cardano:
+    host: backbone.mainnet.cardanofoundation.org
+    port: 3001
+    sync-start-slot: 159983856  # Starting sync point
 ```
-This command will start a postgres database + the backend including the indexer. 
 
-#### Starting the frontend
-The frontend is a simple React application. You can start it with the following command:
-```bash
-cd frontend
-npm install
-npm run dev
-```
+See [Configuration Guide](docs/configuration.md) for complete options.
 
-### Things to do:
-- [X] Implement basic frontend
-- [ ] Implement identity verification - Currently we are interpreting the metadata without identity verification
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 🆘 Support
+
+- **Issues**: Report bugs or request features via [GitHub Issues](../../issues)
+- **Documentation**: Check the `docs/` directory for detailed guides
+- **Community**: Join discussions in the repository discussions
+
+---
+
+**Built with ❤️ for the Cardano ecosystem**
