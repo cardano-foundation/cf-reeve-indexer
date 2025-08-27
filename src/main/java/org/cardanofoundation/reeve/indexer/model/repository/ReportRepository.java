@@ -3,11 +3,13 @@ package org.cardanofoundation.reeve.indexer.model.repository;
 import java.util.List;
 import java.util.Set;
 
-import org.cardanofoundation.reeve.indexer.model.domain.Interval;
-import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import org.cardanofoundation.reeve.indexer.model.domain.Interval;
+import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 
 public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
 
@@ -22,7 +24,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
     List<ReportEntity> findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
             @Param("organisationId") String organisationId, @Param("subType") String subType,
             @Param("interval") Interval interval, @Param("year") Short year,
-            @Param("period") Short period);
+            @Param("period") Short period, Pageable pageable);
 
 
     @Query("""

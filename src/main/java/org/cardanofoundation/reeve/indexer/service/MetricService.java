@@ -9,14 +9,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.cardanofoundation.reeve.indexer.model.domain.MetricEnum;
-import org.cardanofoundation.reeve.indexer.service.metrics.MetricExecutor;
-import org.cardanofoundation.reeve.indexer.service.metrics.MetricNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.cardanofoundation.reeve.indexer.model.domain.MetricEnum;
+import org.cardanofoundation.reeve.indexer.service.metrics.MetricExecutor;
+import org.cardanofoundation.reeve.indexer.service.metrics.MetricNotFoundException;
 
 @Service
 @RequiredArgsConstructor

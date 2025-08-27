@@ -1,15 +1,17 @@
 package org.cardanofoundation.reeve.indexer.model.view;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.reeve.indexer.model.entity.TransactionItemEntity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import org.cardanofoundation.reeve.indexer.model.entity.TransactionItemEntity;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -19,7 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public class TransactionItemView {
 
     private String id;
-    private String amount;
+    private BigDecimal amount;
     private String currency;
     private String documentNumber;
 

@@ -1,15 +1,5 @@
 package org.cardanofoundation.reeve.indexer.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.reeve.indexer.model.domain.Interval;
-import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
-import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
-import org.cardanofoundation.reeve.indexer.model.view.ReportView;
-import org.hibernate.query.sqm.IntervalType;
-import org.springframework.stereotype.Service;
-
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -18,6 +8,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.cardanofoundation.reeve.indexer.model.domain.Interval;
+import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
+import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
+import org.cardanofoundation.reeve.indexer.model.view.ReportView;
 
 @Service
 @Slf4j
@@ -30,9 +33,9 @@ public class ReportService {
     private final Clock clock;
 
     public List<ReportView> findAllByTypeAndPeriod(String organisationId, String reportType,
-            String intervalType, Short year, Short period) {
+            String intervalType, Short year, Short period, Pageable pageable) {
        return reportRepository.findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                organisationId, reportType, intervalType != null ? Interval.valueOf(intervalType) : null, year, period)
+                organisationId, reportType, intervalType != null ? Interval.valueOf(intervalType) : null, year, period, pageable)
                 .stream()
                 .map(reportEntity -> {
                     try {

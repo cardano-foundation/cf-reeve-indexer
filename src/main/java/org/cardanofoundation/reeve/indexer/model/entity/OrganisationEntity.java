@@ -3,6 +3,7 @@ package org.cardanofoundation.reeve.indexer.model.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 public class OrganisationEntity {
-    
+
     @Id
     private String id;
     private String name;

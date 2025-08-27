@@ -2,10 +2,12 @@ package org.cardanofoundation.reeve.indexer.model.view;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.http.ProblemDetail;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
+import org.springframework.http.ProblemDetail;
 
 @Getter
 @Setter

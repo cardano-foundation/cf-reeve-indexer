@@ -4,26 +4,26 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import jakarta.annotation.PostConstruct;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.cardanofoundation.reeve.indexer.model.domain.IncomeStatemenCategories;
 import org.cardanofoundation.reeve.indexer.model.domain.MetricEnum;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.service.ReportService;
 import org.cardanofoundation.reeve.indexer.service.metrics.MetricExecutor;
-import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,7 +45,7 @@ public class IncomeStatementMetricService extends MetricExecutor {
             Optional<LocalDate> endDate) {
         Set<ReportEntity> reportEntities = reportService.findReportsInDateRange(organisationID,
                 MetricEnum.INCOME_STATEMENT.name(), startDate, endDate);
-        
+
         return reportEntities.stream()
         .collect(Collectors.groupingBy(ReportEntity::getYear, Collectors.collectingAndThen(
             Collectors.maxBy(Comparator.comparing(o ->

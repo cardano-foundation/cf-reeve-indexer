@@ -1,29 +1,29 @@
 package org.cardanofoundation.reeve.indexer.yaci;
 
+import java.util.List;
+import java.util.Objects;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.bloxbean.cardano.yaci.store.metadata.domain.TxMetadataLabel;
 import com.bloxbean.cardano.yaci.store.metadata.storage.impl.TxMetadataStorageImpl;
 import com.bloxbean.cardano.yaci.store.metadata.storage.impl.mapper.MetadataMapper;
 import com.bloxbean.cardano.yaci.store.metadata.storage.impl.repository.TxMetadataLabelRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+
 import org.cardanofoundation.reeve.indexer.model.domain.RawMetadata;
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
 import org.cardanofoundation.reeve.indexer.model.domain.Transaction;
-import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.TransactionEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Component
 @Slf4j

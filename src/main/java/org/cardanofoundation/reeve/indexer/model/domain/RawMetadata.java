@@ -1,14 +1,16 @@
 package org.cardanofoundation.reeve.indexer.model.domain;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.cardanofoundation.reeve.indexer.util.RawMetadataDeserializer;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import org.cardanofoundation.reeve.indexer.util.RawMetadataDeserializer;
 
 @Getter
 @Setter

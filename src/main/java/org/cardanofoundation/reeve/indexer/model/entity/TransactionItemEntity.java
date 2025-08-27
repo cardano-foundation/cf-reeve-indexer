@@ -1,5 +1,7 @@
 package org.cardanofoundation.reeve.indexer.model.entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -7,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +29,7 @@ public class TransactionItemEntity {
     @Column(name = "id", nullable = false)
     private String id;
     @Column(name = "amount", nullable = false)
-    private String amount;
+    private BigDecimal amount;
     @Column(name = "fx_rate", nullable = false)
     private String fxRate;
     @Column(name = "document_number")

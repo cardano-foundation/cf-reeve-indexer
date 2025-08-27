@@ -1,16 +1,19 @@
 package org.cardanofoundation.reeve.indexer.model.view;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.cardanofoundation.reeve.indexer.model.entity.TransactionItemEntity;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import org.cardanofoundation.reeve.indexer.model.entity.TransactionItemEntity;
 
 @Getter
 @Setter
@@ -29,7 +32,7 @@ public class ExtractionTransactionItemView {
 
     private String transactionType;
     private String blockChainHash;
-    private String amountLcy;
+    private BigDecimal amountLcy;
     private String fxRate;
     private String costCenterCustomerCode;
     private String costCenterName;

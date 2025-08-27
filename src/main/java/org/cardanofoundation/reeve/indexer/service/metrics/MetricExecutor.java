@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.cardanofoundation.reeve.indexer.model.domain.MetricEnum;
-
 import lombok.Getter;
+
+import org.cardanofoundation.reeve.indexer.model.domain.MetricEnum;
 
 public abstract class MetricExecutor {
 

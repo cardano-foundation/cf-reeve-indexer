@@ -1,18 +1,20 @@
 package org.cardanofoundation.reeve.indexer.model.view;
 
+import java.util.Map;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
-import java.util.Map;
 
 @AllArgsConstructor
 @RequiredArgsConstructor

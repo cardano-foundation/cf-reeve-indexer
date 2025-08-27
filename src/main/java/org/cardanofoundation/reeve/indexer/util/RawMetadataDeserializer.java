@@ -1,19 +1,19 @@
 package org.cardanofoundation.reeve.indexer.util;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
-import org.cardanofoundation.reeve.indexer.model.domain.Project;
 import org.cardanofoundation.reeve.indexer.model.domain.RawMetadata;
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
 import org.cardanofoundation.reeve.indexer.model.domain.Transaction;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 public class RawMetadataDeserializer extends StdDeserializer<RawMetadata> {
 

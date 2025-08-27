@@ -1,13 +1,15 @@
 package org.cardanofoundation.reeve.indexer.model.domain;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.cardanofoundation.reeve.indexer.model.entity.TransactionItemEntity;
 
-import java.util.Optional;
+import org.cardanofoundation.reeve.indexer.model.entity.TransactionItemEntity;
 
 @Getter
 @Setter
@@ -17,7 +19,7 @@ import java.util.Optional;
 public class TransactionItem {
 
         private String id;
-        private String amount;
+        private BigDecimal amount;
         private String fxRate;
         private Document document;
         private CostCenter costCenter;

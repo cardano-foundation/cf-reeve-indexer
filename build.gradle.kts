@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.7"
+    id("com.diffplug.spotless") version "6.19.0"
     id("java")
 }
 
@@ -40,3 +41,27 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+spotless {
+        java {
+            target("**/src/**/*.java")
+
+            // Exclude target directory
+            targetExclude("**/target/**/*.java")
+
+            // Remove wildcard imports
+            removeUnusedImports()
+
+            // Define the import order
+            importOrder("java", "jakarta", "javax", "lombok", "org.springframework", "", "org.junit", "org.cardanofoundation", "#")
+
+            // Trim trailing whitespace
+            trimTrailingWhitespace()
+
+            // Set indentation: 2 spaces per tab
+            indentWithSpaces(2)
+
+            // Ensure files end with a newline
+            endWithNewline()
+        }
+    }

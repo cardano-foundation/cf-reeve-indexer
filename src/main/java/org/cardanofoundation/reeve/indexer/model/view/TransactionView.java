@@ -1,13 +1,14 @@
 package org.cardanofoundation.reeve.indexer.model.view;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.reeve.indexer.model.entity.TransactionEntity;
 
-import java.time.LocalDate;
-import java.util.List;
+import org.cardanofoundation.reeve.indexer.model.entity.TransactionEntity;
 
 @RequiredArgsConstructor
 @AllArgsConstructor

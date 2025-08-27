@@ -2,16 +2,16 @@ package org.cardanofoundation.reeve.indexer.model.request;
 
 import java.time.LocalDate;
 
-import org.cardanofoundation.reeve.indexer.model.view.MetricView;
-
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import org.cardanofoundation.reeve.indexer.model.view.MetricView;
 
 
 @Getter

@@ -2,20 +2,23 @@ package org.cardanofoundation.reeve.indexer.model.view;
 
 import java.util.List;
 import java.util.Optional;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.springframework.http.ProblemDetail;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class ExtractionTransactionView {
-    private boolean success;
+    private Boolean success;
 
     private long total;
 
@@ -34,6 +37,8 @@ public class ExtractionTransactionView {
     }
 
     public static ExtractionTransactionView createFail(ProblemDetail error) {
-        return new ExtractionTransactionView(false, 0L, List.of(), Optional.of(error), 0, 0);
+        return ExtractionTransactionView.builder()
+                .error(Optional.of(error))
+                .build();
     }
 }
