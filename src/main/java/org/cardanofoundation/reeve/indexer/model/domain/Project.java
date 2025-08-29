@@ -15,4 +15,18 @@ public class Project {
 
     private String name;
     private String custCode;
+
+    public void setName(Object name) {
+        if (name instanceof String) {
+            this.name = (String) name;
+        } else if (name instanceof java.util.List) {
+            this.name = String.join(",", ((java.util.List<?>) name).stream()
+                    .map(Object::toString)
+                    .toArray(String[]::new));
+        } else if (name != null) {
+            this.name = name.toString();
+        } else {
+            this.name = null;
+        }
+    }
 }
