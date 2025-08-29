@@ -8,13 +8,13 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package.json and package-lock.json (or yarn.lock)
-COPY frontend/package*.json ./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the frontend application files
-COPY frontend/ ./
+COPY ./ ./
 
 # Build the production version of the app
 RUN npm run build
@@ -27,10 +27,7 @@ FROM nginx:1.25-alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy a custom Nginx configuration file
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80 for the Nginx server
-EXPOSE 80
-
-# Command to start Nginx
+EXPOSE 3000
 CMD ["nginx", "-g", "daemon off;"]
