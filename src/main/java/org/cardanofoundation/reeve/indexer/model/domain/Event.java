@@ -1,6 +1,5 @@
 package org.cardanofoundation.reeve.indexer.model.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
