@@ -1,33 +1,22 @@
-# Dockerfile for React Vite App (in frontend/ directory)
-
-# --- Build Stage ---
-# Use a Node.js image to build the React app
-FROM node:20-alpine AS builder
-
-# Set the working directory inside the container
+FROM node:20-alpine AS build
 WORKDIR /app
-
-# Copy package.json and package-lock.json (or yarn.lock)
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
-
-# Copy the rest of the frontend application files
-COPY ./ ./
-
-# Build the production version of the app
+COPY . ./
 RUN npm run build
 
-# --- Final Image Stage ---
-# Use a lightweight Nginx image to serve the static files
-FROM nginx:1.25-alpine
+FROM nginx:1.25-alpine AS frontend
+WORKDIR /app
+ARG VITE_VERSION="0.0.0"
+ENV VITE_VERSION $VITE_VERSION
+# Nginx config
+RUN rm -rf /etc/nginx/conf.d
+COPY docker-assets/nginx-conf.d /etc/nginx/conf.d
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY env.global.tmp.js /app/env.global.tmp.js
+COPY package.json /app/
+COPY docker-assets/entrypoint.sh /app/entrypoint.sh
 
-# Copy the built static files from the builder stage to the Nginx html directory
-COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
 
-# Copy a custom Nginx configuration file
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 3000
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["sh", "/app/entrypoint.sh"]

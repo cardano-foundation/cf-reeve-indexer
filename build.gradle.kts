@@ -43,25 +43,29 @@ tasks.withType<Test> {
 }
 
 spotless {
-        java {
-            target("**/src/**/*.java")
+    java {
+        target("**/src/**/*.java")
 
-            // Exclude target directory
-            targetExclude("**/target/**/*.java")
+        // Exclude target directory
+        targetExclude("**/target/**/*.java")
 
-            // Remove wildcard imports
-            removeUnusedImports()
+        // Remove wildcard imports
+        removeUnusedImports()
 
-            // Define the import order
-            importOrder("java", "jakarta", "javax", "lombok", "org.springframework", "", "org.junit", "org.cardanofoundation", "#")
+        // Define the import order
+        importOrder("java", "jakarta", "javax", "lombok", "org.springframework", "", "org.junit", "org.cardanofoundation", "#")
 
-            // Trim trailing whitespace
-            trimTrailingWhitespace()
+        // Trim trailing whitespace
+        trimTrailingWhitespace()
 
-            // Set indentation: 2 spaces per tab
-            indentWithSpaces(2)
+        // Set indentation: 2 spaces per tab
+        indentWithSpaces(2)
 
-            // Ensure files end with a newline
-            endWithNewline()
-        }
+        // Ensure files end with a newline
+        endWithNewline()
     }
+}
+
+tasks.bootJar {
+    archiveClassifier = "all"
+}
