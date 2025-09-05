@@ -2,6 +2,8 @@ services:
   reeve-verifier-backend:
     build:
       context: .
+      args:
+        - GRADLE_OPTS=-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2g
     ports:
       - "9000:9000"
     environment:
@@ -9,13 +11,16 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy
+    restart: unless-stopped
 
   reeve-verifier-frontend:
     build:
       context: frontend
     ports:
       - "3000:80"
+    restart: unless-stopped
 
   postgres-db:
     image: postgres:15-alpine
@@ -28,6 +33,13 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d reeve-verifier"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
 volumes:
   postgres-data:
