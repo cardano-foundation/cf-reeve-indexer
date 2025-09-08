@@ -16,6 +16,9 @@ services:
       context: frontend
     ports:
       - "3000:80"
+    environment:
+      PORT: "3000"
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:9000}
 
   postgres-db:
     image: postgres:15-alpine
