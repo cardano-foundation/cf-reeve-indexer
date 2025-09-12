@@ -5,8 +5,9 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "noEmitOnError": false,
+    "types": ["vitest/globals"],
 
+    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -14,12 +15,20 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    "strict": false,
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Module resolution */
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./src/*"]
+      "*": ["*", "/*"],
+      "libs/*": ["libs/*"]
     }
   },
-  "include": ["src"],
-  "exclude": [],
+  "include": ["src", "./vitest.setup.ts", "node_modules/vitest/globals.d.ts"],
+  "exclude": ["node_modules"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
