@@ -1,0 +1,229 @@
+import {
+  Add,
+  AddCircle,
+  ArrowCircleLeft,
+  ArrowCircleRight,
+  ArrowDown,
+  ArrowDown2,
+  ArrowLeft,
+  ArrowLeft2,
+  ArrowRight2,
+  ArrowSwapHorizontal,
+  ArrowUp,
+  ArrowUp2,
+  Book1,
+  Box2,
+  Calendar,
+  Chart21,
+  Check,
+  Clock,
+  CloseCircle,
+  Component,
+  Copy,
+  Danger,
+  DirectboxSend,
+  Document,
+  DocumentText,
+  DocumentUpload,
+  Edit,
+  Element4,
+  ExportSquare,
+  Eye,
+  EyeSlash,
+  FilterRemove,
+  FolderOpen,
+  Forbidden2,
+  Graph,
+  GridEdit,
+  Home2,
+  Icon,
+  ImportSquare,
+  InfoCircle,
+  LoginCurve,
+  MessageQuestion,
+  Minus,
+  MinusSquare,
+  Note1,
+  RefreshCircle,
+  ShieldTick,
+  Setting,
+  Setting2,
+  Stop,
+  Warning2,
+  TickCircle,
+  TickSquare,
+  Trash,
+  TrendUp
+} from 'iconsax-react'
+
+const ADD = 'ADD'
+const ADD_CIRCLE = 'ADD_CIRCLE'
+const ARROW_CIRCLE_LEFT = 'ARROW_CIRCLE_LEFT'
+const ARROW_CIRCLE_RIGHT = 'ARROW_CIRCLE_RIGHT'
+const ARROW_DOWN = 'ARROW_DOWN'
+const ARROW_DOWN2 = 'ARROW_DOWN2'
+const ARROW_LEFT = 'ARROW_LEFT'
+const ARROW_LEFT2 = 'ARROW_LEFT2'
+const ARROW_RIGHT2 = 'ARROW_RIGHT2'
+const ARROW_SWAP_HORIZONTAL = 'ARROW_SWAP_HORIZONTAL'
+const ARROW_UP = 'ARROW_UP'
+const ARROW_UP2 = 'ARROW_UP2'
+const BOOK1 = 'BOOK1'
+const BOX2 = 'BOX2'
+const CALENDAR = 'CALENDAR'
+const CHART21 = 'CHART21'
+const CHECK = 'CHECK'
+const CLOCK = 'CLOCK'
+const CLOSE_CIRCLE = 'CLOSE_CIRCLE'
+const COMPONENT = 'COMPONENT'
+const COPY = 'COPY'
+const DANGER = 'DANGER'
+const DIRECTBOX_SEND = 'DIRECTBOX_SEND'
+const DOCUMENT = 'DOCUMENT'
+const DOCUMENT_TEXT = 'DOCUMENT_TEXT'
+const DOCUMENT_UPLOAD = 'DOCUMENT_UPLOAD'
+const EDIT = 'EDIT'
+const ELEMENT4 = 'ELEMENT4'
+const EXPORT_SQUARE = 'EXPORT_SQUARE'
+const EYE = 'EYE'
+const EYE_SLASH = 'EYE_SLASH'
+const FILTER_REMOVE = 'FILTER_REMOVE'
+const FOLDER_OPEN = 'FOLDER_OPEN'
+const FORBIDDEN2 = 'FORBIDDEN2'
+const GRAPH = 'GRAPH'
+const GRID_EDIT = 'GRID_EDIT'
+const HOME2 = 'HOME2'
+const ICON = 'ICON'
+const IMPORT_SQUARE = 'IMPORT_SQUARE'
+const INFO_CIRCLE = 'INFO_CIRCLE'
+const LOGIN_CURVE = 'LOGIN_CURVE'
+const MESSAGE_QUESTION = 'MESSAGE_QUESTION'
+const MINUS = 'MINUS'
+const MINUS_SQUARE = 'MINUS_SQUARE'
+const NOTE1 = 'NOTE1'
+const REFRESH_CIRCLE = 'REFRESH_CIRCLE'
+const SHIELD_TICK = 'SHIELD_TICK'
+const SETTING = 'SETTING'
+const SETTING2 = 'SETTING2'
+const STOP = 'STOP'
+const WARNING2 = 'WARNING2'
+const TICK_CIRCLE = 'TICK_CIRCLE'
+const TICK_SQUARE = 'TICK_SQUARE'
+const TRASH = 'TRASH'
+const TREND_UP = 'TREND_UP'
+
+export const ICONSAX_NAMES = {
+  ADD,
+  ADD_CIRCLE,
+  ARROW_CIRCLE_LEFT,
+  ARROW_CIRCLE_RIGHT,
+  ARROW_DOWN,
+  ARROW_DOWN2,
+  ARROW_LEFT,
+  ARROW_LEFT2,
+  ARROW_RIGHT2,
+  ARROW_SWAP_HORIZONTAL,
+  ARROW_UP,
+  ARROW_UP2,
+  BOOK1,
+  BOX2,
+  CALENDAR,
+  CHART21,
+  CHECK,
+  CLOCK,
+  CLOSE_CIRCLE,
+  COMPONENT,
+  COPY,
+  DANGER,
+  DIRECTBOX_SEND,
+  DOCUMENT,
+  DOCUMENT_TEXT,
+  DOCUMENT_UPLOAD,
+  EDIT,
+  ELEMENT4,
+  EXPORT_SQUARE,
+  EYE,
+  EYE_SLASH,
+  FILTER_REMOVE,
+  FOLDER_OPEN,
+  FORBIDDEN2,
+  GRAPH,
+  GRID_EDIT,
+  HOME2,
+  ICON,
+  IMPORT_SQUARE,
+  INFO_CIRCLE,
+  LOGIN_CURVE,
+  MESSAGE_QUESTION,
+  MINUS,
+  MINUS_SQUARE,
+  NOTE1,
+  REFRESH_CIRCLE,
+  SHIELD_TICK,
+  SETTING,
+  SETTING2,
+  STOP,
+  WARNING2,
+  TICK_CIRCLE,
+  TICK_SQUARE,
+  TRASH,
+  TREND_UP
+} as const
+
+export const ICONSAX_ICONS = {
+  [ICONSAX_NAMES.ADD]: Add,
+  [ICONSAX_NAMES.ADD_CIRCLE]: AddCircle,
+  [ICONSAX_NAMES.ARROW_CIRCLE_LEFT]: ArrowCircleLeft,
+  [ICONSAX_NAMES.ARROW_CIRCLE_RIGHT]: ArrowCircleRight,
+  [ICONSAX_NAMES.ARROW_DOWN]: ArrowDown,
+  [ICONSAX_NAMES.ARROW_DOWN2]: ArrowDown2,
+  [ICONSAX_NAMES.ARROW_LEFT]: ArrowLeft,
+  [ICONSAX_NAMES.ARROW_LEFT2]: ArrowLeft2,
+  [ICONSAX_NAMES.ARROW_RIGHT2]: ArrowRight2,
+  [ICONSAX_NAMES.ARROW_SWAP_HORIZONTAL]: ArrowSwapHorizontal,
+  [ICONSAX_NAMES.ARROW_UP]: ArrowUp,
+  [ICONSAX_NAMES.ARROW_UP2]: ArrowUp2,
+  [ICONSAX_NAMES.BOOK1]: Book1,
+  [ICONSAX_NAMES.BOX2]: Box2,
+  [ICONSAX_NAMES.CALENDAR]: Calendar,
+  [ICONSAX_NAMES.CHART21]: Chart21,
+  [ICONSAX_NAMES.CHECK]: Check,
+  [ICONSAX_NAMES.CLOCK]: Clock,
+  [ICONSAX_NAMES.CLOSE_CIRCLE]: CloseCircle,
+  [ICONSAX_NAMES.COMPONENT]: Component,
+  [ICONSAX_NAMES.COPY]: Copy,
+  [ICONSAX_NAMES.DANGER]: Danger,
+  [ICONSAX_NAMES.DIRECTBOX_SEND]: DirectboxSend,
+  [ICONSAX_NAMES.DOCUMENT]: Document,
+  [ICONSAX_NAMES.DOCUMENT_TEXT]: DocumentText,
+  [ICONSAX_NAMES.DOCUMENT_UPLOAD]: DocumentUpload,
+  [ICONSAX_NAMES.EDIT]: Edit,
+  [ICONSAX_NAMES.ELEMENT4]: Element4,
+  [ICONSAX_NAMES.EXPORT_SQUARE]: ExportSquare,
+  [ICONSAX_NAMES.EYE]: Eye,
+  [ICONSAX_NAMES.EYE_SLASH]: EyeSlash,
+  [ICONSAX_NAMES.FILTER_REMOVE]: FilterRemove,
+  [ICONSAX_NAMES.FOLDER_OPEN]: FolderOpen,
+  [ICONSAX_NAMES.FORBIDDEN2]: Forbidden2,
+  [ICONSAX_NAMES.GRAPH]: Graph,
+  [ICONSAX_NAMES.GRID_EDIT]: GridEdit,
+  [ICONSAX_NAMES.HOME2]: Home2,
+  [ICONSAX_NAMES.ICON]: Icon,
+  [ICONSAX_NAMES.IMPORT_SQUARE]: ImportSquare,
+  [ICONSAX_NAMES.INFO_CIRCLE]: InfoCircle,
+  [ICONSAX_NAMES.LOGIN_CURVE]: LoginCurve,
+  [ICONSAX_NAMES.MESSAGE_QUESTION]: MessageQuestion,
+  [ICONSAX_NAMES.MINUS]: Minus,
+  [ICONSAX_NAMES.MINUS_SQUARE]: MinusSquare,
+  [ICONSAX_NAMES.NOTE1]: Note1,
+  [ICONSAX_NAMES.REFRESH_CIRCLE]: RefreshCircle,
+  [ICONSAX_NAMES.SHIELD_TICK]: ShieldTick,
+  [ICONSAX_NAMES.SETTING]: Setting,
+  [ICONSAX_NAMES.SETTING2]: Setting2,
+  [ICONSAX_NAMES.STOP]: Stop,
+  [ICONSAX_NAMES.WARNING2]: Warning2,
+  [ICONSAX_NAMES.TICK_CIRCLE]: TickCircle,
+  [ICONSAX_NAMES.TICK_SQUARE]: TickSquare,
+  [ICONSAX_NAMES.TRASH]: Trash,
+  [ICONSAX_NAMES.TREND_UP]: TrendUp
+} as const
