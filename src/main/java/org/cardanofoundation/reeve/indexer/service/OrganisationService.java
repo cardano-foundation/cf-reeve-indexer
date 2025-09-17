@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
+import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
+import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
 
 @Service
 @Slf4j
@@ -18,6 +20,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.OrganisationReposito
 public class OrganisationService {
 
     private final OrganisationRepository organisationRepository;
+    private final CurrencyRepository currencyRepository;
 
     public Optional<OrganisationEntity> findById(String organisationId) {
         return organisationRepository.findById(organisationId);
@@ -39,5 +42,11 @@ public class OrganisationService {
                 .currencyId(entity.getCurrencyId())
                 .taxIdNumber(entity.getTaxIdNumber())
                 .build();
+    }
+
+    public List<CurrencyView> getCurrenciesForOrganisation(String orgId) {
+        return currencyRepository.findAllByOrgId(orgId).stream()
+                .map(currencyEntity -> new CurrencyView(currencyEntity.getId().getCurrencyId(), currencyEntity.getCustCode()))
+                .toList();
     }
 }

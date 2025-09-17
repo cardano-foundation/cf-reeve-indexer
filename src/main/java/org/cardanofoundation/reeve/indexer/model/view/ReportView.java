@@ -38,7 +38,7 @@ public class ReportView {
 
     private Long ver;
 
-    private Map<String, Object> fields; // Assuming fields is a JSON string, adjust as necessary
+    private Map<String, Object> data; // Assuming fields is a JSON string, adjust as necessary
 
     public static ReportView fromEntity(ReportEntity entity, OrganisationEntity organisationEntity, ObjectMapper objectMapper) throws JsonProcessingException {
         return ReportView.builder()
@@ -50,7 +50,7 @@ public class ReportView {
                 .ver(entity.getVer())
                 .currency(organisationEntity.getCurrencyId())
                 .blockChainHash(entity.getTxHash())
-                .fields(objectMapper.readValue(entity.getFields(), Map.class))
+                .data(objectMapper.readValue(entity.getFields(), Map.class))
                 .build();
     }
 }
