@@ -1,4 +1,4 @@
-import { BalanceSheetDetailsKeys, IncomeStatementDetailsKeys, ReportApiResponse, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { BalanceSheetDetailsKeys, IncomeStatementDetailsKeys, ReportApiResponse, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { ReportBalanceSheetFormValues, ReportIncomeStatementFormValues } from 'modules/report-type/components/ReportTypeForm/ReportTypeForm.types.ts'
 import { getTotalIncome } from 'modules/report-type/utils/calculations.ts'
 

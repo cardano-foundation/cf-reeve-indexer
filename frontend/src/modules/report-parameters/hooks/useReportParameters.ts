@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 
 import { useLocationState } from 'hooks'
-import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { getReportCurrencyOptions } from 'modules/report-parameters/components/ReportParametersForm/ReportParametersForm.utils.ts'
 import { useDialogNonPublishedReport, useDialogPublishedReport } from 'modules/report-parameters/hooks/useDialogReport.ts'
 import { useReportParametersForm } from 'modules/report-parameters/hooks/useReportParametersForm.ts'

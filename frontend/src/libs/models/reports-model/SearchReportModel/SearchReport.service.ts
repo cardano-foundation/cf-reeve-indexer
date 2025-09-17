@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { ReportType, SearchReportRequest } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportType, SearchReportRequest } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 
 const getSearchReportQuery = async (parameters: SearchReportRequest) => {
   const { reportsApi } = backendLobApi()

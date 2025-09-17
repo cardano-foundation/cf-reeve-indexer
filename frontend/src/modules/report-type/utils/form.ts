@@ -1,4 +1,4 @@
-import { BalanceSheetDetailsApiResponse, IncomeStatementDetailsApiResponse } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { BalanceSheetDetailsApiResponse, IncomeStatementDetailsApiResponse } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { formatNumber } from 'libs/utils/format.ts'
 
 export const getBalanceSheetInitialValues = (report: BalanceSheetDetailsApiResponse | null) => ({

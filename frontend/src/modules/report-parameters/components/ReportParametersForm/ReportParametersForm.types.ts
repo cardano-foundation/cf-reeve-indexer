@@ -1,4 +1,4 @@
-import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 
 export interface ReportParametersFormValues {
   report: ReportType

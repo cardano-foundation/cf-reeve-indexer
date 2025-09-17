@@ -28,6 +28,3 @@ export type { PickerProps } from './picker/picker.types'
 
 export { TableToolbar } from './table-toolbar/table-toolbar.component'
 export type { TableToolbarProps } from './table-toolbar/table-toolbar.types'
-
-export { Watermark } from './watermark/watermark.component'
-export type { WatermarkProps } from './watermark/watermark.types'

@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 
 import { useLocationState } from 'hooks'
-import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 
 export enum ReportTypeParam {
   BALANCE_SHEET = 'balance-sheet',

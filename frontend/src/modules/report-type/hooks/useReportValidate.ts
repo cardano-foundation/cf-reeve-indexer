@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { BalanceSheetDetailsKeys, IncomeStatementDetailsKeys, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { BalanceSheetDetailsKeys, IncomeStatementDetailsKeys, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 
 export type BalanceSheetWarnings = Record<BalanceSheetDetailsKeys, boolean | undefined>
 

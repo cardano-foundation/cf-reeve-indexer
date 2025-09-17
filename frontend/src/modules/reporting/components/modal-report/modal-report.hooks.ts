@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { useModal } from 'features/common'
-import { ReportApiResponse, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types'
+import { ReportApiResponse, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 import { formatCurrency } from 'modules/organizationDetails/components/organization-form/Organization.utils'
 import { getReportPeriod } from 'modules/report-parameters/utils/payload'
 import type { ReportBalanceSheetFormValues, ReportIncomeStatementFormValues } from 'modules/report-type/components/ReportTypeForm/ReportTypeForm.types'

@@ -3,10 +3,6 @@ import axios, { AxiosRequestConfig, ResponseType as AxiosResponseType } from 'ax
 import { DEFAULT_CONTENT_TYPE_HEADERS } from 'libs/api-connectors/backend-connector-lob/const/headers.consts.ts'
 import { getSessionStorageItem } from 'libs/storage-connectors/session-storage-connector/utils/getSessionStorageItem.ts'
 
-import { activateInterceptors } from './interceptors'
-
-activateInterceptors()
-
 export const sendRequest = async <TResponse>(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
   url: string,

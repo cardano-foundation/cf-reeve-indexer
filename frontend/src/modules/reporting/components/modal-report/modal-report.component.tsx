@@ -1,6 +1,6 @@
 import { Modal } from 'features/common'
 import { Alert, Box, Typography } from 'features/mui/base'
-import { PublishError } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types'
+import { PublishError } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
 import { ReportTypeForm } from 'modules/report-type/components/ReportTypeForm/ReportTypeForm.form'
 

@@ -26,7 +26,7 @@ export const usePublicDashboardQueries = (state: PublicDashboardQueriesState) =>
 
   const { values } = formik
 
-  const selectedOrganisation = useSelectedOrganisation()
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
 
   const { availableMetrics, isAvailableMetricsFetching } = useGetAvailableMetricsModel()
   const { metrics, isMetricsFetching } = useGetMetricsModel(

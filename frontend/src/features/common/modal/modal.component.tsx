@@ -1,4 +1,4 @@
-import { ButtonClose, Watermark } from 'features/common'
+import { ButtonClose } from 'features/common'
 import { Box } from 'features/mui/base'
 
 import { ModalContext } from './modal.context'
@@ -22,7 +22,6 @@ const ModalContent = ({ children, isPreviewMode, ...props }: ModalContentProps) 
   return (
     <Box display="flex" position="relative" overflow="hidden auto">
       <ModalContentStyled {...props}>{children}</ModalContentStyled>
-      {isPreviewMode && <Watermark />}
     </Box>
   )
 }

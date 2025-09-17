@@ -1,7 +1,7 @@
 import { FormikErrors, FormikValues } from 'formik'
 import { Dispatch, SetStateAction } from 'react'
 
-import { ReportApiResponse, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportApiResponse, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ReportBalanceSheetFormValues, ReportIncomeStatementFormValues } from 'modules/report-type/components/ReportTypeForm/ReportTypeForm.types.ts'
 import { useReportValidate } from 'modules/report-type/hooks/useReportValidate.ts'

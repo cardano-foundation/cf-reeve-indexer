@@ -20,7 +20,7 @@ interface DashboardBuilderDialogTemplateSaveState {
 export const useDashboardBuilderDialogTemplateSave = (state: DashboardBuilderDialogTemplateSaveState) => {
   const { availableMetrics, dashboard, template, selection } = state
 
-  const selectedOrganisation = useSelectedOrganisation()
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
 
   const { triggerSaveDashboard } = useSaveDashboardModel()
   const { triggerUpdateDashboard } = useUpdateDashboardModel()

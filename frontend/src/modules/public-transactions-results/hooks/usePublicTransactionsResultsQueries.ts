@@ -1,4 +1,3 @@
-import { useSelectedOrganisation } from 'libs/authentication/user/userSelctedOrganisation.tsx'
 import { useGetPublicTransactionsModel } from 'libs/models/public-transactions-model/GetPublicTransactions/GetPublicTransactionsModel.service.ts'
 import { toDayjs } from 'libs/utils/toDayjs.ts'
 import { PublicTransactionsFormValues } from 'modules/public-transactions/components/PublicTransactionsForm/PublicTransactionsForm.types.ts'
@@ -16,7 +15,7 @@ export const usePublicTransactionsResultsQueries = (state: PublicTransactionsRes
 
   const { page, rowsPerPage } = pagination
 
-  const selectedOrganisation = useSelectedOrganisation()
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
 
   const DEFAULT_REQUEST_PAYLOAD = {
     organisationId: selectedOrganisation,

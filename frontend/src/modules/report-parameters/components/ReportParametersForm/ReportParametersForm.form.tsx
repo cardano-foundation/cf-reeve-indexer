@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { Form } from 'formik'
 
-import { GetReportParametersResponse200 } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { GetReportParametersResponse200 } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { FieldAutomaticGeneration } from 'libs/form-kit/components/FieldAutomaticGeneration/FieldAutomaticGeneration.component.tsx'
 import { FieldCurrency } from 'libs/form-kit/components/FieldCurrency/FieldCurrency.component.tsx'
 import { FieldPeriod } from 'libs/form-kit/components/FieldPeriod/FieldPeriod.component.tsx'

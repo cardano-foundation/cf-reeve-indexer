@@ -1,4 +1,4 @@
-import type { ReportApiResponse } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types'
+import type { ReportApiResponse } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 
 interface ModalReportNonPreviewProps {
   report: ReportApiResponse

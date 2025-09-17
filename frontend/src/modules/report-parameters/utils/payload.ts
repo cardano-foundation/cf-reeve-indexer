@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { IntervalType, ReportMonth, ReportQuarter } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { IntervalType, ReportMonth, ReportQuarter } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 
 export const getSearchReportPayload = (period: string) => {
   const [year, timeFrame] = period.split(/\s/g)

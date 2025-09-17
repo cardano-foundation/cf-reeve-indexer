@@ -1,4 +1,4 @@
-import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { useSelectedOrganisation } from 'libs/authentication/user/userSelctedOrganisation'
 import { useGenerateReportModel } from 'libs/models/reports-model/GenerateReportModel/GenerateReportModel.service'
 import { useSearchBalanceSheetReportModel, useSearchIncomeStatementReportModel } from 'libs/models/reports-model/SearchReportModel/SearchReport.service.ts'
@@ -12,7 +12,7 @@ interface ReportsState {
 
 export const useReportTypeQueries = (state: ReportsState) => {
   const { period, reportType = ReportType.BALANCE_SHEET } = state
-  const selectedOrganisation = useSelectedOrganisation()
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
 
   const payload = getSearchReportPayload(period ?? '')
 

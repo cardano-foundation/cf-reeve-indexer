@@ -11,7 +11,7 @@ import {
   ReportBalanceSheetApiResponse,
   ReportIncomeStatementApiResponse,
   ReportType
-} from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+} from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
 import { ButtonPrimary } from 'libs/ui-kit/components/ButtonPrimary/ButtonPrimary.component.tsx'

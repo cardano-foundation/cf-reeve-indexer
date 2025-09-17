@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 
 import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { PublishReportRequest } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { PublishReportRequest } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 
 const publishReportQuery = async (parameters: PublishReportRequest) => {
   const { reportsApi } = backendLobApi()

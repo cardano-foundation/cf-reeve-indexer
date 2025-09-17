@@ -1,7 +1,7 @@
 import { UseMutateAsyncFunction } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
-import { CreateReportRequest, CreateReportResponse200, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { CreateReportRequest, CreateReportResponse200, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { useSelectedOrganisation } from 'libs/authentication/user/userSelctedOrganisation'
 import { useDialogAlert } from 'libs/ui-kit/components/DialogAlert/useDialogAlert.ts'
 import { getSearchReportPayload } from 'modules/report-parameters/utils/payload'
@@ -22,7 +22,7 @@ interface DialogReportSaveHandlers {
 const useDialogReportSave = (state: DialogReportSaveState, handlers: DialogReportSaveHandlers) => {
   const { period, report, reportType } = state
   const { onCreateReportConfirm } = handlers
-  const selectedOrganisation = useSelectedOrganisation()
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
 
   const navigate = useNavigate()
 

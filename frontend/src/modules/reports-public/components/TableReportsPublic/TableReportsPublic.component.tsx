@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography'
 import { GridColDef } from '@mui/x-data-grid'
 import { ExportSquare } from 'iconsax-react'
 
-import { ReportApiResponse } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types'
+import { ReportApiResponse } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx'

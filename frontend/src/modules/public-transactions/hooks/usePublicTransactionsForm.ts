@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 
 import { useDatesRange } from 'hooks'
 import { OrganisationsApiResponse } from 'libs/api-connectors/backend-connector-lob/api/organisation/organisationApi.types.ts'
-import { useSelectedOrganisation } from 'libs/authentication/user/userSelctedOrganisation'
 import { useFormPublicTransactionsValidation } from 'libs/form-kit/validations/useFormPublicTransactionsValidation.ts'
 import { toDayjs } from 'libs/utils/toDayjs.ts'
 import { PublicTransactionsFormValues } from 'modules/public-transactions/components/PublicTransactionsForm/PublicTransactionsForm.types.ts'
@@ -20,7 +19,7 @@ export const usePublicTransactionsForm = (state: TransactionsFormState) => {
 
   const navigate = useNavigate()
 
-  const selectedOrganisation = useSelectedOrganisation()
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
 
   const [initialValues, setInitialValues] = useState<PublicTransactionsFormValues>({
     organisation: locationState?.organisation ?? selectedOrganisation,

@@ -1,6 +1,6 @@
 import { useField } from 'formik'
 
-import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { InputSelect, SelectOption } from 'libs/ui-kit/components/InputSelect/InputSelect.component.tsx'
 

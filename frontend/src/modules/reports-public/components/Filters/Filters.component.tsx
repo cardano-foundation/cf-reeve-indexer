@@ -1,6 +1,6 @@
 import Grid from '@mui/material/Grid'
 
-import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 import { FieldPeriod } from 'libs/form-kit/components/FieldPeriod/FieldPeriod.component'
 import { FieldReport } from 'libs/form-kit/components/FieldReport/FieldReport.component'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'

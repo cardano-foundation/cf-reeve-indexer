@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { Danger, Forbidden2 } from 'iconsax-react'
 
-import { ReportApiResponse } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportApiResponse } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
 import { ButtonText } from 'libs/ui-kit/components/ButtonText/ButtonText.component.tsx'

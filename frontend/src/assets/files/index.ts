@@ -1,7 +1,1 @@
-export { default as templateChartOfAccounts } from './template-chart-of-accounts.csv?url'
-export { default as templateCostCenters } from './template-cost-centers.csv?url'
-export { default as templateEventCodes } from './template-event-codes.csv?url'
-export { default as templateReferenceCodes } from './template-reference-codes.csv?url'
-export { default as templateTransactions } from './template-transactions.csv?url'
-export { default as templateVatCodes } from './template-vat-codes.csv?url'
 export { default as termsOfUse } from './terms-of-use.pdf?url'

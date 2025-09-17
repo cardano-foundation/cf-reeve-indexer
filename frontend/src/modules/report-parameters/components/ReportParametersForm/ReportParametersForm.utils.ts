@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { CurrencyType, ReportMonth, ReportQuarter, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { CurrencyType, ReportMonth, ReportQuarter, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types.ts'
 import { intl } from 'libs/translations/utils/intl'
 import { SelectOption } from 'libs/ui-kit/components/InputSelect/InputSelect.component.tsx'
 import { theme } from 'libs/ui-kit/theme/theme.ts'

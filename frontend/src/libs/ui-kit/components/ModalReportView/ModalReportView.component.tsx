@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 
-import { ReportBalanceSheetApiResponse, ReportIncomeStatementApiResponse, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/reportsApi.types.ts'
+import { ReportBalanceSheetApiResponse, ReportIncomeStatementApiResponse, ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { ButtonText } from 'libs/ui-kit/components/ButtonText/ButtonText.component.tsx'
