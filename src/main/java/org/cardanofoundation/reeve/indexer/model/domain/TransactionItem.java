@@ -32,7 +32,7 @@ public class TransactionItem {
                                 .documentNumber(Optional.ofNullable(document)
                                                 .map(Document::getNumber).orElse(null))
                                 .currency(Optional.ofNullable(document).map(Document::getCurrency)
-                                                .map(Currency::getCustCode).orElse(null))
+                                                .map(Currency::getId).orElse(null))
                                 .costCenterCustCode(Optional.ofNullable(costCenter)
                                                 .map(CostCenter::getCustCode).orElse(null))
                                 .costCenterName(Optional.ofNullable(costCenter)

@@ -2,7 +2,7 @@ package org.cardanofoundation.reeve.indexer.yaci;
 
 import java.util.List;
 import java.util.Objects;
-
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +21,7 @@ import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
 import org.cardanofoundation.reeve.indexer.model.domain.Transaction;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.TransactionEntity;
+import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
@@ -35,16 +36,18 @@ public class CustomMetadataStorage extends TxMetadataStorageImpl {
     private final TransactionRepository transactionRepository;
     private final ReportRepository reportRepository;
     private final OrganisationRepository organisationRepository;
+    private final CurrencyRepository currencyRepository;
 
     public CustomMetadataStorage(ObjectMapper objectMapper,
             TransactionRepository transactionRepository, ReportRepository reportRepository,
             TxMetadataLabelRepository metadataLabelRepository, MetadataMapper metadataMapper,
-            OrganisationRepository organisationRepository) {
+            OrganisationRepository organisationRepository, CurrencyRepository currencyRepository) {
         super(metadataLabelRepository, metadataMapper);
         this.objectMapper = objectMapper;
         this.transactionRepository = transactionRepository;
         this.reportRepository = reportRepository;
         this.organisationRepository = organisationRepository;
+        this.currencyRepository = currencyRepository;
     }
 
     @Override
@@ -78,6 +81,20 @@ public class CustomMetadataStorage extends TxMetadataStorageImpl {
                             ((List<Transaction>) rawMetadata.getData()).stream()
                                     .map(transaction -> {
                                         TransactionEntity entity = transaction.toEntity();
+                                        // storing currencies if not exists
+                                        transaction.getItems().forEach(item -> {
+                                            Optional.ofNullable(item.getDocument())
+                                                    .ifPresent(doc -> {
+                                                        if (doc.getCurrency() != null) {
+                                                            currencyRepository.saveIfNotExists(
+                                                                    rawMetadata.getOrg().getId(),
+                                                                    doc.getCurrency().getId(),
+                                                                    doc.getCurrency()
+                                                                            .getCustCode());
+                                                        }
+                                                    });
+                                        });
+
                                         entity.setOrganisationId(rawMetadata.getOrg().getId());
                                         entity.setTxHash(rawMetadata.getTxHash());
                                         return entity;
