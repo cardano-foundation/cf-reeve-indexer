@@ -3,21 +3,25 @@ package org.cardanofoundation.reeve.indexer.service;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Service;
+
+import com.bloxbean.cardano.client.crypto.bip39.Sha256Hash;
+import com.bloxbean.cardano.client.util.HexUtil;
+
 import org.cardanofoundation.reeve.indexer.config.KeriProperties;
 import org.cardanofoundation.reeve.indexer.model.domain.Identity;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operation;
-import org.springframework.stereotype.Service;
-import com.bloxbean.cardano.client.crypto.bip39.Sha256Hash;
-import com.bloxbean.cardano.client.util.HexUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
 public class KeriService {
-    
+
     private final SignifyClient client;
     private final KeriProperties keriProperties;
 

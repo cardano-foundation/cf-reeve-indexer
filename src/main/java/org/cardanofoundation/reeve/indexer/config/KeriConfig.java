@@ -1,21 +1,23 @@
 package org.cardanofoundation.reeve.indexer.config;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
 public class KeriConfig {
-    
+
     private final KeriProperties keriProperties;
-    
+
     @Bean
     public SignifyClient signifyClient() throws Exception {
         log.info("Creating SignifyClient with URL: {}, Boot URL: {}", keriProperties.getUrl(), keriProperties.getBootUrl());

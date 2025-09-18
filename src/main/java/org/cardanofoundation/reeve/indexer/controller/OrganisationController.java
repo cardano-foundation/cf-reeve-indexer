@@ -39,5 +39,5 @@ public class OrganisationController {
         List<CurrencyView> currencies = organisationService.getCurrenciesForOrganisation(orgId);
         return ResponseEntity.ok(currencies);
     }
-    
+
 }

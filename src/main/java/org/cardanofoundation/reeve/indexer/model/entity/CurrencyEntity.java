@@ -8,6 +8,7 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -32,7 +33,7 @@ public class CurrencyEntity {
 
     private String custCode;
 
-    
+
     @Embeddable
     @AllArgsConstructor
     @NoArgsConstructor

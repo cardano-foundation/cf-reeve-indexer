@@ -16,8 +16,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
 import org.cardanofoundation.reeve.indexer.model.domain.Identity;
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 
