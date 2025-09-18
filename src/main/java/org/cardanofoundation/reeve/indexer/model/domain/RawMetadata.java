@@ -26,6 +26,7 @@ public class RawMetadata {
     private Long ver;
     private ReeveTransactionType type;
     private Metadata metadata;
+    private Identity identifier;
 
     private Object data;
     private List<Transaction> transactions;

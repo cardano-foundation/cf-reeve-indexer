@@ -1,6 +1,9 @@
 package org.cardanofoundation.reeve.indexer.model.entity;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,10 +15,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import org.cardanofoundation.reeve.indexer.model.domain.Identity;
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 
 @Entity
@@ -24,6 +29,7 @@ import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 public class ReportEntity {
     @Id
     @GeneratedValue
@@ -49,4 +55,14 @@ public class ReportEntity {
 
     @Column(name = "organisation_id", nullable = false)
     private String organisationId;
+
+    private boolean identityVerified;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "aid", column = @Column(name = "aid")),
+            @AttributeOverride(name = "sequenceNumber", column = @Column(name = "sequence_number")),
+            @AttributeOverride(name = "dataHash", column = @Column(name = "data_hash")),
+    })
+    private Identity identity;
 }

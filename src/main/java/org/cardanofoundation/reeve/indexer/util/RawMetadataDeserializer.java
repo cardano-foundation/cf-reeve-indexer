@@ -9,7 +9,9 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+import org.cardanofoundation.reeve.indexer.model.domain.Identity;
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
+import org.cardanofoundation.reeve.indexer.model.domain.Metadata;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.domain.RawMetadata;
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
@@ -91,6 +93,22 @@ public class RawMetadataDeserializer extends StdDeserializer<RawMetadata> {
             if (orgNode != null && !orgNode.isNull()) {
                 // Assuming Organisation is a class that can be deserialized from JSON
                 rawMetadata.setOrg(codec.treeToValue(orgNode, Organisation.class));
+            }
+        }
+
+        if (rootNode.has("identifier")) {
+            JsonNode idNode = rootNode.get("identifier");
+            if (idNode != null && !idNode.isNull()) {
+                // Assuming Identity is a class that can be deserialized from JSON
+                rawMetadata.setIdentifier(codec.treeToValue(idNode, Identity.class));
+            }
+        }
+
+        if (rootNode.has("metadata")) {
+            JsonNode metadataNode = rootNode.get("metadata");
+            if (metadataNode != null && !metadataNode.isNull()) {
+                // Assuming Metadata is a class that can be deserialized from JSON
+                rawMetadata.setMetadata(codec.treeToValue(metadataNode, Metadata.class));
             }
         }
 
