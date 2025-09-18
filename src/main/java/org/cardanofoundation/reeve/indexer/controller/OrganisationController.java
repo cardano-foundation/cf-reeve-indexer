@@ -18,7 +18,7 @@ import org.cardanofoundation.reeve.indexer.service.OrganisationService;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/v1/organisations")
 @RequiredArgsConstructor
 @Slf4j

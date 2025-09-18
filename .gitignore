@@ -17,8 +17,9 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
-### IntelliJ IDEA ###
+### Editors & files ###
 .idea
+.DS_Store
 *.iws
 *.iml
 *.ipr
@@ -33,6 +34,10 @@ out/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
+# dependencies
 .vscode/
 frontend/node_modules/
+frontend/dist
+frontend/dist-ssr
+frontend/.env
+*.local

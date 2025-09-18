@@ -30,7 +30,7 @@ import org.cardanofoundation.reeve.indexer.service.OrganisationService;
 import org.cardanofoundation.reeve.indexer.service.ReportService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
 @Slf4j

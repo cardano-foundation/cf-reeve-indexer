@@ -49,7 +49,7 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
    - Backend API: http://localhost:9000
    - OpenAPI Documentation: http://localhost:9000/swagger-ui.html
    - Database: localhost:5432 (postgres/postgres)
-   - Frontend: http://localhost:5173
+   - Frontend: http://localhost:3000
 
 ### Option 2: Local Development
 
