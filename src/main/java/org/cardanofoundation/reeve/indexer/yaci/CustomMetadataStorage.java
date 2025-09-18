@@ -25,6 +25,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
+import org.cardanofoundation.reeve.indexer.service.KeriService;
 
 @Component
 @Slf4j
@@ -32,22 +33,27 @@ public class CustomMetadataStorage extends TxMetadataStorageImpl {
 
     @Value("${reeve.label}")
     private String metadataLabel;
+    @Value("${keri.enabled:false}")
+    private boolean keriEnabled;
     private final ObjectMapper objectMapper;
     private final TransactionRepository transactionRepository;
     private final ReportRepository reportRepository;
     private final OrganisationRepository organisationRepository;
     private final CurrencyRepository currencyRepository;
+    private final KeriService keriService;
 
     public CustomMetadataStorage(ObjectMapper objectMapper,
             TransactionRepository transactionRepository, ReportRepository reportRepository,
             TxMetadataLabelRepository metadataLabelRepository, MetadataMapper metadataMapper,
-            OrganisationRepository organisationRepository, CurrencyRepository currencyRepository) {
+            OrganisationRepository organisationRepository, CurrencyRepository currencyRepository,
+            KeriService keriService) {
         super(metadataLabelRepository, metadataMapper);
         this.objectMapper = objectMapper;
         this.transactionRepository = transactionRepository;
         this.reportRepository = reportRepository;
         this.organisationRepository = organisationRepository;
         this.currencyRepository = currencyRepository;
+        this.keriService = keriService;
     }
 
     @Override
@@ -75,7 +81,15 @@ public class CustomMetadataStorage extends TxMetadataStorageImpl {
                         rawMetadata.getOrg().getCurrencyId(),
                         rawMetadata.getOrg().getCountryCode(),
                         rawMetadata.getOrg().getTaxIdNumber());
-
+                // verifiy identity
+                boolean identityVerified = false;
+                if(keriEnabled && Double.parseDouble(rawMetadata.getMetadata().getVersion()) >= 1.2) {
+                    try {
+                        identityVerified = keriService.verifyIdentity(rawMetadata.getIdentifier());
+                    } catch (Exception e) {
+                        log.warn("Error verifying identity: {}, error: {}", rawMetadata.getIdentifier(), e.getMessage());
+                    }
+                }
                 if (rawMetadata.getType() == ReeveTransactionType.INDIVIDUAL_TRANSACTIONS) {
                     List<TransactionEntity> transactionEntities =
                             ((List<Transaction>) rawMetadata.getData()).stream()
@@ -109,7 +123,10 @@ public class CustomMetadataStorage extends TxMetadataStorageImpl {
                             .period(rawMetadata.getPeriod())
                             .subType(rawMetadata.getSubType())
                             .ver(rawMetadata.getVer())
-                            .fields((String) rawMetadata.getData()).build();
+                            .fields((String) rawMetadata.getData())
+                            .identity(rawMetadata.getIdentifier())
+                            .identityVerified(identityVerified)
+                            .build();
                     reportRepository.save(reportEntity);
                 }
             });

@@ -28,6 +28,9 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations")
     implementation("com.bloxbean.cardano:yaci-store-metadata-spring-boot-starter:0.1.4")
     implementation("org.postgresql:postgresql")
+    
+    implementation("org.cardanofoundation:signify:0.1.0")
+    implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")
 
     // implementation("org.zalando:problem-spring-web-starter:0.29.1")
     compileOnly("org.projectlombok:lombok:1.18.32")

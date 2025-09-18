@@ -1,0 +1,37 @@
+package org.cardanofoundation.reeve.indexer.config;
+
+import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.coring.Coring;
+import org.cardanofoundation.signify.app.coring.Operation;
+import org.cardanofoundation.signify.cesr.Salter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Configuration
+@RequiredArgsConstructor
+@Slf4j
+public class KeriConfig {
+    
+    private final KeriProperties keriProperties;
+    
+    @Bean
+    public SignifyClient signifyClient() throws Exception {
+        log.info("Creating SignifyClient with URL: {}, Boot URL: {}", keriProperties.getUrl(), keriProperties.getBootUrl());
+        String bran = Coring.randomPasscode();
+        SignifyClient client = new SignifyClient(keriProperties.getUrl(), bran, Salter.Tier.low, keriProperties.getBootUrl(), null);
+        try {
+            client.connect();
+        } catch (Exception e) {
+            client.boot();
+            client.connect();
+        }
+        for (String oobi : keriProperties.getOobisList()) {
+            Object object = client.oobis().resolve(oobi, null);
+            client.operations().wait(Operation.fromObject(object));
+        }
+        return client;
+    }
+
+}
