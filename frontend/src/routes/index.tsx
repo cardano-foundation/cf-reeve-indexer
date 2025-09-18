@@ -37,6 +37,7 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Outlet />} path={ROUTES_V2.ROOT}>
       <Route element={<LayoutPublic />}>
+        <Route index element={<ViewPublicDashboard />} />
         <Route element={<ViewPublicDashboard />} path={ROUTES_V2.PUBLIC_DASHBOARD} />
         <Route element={<ViewReportsPublic />} path={ROUTES_V2.PUBLIC_REPORTS} />
         <Route element={<ViewPublicTransactions />} path={ROUTES_V2.PUBLIC_TRANSACTIONS} />
