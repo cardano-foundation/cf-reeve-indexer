@@ -1,9 +1,6 @@
 package org.cardanofoundation.reeve.indexer.model.entity;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,7 +17,6 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import org.cardanofoundation.reeve.indexer.model.domain.Identity;
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 
 @Entity
@@ -58,11 +54,5 @@ public class ReportEntity {
 
     private boolean identityVerified;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "aid", column = @Column(name = "aid")),
-            @AttributeOverride(name = "sequenceNumber", column = @Column(name = "sequence_number")),
-            @AttributeOverride(name = "dataHash", column = @Column(name = "data_hash")),
-    })
-    private Identity identity;
+    private String metadataHash;
 }

@@ -1,4 +1,4 @@
-package org.cardanofoundation.reeve.indexer.model.domain;
+package org.cardanofoundation.reeve.indexer.model.domain.metadata;
 
 import java.util.List;
 
@@ -10,23 +10,28 @@ import lombok.Setter;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import org.cardanofoundation.reeve.indexer.util.RawMetadataDeserializer;
+import org.cardanofoundation.reeve.indexer.model.domain.Interval;
+import org.cardanofoundation.reeve.indexer.model.domain.Metadata;
+import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
+import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
+import org.cardanofoundation.reeve.indexer.model.domain.Transaction;
+import org.cardanofoundation.reeve.indexer.util.ReeveMetadataDeserializer;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonDeserialize(using = RawMetadataDeserializer.class)
-public class RawMetadata {
+@JsonDeserialize(using = ReeveMetadataDeserializer.class)
+public class ReeveMetadata {
 
     private String txHash;
+    private String metadataHash;
 
     private Organisation org;
     private Long ver;
     private ReeveTransactionType type;
     private Metadata metadata;
-    private Identity identifier;
 
     private Object data;
     private List<Transaction> transactions;

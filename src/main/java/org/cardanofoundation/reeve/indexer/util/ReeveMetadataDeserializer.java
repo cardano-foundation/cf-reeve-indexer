@@ -9,26 +9,25 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-import org.cardanofoundation.reeve.indexer.model.domain.Identity;
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 import org.cardanofoundation.reeve.indexer.model.domain.Metadata;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
-import org.cardanofoundation.reeve.indexer.model.domain.RawMetadata;
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
 import org.cardanofoundation.reeve.indexer.model.domain.Transaction;
+import org.cardanofoundation.reeve.indexer.model.domain.metadata.ReeveMetadata;
 
-public class RawMetadataDeserializer extends StdDeserializer<RawMetadata> {
+public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
 
-    public RawMetadataDeserializer() {
+    public ReeveMetadataDeserializer() {
         this(null);
     }
 
-    public RawMetadataDeserializer(Class<?> vc) {
+    public ReeveMetadataDeserializer(Class<?> vc) {
         super(vc);
     }
 
     @Override
-    public RawMetadata deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+    public ReeveMetadata deserialize(JsonParser parser, DeserializationContext context) throws IOException {
         // Get the codec from the parser to work with JSON nodes
         ObjectCodec codec = parser.getCodec();
         // Read the entire JSON structure into a JsonNode tree
@@ -66,7 +65,7 @@ public class RawMetadataDeserializer extends StdDeserializer<RawMetadata> {
 
         // 3. Manually construct the RawMetadata object
         // This approach avoids trying to deserialize 'data' twice.
-        RawMetadata rawMetadata = new RawMetadata();
+        ReeveMetadata rawMetadata = new ReeveMetadata();
         rawMetadata.setType(type);
         rawMetadata.setData(data);
 
@@ -93,14 +92,6 @@ public class RawMetadataDeserializer extends StdDeserializer<RawMetadata> {
             if (orgNode != null && !orgNode.isNull()) {
                 // Assuming Organisation is a class that can be deserialized from JSON
                 rawMetadata.setOrg(codec.treeToValue(orgNode, Organisation.class));
-            }
-        }
-
-        if (rootNode.has("identifier")) {
-            JsonNode idNode = rootNode.get("identifier");
-            if (idNode != null && !idNode.isNull()) {
-                // Assuming Identity is a class that can be deserialized from JSON
-                rawMetadata.setIdentifier(codec.treeToValue(idNode, Identity.class));
             }
         }
 
