@@ -1,6 +1,7 @@
 package org.cardanofoundation.reeve.indexer.model.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
@@ -34,4 +35,6 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             AND r.year >= :startYear AND r.year <= :endYear
             """)
     Set<ReportEntity> findByTypeAndWithinYearRange(@Param("organisationId") String organisationId, @Param("reportType") String reportType, @Param("startYear") int startYear, @Param("endYear") int endYear);
+
+    Optional<ReportEntity> findByTxHash(String txHash);
 }

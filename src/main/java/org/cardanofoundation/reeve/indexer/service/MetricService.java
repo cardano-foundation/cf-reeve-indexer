@@ -1,8 +1,8 @@
 package org.cardanofoundation.reeve.indexer.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.reeve.indexer.model.domain.MetricEnum;
@@ -24,16 +24,20 @@ import org.cardanofoundation.reeve.indexer.service.metrics.MetricNotFoundExcepti
 @Slf4j
 public class MetricService {
 
-    @Value("${reeve.dashboard-folder-path}")
-    private String dashboardFolderPath;
-
     private final List<MetricExecutor> metricExecutors;
 
     public String getOrgDashboardFromFile(String orgId) {
-        String filePath = String.format("%s/%s.json", dashboardFolderPath, orgId);
-        // read the file and return the content
+        String resourcePath = String.format("dashboards/%s.json", orgId);
         try {
-            return Files.readString(Path.of(filePath));
+            ClassPathResource resource = new ClassPathResource(resourcePath);
+            if (!resource.exists()) {
+                log.warn("Dashboard file not found for orgId: {}", orgId);
+                return null;
+            }
+
+            try (InputStream inputStream = resource.getInputStream()) {
+                return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            }
         } catch (IOException e) {
             log.error("Error reading dashboard file for orgId {}: {}", orgId, e.getMessage());
             return null;

@@ -32,6 +32,7 @@ public class KeriConfig {
             client.boot();
             client.connect();
         }
+        log.info("SignifyClient connected");
         for (String oobi : keriProperties.getOobisList()) {
             Object object = client.oobis().resolve(oobi, null);
             client.operations().wait(Operation.fromObject(object));

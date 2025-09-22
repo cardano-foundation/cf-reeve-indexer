@@ -56,8 +56,6 @@ public class ReportView {
                 .blockChainHash(entity.getTxHash())
                 .data(objectMapper.readValue(entity.getFields(), Map.class))
                 .identityVerified(entity.isIdentityVerified())
-                .aid(entity.getIdentity().getAid())
-                .sn(entity.getIdentity().getSn())
                 .build();
     }
 }
