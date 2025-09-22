@@ -3,10 +3,12 @@ package org.cardanofoundation.reeve.indexer.service;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.bloxbean.cardano.client.crypto.bip39.Sha256Hash;
@@ -22,13 +24,19 @@ import org.cardanofoundation.signify.app.coring.Operation;
 @Slf4j
 public class KeriService {
 
-    private final SignifyClient client;
+    private final Optional<SignifyClient> client;
     private final KeriProperties keriProperties;
+    @Value("${keri.enabled:false}")
+    private boolean keriEnabled;
 
     public boolean verifyIdentity(Identity identity) throws Exception {
+        if(!keriEnabled) {
+            log.warn("KERI is not enabled. Skipping identity verification for: {}", identity.getAid());
+            return false;
+        }
         // resolveOobis();
         log.info("Verifying identity: {}", identity.getAid());
-        List<Object> keyEventLog = (List<Object>) client.keyEvents().get(identity.getAid());
+        List<Object> keyEventLog = (List<Object>) client.orElseThrow().keyEvents().get(identity.getAid());
         if(keyEventLog == null || keyEventLog.isEmpty()) {
             log.warn("No key event log found for identity: {}", identity.getAid());
             return false;
@@ -60,8 +68,8 @@ public class KeriService {
     private void resolveOobis() {
         for (String oobi : keriProperties.getOobisList()) {
             try {
-                Object object = client.oobis().resolve(oobi, null);
-                client.operations().wait(Operation.fromObject(object));
+                Object object = client.orElseThrow().oobis().resolve(oobi, null);
+                client.orElseThrow().operations().wait(Operation.fromObject(object));
             } catch (Exception e) {
                 log.error("Error resolving OOBI: {}", oobi, e);
             }
