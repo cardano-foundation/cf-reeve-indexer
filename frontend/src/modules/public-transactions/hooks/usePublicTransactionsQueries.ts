@@ -1,4 +1,3 @@
-import { useSelectedOrganisation } from 'libs/authentication/user/userSelctedOrganisation'
 import { useGetCurrenciesModel } from 'libs/models/organisation-model/GetCurrencies/GetCurrencies.service.ts'
 import { useGetOrganisationsModel } from 'libs/models/organisation-model/GetOrganisations/GetOrganisations.service.ts'
 

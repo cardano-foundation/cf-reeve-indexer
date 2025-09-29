@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { UploadCostCentersRequest } from 'libs/api-connectors/backend-connector-lob/api/cost-centers/costCentersApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { UploadCostCentersRequest } from 'libs/api-connectors/backend-connector-reeve/api/cost-centers/costCentersApi.types.ts'
 
 const uploadCostCentersQuery = async (payload: UploadCostCentersRequest) => {
-  const { costCentersApi } = backendLobApi()
+  const { costCentersApi } = backendReeveApi()
 
   const data = await costCentersApi.uploadCostCenters(payload)
 

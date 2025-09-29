@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
 
 const getOrganisationsQuery = async ({ hasAuthorizationHeader }: { hasAuthorizationHeader?: boolean }) => {
-  const { organisationApi } = backendLobApi()
+  const { organisationApi } = backendReeveApi()
 
   const data = await organisationApi.getOrganisations({ hasAuthorizationHeader })
 

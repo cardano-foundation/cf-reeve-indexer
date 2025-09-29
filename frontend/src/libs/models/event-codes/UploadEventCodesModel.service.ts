@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { UploadEventCodesRequest } from 'libs/api-connectors/backend-connector-lob/api/event-codes/eventCodesApi.types'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { UploadEventCodesRequest } from 'libs/api-connectors/backend-connector-reeve/api/event-codes/eventCodesApi.types'
 
 const uploadEventCodesQuery = async (payload: UploadEventCodesRequest) => {
-  const { eventCodesApi } = backendLobApi()
+  const { eventCodesApi } = backendReeveApi()
 
   const data = await eventCodesApi.uploadEventCodes(payload)
 

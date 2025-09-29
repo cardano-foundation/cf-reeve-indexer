@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs'
 
-import type { PostBatchDetailsRequestBody } from 'libs/api-connectors/backend-connector-lob/api/batches/batchesApi.types.ts'
+import type { PostBatchDetailsRequestBody } from 'libs/api-connectors/backend-connector-reeve/api/batches/batchesApi.types.ts'
 
 import type { BatchDetailsFiltersValues } from './batch-details-filters.types'
 

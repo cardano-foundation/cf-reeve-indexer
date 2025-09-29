@@ -1,6 +1,6 @@
 import { useField } from 'formik'
 
-import { ReportType } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
+import { ReportType } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { InputSelect, SelectOption } from 'libs/ui-kit/components/InputSelect/InputSelect.component.tsx'
 
@@ -14,8 +14,7 @@ export const FieldReport = ({ items, isRequired = false }: FieldReportProps) => 
 
   const { t } = useTranslations()
 
-  const hasValue = field.value.length > 0
   const label = `${t({ id: 'reportType' })}${isRequired ? ' *' : ''}`
 
-  return <InputSelect items={items} label={label} name={field.name} placeholder={!hasValue ? 'All' : ''} value={field.value} onChange={field.onChange} />
+  return <InputSelect items={items} label={label} name={field.name} value={field.value} onChange={field.onChange} />
 }

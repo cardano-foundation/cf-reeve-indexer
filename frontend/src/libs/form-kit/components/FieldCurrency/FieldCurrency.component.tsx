@@ -16,5 +16,5 @@ export const FieldCurrency = ({ items, isRequired = false }: FieldCurrencyProps)
   const hasValue = field.value.length > 0
   const label = `${t({ id: 'currency' })}${isRequired ? ' *' : ''}`
 
-  return <InputSelect items={items} label={label} name={field.name} placeholder={!hasValue ? 'All' : ''} value={field.value} onChange={field.onChange} />
+  return <InputSelect items={items} label={label} name={field.name} value={field.value} onChange={field.onChange} />
 }

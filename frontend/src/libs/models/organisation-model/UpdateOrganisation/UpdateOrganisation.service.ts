@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { UpdateOrganisationDTO } from 'libs/api-connectors/backend-connector-lob/api/organisation/organisationApi.types'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { UpdateOrganisationDTO } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types'
 
 const updateOrganisationQuery = async (payload: Partial<UpdateOrganisationDTO>) => {
-  const { organisationApi } = backendLobApi()
+  const { organisationApi } = backendReeveApi()
 
   const data = await organisationApi.updateOrganisation({ payload })
 

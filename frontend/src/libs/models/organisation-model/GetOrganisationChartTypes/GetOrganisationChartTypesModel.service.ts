@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
 
 const getOrganisationChartTypesQuery = async ({ id }: { id: string }) => {
-  const { organisationApi } = backendLobApi()
+  const { organisationApi } = backendReeveApi()
 
   const data = await organisationApi.getOrganisationChartTypes({ id })
 

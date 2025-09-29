@@ -3,7 +3,7 @@ import { type FocusEvent } from 'react'
 
 import { InputNumeric } from 'features/common'
 import { formatNumber } from 'libs/utils/format'
-import { formatToFloatReadyFormat } from 'modules/report-type/utils/format'
+import { formatToFloatReadyFormat } from 'modules/public-reports/utils/format'
 
 import type { FieldNumericProps } from './field-numeric.types'
 

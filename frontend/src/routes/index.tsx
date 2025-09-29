@@ -7,7 +7,7 @@ import { ViewPublicResourcesGlossary } from 'modules/public-resources-glossary/v
 import { ViewPublicResourcesUserGuide } from 'modules/public-resources-user-guide/view/ViewPublicResourcesUserGuide.component'
 import { ViewPublicTransactions } from 'modules/public-transactions/view/ViewPublicTransactions.component.tsx'
 import { ViewPublicTransactionsResults } from 'modules/public-transactions-results/view/ViewPublicTransactionsResults.component.tsx'
-import { ViewReportsPublic } from 'modules/reports-public/view/ViewReportsPublic.component.tsx'
+import { ViewReportsPublic } from 'modules/public-reports/view/ViewReportsPublic.component.tsx'
 
 export const ROUTES_V2 = {
   ROOT: '/',

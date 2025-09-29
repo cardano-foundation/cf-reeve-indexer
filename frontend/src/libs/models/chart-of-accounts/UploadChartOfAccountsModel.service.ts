@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { UploadChartOfAccountsRequest } from 'libs/api-connectors/backend-connector-lob/api/chart-of-accounts/chartOfAccountsApi.types'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { UploadChartOfAccountsRequest } from 'libs/api-connectors/backend-connector-reeve/api/chart-of-accounts/chartOfAccountsApi.types'
 
 const uploadChartOfAccountsQuery = async (payload: UploadChartOfAccountsRequest) => {
-  const { chartOfAccountsApi } = backendLobApi()
+  const { chartOfAccountsApi } = backendReeveApi()
 
   const data = await chartOfAccountsApi.uploadChartOfAccounts(payload)
 

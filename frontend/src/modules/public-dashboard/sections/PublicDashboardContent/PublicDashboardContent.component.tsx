@@ -1,14 +1,14 @@
 import Box from '@mui/material/Box'
 
 import { publicDashboardIllustration } from 'assets/images'
-import { GetDashboardsResponse } from 'libs/api-connectors/backend-connector-lob/api/dashboards/dashboardsApi.types.ts'
+import { GetDashboardsResponse } from 'libs/api-connectors/backend-connector-reeve/api/dashboards/dashboardsApi.types.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { DashboardFilters } from 'libs/ui-kit/components/DashboardFilters/DashboardFilters.component.tsx'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component.tsx'
 import { LoaderCentered } from 'libs/ui-kit/components/LoaderCentered/LoaderCentered.component.tsx'
-import { ChartsData } from 'modules/dashboard-builder/hooks/useChartsData'
-import { Slots, TemplateSlotSelections } from 'modules/dashboard-builder/types'
-import { getDefaultTemplateSlots } from 'modules/dashboard-builder/utils/templateSlot.ts'
+import { ChartsData } from 'modules/dashboard-tool/hooks/useChartsData'
+import { Slots, TemplateSlotSelections } from 'modules/dashboard-tool/types'
+import { getDefaultTemplateSlots } from 'modules/dashboard-tool/utils/templateSlot.ts'
 import { TemplateSelection } from 'modules/public-dashboard/components/TemplateSelection.component.tsx'
 
 interface PublicDashboardContentProps {

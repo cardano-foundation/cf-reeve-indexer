@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { UploadTransactionsApiRequest } from 'libs/api-connectors/backend-connector-lob/api/transactions/transactionsApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { UploadTransactionsApiRequest } from 'libs/api-connectors/backend-connector-reeve/api/transactions/transactionsApi.types.ts'
 
 const validateUploadTransactionsQuery = async (request: UploadTransactionsApiRequest) => {
-  const { transactionsApi } = backendLobApi()
+  const { transactionsApi } = backendReeveApi()
 
   const data = await transactionsApi.validateUploadTransactions(request)
 

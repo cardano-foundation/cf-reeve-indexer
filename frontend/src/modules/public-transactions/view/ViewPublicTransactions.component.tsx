@@ -35,7 +35,7 @@ export const ViewPublicTransactions = () => {
       <LayoutPublic.Main flexDirection="column" mx="auto" maxWidth="46.5rem" pt={2}>
         <Box mb={{ xs: 4, sm: 8 }}>
           <Typography variant="body2" color={theme.palette.text.secondary}>
-            {t({ id: 'extractionFormDescription' })}
+            {t({ id: 'publicTransactionsViewDescription' })}
           </Typography>
         </Box>
         <PublicTransactionsForm

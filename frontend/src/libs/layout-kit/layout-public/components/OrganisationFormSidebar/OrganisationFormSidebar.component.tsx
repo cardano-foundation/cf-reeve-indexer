@@ -1,6 +1,5 @@
 import { Formik } from 'formik'
 
-import { useSelectedOrganisation } from 'libs/authentication/user/userSelctedOrganisation'
 import { FieldOrganisations } from 'libs/form-kit/components/FieldOrganisations/FieldOrganisations.component.tsx'
 import { OrganisationFormSidebarStyled, OrganisationsFormStyled } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.styles.tsx'
 import { OrganisationFormValues } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.types.ts'

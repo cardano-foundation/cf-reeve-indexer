@@ -1,12 +1,12 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { GetPublicTransactionsParameters, GetPublicTransactionsRequest } from 'libs/api-connectors/backend-connector-lob/api/public-transactions/publicTransactions.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { GetPublicTransactionsParameters, GetPublicTransactionsRequest } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types.ts'
 
 const getPublicTransactionsQuery = async (request: GetPublicTransactionsRequest, parameters: GetPublicTransactionsParameters) => {
-  const { publicTransactionsApi } = backendLobApi()
+  const { transactionsApi } = backendReeveApi()
 
-  const data = await publicTransactionsApi.getPublicTransactions(request, parameters)
+  const data = await transactionsApi.getTransactions(request, parameters)
 
   if (!data) return null
 

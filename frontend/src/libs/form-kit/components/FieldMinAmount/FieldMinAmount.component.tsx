@@ -4,7 +4,7 @@ import { FocusEvent } from 'react'
 import { InputNumeric } from 'libs/form-kit/components/InputNumeric/InputNumeric.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { formatNumber } from 'libs/utils/format.ts'
-import { formatToFloatReadyFormat } from 'modules/report-type/utils/format.ts'
+import { formatToFloatReadyFormat } from 'modules/public-reports/utils/format.ts'
 
 export const FieldMinAmount = () => {
   const [field, meta, helpers] = useField<string>('minAmount')

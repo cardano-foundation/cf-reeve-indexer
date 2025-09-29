@@ -1,6 +1,6 @@
 import { GridColDef } from '@mui/x-data-grid'
 
-import { TransactionItemApiResponse, Violation } from 'libs/api-connectors/backend-connector-lob/api/batches/batchesApi.types.ts'
+import { TransactionItemApiResponse, Violation } from 'libs/api-connectors/backend-connector-reeve/api/batches/batchesApi.types.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { CellCodeDetails } from 'libs/ui-kit/components/CellCodeDetails/CellCodeDetails.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'

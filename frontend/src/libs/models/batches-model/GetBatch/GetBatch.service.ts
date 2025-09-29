@@ -1,10 +1,10 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { PostBatchDetailsRequest } from 'libs/api-connectors/backend-connector-lob/api/batches/batchesApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { PostBatchDetailsRequest } from 'libs/api-connectors/backend-connector-reeve/api/batches/batchesApi.types.ts'
 
 const getBatchQuery = async (request: PostBatchDetailsRequest) => {
-  const { batchesApi } = backendLobApi()
+  const { batchesApi } = backendReeveApi()
 
   const data = await batchesApi.getBatch(request)
 

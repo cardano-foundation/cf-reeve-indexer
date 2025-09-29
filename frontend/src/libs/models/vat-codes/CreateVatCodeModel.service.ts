@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { VatCodeRequestParameters } from 'libs/api-connectors/backend-connector-lob/api/vat-codes/vatCodesApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { VatCodeRequestParameters } from 'libs/api-connectors/backend-connector-reeve/api/vat-codes/vatCodesApi.types.ts'
 
 const createVatCodeQuery = async (payload: Partial<VatCodeRequestParameters>) => {
-  const { vatCodesApi } = backendLobApi()
+  const { vatCodesApi } = backendReeveApi()
 
   const data = await vatCodesApi.createVatCode(payload)
 

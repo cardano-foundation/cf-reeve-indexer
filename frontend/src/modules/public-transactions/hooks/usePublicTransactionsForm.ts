@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useDatesRange } from 'hooks'
-import { OrganisationsApiResponse } from 'libs/api-connectors/backend-connector-lob/api/organisation/organisationApi.types.ts'
+import { OrganisationsApiResponse } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
 import { useFormPublicTransactionsValidation } from 'libs/form-kit/validations/useFormPublicTransactionsValidation.ts'
 import { toDayjs } from 'libs/utils/toDayjs.ts'
 import { PublicTransactionsFormValues } from 'modules/public-transactions/components/PublicTransactionsForm/PublicTransactionsForm.types.ts'

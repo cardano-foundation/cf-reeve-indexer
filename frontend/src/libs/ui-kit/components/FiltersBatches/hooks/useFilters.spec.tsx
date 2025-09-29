@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import dayjs from 'dayjs'
 import { it } from 'vitest'
 
-import { BatchStatistics } from 'libs/api-connectors/backend-connector-lob/api/batches/batchesApi.types.ts'
+import { BatchStatistics } from 'libs/api-connectors/backend-connector-reeve/api/batches/batchesApi.types.ts'
 
 import { useFilters, StatusOption } from './useFilters'
 

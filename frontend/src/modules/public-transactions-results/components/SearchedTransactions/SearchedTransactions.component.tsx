@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 import { ExportSquare } from 'iconsax-react'
 import { useMemo, useRef } from 'react'
 
-import { PublicTransactionResponse } from 'libs/api-connectors/backend-connector-lob/api/public-transactions/publicTransactions.types.ts'
+import { PublicTransactionResponse } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { CellCodeDetails } from 'libs/ui-kit/components/CellCodeDetails/CellCodeDetails.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'

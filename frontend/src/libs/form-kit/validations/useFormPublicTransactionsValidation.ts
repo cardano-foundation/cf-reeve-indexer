@@ -5,7 +5,7 @@ import { useFieldBlockchainHashValidation } from 'libs/form-kit/validations/useF
 import { useFieldDateFromValidation } from 'libs/form-kit/validations/useFieldDateFromValidation.ts'
 import { useFieldDateToValidation } from 'libs/form-kit/validations/useFieldDateToValidation.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
-import { formatToFloatReadyFormat } from 'modules/report-type/utils/format.ts'
+import { formatToFloatReadyFormat } from 'modules/public-reports/utils/format.ts'
 
 interface UseFormPublicTransactionsValidationState {
   dateFromMinDate: Dayjs

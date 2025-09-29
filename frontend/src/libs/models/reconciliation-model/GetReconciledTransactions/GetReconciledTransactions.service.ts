@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
 import {
   GetReconciledTransactionsApiParameters,
   GetReconciledTransactionsApiRequest
-} from 'libs/api-connectors/backend-connector-lob/api/reconciliation/reconciliationApi.types.ts'
+} from 'libs/api-connectors/backend-connector-reeve/api/reconciliation/reconciliationApi.types.ts'
 
 const getReconciledTransactionsQuery = async (request: GetReconciledTransactionsApiRequest, parameters?: GetReconciledTransactionsApiParameters) => {
-  const { reconciliationApi } = backendLobApi()
+  const { reconciliationApi } = backendReeveApi()
 
   const data = await reconciliationApi.getReconciledTransactions(request, parameters)
 

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
 
 const getEventCodesQuery = async (organisationId: string) => {
-  const { eventCodesApi } = backendLobApi()
+  const { eventCodesApi } = backendReeveApi()
 
   const data = await eventCodesApi.getEventCodes(organisationId)
 

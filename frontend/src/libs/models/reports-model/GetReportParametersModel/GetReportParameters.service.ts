@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { GetReportParametersRequest } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { GetReportParametersRequest } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 
 const getReportParametersQuery = async (parameters: GetReportParametersRequest) => {
-  const { reportsApi } = backendLobApi()
+  const { reportsApi } = backendReeveApi()
 
   const data = await reportsApi.getReportParameters({ ...parameters })
 

@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { GetMetricsRequest } from 'libs/api-connectors/backend-connector-lob/api/metrics/metricsApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { GetMetricsRequest } from 'libs/api-connectors/backend-connector-reeve/api/metrics/metricsApi.types.ts'
 
 const getMetricsQuery = async (request: GetMetricsRequest) => {
-  const { metricsApi } = backendLobApi()
+  const { metricsApi } = backendReeveApi()
 
   const data = await metricsApi.getMetrics(request)
 

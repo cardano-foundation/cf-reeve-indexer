@@ -1,13 +1,13 @@
-import { ChartsData } from 'modules/dashboard-builder/hooks/useChartsData.ts'
-import { DashboardBuilderTemplate1 } from 'modules/dashboard-builder/templates/DashboardBuilderTemplate1/DashboardBuilderTemplate1.component.tsx'
-import { DashboardBuilderTemplate2 } from 'modules/dashboard-builder/templates/DashboardBuilderTemplate2/DashboardBuilderTemplate2.component.tsx'
-import { DashboardBuilderTemplate3 } from 'modules/dashboard-builder/templates/DashboardBuilderTemplate3/DashboardBuilderTemplate3.component.tsx'
-import { Slots, Template, TemplateSlotSelections } from 'modules/dashboard-builder/types'
+import { ChartsData } from 'modules/dashboard-tool/hooks/useChartsData.ts'
+import { DashboardToolTemplate1 } from 'modules/dashboard-tool/templates/DashboardToolTemplate1/DashboardToolTemplate1.component.tsx'
+import { DashboardToolTemplate2 } from 'modules/dashboard-tool/templates/DashboardToolTemplate2/DashboardToolTemplate2.component.tsx'
+import { DashboardToolTemplate3 } from 'modules/dashboard-tool/templates/DashboardToolTemplate3/DashboardToolTemplate3.component.tsx'
+import { Slots, Template, TemplateSlotSelections } from 'modules/dashboard-tool/types'
 
 const templates = {
-  [Template.ONE]: DashboardBuilderTemplate1,
-  [Template.TWO]: DashboardBuilderTemplate2,
-  [Template.THREE]: DashboardBuilderTemplate3
+  [Template.ONE]: DashboardToolTemplate1,
+  [Template.TWO]: DashboardToolTemplate2,
+  [Template.THREE]: DashboardToolTemplate3
 }
 
 interface TemplateSelectionProps {

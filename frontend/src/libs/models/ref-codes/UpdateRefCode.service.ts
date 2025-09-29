@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { PostRefCodeRequest } from 'libs/api-connectors/backend-connector-lob/api/ref-codes/refCodesApi.types'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { PostRefCodeRequest } from 'libs/api-connectors/backend-connector-reeve/api/ref-codes/refCodesApi.types'
 
 const updateRefCodeQuery = async (payload: PostRefCodeRequest) => {
-  const { refCodesApi } = backendLobApi()
+  const { refCodesApi } = backendReeveApi()
 
   const data = await refCodesApi.updateRefCode(payload)
 

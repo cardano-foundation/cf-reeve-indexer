@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { TriggerReconciliationApiRequest } from 'libs/api-connectors/backend-connector-lob/api/reconciliation/reconciliationApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { TriggerReconciliationApiRequest } from 'libs/api-connectors/backend-connector-reeve/api/reconciliation/reconciliationApi.types.ts'
 
 const triggerReconciliationQuery = async (request: TriggerReconciliationApiRequest) => {
-  const { reconciliationApi } = backendLobApi()
+  const { reconciliationApi } = backendReeveApi()
 
   const data = await reconciliationApi.triggerReconciliation(request)
 

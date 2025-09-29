@@ -1,4 +1,4 @@
-import { TransactionsTypesApiResponse } from 'libs/api-connectors/backend-connector-lob/api/transactions/transactionsApi.types.ts'
+import { TransactionsTypesApiResponse } from 'libs/api-connectors/backend-connector-reeve/api/transactions/transactionsApi.types.ts'
 
 import { TransactionsTypesDTO } from './GetTransactionTypes.types.ts'
 

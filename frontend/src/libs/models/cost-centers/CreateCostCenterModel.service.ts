@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { CostCenterRequestParameters } from 'libs/api-connectors/backend-connector-lob/api/cost-centers/costCentersApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { CostCenterRequestParameters } from 'libs/api-connectors/backend-connector-reeve/api/cost-centers/costCentersApi.types.ts'
 
 const createCostCenterQuery = async (payload: Partial<CostCenterRequestParameters>) => {
-  const { costCentersApi } = backendLobApi()
+  const { costCentersApi } = backendReeveApi()
 
   const data = await costCentersApi.createCostCenter(payload)
 

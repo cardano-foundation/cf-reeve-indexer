@@ -8,8 +8,8 @@ import { InputNumeric } from 'libs/form-kit/components/InputNumeric/InputNumeric
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber } from 'libs/utils/format.ts'
-import { ReportBalanceSheetFormValues, ReportIncomeStatementFormValues } from 'modules/report-type/components/ReportTypeForm/ReportTypeForm.types.ts'
-import { formatToFloatReadyFormat } from 'modules/report-type/utils/format.ts'
+import { ReportBalanceSheetFormValues, ReportIncomeStatementFormValues } from 'modules/public-reports/components/ReportTypeForm/ReportTypeForm.types.ts'
+import { formatToFloatReadyFormat } from 'modules/public-reports/utils/format.ts'
 
 type FieldName = keyof ReportBalanceSheetFormValues | keyof ReportIncomeStatementFormValues
 

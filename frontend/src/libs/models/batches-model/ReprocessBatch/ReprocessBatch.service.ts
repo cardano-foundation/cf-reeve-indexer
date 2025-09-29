@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi'
-import { BatchApiParameters } from 'libs/api-connectors/backend-connector-lob/api/batches/batchesApi.types'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { BatchApiParameters } from 'libs/api-connectors/backend-connector-reeve/api/batches/batchesApi.types'
 
 const reprocessBatchQuery = async (parameters: BatchApiParameters) => {
-  const { batchesApi } = backendLobApi()
+  const { batchesApi } = backendReeveApi()
 
   const data = await batchesApi.reprocessBatch(parameters)
 

@@ -3,8 +3,8 @@ import { AutocompleteChangeDetails, AutocompleteChangeReason } from '@mui/materi
 import Box from '@mui/material/Box'
 import dayjs from 'dayjs'
 
-import { BatchStatistics } from 'libs/api-connectors/backend-connector-lob/api/batches/batchesApi.types.ts'
-import { OrganisationApiResponse } from 'libs/api-connectors/backend-connector-lob/api/organisation/organisationApi.types.ts'
+import { BatchStatistics } from 'libs/api-connectors/backend-connector-reeve/api/batches/batchesApi.types.ts'
+import { OrganisationApiResponse } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { intl } from 'libs/translations/utils/intl.ts'
 import { ButtonText } from 'libs/ui-kit/components/ButtonText/ButtonText.component.tsx'

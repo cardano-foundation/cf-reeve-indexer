@@ -1,7 +1,6 @@
 import dayjs from 'dayjs'
 import { FormikProps } from 'formik'
 
-import { useSelectedOrganisation } from 'libs/authentication/user/userSelctedOrganisation.tsx'
 import { useGetDashboardsModel } from 'libs/models/dashboards-model/GetDashboards/GetDashboardsModel.service.ts'
 import { useGetAvailableMetricsModel } from 'libs/models/metrics-model/GetAvailableMetrics/GetAvailableMetricsModel.service.ts'
 import { useGetMetricsModel } from 'libs/models/metrics-model/GetMetrics/GetMetricsModel.service.ts'

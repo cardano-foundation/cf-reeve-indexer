@@ -2,7 +2,7 @@ import { AutocompleteChangeDetails, AutocompleteChangeReason } from '@mui/materi
 import { Dayjs } from 'dayjs'
 import { ReactElement, ReactNode, ReactPortal, SyntheticEvent, useState } from 'react'
 
-import { BatchStatistics } from 'libs/api-connectors/backend-connector-lob/api/batches/batchesApi.types.ts'
+import { BatchStatistics } from 'libs/api-connectors/backend-connector-reeve/api/batches/batchesApi.types.ts'
 
 export interface StatusOption {
   name: string | number | boolean | ReactElement | Iterable<ReactNode> | ReactPortal | (string | undefined)[] | null | undefined

@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { GetDashboardsRequest } from 'libs/api-connectors/backend-connector-lob/api/dashboards/dashboardsApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { GetDashboardsRequest } from 'libs/api-connectors/backend-connector-reeve/api/dashboards/dashboardsApi.types.ts'
 
 const getDashboardsQuery = async (request: GetDashboardsRequest) => {
-  const { dashboardsApi } = backendLobApi()
+  const { dashboardsApi } = backendReeveApi()
 
   const data = await dashboardsApi.getDashboards(request)
 

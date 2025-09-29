@@ -26,11 +26,3 @@ dist-ssr
 
 .env
 /public/env.global.js
-
-# Tests
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/.features-gen/
-/playwright/.auth/

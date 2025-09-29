@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography'
 import { Dayjs } from 'dayjs'
 import { Form, Formik, FormikConfig, FormikProps } from 'formik'
 
-import { CurrenciesApiResponse, OrganisationsApiResponse } from 'libs/api-connectors/backend-connector-lob/api/organisation/organisationApi.types.ts'
+import { CurrenciesApiResponse, OrganisationsApiResponse } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
 import { FieldBlockchainHash } from 'libs/form-kit/components/FieldBlockchainHash/FieldBlockchainHash.component.tsx'
 import { FieldCurrency } from 'libs/form-kit/components/FieldCurrency/FieldCurrency.component.tsx'
 import { FieldDateFrom } from 'libs/form-kit/components/FieldDateFrom/FieldDateFrom.component.tsx'

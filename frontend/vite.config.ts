@@ -11,12 +11,7 @@ export default defineConfig(({ mode }) => {
   return {
     define: {
       'import.meta.env.VITE_VERSION': JSON.stringify(env.VITE_VERSION),
-      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL),
-      'import.meta.env.VITE_ADMIN_EMAIL': JSON.stringify(env.VITE_ADMIN_EMAIL),
-      'import.meta.env.VITE_KEYCLOAK_URL': JSON.stringify(env.VITE_KEYCLOAK_URL),
-      'import.meta.env.VITE_KEYCLOAK_REALM': JSON.stringify(env.VITE_KEYCLOAK_REALM),
-      'import.meta.env.VITE_KEYCLOAK_CLIENT_ID': JSON.stringify(env.VITE_KEYCLOAK_CLIENT_ID),
-      'import.meta.env.VITE_KEYCLOAK_REDIRECT_URL': JSON.stringify(env.VITE_KEYCLOAK_REDIRECT_URL)
+      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL)
     },
     plugins: [react(), tsconfigPaths()],
     server: {

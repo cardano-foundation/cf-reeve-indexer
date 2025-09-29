@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { CreateReportRequest } from 'libs/api-connectors/backend-connector-lob/api/reports/publicReports.types'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { CreateReportRequest } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 
 const createReportQuery = async (parameters: CreateReportRequest) => {
-  const { reportsApi } = backendLobApi()
+  const { reportsApi } = backendReeveApi()
 
   const data = await reportsApi.createReport({ ...parameters })
 

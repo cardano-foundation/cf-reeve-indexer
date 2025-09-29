@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { backendLobApi } from 'libs/api-connectors/backend-connector-lob/api/backendLobApi.ts'
-import { ExtractTransactionsApiRequest } from 'libs/api-connectors/backend-connector-lob/api/transactions/transactionsApi.types.ts'
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { ExtractTransactionsApiRequest } from 'libs/api-connectors/backend-connector-reeve/api/transactions/transactionsApi.types.ts'
 
 const extractTransactionsQuery = async (request: ExtractTransactionsApiRequest) => {
-  const { transactionsApi } = backendLobApi()
+  const { transactionsApi } = backendReeveApi()
 
   const data = await transactionsApi.extractTransactions(request)
 
