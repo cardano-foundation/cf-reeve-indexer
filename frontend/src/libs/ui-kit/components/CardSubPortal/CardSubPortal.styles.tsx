@@ -1,0 +1,90 @@
+import Box from '@mui/material/Box'
+import Card, { CardProps } from '@mui/material/Card'
+import CardActionArea from '@mui/material/CardActionArea'
+import CardContent from '@mui/material/CardContent'
+import { styled } from 'styled-components'
+
+interface CardStyledProps extends CardProps {
+  $background: string
+}
+
+export const CardStyled = styled(Card)<CardStyledProps>`
+  && {
+    min-width: 20.313rem;
+    width: 100%;
+    height: 5.5rem;
+    background: ${({ $background }) => $background};
+    border: 1px solid ${({ theme }) => theme.palette.divider};
+    border-radius: ${({ theme }) => `${theme.shape.borderRadius * 2}px`};
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: ${({ theme }) => theme.palette.common.white};
+      transform: translateY(-4px);
+      // Target IconWrapper inside on hover
+      .icon-wrapper {
+        background: ${({ $background }) => $background};
+        transform: rotate(-5deg) scale(1.2);
+        transition:
+          background 0.4s ease,
+          transform 0.3s ease;
+        svg {
+          color: #fff;
+        }
+      }
+      .arrow-icon-wrapper {
+        transform: translateX(10px);
+        transition:
+          background 0.4s ease,
+          transform 0.3s ease;
+      }
+    }
+  }
+`
+
+export const CardActionAreaStyled = styled(CardActionArea)`
+  && {
+    height: 100%;
+  }
+` as typeof CardActionArea
+
+export const CardContentStyled = styled(CardContent)`
+  && {
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    padding: ${({ theme }) => theme.spacing(2.5)};
+    gap: ${({ theme }) => theme.spacing(1)};
+    justify-content: space-between;
+  }
+`
+
+export const IconWrapperStyled = styled.div`
+  && {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    background: ${({ theme }) => theme.palette.common.white};
+  }
+`
+export const ContentStyled = styled(Box)`
+  && {
+    width: 100%;
+    padding: ${({ theme }) => theme.spacing(0)};
+    p={0} pr={0}
+  }
+`
+export const IconContentStyled = styled(Box)`
+  && {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: ${({ theme }) => theme.spacing(1)};
+    flex: 1 0 auto;
+  }
+`

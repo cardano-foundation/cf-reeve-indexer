@@ -1,0 +1,23 @@
+import { useMutation } from '@tanstack/react-query'
+
+import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
+import { CostCenterRequestParameters } from 'libs/api-connectors/backend-connector-reeve/api/cost-centers/costCentersApi.types.ts'
+
+const createCostCenterQuery = async (payload: Partial<CostCenterRequestParameters>) => {
+  const { costCentersApi } = backendReeveApi()
+
+  const data = await costCentersApi.createCostCenter(payload)
+
+  if (!data) return null
+
+  return data
+}
+
+export const useCreateCostCenterModel = () => {
+  const { data, mutateAsync } = useMutation({ mutationKey: ['CREATE_COST_CENTER'], mutationFn: createCostCenterQuery })
+
+  return {
+    updatedCostCenter: data ?? null,
+    triggerCreateCostCenter: mutateAsync
+  }
+}
