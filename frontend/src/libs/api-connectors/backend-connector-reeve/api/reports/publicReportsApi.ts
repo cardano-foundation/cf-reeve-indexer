@@ -7,11 +7,11 @@ import {
 export const reportsApi = (baseUrl: string) => {
   const { post } = httpService(baseUrl)
 
-  const getReports = (parameters: GetPublicReportsRequest) => {
-    return post<GetReportsResponse200, GetPublicReportsRequest>(`api/v1/public/reports`, { ...parameters }, { Authorization: '' })
+  const getPublicReports = (parameters: GetPublicReportsRequest) => {
+    return post<GetReportsResponse200, GetPublicReportsRequest>(`api/v1/reports`, { ...parameters }, { Authorization: '' })
   }
 
   return {
-    getReports
+    getPublicReports
   }
 }
