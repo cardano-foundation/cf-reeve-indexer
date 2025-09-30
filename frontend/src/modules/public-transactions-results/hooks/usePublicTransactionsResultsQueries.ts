@@ -1,4 +1,4 @@
-import { useGetPublicTransactionsModel } from 'libs/models/public-transactions-model/GetPublicTransactions/GetPublicTransactionsModel.service.ts'
+import { useGetPublicTransactionsModel } from 'libs/models/transactions-model/GetPublicTransactions/GetPublicTransactionsModel.service.ts'
 import { toDayjs } from 'libs/utils/toDayjs.ts'
 import { PublicTransactionsFormValues } from 'modules/public-transactions/components/PublicTransactionsForm/PublicTransactionsForm.types.ts'
 import { formatToFloatReadyFormat } from 'modules/public-reports/utils/format.ts'

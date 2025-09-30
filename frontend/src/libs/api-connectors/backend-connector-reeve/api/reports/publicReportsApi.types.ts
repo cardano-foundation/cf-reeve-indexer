@@ -176,7 +176,7 @@ export interface GetReportsRequest {
 
 export interface GetPublicReportsRequest {
   organisationId: string
-  reportType: ReportType | string
+  reportType?: ReportType | string
   intervalType?: IntervalType
   year?: number
   period?: number

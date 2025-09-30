@@ -16,9 +16,9 @@ export const usePublicReportsQueries = (state: PublicReportsQueriesState) => {
 
   const { reports, isFetching } = useGetPublicReportsModel({
     ...(values?.period ? getSearchReportPayload(values.period) : {}),
-    reportType: values?.report,
-    organisationId: selectedOrganisation
-  })
+    ...(values?.report && { reportType: values.report }),
+    organisationId: selectedOrganisation,
+  });
 
   return {
     reports: reports?.report ?? [],
