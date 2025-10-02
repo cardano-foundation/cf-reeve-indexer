@@ -12,7 +12,7 @@ export const usePublicReportsQueries = (state: PublicReportsQueriesState) => {
 
   const { values } = formik
 
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94' // TODO - make dynamic when multi-org is supported
 
   const { reports, isFetching } = useGetPublicReportsModel({
     ...(values?.period ? getSearchReportPayload(values.period) : {}),
@@ -21,7 +21,7 @@ export const usePublicReportsQueries = (state: PublicReportsQueriesState) => {
   });
 
   return {
-    reports: reports?.report ?? [],
+    reports: reports?.reports ?? [],
     isFetching
   }
 }

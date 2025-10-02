@@ -38,7 +38,7 @@ export const TableReportsPublic = ({ data, onViewOpen, areFiltersSelected, isFet
       minWidth: 192
     },
     {
-      field: 'documentCurrencyCustomerCode',
+      field: 'currency',
       headerName: t({ id: 'currency' }),
       valueFormatter: (value) => formatCurrency(value),
       hideable: false,
@@ -110,7 +110,7 @@ export const TableReportsPublic = ({ data, onViewOpen, areFiltersSelected, isFet
         }}
         columns={columns}
         rows={data ?? []}
-        getRowId={(row) => row.reportId}
+        getRowId={(row) => `${row.organisationId}-${row.type}-${row.intervalType}-${row.year}-${row.period}-${row.ver}`}
         hasFiltersSelected={areFiltersSelected}
         isLoading={isFetching}
         disableColumnMenu

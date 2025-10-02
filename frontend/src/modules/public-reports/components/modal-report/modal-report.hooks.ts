@@ -33,19 +33,19 @@ export const useModalReportView = () => {
   return { report, handleReportViewClose, handleReportViewOpen, isReportViewOpen: isModalReportOpen }
 }
 
-export const useModalReportInternalState = (state: ModalReportState) => {
-  const { report } = state
+// export const useModalReportInternalState = (state: ModalReportState) => {
+//   const { report } = state
 
-  const { canPublishError, documentCurrencyCustomerCode, intervalType, period, type, year, publish, canBePublish } = report
+//   const { intervalType, period, type, year, publish, canBePublish } = report
 
-  const currency = formatCurrency(documentCurrencyCustomerCode ?? 'ISO-4217:CHF')
+//   const currency = formatCurrency(documentCurrencyCustomerCode ?? 'ISO-4217:CHF')
 
-  const reportPeriod = getReportPeriod(intervalType, period, year)
+//   const reportPeriod = getReportPeriod(intervalType, period, year)
 
-  const isPendingReport = !publish && !canBePublish
+//   const isPendingReport = !publish && !canBePublish
 
-  const values: ReportBalanceSheetFormValues | ReportIncomeStatementFormValues =
-    type === ReportType.BALANCE_SHEET ? getBalanceSheetInitialValues(report) : getIncomeStatementInitialValues(report)
+//   const values: ReportBalanceSheetFormValues | ReportIncomeStatementFormValues =
+//     type === ReportType.BALANCE_SHEET ? getBalanceSheetInitialValues(report) : getIncomeStatementInitialValues(report)
 
-  return { canPublishError, currency, reportPeriod, type, values, isPendingReport }
-}
+//   return { canPublishError, currency, reportPeriod, type, values, isPendingReport }
+// }
