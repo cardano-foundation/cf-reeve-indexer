@@ -27,12 +27,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
 import org.cardanofoundation.reeve.indexer.model.domain.Transaction;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.IdentityMetadata;
+import org.cardanofoundation.reeve.indexer.model.domain.metadata.IdentityType;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.ReeveMetadata;
-import org.cardanofoundation.reeve.indexer.model.entity.IdentityEntity;
+import org.cardanofoundation.reeve.indexer.model.entity.CredentialEntity;
+import org.cardanofoundation.reeve.indexer.model.entity.IdentityEventEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.TransactionEntity;
+import org.cardanofoundation.reeve.indexer.model.entity.mapper.CredentialMetadataMapper;
+import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
-import org.cardanofoundation.reeve.indexer.model.repository.IdentityRepository;
+import org.cardanofoundation.reeve.indexer.model.repository.IdentityEventRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
@@ -57,13 +61,14 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
     private final OrganisationRepository organisationRepository;
     private final CurrencyRepository currencyRepository;
     private final KeriService keriService;
-    private final IdentityRepository identityRepository;
+    private final IdentityEventRepository identityRepository;
+    private final CredentialRepository credentialRepository;
 
     public ReeveMetadataStorage(ObjectMapper objectMapper,
             TransactionRepository transactionRepository, ReportRepository reportRepository,
             TxMetadataLabelRepository metadataLabelRepository, MetadataMapper metadataMapper,
             OrganisationRepository organisationRepository, CurrencyRepository currencyRepository,
-            KeriService keriService, IdentityRepository identityRepository) {
+            KeriService keriService, IdentityEventRepository identityRepository, CredentialRepository credentialRepository) {
         super(metadataLabelRepository, metadataMapper);
         this.objectMapper = objectMapper;
         this.transactionRepository = transactionRepository;
@@ -72,6 +77,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
         this.currencyRepository = currencyRepository;
         this.keriService = keriService;
         this.identityRepository = identityRepository;
+        this.credentialRepository = credentialRepository;
     }
 
     @Override
@@ -109,7 +115,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                     }
                 }).filter(Objects::nonNull).toList();
         handleReeveTxs(reeveTxs);
-        if (keriEnabled && !reeveTxs.isEmpty()) {
+        if (keriEnabled) {
             List<IdentityMetadata> list = txMetadataLabelsList.stream()
                     .filter(metadata -> metadata.getLabel().equals(keriMetadataLabel))
                     .map(metadata -> {
@@ -134,11 +140,21 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
     private void handleIdentityTxs(List<IdentityMetadata> list) {
         list.forEach(rawMetadata -> {
-            IdentityEntity identityEntity = IdentityEntity.builder().txHash(rawMetadata.getTxHash())
-                    .sequenceNumber(rawMetadata.getS()).dataHash(rawMetadata.getD())
-                    .identifier(rawMetadata.getI()).type(rawMetadata.getType()).build();
+            if(rawMetadata.getType() == IdentityType.KERI) {
+            IdentityEventEntity identityEntity = IdentityEventEntity.builder()
+                    .txHash(rawMetadata.getTxHash())
+                    .sequenceNumber(rawMetadata.getS())
+                    .dataHash(rawMetadata.getA())
+                    .eventHash(rawMetadata.getD())
+                    .identifier(rawMetadata.getI())
+                    .type(rawMetadata.getType().name())
+                .build();
             identityRepository.saveAndFlush(identityEntity);
             keriService.verifyIdentityTx(identityEntity);
+            } else if (rawMetadata.getType() == IdentityType.CREDENTIAL) {
+                CredentialEntity entity = CredentialMetadataMapper.toEntity(rawMetadata);
+                credentialRepository.saveAndFlush(entity);
+            }
         });
     }
 

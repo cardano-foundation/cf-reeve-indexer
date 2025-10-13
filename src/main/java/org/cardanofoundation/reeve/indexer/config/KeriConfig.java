@@ -33,7 +33,7 @@ public class KeriConfig {
             client.connect();
         }
         log.info("SignifyClient connected");
-        for (String oobi : keriProperties.getOobisList()) {
+        for (String oobi : keriProperties.getOobis()) {
             Object object = client.oobis().resolve(oobi, null);
             client.operations().wait(Operation.fromObject(object));
         }

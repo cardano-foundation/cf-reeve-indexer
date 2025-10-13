@@ -14,6 +14,8 @@ import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
 import { Filters } from 'modules/public-reports/components/Filters/Filters.component.tsx'
+import CancelIcon from '@mui/icons-material/Cancel'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 interface TableReportsPublicProps {
   data: ReportApiResponse[] | null
@@ -81,6 +83,18 @@ export const TableReportsPublic = ({ data, onViewOpen, areFiltersSelected, isFet
       sortable: true,
       flex: 1,
       minWidth: 192
+    },
+    {
+      field: 'identityVerified',
+      headerName: t({ id: 'identityVerified' }),
+      renderCell: ({ value }) => (
+        <Box display="flex" alignItems="center" justifyContent="center" width="100%" height="100%">
+          {value ? <CheckCircleIcon /> : <CancelIcon />}
+        </Box>),
+      hideable: false,
+      sortable: true,
+      flex: 1,
+      minWidth: 50
     },
     {
       field: 'actions',

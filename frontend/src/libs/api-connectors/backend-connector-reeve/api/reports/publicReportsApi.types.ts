@@ -61,7 +61,7 @@ export type ReportApiResponse = {
   period: number
   ver: number
   blockChainHash: string
-  identityVerified: false
+  identityVerified: boolean
   data: NestedMap
 }
 

@@ -10,17 +10,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "reeve_identity")
+@Table(name = "reeve_identity_event")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
-public class IdentityEntity {
+public class IdentityEventEntity {
 
     @Id
     private String txHash;
     private String sequenceNumber;
     private String dataHash;
+    private String eventHash;
     private String identifier;
     private String type;
 }
