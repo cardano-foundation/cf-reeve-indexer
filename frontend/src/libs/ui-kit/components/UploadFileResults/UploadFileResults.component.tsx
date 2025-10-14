@@ -9,7 +9,6 @@ import {
   CardContentStyled,
   CardStyled,
   CheckIconStyled,
-  DangerIconStyled,
   FileIconStyled,
   FormHelperTextStyled
 } from 'libs/ui-kit/components/UploadFileResults/UploadFileResults.styles.tsx'
@@ -27,12 +26,14 @@ interface UploadFileResultsProps {
 export const UploadFileResults = ({ error, file, fileSize = DEFAULT_FILE_SIZE, fileType = CSV_FILE_TYPE, onClose, isDisabled }: UploadFileResultsProps) => {
   const theme = useTheme()
 
+  const hasError = Boolean(error)
+
   const isFileSizeValid = file.size < fileSize
   const isFileTypeValid = file.type.includes(fileType)
 
   return (
     <Box mt={2} width="100%">
-      <CardStyled>
+      <CardStyled $hasError={hasError}>
         <CardContentStyled>
           <FileIconStyled />
           <Box minWidth={0} width="100%">
@@ -43,13 +44,13 @@ export const UploadFileResults = ({ error, file, fileSize = DEFAULT_FILE_SIZE, f
               {`${formatNumber(file.size / (1000 * 1000), { minimumFractionDigits: 0, maximumFractionDigits: 2 })} MB`}
             </Typography>
           </Box>
-          {isFileSizeValid && isFileTypeValid ? <CheckIconStyled /> : <DangerIconStyled />}
+            {isFileSizeValid && isFileTypeValid ? <CheckIconStyled /> : null}
         </CardContentStyled>
         <CardActionsStyled>
           <ButtonClose onClick={onClose} disabled={isDisabled} />
         </CardActionsStyled>
       </CardStyled>
-      {error && <FormHelperTextStyled error={Boolean(error)}>{error}</FormHelperTextStyled>}
+      {error && <FormHelperTextStyled error={hasError}>{error}</FormHelperTextStyled>}
     </Box>
   )
 }

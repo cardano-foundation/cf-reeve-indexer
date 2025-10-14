@@ -1,3 +1,4 @@
+import { verify } from 'crypto'
 import {
   Add,
   AddCircle,
@@ -53,7 +54,8 @@ import {
   TickCircle,
   TickSquare,
   Trash,
-  TrendUp
+  TrendUp,
+  Verify
 } from 'iconsax-react'
 
 const ADD = 'ADD'
@@ -111,6 +113,7 @@ const TICK_CIRCLE = 'TICK_CIRCLE'
 const TICK_SQUARE = 'TICK_SQUARE'
 const TRASH = 'TRASH'
 const TREND_UP = 'TREND_UP'
+const VERIFY = 'VERIFY'
 
 export const ICONSAX_NAMES = {
   ADD,
@@ -167,7 +170,8 @@ export const ICONSAX_NAMES = {
   TICK_CIRCLE,
   TICK_SQUARE,
   TRASH,
-  TREND_UP
+  TREND_UP,
+  VERIFY
 } as const
 
 export const ICONSAX_ICONS = {
@@ -225,5 +229,6 @@ export const ICONSAX_ICONS = {
   [ICONSAX_NAMES.TICK_CIRCLE]: TickCircle,
   [ICONSAX_NAMES.TICK_SQUARE]: TickSquare,
   [ICONSAX_NAMES.TRASH]: Trash,
-  [ICONSAX_NAMES.TREND_UP]: TrendUp
+  [ICONSAX_NAMES.TREND_UP]: TrendUp,
+  [ICONSAX_NAMES.VERIFY]: Verify,
 } as const

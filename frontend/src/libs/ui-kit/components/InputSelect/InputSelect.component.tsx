@@ -46,9 +46,7 @@ export const InputSelect = ({
   return (
     <Box width="100%">
       <FormControl error={error} fullWidth disabled={disabled}>
-        <InputLabel id="demo-simple-select-label" htmlFor={`field-${name}`} size="small">
-          {`${label}${required ? ' *' : ''}`}
-        </InputLabel>
+        <InputLabel id="demo-simple-select-label" htmlFor={`field-${name}`} size="small">{`${label}${required ? ' *' : ''}`}</InputLabel>
         <Select
           labelId="demo-simple-select-label"
           label={`${label}${required ? ' *' : ''}`}

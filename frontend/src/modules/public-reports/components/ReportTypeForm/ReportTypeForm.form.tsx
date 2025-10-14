@@ -3,7 +3,6 @@ import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import { Form, Formik, FormikConfig, FormikErrors, FormikProps } from 'formik'
-import { Forbidden2 } from 'iconsax-react'
 import { noop } from 'lodash'
 
 import { ReportBalanceSheetApiResponse, ReportIncomeStatementApiResponse, ReportType } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
@@ -125,7 +124,7 @@ const ReportBalanceSheetFormLayout = ({
           {(balance || isCrossReportProfitEqual) && (
             <Box display="flex" flexDirection="column" gap={3} mt={5}>
               {balance && (
-                <Alert icon={<Forbidden2 variant="Outline" size={22} />} severity="error">
+                <Alert severity="error">
                   <Typography variant="body2">{balance}</Typography>
                 </Alert>
               )}

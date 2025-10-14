@@ -1,11 +1,17 @@
 import Card from '@mui/material/Card'
 import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
-import FormHelperText from '@mui/material/FormHelperText'
-import { Danger, Document, TickCircle } from 'iconsax-react'
+import { Document, TickCircle } from 'iconsax-react'
 import { styled } from 'styled-components'
 
-export const CardStyled = styled(Card)`
+import { FormHelperText } from 'features/mui/base'
+import { colors as paletteColors } from 'libs/ui-kit/theme/colors'
+
+interface CardStyledProps {
+  $hasError: boolean
+}
+
+export const CardStyled = styled(Card)<CardStyledProps>`
   && {
     width: 100%;
     height: 4rem;
@@ -13,7 +19,7 @@ export const CardStyled = styled(Card)`
     padding: ${({ theme }) => theme.spacing(0.75, 2)};
     gap: ${({ theme }) => theme.spacing(1)};
     background: ${({ theme }) => theme.palette.background.default};
-    border: 1px solid ${({ theme }) => theme.palette.divider};
+    border: 1px solid ${({ theme, $hasError }) => ($hasError ? theme.palette.error.main : theme.palette.divider)};
     border-radius: ${({ theme }) => theme.shape.borderRadius * 1.5}px;
     box-shadow: none;
   }
@@ -42,12 +48,6 @@ export const CardActionsStyled = styled(CardActions)`
   }
 `
 
-export const FormHelperTextStyled = styled(FormHelperText)`
-  && {
-    margin: ${({ theme }) => theme.spacing(0.375, 1.75, 0, 1.75)};
-  }
-`
-
 interface IconStyledProps {
   className?: string
 }
@@ -66,9 +66,10 @@ export const CheckIconStyled = styled(({ className }: IconStyledProps) => <TickC
   }
 `
 
-export const DangerIconStyled = styled(({ className }: IconStyledProps) => <Danger className={className} size={24} variant="Bold" />)`
+export const FormHelperTextStyled = styled(FormHelperText)`
   && {
-    flex: 0 0 auto;
-    color: ${({ theme }) => theme.palette.error.dark};
+    &.Mui-error {
+      color: ${paletteColors.red[700]};
+    }
   }
 `

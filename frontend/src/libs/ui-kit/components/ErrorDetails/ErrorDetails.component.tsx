@@ -1,10 +1,12 @@
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
-
+import { ApiError } from 'libs/api-connectors/backend-connector-reeve/api/errors.types.ts'
+import { useTheme } from '@mui/material'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
 import { ButtonText } from 'libs/ui-kit/components/ButtonText/ButtonText.component.tsx'
-import { ErrorDetail } from 'modules/organization-setup/hooks/useOrganizationSetupForm.ts'
+
+export type ErrorDetail = Pick<ApiError, 'detail' | 'status' | 'title'>
 
 interface ErrorDetailsProps {
   errors: ErrorDetail[]
@@ -14,7 +16,7 @@ interface ErrorDetailsProps {
 
 export const ErrorDetails = ({ errors, onDetailsClick, hasDetails = false }: ErrorDetailsProps) => {
   const { t } = useTranslations()
-
+  const theme = useTheme()
   return (
     <Grid container mt={4} size="grow" spacing={2}>
       {errors.map(({ title }) => (
@@ -26,7 +28,7 @@ export const ErrorDetails = ({ errors, onDetailsClick, hasDetails = false }: Err
               </Grid>
               {hasDetails && (
                 <Grid size="auto">
-                  <ButtonText size="small" onClick={onDetailsClick}>
+                  <ButtonText color="error" size="small" sx={{ color: theme.palette.error.dark }} onClick={onDetailsClick}>
                     {t({ id: 'seeDetails' })}
                   </ButtonText>
                 </Grid>

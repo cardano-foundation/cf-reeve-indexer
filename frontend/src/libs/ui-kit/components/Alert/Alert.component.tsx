@@ -17,7 +17,7 @@ export const Alert = ({ children, icon, severity, variant = 'outlined', ...props
   const Icon = severity ? ICONS[severity] : ICONS.success
 
   return (
-    <AlertStyled icon={icon ?? <Icon variant="Outline" size={22} />} severity={severity} variant={variant} {...props}>
+    <AlertStyled icon={icon ?? <Icon variant={severity === 'error' ? 'Bold' : 'Outline'} size={22} />} severity={severity} variant={variant} {...props}>
       {children}
     </AlertStyled>
   )

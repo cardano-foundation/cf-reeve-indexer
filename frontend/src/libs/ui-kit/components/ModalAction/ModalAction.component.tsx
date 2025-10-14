@@ -6,7 +6,6 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import { Theme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import { Danger } from 'iconsax-react'
 import { ReactElement, ReactNode, useEffect, useState } from 'react'
 
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
@@ -100,9 +99,7 @@ export const ModalAction = ({
         <DialogContent sx={{ padding: 3, backgroundColor: theme.palette.common.white }}>
           {warning && (
             <Box pb={4}>
-              <Alert icon={<Danger />} severity="warning">
-                {warning}
-              </Alert>
+              <Alert severity="warning">{warning}</Alert>
             </Box>
           )}
           {message && (
