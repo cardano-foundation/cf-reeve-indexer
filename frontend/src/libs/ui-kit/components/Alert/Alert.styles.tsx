@@ -22,7 +22,7 @@ export const AlertStyled = styled(Alert)`
       color: ${paletteColors.blue[800]};
 
       & .MuiAlert-icon {
-        color: ${paletteColors.blue[500]};
+        color: ${({ theme }) => theme.palette.error.main};
       }
     }
 

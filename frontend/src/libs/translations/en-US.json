@@ -294,7 +294,7 @@
   "dataSourceIsRequired": "Data source is required",
   "dateIsRequired": "Date is required",
   "fileIsRequired": "File is required",
-  "incorrectFileSize": "File exceeds maximum size limit",
+  "incorrectFileSize": "File exceeds the 10 MB size limit. Please upload a smaller file.",
   "incorrectFileType": "File type is invalid",
   "transactionNumbersSpecialCharactersNotAllowed": "No special characters allowed except \",-/\"",
   "unableToImportMessage": "Unable to import transactions",

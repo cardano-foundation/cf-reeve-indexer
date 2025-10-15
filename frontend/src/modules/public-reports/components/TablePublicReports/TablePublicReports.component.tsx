@@ -4,6 +4,7 @@ import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import { GridColDef } from '@mui/x-data-grid'
 import { ExportSquare } from 'iconsax-react'
+import { verifyColors } from 'libs/ui-kit/theme/colors.ts'
 
 import { ReportApiResponse } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
@@ -14,8 +15,7 @@ import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
 import { Filters } from 'modules/public-reports/components/Filters/Filters.component.tsx'
-import CancelIcon from '@mui/icons-material/Cancel'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { IconsaxIcon, ICONSAX_NAMES } from 'features/iconsax'
 
 interface TableReportsPublicProps {
   data: ReportApiResponse[] | null
@@ -88,9 +88,15 @@ export const TableReportsPublic = ({ data, onViewOpen, areFiltersSelected, isFet
       field: 'identityVerified',
       headerName: t({ id: 'identityVerified' }),
       renderCell: ({ value }) => (
-        <Box display="flex" alignItems="center" justifyContent="center" width="100%" height="100%">
-          {value ? <CheckCircleIcon /> : <CancelIcon />}
-        </Box>),
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconsaxIcon
+            name={ICONSAX_NAMES.VERIFY}
+            size={22}
+            variant="Outline"
+            color={value ? verifyColors.blue[600] : theme.palette.grey[400]}
+          />{' '}
+        </Box>
+      ),
       hideable: false,
       sortable: true,
       flex: 1,

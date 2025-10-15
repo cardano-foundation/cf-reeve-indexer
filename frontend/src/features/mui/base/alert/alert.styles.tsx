@@ -43,7 +43,7 @@ export const AlertStyled = styled(AlertMUI)<AlertProps>(
       color: ${paletteColors.orange[800]};
 
       & .MuiAlert-icon {
-        color: ${paletteColors.orange[500]};
+        color: ${theme.palette.error.main};
       }
     }
 
