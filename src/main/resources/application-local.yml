@@ -9,7 +9,7 @@ spring:
     locations: classpath:db/store/{vendor}
     out-of-order: true
   datasource:
-    url: jdbc:postgresql://localhost:5433/reeve-verifier?currentSchema=reeve
+    url: jdbc:postgresql://localhost:5432/reeve-verifier?currentSchema=reeve
     username: postgres
     password: postgres
   jackson:

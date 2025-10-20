@@ -1,5 +1,7 @@
 package org.cardanofoundation.reeve.indexer.model.entity;
 
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -23,4 +25,6 @@ public class OrganisationEntity {
     private String currencyId;
     private String countryCode;
     private String taxIdNumber;
+    private String txHash;
+    private List<String> assets;
 }

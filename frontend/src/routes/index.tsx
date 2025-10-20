@@ -13,6 +13,7 @@ export const ROUTES_V2 = {
   ROOT: '/',
   PUBLIC_DASHBOARD: 'dashboard',
   PUBLIC_REPORTS: 'reports',
+  PUBLIC_REPORTS_V2: 'reports-v2',
   PUBLIC_TRANSACTIONS: 'transactions',
   PUBLIC_TRANSACTIONS_RESULTS: 'transactions-results',
   PUBLIC_RESOURCES: 'resources',
@@ -26,6 +27,7 @@ export const PATHS = {
   ROOT: createRoutePath(),
   PUBLIC_DASHBOARD: createRoutePath([ROUTES_V2.PUBLIC_DASHBOARD]),
   PUBLIC_REPORTS: createRoutePath([ROUTES_V2.PUBLIC_REPORTS]),
+  PUBLIC_REPORTS_V2: createRoutePath([ROUTES_V2.PUBLIC_REPORTS_V2]),
   PUBLIC_TRANSACTIONS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS]),
   PUBLIC_TRANSACTIONS_RESULTS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS]),
   PUBLIC_RESOURCES: createRoutePath([ROUTES_V2.PUBLIC_RESOURCES]),
@@ -39,6 +41,7 @@ export const router = createBrowserRouter(
       <Route element={<LayoutPublic />}>
         <Route element={<ViewPublicDashboard />} path={ROUTES_V2.PUBLIC_DASHBOARD} />
         <Route element={<ViewReportsPublic />} path={ROUTES_V2.PUBLIC_REPORTS} />
+        <Route element={<ViewReportsPublic />} path={ROUTES_V2.PUBLIC_REPORTS_V2} />
         <Route element={<ViewPublicTransactions />} path={ROUTES_V2.PUBLIC_TRANSACTIONS} />
         <Route element={<ViewPublicTransactionsResults />} path={ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS} />
         <Route element={<Outlet />} path={ROUTES_V2.PUBLIC_RESOURCES}>

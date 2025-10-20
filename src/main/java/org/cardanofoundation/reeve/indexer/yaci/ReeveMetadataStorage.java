@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
+import org.cardanofoundation.reeve.indexer.model.domain.ReportType;
 import org.cardanofoundation.reeve.indexer.model.domain.Transaction;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.IdentityMetadata;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.IdentityType;
@@ -161,9 +162,12 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
     private void handleReeveTxs(List<ReeveMetadata> reeveTxs) {
         reeveTxs.forEach(rawMetadata -> {
             // Store organisation if not exists, handle race condition in parallel events
-            organisationRepository.saveIfNotExists(rawMetadata.getOrg().getId(),
+            organisationRepository.saveIfNotExists(
+                    rawMetadata.getOrg().getId(),
                     rawMetadata.getOrg().getName(), rawMetadata.getOrg().getCurrencyId(),
-                    rawMetadata.getOrg().getCountryCode(), rawMetadata.getOrg().getTaxIdNumber());
+                    rawMetadata.getOrg().getCountryCode(), rawMetadata.getOrg().getTaxIdNumber(),
+                    rawMetadata.getTxHash()
+            );
             // verifiy identity
             boolean identityVerified = false; // TODO need to implement identity verification
             if (rawMetadata.getType() == ReeveTransactionType.INDIVIDUAL_TRANSACTIONS) {
@@ -191,13 +195,26 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
             if (rawMetadata.getType() == ReeveTransactionType.REPORT) {
                 ReportEntity reportEntity = ReportEntity.builder()
                         .organisationId(rawMetadata.getOrg().getId())
-                        .txHash(rawMetadata.getTxHash()).interval(rawMetadata.getInterval())
-                        .year(rawMetadata.getYear()).period(rawMetadata.getPeriod())
+                        .type(ReportType.V1)
+                        .txHash(rawMetadata.getTxHash())
+                        .interval(rawMetadata.getInterval())
+                        .year(rawMetadata.getYear())
+                        .period(rawMetadata.getPeriod())
                         .subType(rawMetadata.getSubType()).ver(rawMetadata.getVer())
                         .fields((String) rawMetadata.getData()).identityVerified(identityVerified)
                         .metadataHash(rawMetadata.getMetadataHash()).build();
                 reportRepository.saveAndFlush(reportEntity);
-
+            }
+            if (rawMetadata.getType() == ReeveTransactionType.REPORT_V2) {
+                ReportEntity reportEntity = ReportEntity.builder()
+                        .organisationId(rawMetadata.getOrg().getId())
+                        .type(ReportType.V2)
+                        .txHash(rawMetadata.getTxHash()).interval(rawMetadata.getInterval())
+                        .year(rawMetadata.getYear()).period(rawMetadata.getPeriod())
+                        .subType(rawMetadata.getSubType()).ver(rawMetadata.getVer())
+                        // .fields((String) rawMetadata.getData()).identityVerified(identityVerified) // Fields stored in contract data
+                        .metadataHash(rawMetadata.getMetadataHash()).build();
+                reportRepository.saveAndFlush(reportEntity);
             }
         });
     }

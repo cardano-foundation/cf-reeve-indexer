@@ -25,6 +25,7 @@ export const NavigationSidebar = () => {
     <NavigationStyled component="nav">
       <ListStyled aria-labelledby={t({ id: 'navigation' })} disablePadding>
         <ButtonNavItem icon={Note1} label={t({ id: 'publicReports' })} route={PATHS.PUBLIC_REPORTS} getCurrentPage={getCurrentPage} hasTooltip={!isSidebarOpen} />
+        <ButtonNavItem icon={Note1} label={t({ id: 'publicReportsV2' })} route={PATHS.PUBLIC_REPORTS_V2} getCurrentPage={getCurrentPage} hasTooltip={!isSidebarOpen} />
         <ButtonNavItem
           icon={ArrowSwapHorizontal}
           label={t({ id: 'publicTransactions' })}

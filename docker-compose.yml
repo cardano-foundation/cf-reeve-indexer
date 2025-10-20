@@ -32,5 +32,31 @@ services:
     ports:
       - "5432:5432"
 
+  yaci-cli:
+    restart: unless-stopped
+    image: bloxbean/yaci-cli:0.10.6
+    env_file:
+      - ./yaci-config/env
+      - ./yaci-config/node.properties
+    volumes:
+      - ./yaci-config/node.properties:/app/config/node.properties
+      - yaci-data:/clusters
+    ports:
+      - "${YACI_DEVNET_EXPOSED_PORT:-3001}:3001"
+      - "8080:8080"
+    entrypoint: [ "/app/yaci-cli", "create-node", "-o", "--start" ]
+
+  yaci-viewer:
+    restart: unless-stopped
+    image: bloxbean/yaci-viewer:0.10.6
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./yaci-config/env
+    environment:
+      PUBLIC_INDEXER_BASE_URL: ${PUBLIC_INDEXER_BASE_URL:-http://yaci-cli:8080/api/v1}
+      PUBLIC_INDEXER_WS_URL: ${PUBLIC_INDEXER_WS_URL:-ws://localhost:8080/ws/liveblocks}
+
 volumes:
   postgres-data:
+  yaci-data:

@@ -18,6 +18,7 @@ spring:
     hibernate:
       ddl-auto: update
 reeve:
+  script-path: ./aiken/plutus.json
   label: 1447
   dashboard-folder-path: ./dashboards
 store:
