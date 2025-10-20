@@ -37,13 +37,25 @@ public class TransactionService {
     }
 
     public ExtractionTransactionView findTransactionItems(String organisationId, LocalDate dateFrom, LocalDate dateTo,
-            Set<String> events,
-            Set<String> currencies, Double minAmount,
-            Double maxAmount, Set<String> transactionHashes, Pageable pageable) {
+                                                          Set<String> events,
+                                                          Set<String> currencies, Double minAmount,
+                                                          Double maxAmount, Set<String> transactionHashes, Set<String> documentNumber, Set<String> type,
+                                                          Set<String> vatCustCode,
+                                                          Set<String> costCenterCustCode,
+                                                          Set<String> projectCustCode,
+                                                          Set<String> counterPartyType,
+                                                          Set<String> counterPartyCustCode,
+                                                          Pageable pageable) {
         Page<TransactionItemEntity> transactionItems;
         try {
             transactionItems = transactionItemRepository.searchItems(organisationId, Optional.ofNullable(dateFrom).orElse(LocalDate.of(1970, 1, 1)).atStartOfDay(),
-                    Optional.ofNullable(dateTo).orElse(LocalDate.now()).atStartOfDay(), events, currencies, minAmount, maxAmount, transactionHashes, pageable);
+                    Optional.ofNullable(dateTo).orElse(LocalDate.now()).atStartOfDay(), events, currencies, minAmount, maxAmount, transactionHashes, documentNumber, type,
+                    vatCustCode,
+                    costCenterCustCode,
+                    projectCustCode,
+                    counterPartyType,
+                    counterPartyCustCode,
+                    pageable);
         } catch (Exception e) {
             log.error("Error occurred while searching transaction items", e);
             return ExtractionTransactionView.createFail(ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Error occurred while searching transaction items"));

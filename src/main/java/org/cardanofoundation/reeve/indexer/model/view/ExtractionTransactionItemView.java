@@ -40,7 +40,7 @@ public class ExtractionTransactionItemView {
     private String projectName;
     private String accountEventCode;
     private String accountEventName;
-    private String documentNum;
+    private String documentNumber;
     private String documentCurrencyCustomerCode;
     private String vatCustomerCode;
     private String vatRate;
@@ -50,12 +50,12 @@ public class ExtractionTransactionItemView {
     public static ExtractionTransactionItemView fromEntity(TransactionItemEntity entity) {
         return ExtractionTransactionItemView.builder()
                 .id(entity.getId())
-                .transactionInternalNumber(entity.getTransaction().getNumber())
+                .transactionInternalNumber(entity.getTransaction().getInternalNumber())
                 .entryDate(entity.getTransaction().getDate())
                 .transactionType(entity.getTransaction().getType())
                 .blockChainHash(entity.getTransaction().getTxHash())
-                .amountLcy(entity.getAmount()).fxRate(entity.getFxRate())
-                .documentNum(entity.getDocumentNumber())
+                .amountLcy(entity.getAmountLcy()).fxRate(entity.getFxRate())
+                .documentNumber(entity.getDocumentNumber())
                 .documentCurrencyCustomerCode(entity.getCurrency())
                 .costCenterCustomerCode(entity.getCostCenterCustCode())
                 .costCenterName(entity.getCostCenterName())

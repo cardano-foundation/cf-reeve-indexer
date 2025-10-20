@@ -28,7 +28,7 @@ public class TransactionItemView {
     public static TransactionItemView fromEntity(TransactionItemEntity entity) {
         return TransactionItemView.builder()
                 .id(entity.getId())
-                .amount(entity.getAmount())
+                .amount(entity.getAmountLcy())
                 .currency(entity.getCurrency())
                 .documentNumber(entity.getDocumentNumber())
                 .build();

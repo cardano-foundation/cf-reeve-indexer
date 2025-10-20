@@ -37,4 +37,19 @@ public class TransactionsSearchRequest {
     private Double maxAmount;
 
     private Set<String> transactionHashes;
+
+    private Set<String> documentNumber;
+
+    private Set<String> type;
+
+    private Set<String> vatCustCode;
+
+    private Set<String> costCenterCustCode;
+
+    private Set<String> projectCustCode;
+
+    private Set<String> counterPartyType;
+
+    private Set<String> counterPartyCustCode;
+
 }

@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS reeve_currency (
 CREATE TABLE IF NOT EXISTS reeve_transactions (
     id VARCHAR(255) PRIMARY KEY,
     tx_hash VARCHAR(255) NOT NULL,
-    number VARCHAR(255) NOT NULL,
+    internal_number VARCHAR(255) NOT NULL,
     accounting_period VARCHAR(255) NOT NULL,
     batch_id VARCHAR(255) NOT NULL,
     type VARCHAR(255) NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS reeve_transactions (
 CREATE TABLE IF NOT EXISTS reeve_transaction_item (
     id VARCHAR(255) PRIMARY KEY,
     transaction_id VARCHAR(255) NOT NULL,
-    amount DECIMAL(19, 4) NOT NULL,
+    amount_lcy DECIMAL(19, 4) NOT NULL,
     fx_rate VARCHAR(255) NOT NULL,
     document_number VARCHAR(255),
     currency VARCHAR(255),
