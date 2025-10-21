@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.response.DataResponse;
 import org.cardanofoundation.reeve.indexer.service.ContractService;
+
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -24,17 +26,28 @@ public class ContractController {
 
     private final ContractService contractService;
 
-    @GetMapping("/asset/{name}/datum/history")
+    @GetMapping("/assets")
+    public ResponseEntity<List<String>> getAssets() {
+    return ResponseEntity.ok(contractService.getAllAssetNames());
+    }
+
+    @GetMapping("/assets/{name}/organisation")
+    public ResponseEntity<Organisation> getOrganisationByAssetName(@PathVariable("name") String name) {
+        return contractService.getOrganisationByAssetName(name).map(org -> ResponseEntity.ok(org)).orElse(ResponseEntity.badRequest().build());
+    }
+
+
+    @GetMapping("/assets/{name}/datum/history")
     public ResponseEntity<List<DataResponse>> getAssetsByName(@PathVariable("name") String name) {
     return ResponseEntity.ok(contractService.getDataForAssetName(name));
     }
 
-    @GetMapping("/asset/{name}/datum/current")
+    @GetMapping("/assets/{name}/datum/current")
     public ResponseEntity<DataResponse> getCurrentAssetByName(@PathVariable("name") String name) {
     return ResponseEntity.ok(contractService.getCurrentDataForAssetName(name));
     }
 
-    @GetMapping("/asset/{name}/redeemer/current")
+    @GetMapping("/assets/{name}/redeemer/current")
     public ResponseEntity<DataResponse> getCurrentRedeemerByName(@PathVariable("name") String name) {
     return ResponseEntity.ok(contractService.getCurrentRedeemerDataForAssetName(name));
     }

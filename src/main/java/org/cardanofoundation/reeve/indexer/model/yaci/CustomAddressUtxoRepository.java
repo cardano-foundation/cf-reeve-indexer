@@ -1,4 +1,4 @@
-package org.cardanofoundation.reeve.indexer.model.repository;
+package org.cardanofoundation.reeve.indexer.model.yaci;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +19,7 @@ public interface CustomAddressUtxoRepository extends JpaRepository<AddressUtxoEn
 
     @Query("SELECT a FROM AddressUtxoEntity a WHERE CAST(a.amounts as string) LIKE CONCAT('%', :assetName, '%') ORDER BY a.blockTime DESC LIMIT 1")
     Optional<AddressUtxoEntity> findLatestByAssetName(@Param("assetName") String assetName);
+
+    @Query("SELECT a FROM AddressUtxoEntity a WHERE CAST(a.amounts as string) LIKE CONCAT('%', :assetName, '%') ORDER BY a.blockTime ASC LIMIT 1")
+    Optional<AddressUtxoEntity> findFirstByAssetName(@Param("assetName") String assetName);
 }

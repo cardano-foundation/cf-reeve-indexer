@@ -20,13 +20,17 @@ import com.bloxbean.cardano.client.plutus.spec.ConstrPlutusData;
 import com.bloxbean.cardano.client.plutus.spec.ListPlutusData;
 import com.bloxbean.cardano.client.plutus.spec.PlutusData;
 import com.bloxbean.cardano.client.util.HexUtil;
+import com.bloxbean.cardano.yaci.store.assets.storage.impl.repository.TxAssetRepository;
 import com.bloxbean.cardano.yaci.store.script.storage.impl.model.TxScriptEntity;
 import com.bloxbean.cardano.yaci.store.utxo.storage.impl.model.AddressUtxoEntity;
 import org.apache.commons.lang3.math.Fraction;
 
-import org.cardanofoundation.reeve.indexer.model.repository.CustomAddressUtxoRepository;
-import org.cardanofoundation.reeve.indexer.model.repository.CustomTxScriptRepository;
+import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
+import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
+import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
 import org.cardanofoundation.reeve.indexer.model.response.DataResponse;
+import org.cardanofoundation.reeve.indexer.model.yaci.CustomAddressUtxoRepository;
+import org.cardanofoundation.reeve.indexer.model.yaci.CustomTxScriptRepository;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,6 +40,18 @@ public class ContractService {
 
     private final CustomAddressUtxoRepository customAddressUtxoRepository;
     private final CustomTxScriptRepository customTxScriptRepository;
+    private final TxAssetRepository txAssetRepository;
+    private final OrganisationRepository organisationRepository;
+
+    public Optional<Organisation> getOrganisationByAssetName(String assetName) {
+        Optional<AddressUtxoEntity> optUtxo = customAddressUtxoRepository.findFirstByAssetName(assetName);
+        if (optUtxo.isEmpty())
+            return Optional.empty();
+        Optional<OrganisationEntity> byTxHash = organisationRepository.findByTxHash(optUtxo.get().getTxHash());
+        if (byTxHash.isEmpty())
+            return Optional.empty();
+        return Optional.of(Organisation.fromEntity(byTxHash.get()));
+    }
 
     public DataResponse getCurrentDataForAssetName(String assetName) {
         var optUtxo = customAddressUtxoRepository.findLatestByAssetName(assetName);
@@ -129,6 +145,13 @@ public class ContractService {
             result.put(new String(name.getValue()), fraction.doubleValue());
         });
         return result; // Implement actual parsing logic here
+    }
+
+    public List<String> getAllAssetNames() {
+        return txAssetRepository.findAll().stream()
+                .map(txAsset -> txAsset.getAssetName())
+                .distinct()
+                .toList();
     }
 
 }

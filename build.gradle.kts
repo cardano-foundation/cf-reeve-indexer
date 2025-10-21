@@ -36,6 +36,7 @@ dependencies {
     implementation("com.bloxbean.cardano:yaci-store-metadata-spring-boot-starter:0.1.6")
     implementation("com.bloxbean.cardano:yaci-store-utxo-spring-boot-starter:0.1.6")
     implementation("com.bloxbean.cardano:yaci-store-script-spring-boot-starter:0.1.6")
+    implementation("com.bloxbean.cardano:yaci-store-assets-spring-boot-starter:0.1.6")
     implementation("com.bloxbean.cardano:aiken-java-binding:0.1.0")
 
     // implementation("org.zalando:problem-spring-web-starter:0.29.1")

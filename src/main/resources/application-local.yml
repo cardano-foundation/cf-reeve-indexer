@@ -14,9 +14,6 @@ spring:
     password: postgres
   jackson:
     property-naming-strategy: SNAKE_CASE
-  jpa:
-    hibernate:
-      ddl-auto: update
 reeve:
   label: 1447
   dashboard-folder-path: ./dashboards

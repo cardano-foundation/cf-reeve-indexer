@@ -3,6 +3,7 @@ import { metricsApi } from 'libs/api-connectors/backend-connector-reeve/api/metr
 import { organisationApi } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.ts'
 import { transactionsApi } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi'
 import { reportsApi } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi'
+import { ContractAPI } from 'libs/api-connectors/backend-connector-reeve/api/contracts/publicContractApi'
 import { backendConfigurationLoB } from 'libs/api-connectors/backend-connector-reeve/const/envs.ts'
 
 export const backendReeveApi = () => {
@@ -16,5 +17,6 @@ export const backendReeveApi = () => {
     organisationApi: organisationApi(parsedApiUrl),
     reportsApi: reportsApi(parsedApiUrl),
     transactionsApi: transactionsApi(parsedApiUrl),
+    contractApi: ContractAPI(parsedApiUrl),
   }
 }

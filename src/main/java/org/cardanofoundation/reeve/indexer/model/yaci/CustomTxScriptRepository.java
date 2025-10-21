@@ -1,4 +1,4 @@
-package org.cardanofoundation.reeve.indexer.model.repository;
+package org.cardanofoundation.reeve.indexer.model.yaci;
 
 import java.util.Optional;
 import java.util.UUID;

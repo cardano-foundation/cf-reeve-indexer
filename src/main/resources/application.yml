@@ -16,7 +16,7 @@ spring:
     property-naming-strategy: SNAKE_CASE
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
 reeve:
   script-path: ./aiken/plutus.json
   label: 1447

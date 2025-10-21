@@ -9,6 +9,8 @@ import lombok.Setter;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
+
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -35,5 +37,18 @@ public class Organisation {
         } else {
             this.name = null;
         }
+    }
+
+    public static Organisation fromEntity(OrganisationEntity organisationEntity) {
+        if (organisationEntity == null) {
+            return null;
+        }
+        return Organisation.builder()
+                .id(organisationEntity.getId())
+                .name(organisationEntity.getName())
+                .currencyId(organisationEntity.getCurrencyId())
+                .countryCode(organisationEntity.getCountryCode())
+                .taxIdNumber(organisationEntity.getTaxIdNumber())
+                .build();
     }
 }
