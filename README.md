@@ -50,6 +50,11 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
    docker compose -f docker-compose-devkit.yml up -d
    ```
 
+   With Reeve together:
+   ```bash
+   docker compose -f docker-compose-reeve.yml up -d
+   ```
+
 3. **Access the applications:**
    - Backend API: http://localhost:9000
    - OpenAPI Documentation: http://localhost:9000/swagger-ui.html
