@@ -16,8 +16,9 @@ spring:
     property-naming-strategy: SNAKE_CASE
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
 reeve:
+  script-path: ${REVE_SCRIPT_PATH:./aiken/plutus.json}
   label: 1447
   dashboard-folder-path: ./dashboards
 store:
@@ -28,13 +29,7 @@ store:
     sync-start-slot: 159983856
     sync-start-blockhash: 739cbc4d7ae7a15805ce2ede010b3a24c6d2e18489e3940731822f9f5488d670
   executor:
-    enable-parallel-processing: true
-    block-processing-threads: 15
-    event-processing-threads: 30
-    blocks-batch-size: 200
-    blocks-partition-size: 10
-    use-virtual-thread-for-batch-processing: true
-    use-virtual-thread-for-event-processing: true
+    enable-parallel-processing: false
   core:
     enabled: true
   metadata:

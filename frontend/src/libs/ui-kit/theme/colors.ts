@@ -1,13 +1,13 @@
 export const chartColors = {
   blue: {
-    600: '#55ADFF',
-    700: '#0084FF',
-    800: '#0058AA'
+    600: '#2E8FC6',  // Darker, less bright blue
+    700: '#0066CC',  // Darker primary blue
+    800: '#004C99'   // Even darker blue
   },
   green: {
-    600: '#55D4A6',
-    700: '#00BE7A',
-    800: '#007F51'
+    600: '#2BA378',  // Darker, less bright green
+    700: '#008B5C',  // Darker primary green
+    800: '#006642'   // Even darker green
   },
   purple: {
     600: '#D4C5FF',
@@ -20,8 +20,8 @@ export const chartColors = {
     800: '#AA2F45'
   },
   cyan: {
-    600: '#00E0FF',
-    800: '#00BBD4'
+    600: '#00B8D4',  // Darker cyan
+    800: '#0097A7'   // Even darker cyan
   },
   pink: {
     600: '#D09CA5',

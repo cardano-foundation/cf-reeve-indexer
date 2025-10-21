@@ -18,6 +18,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
+import org.cardanofoundation.reeve.indexer.model.domain.ReportType;
 
 @Entity
 @Table(name = "reeve_reports")
@@ -32,6 +33,8 @@ public class ReportEntity {
     private Long id;
 
     private String txHash;
+
+    private ReportType type;
 
     // Assuming Interval is an Enum. Use @Embedded for a separate class.
     @Enumerated(EnumType.STRING)

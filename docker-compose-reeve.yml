@@ -8,7 +8,13 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/reeve-verifier?currentSchema=reeve
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_PROFILES_ACTIVE=docker-devkit
       - REVE_SCRIPT_PATH=/app/plutus.json
+      - STORE_CARDANO_HOST=host.docker.internal
+      - KERI_ENABLED=${KERI_ENABLED:-false}
+      - KERI_OOBIS=${KERI_OOBIS:-}
+      - KERI_URL=http://host.docker.internal:3901
+      - KERI_BOOT_URL=http://host.docker.internal:3903
     depends_on:
       - postgres-db
 
@@ -19,7 +25,7 @@ services:
       - "3002:80"
     environment:
       PORT: "3002"
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:9002}
+      VITE_API_URL: http://localhost:9002
 
   postgres-db:
     image: postgres:15-alpine
@@ -31,8 +37,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
 volumes:
   postgres-data:
-  yaci-data:

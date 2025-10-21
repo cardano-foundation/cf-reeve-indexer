@@ -9,10 +9,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableConfigurationProperties
 @EntityScan({
-        "org.cardanofoundation.reeve.indexer.model"
+        "org.cardanofoundation.reeve.indexer.model.entity"
 })
 @EnableJpaRepositories({
-        "org.cardanofoundation.reeve.indexer.model"
+        "org.cardanofoundation.reeve.indexer.model.repository",
+        "org.cardanofoundation.reeve.indexer.model.yaci"
 })
 public class ReeveIndexingExampleApplication {
 

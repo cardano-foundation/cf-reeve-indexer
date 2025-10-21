@@ -41,8 +41,18 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
    ```
 
 2. **Start the application:**
+   On Mainnet:
    ```bash
    docker compose up
+   ```
+   On Yaci Devkit:
+   ```bash
+   docker compose -f docker-compose-devkit.yml up -d
+   ```
+
+   With Reeve together:
+   ```bash
+   docker compose -f docker-compose-reeve.yml up -d
    ```
 
 3. **Access the applications:**
@@ -70,59 +80,6 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
    npm run dev
    ```
 
-## 📖 Documentation
-
-Comprehensive documentation is available in the `docs/` directory:
-
-- [**API Documentation**](docs/api.md) - REST API endpoints and usage
-- [**Architecture Guide**](docs/architecture.md) - Detailed system architecture
-- [**Configuration Guide**](docs/configuration.md) - Application configuration options
-- [**Development Guide**](docs/development.md) - Development setup and guidelines
-- [**Deployment Guide**](docs/deployment.md) - Production deployment instructions
-
-## 🔧 Technology Stack
-
-### Backend
-- **Spring Boot 3.5.4** - Application framework
-- **Spring Data JPA** - Database abstraction
-- **Yaci Store** - Cardano blockchain indexer
-- **PostgreSQL** - Primary database
-- **OpenAPI 3** - API documentation
-- **Lombok** - Code generation
-
-### Frontend
-- **React 18** - UI framework
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **Radix UI** - Accessible component primitives
-
-### Infrastructure
-- **Docker** - Containerization
-- **Gradle** - Build automation
-- **Flyway** - Database migrations
-
-## 📊 Features
-
-### Data Indexing
-- Real-time indexing of Reeve transactions (metadata label `1447`)
-- Automatic parsing of financial reports and organizational data
-- Configurable sync starting point
-- Parallel processing support
-
-### REST API
-- **Organizations**: List and search organizations
-- **Reports**: Financial reports with filtering by type, period, and organization
-- **Transactions**: Detailed transaction data with pagination
-- **OpenAPI Documentation**: Interactive API explorer
-
-### Frontend Features
-- Modern, responsive design
-- Organization browsing and filtering
-- Financial report visualization
-- Transaction details and history
-- Real-time data updates
-
 ## 🛠️ Configuration
 
 Key configuration options in `application.yml`:
@@ -137,23 +94,5 @@ store:
     port: 3001
     sync-start-slot: 159983856  # Starting sync point
 ```
-
-See [Configuration Guide](docs/configuration.md) for complete options.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 🆘 Support
-
-- **Issues**: Report bugs or request features via [GitHub Issues](../../issues)
-- **Documentation**: Check the `docs/` directory for detailed guides
-- **Community**: Join discussions in the repository discussions
-
----
 
 **Built with ❤️ for the Cardano ecosystem**
