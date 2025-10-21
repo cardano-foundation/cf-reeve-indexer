@@ -4,12 +4,12 @@ SET search_path TO reeve;
 
 -- OrganisationEntity
 CREATE TABLE IF NOT EXISTS reeve_organisation (
-    id VARCHAR(255) ,
+    id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255),
     currency_id VARCHAR(255),
-    country_code VARCHAR(10),
+    country_code VARCHAR(255),
     tax_id_number VARCHAR(255),
-    tx_hash VARCHAR(255) PRIMARY KEY,
+    tx_hash VARCHAR(255),
     assets TEXT[]
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS reeve_transaction_item (
     amount DECIMAL(19, 4) NOT NULL,
     fx_rate VARCHAR(255) NOT NULL,
     document_number VARCHAR(255),
-    currency VARCHAR(10),
+    currency VARCHAR(255),
     costcenter_name VARCHAR(255),
     costcenter_cust_code VARCHAR(255),
     vat_rate VARCHAR(50),

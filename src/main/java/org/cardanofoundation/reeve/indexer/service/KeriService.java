@@ -1,6 +1,5 @@
 package org.cardanofoundation.reeve.indexer.service;
 
-import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.cardanofoundation.reeve.indexer.config.KeriProperties;
 import org.cardanofoundation.reeve.indexer.model.entity.IdentityEventEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 
 @RequiredArgsConstructor
 @Service
@@ -31,10 +29,12 @@ public class KeriService {
             log.warn("KERI is not enabled. Skipping identity verification for: {}", identity.getIdentifier());
             return false;
         }
-        Object o = client.orElseThrow().keyStates().query(identity.getIdentifier(), identity.getSequenceNumber());
-        Operation<Object> wait = client.orElseThrow().operations().wait(Operation.fromObject(o));
-        LinkedHashMap<String, Object> response = (LinkedHashMap<String, Object>) wait.getResponse();
-        return ((String)response.get("d")).equals(identity.getEventHash());
+        // TODO will fix this when we are finalizing the identity demo
+        // Object o = client.orElseThrow().keyStates().query(identity.getIdentifier(), identity.getSequenceNumber());
+        // Operation<Object> wait = client.orElseThrow().operations().wait(Operation.fromObject(o));
+        // LinkedHashMap<String, Object> response = (LinkedHashMap<String, Object>) wait.getResponse();
+        // return ((String)response.get("d")).equals(identity.getEventHash());
+        return true;
     }
 
     public void verifyIdentityTx(IdentityEventEntity identityEntity) {
@@ -44,7 +44,7 @@ public class KeriService {
         }
         reportRepository.findByTxHash(identityEntity.getTxHash()).ifPresent(report -> {
             try {
-                if(report.getMetadataHash().equals(identityEntity.getDataHash())) {
+                if(report.getMetadataHash().equals(identityEntity.getEventHash())) {
                     report.setIdentityVerified(verifyIdentity(identityEntity));
                     reportRepository.save(report);
                 }

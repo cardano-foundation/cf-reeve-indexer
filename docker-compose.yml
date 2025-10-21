@@ -3,11 +3,12 @@ services:
     build:
       context: .
     ports:
-      - "9000:9000"
+      - "9002:9000"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/reeve-verifier?currentSchema=reeve
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+      - REVE_SCRIPT_PATH=/app/plutus.json
     depends_on:
       - postgres-db
 
@@ -15,10 +16,10 @@ services:
     build:
       context: frontend
     ports:
-      - "3000:80"
+      - "3002:80"
     environment:
-      PORT: "3000"
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:9000}
+      PORT: "3002"
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:9002}
 
   postgres-db:
     image: postgres:15-alpine
@@ -31,31 +32,6 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-
-  yaci-cli:
-    restart: unless-stopped
-    image: bloxbean/yaci-cli:0.10.6
-    env_file:
-      - ./yaci-config/env
-      - ./yaci-config/node.properties
-    volumes:
-      - ./yaci-config/node.properties:/app/config/node.properties
-      - yaci-data:/clusters
-    ports:
-      - "${YACI_DEVNET_EXPOSED_PORT:-3001}:3001"
-      - "8080:8080"
-    entrypoint: [ "/app/yaci-cli", "create-node", "-o", "--start" ]
-
-  yaci-viewer:
-    restart: unless-stopped
-    image: bloxbean/yaci-viewer:0.10.6
-    ports:
-      - "5173:5173"
-    env_file:
-      - ./yaci-config/env
-    environment:
-      PUBLIC_INDEXER_BASE_URL: ${PUBLIC_INDEXER_BASE_URL:-http://yaci-cli:8080/api/v1}
-      PUBLIC_INDEXER_WS_URL: ${PUBLIC_INDEXER_WS_URL:-ws://localhost:8080/ws/liveblocks}
 
 volumes:
   postgres-data:

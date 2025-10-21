@@ -16,6 +16,7 @@ java {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -29,7 +30,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
     
     // Keri
-    implementation("org.cardanofoundation:signify:0.1.0")
+    implementation("org.cardanofoundation:signify:0.1.1")
 
     // Yaci store
     implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")

@@ -9,26 +9,28 @@ spring:
     locations: classpath:db/store/{vendor}
     out-of-order: true
   datasource:
-    url: jdbc:postgresql://localhost:5433/reeve-verifier?currentSchema=reeve
+    url: jdbc:postgresql://localhost:5432/reeve-verifier?currentSchema=reeve
     username: postgres
     password: postgres
   jackson:
     property-naming-strategy: SNAKE_CASE
+  jpa:
+    hibernate:
+      ddl-auto: none
 reeve:
+  script-path: ${REVE_SCRIPT_PATH:./aiken/plutus.json}
   label: 1447
   dashboard-folder-path: ./dashboards
 store:
   cardano:
-    host: 127.0.0.1
+    host: yaci-cli
     port: 3001
-    # 42 is protocol magic for Yaci-Dev-Kit
     protocol-magic: 42
     # for devnet we must specify the genesis files for Yaci-Store
     byron-genesis-file: classpath:/devel/config/devkit/byron-genesis.json
     shelley-genesis-file: classpath:/devel/config/devkit/shelley-genesis.json
     alonzo-genesis-file: classpath:/devel/config/devkit/alonzo-genesis.json
     conway-genesis-file: classpath:/devel/config/devkit/conway-genesis.json
-
     sync-start-blockhash:
     sync-start-slot: 0
   executor:
@@ -41,9 +43,8 @@ server:
   port: 9000
 
 keri:
-  enabled: true
+  enabled: false
   metadata-label: 1
-  url: http://127.0.0.1:3901
-  bootUrl: http://127.0.0.1:3903
-  oobis: 
-    - http://keria:3902/oobi/EJO54wp79Apo4pOyAloOVQw9BQlVohycPWV0FaurG8Br/agent/EOS8r7jbPS1rYKR7duLMfuSwQsNUuUPmuFq4b-ORm9ih  
+  url: ${KERI_URL:http://127.0.0.1:1901}
+  bootUrl: ${KERI_BOOT_URL:http://127.0.0.1:1903}
+  oobis: ${KERI_OOBIS:http://keria:3902/oobi/EJO54wp79Apo4pOyAloOVQw9BQlVohycPWV0FaurG8Br/agent/EOS8r7jbPS1rYKR7duLMfuSwQsNUuUPmuFq4b-ORm9ih}

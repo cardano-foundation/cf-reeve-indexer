@@ -14,7 +14,7 @@ public interface OrganisationRepository extends JpaRepository<OrganisationEntity
     @Modifying
     @Query(value = "INSERT INTO reeve_organisation (id, name, currency_id, country_code, tax_id_number, tx_hash) " +
                    "VALUES (:id, :name, :currencyId, :countryCode, :taxIdNumber, :txHash) " +
-                   "ON CONFLICT (tx_hash) DO NOTHING", nativeQuery = true)
+                   "ON CONFLICT (id) DO NOTHING", nativeQuery = true)
     void saveIfNotExists(@Param("id") String id,
                         @Param("name") String name,
                         @Param("currencyId") String currencyId,

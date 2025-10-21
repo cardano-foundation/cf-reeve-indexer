@@ -19,12 +19,13 @@ import lombok.NoArgsConstructor;
 @Getter
 public class OrganisationEntity {
 
+
     @Id
-    private String txHash;
     private String id;
     private String name;
     private String currencyId;
     private String countryCode;
     private String taxIdNumber;
     private List<String> assets;
+    private String txHash;
 }
