@@ -22,7 +22,7 @@ services:
     build:
       context: frontend
     ports:
-      - "3002:80"
+      - "3003:80"
     environment:
       PORT: "3002"
       VITE_API_URL: http://localhost:9002
