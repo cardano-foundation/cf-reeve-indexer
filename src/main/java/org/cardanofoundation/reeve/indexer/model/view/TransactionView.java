@@ -29,7 +29,7 @@ public class TransactionView {
         return TransactionView.builder()
                 .id(entity.getId())
                 .txHash(entity.getTxHash())
-                .number(entity.getNumber())
+                .number(entity.getInternalNumber())
                 .accountingPeriod(entity.getAccountingPeriod())
                 .batchId(entity.getBatchId())
                 .type(entity.getType())

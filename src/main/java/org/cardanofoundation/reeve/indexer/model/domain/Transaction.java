@@ -29,7 +29,7 @@ public class Transaction {
     public TransactionEntity toEntity() {
         TransactionEntity transactionEntity = TransactionEntity.builder()
                 .id(id)
-                .number(number)
+                .internalNumber(number)
                 .batchId(batchId)
                 .accountingPeriod(accountingPeriod)
                 .type(type)

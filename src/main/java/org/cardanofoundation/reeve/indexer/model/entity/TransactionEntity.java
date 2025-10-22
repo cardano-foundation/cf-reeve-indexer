@@ -31,8 +31,8 @@ public class TransactionEntity {
     private String id;
     @Column(name = "tx_hash", nullable = false)
     private String txHash;
-    @Column(name = "number", nullable = false)
-    private String number;
+    @Column(name = "internal_number", nullable = false)
+    private String internalNumber;
     @Column(name = "accounting_period", nullable = false)
     private String accountingPeriod;
     @Column(name = "batch_id", nullable = false)

@@ -68,7 +68,15 @@ public class TransactionController {
                                 transactionsRequest.getCurrency(),
                                 transactionsRequest.getMinAmount(),
                                 transactionsRequest.getMaxAmount(),
-                                transactionsRequest.getTransactionHashes(), pageable));
+                                transactionsRequest.getTransactionHashes(),
+                                transactionsRequest.getDocumentNumber(),
+                                transactionsRequest.getType(),
+                                transactionsRequest.getVatCustCode(),
+                                transactionsRequest.getCostCenterCustCode(),
+                                transactionsRequest.getProjectCustCode(),
+                                transactionsRequest.getCounterPartyType(),
+                                transactionsRequest.getCounterPartyCustCode(),
+                                pageable));
         }
 
 }

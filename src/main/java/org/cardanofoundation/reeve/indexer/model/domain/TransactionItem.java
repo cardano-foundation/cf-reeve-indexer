@@ -28,7 +28,7 @@ public class TransactionItem {
         private Event event;
 
         public TransactionItemEntity toEntity() {
-                return TransactionItemEntity.builder().id(id).amount(amount).fxRate(fxRate)
+                return TransactionItemEntity.builder().id(id).amountLcy(amount).fxRate(fxRate)
                                 .documentNumber(Optional.ofNullable(document)
                                                 .map(Document::getNumber).orElse(null))
                                 .currency(Optional.ofNullable(document).map(Document::getCurrency)
