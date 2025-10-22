@@ -5,18 +5,30 @@ services:
     ports:
       - "9002:9000"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/reeve-verifier?currentSchema=reeve
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-indexer:5432/reeve-verifier?currentSchema=reeve
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=docker-devkit
       - REVE_SCRIPT_PATH=/app/plutus.json
-      - STORE_CARDANO_HOST=host.docker.internal
+      - STORE_CARDANO_HOST=${STORE_CARDANO_HOST:-host.docker.internal}
       - KERI_ENABLED=${KERI_ENABLED:-false}
       - KERI_OOBIS=${KERI_OOBIS:-}
-      - KERI_URL=http://host.docker.internal:3901
-      - KERI_BOOT_URL=http://host.docker.internal:3903
+      - KERI_URL=${KERI_URL:-http://host.docker.internal:3901}
+      - KERI_BOOT_URL=${KERI_BOOT_URL:-http://host.docker.internal:3903}
     depends_on:
-      - postgres-db
+      - postgres-indexer
+    networks:
+      - lob
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend-indexer-http.entrypoints=web"
+      - "traefik.http.routers.backend-indexer-http.rule=Host(`${API_HOSTNAME:-api.example.com}`)"
+      - "traefik.http.routers.backend-indexer-https.rule=Host(`${API_HOSTNAME:-api.example.com}`)"
+      - "traefik.http.routers.backend-indexer-https.entrypoints=websecure"
+      - "traefik.http.routers.backend-indexer-https.tls=true"
+      - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.services.backend-indexer.loadbalancer.server.port=9000"
+
 
   reeve-verifier-frontend:
     build:
@@ -24,12 +36,22 @@ services:
     ports:
       - "3003:80"
     environment:
-      PORT: "3002"
-      VITE_API_URL: http://localhost:9002
+      PORT: "3003"
+      VITE_API_URL: ${API_URL:-http://localhost:9002}
+    networks:
+      - lob
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend-indexer-http.entrypoints=web"
+      - "traefik.http.routers.frontend-indexer-http.rule=Host(`${FRONTEND_HOSTNAME:-example.com}`)"
+      - "traefik.http.routers.frontend-indexer-https.rule=Host(`${FRONTEND_HOSTNAME:-example.com}`)"
+      - "traefik.http.routers.frontend-indexer-https.entrypoints=websecure"
+      - "traefik.http.routers.frontend-indexer-https.tls=true"
+      - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
 
-  postgres-db:
+  postgres-indexer:
     image: postgres:15-alpine
-    container_name: postgres-db
+    container_name: postgres-indexer
     environment:
       - POSTGRES_DB=reeve-verifier
       - POSTGRES_USER=postgres
@@ -38,6 +60,13 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    networks:
+      - lob
 
 volumes:
   postgres-data:
+
+networks:
+  lob:
+    name: lob
+    external: true
