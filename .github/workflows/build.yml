@@ -17,9 +17,6 @@ env:
   PRIVATE_DOCKER_REGISTRY_USER: Deploy-Token
   PRIVATE_DOCKER_REGISTRY_PASS: ${{ secrets.GITLAB_PKG_REGISTRY_TOKEN }}
   DOCKER_PUSH: true
-  REEVE_DB_MIGRATIONS_REPO: cardano-foundation/cf-reeve-db-migrations
-  REEVE_DB_MIGRATIONS_REF: main
-  REEVE_DB_MIGRATIONS_PATH: cf-application/src/main/resources/db/migration/postgresql/cf-reeve-db-migrations
   GITLAB_MAVEN_REGISTRY_URL: ${{ secrets.GITLAB_MAVEN_REGISTRY_URL }}
 
 jobs:
