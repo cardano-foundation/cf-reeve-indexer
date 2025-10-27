@@ -1,7 +1,3 @@
--- Create schema if not exists
-CREATE SCHEMA IF NOT EXISTS reeve;
-SET search_path TO reeve;
-
 -- OrganisationEntity
 CREATE TABLE IF NOT EXISTS reeve_organisation (
     id VARCHAR(255) PRIMARY KEY,
