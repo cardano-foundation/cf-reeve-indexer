@@ -6,12 +6,16 @@ spring:
   application:
     name: reeve-indexing-example
   flyway:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres}
+    user: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    schemas: ${DB_SCHEMA:reeve_verifier}
     locations: classpath:db/store/{vendor}
     out-of-order: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/reeve-verifier?currentSchema=reeve
-    username: postgres
-    password: postgres
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres?currentSchema=reeve_verifier}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
   jackson:
     property-naming-strategy: SNAKE_CASE
   jpa:
