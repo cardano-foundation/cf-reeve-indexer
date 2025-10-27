@@ -12,6 +12,8 @@ spring:
     schemas: ${DB_SCHEMA:reeve_verifier}
     locations: classpath:db/store/{vendor}
     out-of-order: true
+    cleanDisabled: ${FLYWAY_CLEAN_DISABLED:false}
+    cleanOnValidationError: ${FLYWAY_CLEAN_ON_ERROR:true}
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres?currentSchema=reeve_verifier}
     username: ${DB_USER:postgres}
