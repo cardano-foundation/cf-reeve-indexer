@@ -9,7 +9,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=docker-devkit
-      - REVE_SCRIPT_PATH=/app/plutus.json
+      - REEVE_SCRIPT_PATH=/app/plutus.json
       - STORE_CARDANO_HOST=host.docker.internal
       - KERI_ENABLED=${KERI_ENABLED:-false}
     depends_on:

@@ -8,9 +8,17 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/reeve-verifier?currentSchema=reeve
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
-      - REVE_SCRIPT_PATH=/app/plutus.json
+      - REEVE_SCRIPT_PATH=/app/plutus.json
     depends_on:
       - postgres-db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend-http.entrypoints=web"
+      - "traefik.http.routers.backend-http.rule=Host(`${API_HOSTNAME:-api.example.com}`)"
+      - "traefik.http.routers.backend-https.rule=Host(`${API_HOSTNAME:-api.example.com}`)"
+      - "traefik.http.routers.backend-https.entrypoints=websecure"
+      - "traefik.http.routers.backend-https.tls=true"
+      - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
 
   reeve-verifier-frontend:
     build:
@@ -20,6 +28,14 @@ services:
     environment:
       PORT: "3002"
       VITE_API_URL: ${VITE_API_URL:-http://localhost:9002}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend-http.entrypoints=web"
+      - "traefik.http.routers.frontend-http.rule=Host(`${FRONTEND_HOSTNAME:-example.com}`)"
+      - "traefik.http.routers.frontend-https.rule=Host(`${FRONTEND_HOSTNAME:-example.com}`)"
+      - "traefik.http.routers.frontend-https.entrypoints=websecure"
+      - "traefik.http.routers.frontend-https.tls=true"
+      - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
 
   postgres-db:
     image: postgres:15-alpine

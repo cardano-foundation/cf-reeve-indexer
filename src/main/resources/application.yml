@@ -22,7 +22,7 @@ spring:
     hibernate:
       ddl-auto: none
 reeve:
-  script-path: ${REVE_SCRIPT_PATH:./aiken/plutus.json}
+  script-path: ${REEVE_SCRIPT_PATH:./aiken/plutus.json}
   label: 1447
   dashboard-folder-path: ./dashboards
 store:
