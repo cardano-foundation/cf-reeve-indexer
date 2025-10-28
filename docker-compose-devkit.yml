@@ -5,7 +5,7 @@ services:
     ports:
       - "9000:9000"
     environment:
-      - DB_URL=jdbc:postgresql://postgres-db:5432/reeve-verifier?currentSchema=reeve
+      - DB_URL=jdbc:postgresql://postgres-indexer:5432/reeve_verifier?currentSchema=reeve_verifier
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=docker-devkit
@@ -13,7 +13,7 @@ services:
       - STORE_CARDANO_HOST=host.docker.internal
       - KERI_ENABLED=${KERI_ENABLED:-false}
     depends_on:
-      - postgres-db
+      - postgres-indexer
 
   reeve-verifier-frontend:
     build:
@@ -24,11 +24,11 @@ services:
       PORT: "3000"
       VITE_API_URL: http://localhost:9000
 
-  postgres-db:
+  postgres-indexer:
     image: postgres:15-alpine
-    container_name: postgres-db
+    container_name: postgres-indexer
     environment:
-      - POSTGRES_DB=reeve-verifier
+      - POSTGRES_DB=reeve_verifier
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:

@@ -5,7 +5,7 @@ services:
     ports:
       - "9002:9000"
     environment:
-      - DB_URL=jdbc:postgresql://postgres-db:5432/reeve-verifier?currentSchema=reeve
+      - DB_URL=jdbc:postgresql://postgres-db:5432/reeve_verifier?currentSchema=reeve_verifier
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - REEVE_SCRIPT_PATH=/app/plutus.json
@@ -41,7 +41,7 @@ services:
     image: postgres:15-alpine
     container_name: postgres-db
     environment:
-      - POSTGRES_DB=reeve-verifier
+      - POSTGRES_DB=reeve_verifier
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
