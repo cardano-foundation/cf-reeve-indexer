@@ -5,9 +5,9 @@ services:
     ports:
       - "9000:9000"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/reeve-verifier?currentSchema=reeve
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - DB_URL=jdbc:postgresql://postgres-db:5432/reeve-verifier?currentSchema=reeve
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=docker-devkit
       - REEVE_SCRIPT_PATH=/app/plutus.json
       - STORE_CARDANO_HOST=host.docker.internal
