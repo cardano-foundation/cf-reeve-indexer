@@ -1,4 +1,4 @@
-import { ArrowSwapHorizontal, Graph, Note1, Book1 } from 'iconsax-react'
+import { ArrowSwapHorizontal, TrendUp, Note1, Book1 } from 'iconsax-react'
 
 import { useLocationState } from 'hooks'
 import { ButtonNavItem } from 'libs/layout-kit/components/ButtonNavItem/ButtonNavItem.component.tsx'
@@ -19,13 +19,12 @@ export const NavigationSidebar = () => {
 
   const getCurrentPage = (route: string) => pathname === route
 
-  const { RESOURCES_ROUTES } = useNavigationRoutes()
+  const { RESOURCES_ROUTES, DATA_EXPLORER_ROUTES } = useNavigationRoutes()
 
   return (
     <NavigationStyled component="nav">
       <ListStyled aria-labelledby={t({ id: 'navigation' })} disablePadding>
         <ButtonNavItem icon={Note1} label={t({ id: 'publicReports' })} route={PATHS.PUBLIC_REPORTS} getCurrentPage={getCurrentPage} hasTooltip={!isSidebarOpen} />
-        <ButtonNavItem icon={Note1} label={t({ id: 'publicReportsV2' })} route={PATHS.PUBLIC_REPORTS_V2} getCurrentPage={getCurrentPage} hasTooltip={!isSidebarOpen} />
         <ButtonNavItem
           icon={ArrowSwapHorizontal}
           label={t({ id: 'publicTransactions' })}
@@ -33,7 +32,17 @@ export const NavigationSidebar = () => {
           getCurrentPage={getCurrentPage}
           hasTooltip={!isSidebarOpen}
         />
-        <ButtonNavItem icon={Graph} label={t({ id: 'publicDashboard' })} route={PATHS.PUBLIC_DASHBOARD} getCurrentPage={getCurrentPage} hasTooltip={!isSidebarOpen} />
+        <CollapseNavItem
+          icon={TrendUp}
+          label={t({ id: 'publicDataExplorer' })}
+          route={PATHS.PUBLIC_DATA_EXPLORER}
+          subRoutes={DATA_EXPLORER_ROUTES}
+          getCurrentPage={getCurrentPage}
+          hasMainRoute={true}
+          onToggleMenu={() => handleSectionMenuToggle(MenuCategory.RESOURCES)}
+          hasTooltip={!isSidebarOpen}
+          isOpen={isResourcesOpen}
+        />
         <CollapseNavItem
           icon={Book1}
           label={t({ id: 'publicResources' })}

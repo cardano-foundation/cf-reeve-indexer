@@ -9,7 +9,7 @@ import { ContractResponse } from 'libs/api-connectors/backend-connector-reeve/ap
 import { ChartLineDashboards } from 'libs/data-visualisation-kit/components/ChartLineDashboards/ChartLineDashboards.component'
 import { chartColors } from 'libs/ui-kit/theme/colors'
 import { Chip } from 'libs/ui-kit/components/Chip/Chip.component'
-import { mapValuesToNumbers, snakeCaseToTitleCase } from 'modules/public-reports-v2/utils/formatUtils'
+import { mapValuesToNumbers, snakeCaseToTitleCase } from 'modules/public-data-explorer-asset-overview/utils/formatUtils'
 
 interface DatumHistoryChartProps {
   data: ContractResponse[]

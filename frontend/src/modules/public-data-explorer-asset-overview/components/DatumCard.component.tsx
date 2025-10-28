@@ -8,7 +8,7 @@ import { Refresh } from 'iconsax-react'
 
 import { ContractResponse } from 'libs/api-connectors/backend-connector-reeve/api/contracts/publicContractApi.types'
 import { chartColors } from 'libs/ui-kit/theme/colors'
-import { snakeCaseToTitleCase, mapValuesToNumbers } from 'modules/public-reports-v2/utils/formatUtils'
+import { snakeCaseToTitleCase, mapValuesToNumbers } from 'modules/public-data-explorer-asset-overview/utils/formatUtils'
 
 interface DatumCardProps {
   data?: ContractResponse

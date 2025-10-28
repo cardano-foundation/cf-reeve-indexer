@@ -1,6 +1,6 @@
 import { useDashboardFiltersForm } from 'libs/ui-kit/components/DashboardFilters/DashboardFilters.hooks.ts'
 import { useChartsData } from 'modules/dashboard-tool/hooks/useChartsData.ts'
-import { usePublicDashboardQueries } from 'modules/public-dashboard/hooks/usePublicDashboardQueries.ts'
+import { usePublicDashboardQueries } from 'modules/public-data-explorer-financial-overview/hooks/usePublicDashboardQueries.ts'
 
 export const usePublicDashboard = () => {
   const { formik } = useDashboardFiltersForm()

@@ -13,12 +13,12 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 
 import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component'
-import { DatumCard } from 'modules/public-reports-v2/components/DatumCard.component'
-import { DatumHistoryChart } from 'modules/public-reports-v2/components/DatumHistoryChart.component'
-import { RedeemerTable } from 'modules/public-reports-v2/components/RedeemerTable.component'
-import { OrganisationTile } from 'modules/public-reports-v2/components/OrganisationTile.component'
+import { DatumCard } from 'modules/public-data-explorer-asset-overview/components/DatumCard.component'
+import { DatumHistoryChart } from 'modules/public-data-explorer-asset-overview/components/DatumHistoryChart.component'
+import { RedeemerTable } from 'modules/public-data-explorer-asset-overview/components/RedeemerTable.component'
+import { OrganisationTile } from 'modules/public-data-explorer-asset-overview/components/OrganisationTile.component'
 
-export const ViewReportsV2 = () => {
+export const ViewPublicDataExplorerAssetOverview = () => {
   const theme = useTheme()
   const { contractApi } = backendReeveApi()
 
@@ -89,8 +89,8 @@ export const ViewReportsV2 = () => {
     <>
       <LayoutPublic.Header isPublic>
         <LayoutPublic.Header.Details
-          description="Interactive dashboard for viewing contract data, datum history, and redeemer information"
-          title="Contract Reports V2"
+          description="Explorer contract data, datum history, and redeemer information"
+          title="Asset Overview"
         />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={4}>

@@ -9,7 +9,7 @@ import { LoaderCentered } from 'libs/ui-kit/components/LoaderCentered/LoaderCent
 import { ChartsData } from 'modules/dashboard-tool/hooks/useChartsData'
 import { Slots, TemplateSlotSelections } from 'modules/dashboard-tool/types'
 import { getDefaultTemplateSlots } from 'modules/dashboard-tool/utils/templateSlot.ts'
-import { TemplateSelection } from 'modules/public-dashboard/components/TemplateSelection.component.tsx'
+import { TemplateSelection } from 'modules/public-data-explorer-financial-overview/components/TemplateSelection.component.tsx'
 
 interface PublicDashboardContentProps {
   dashboard: GetDashboardsResponse | null

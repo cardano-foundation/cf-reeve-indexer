@@ -199,17 +199,18 @@
   "noPublicReportsHint": "{organisation} hasn’t published any report yet—please check back soon!",
 
   "_Public sidebar": "public sidebar section",
-  "publicDashboard": "Dashboard",
+  "publicFinancialOverview": "Financial Overview",
+  "publicAssetOverview": "Asset Overview",
   "publicReports": "Reports",
-  "publicReportsV2": "Reports V2",
+  "publicDataExplorer": "Data Explorer",
   "publicTransactions": "Transactions",
   "publicResources": "Resources",
   "publicUserGuide": "User guide",
   "poweredByLogoLabel": "Powered by",
 
   "_Public dashboard": "public dashboard section",
-  "publicDashboardViewTitle": "Dashboard",
-  "publicDashboardDescription": "Financial overview",
+  "publicDashboardViewTitle": "Financial Overview",
+  "publicDashboardDescription": "Explorer financial statement insights",
   "noPublicDashboardMessage": "No dashboard available",
   "noPublicDashboardHint": "{organisation} hasn’t created any dashboard yet—please check back soon!",
 
@@ -228,6 +229,14 @@
   "noPublicTransactionsHint": "Adjust your filters and try again",
   "blockchainHashLength": "Cardano blockchain transaction hashes must contain 64 hexadecimal characters (0-9, a-f).",
   "specialCharactersNotAllowed": "To enter multiple blockchain transaction hashes, separate them with a comma or a space.",
+
+  "_Public data_explorer": "public data explorer section",
+  "publicDataExplorerViewTitle": "Data Explorer",
+  "publicDataExplorerViewDescription": "Explore organisational data insights",
+  "cardFinancialOverviewDescription": "Explorer financial statement insights",
+  "cardFinancialOverviewTitle": "Financial Overview",
+  "cardAssetOverviewDescription": "Explorer overview of asset tokens",
+  "cardAssetOverviewTitle": "Asset Overview",
 
   "_Public resources": "public resources section",
   "publicResourcesViewTitle": "Resources",
