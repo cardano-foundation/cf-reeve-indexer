@@ -8,6 +8,5 @@ export const useNavigationRoutes = () => {
     { label: t({ id: 'publicGlossary' }), route: PATHS.PUBLIC_RESOURCES_GLOSSARY },
     { label: t({ id: 'publicUserGuide' }), route: PATHS.PUBLIC_RESOURCES_USERGUIDE }
   ]
-
   return { RESOURCES_ROUTES }
 }

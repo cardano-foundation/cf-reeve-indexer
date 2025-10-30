@@ -10,15 +10,17 @@ import { useTheme } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
-
 import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component'
-import { DatumCard } from 'modules/public-reports-v2/components/DatumCard.component'
-import { DatumHistoryChart } from 'modules/public-reports-v2/components/DatumHistoryChart.component'
-import { RedeemerTable } from 'modules/public-reports-v2/components/RedeemerTable.component'
-import { OrganisationTile } from 'modules/public-reports-v2/components/OrganisationTile.component'
+import { DatumCard } from 'modules/public-reward-dashboard/components/DatumCard.component'
+import { DatumHistoryChart } from 'modules/public-reward-dashboard/components/DatumHistoryChart.component'
+import { RedeemerTable } from 'modules/public-reward-dashboard/components/RedeemerTable.component'
+import { OrganisationTile } from 'modules/public-reward-dashboard/components/OrganisationTile.component'
+//import { mockAdaData } from 'modules/public-reward-dashboard/utils/mockDataAda'
+import { opacityColors } from 'libs/ui-kit/theme/colors.ts'
+import { ArrowDown2 } from 'iconsax-react'
 
-export const ViewReportsV2 = () => {
+export const ViewPublicRewardDashboard = () => {
   const theme = useTheme()
   const { contractApi } = backendReeveApi()
 
@@ -44,37 +46,25 @@ export const ViewReportsV2 = () => {
     }
   }, [assets, selectedToken])
 
-  const {
-    data: currentDatum,
-    isFetching: isFetchingCurrentDatum
-  } = useQuery({
+  const { data: currentDatum, isFetching: isFetchingCurrentDatum } = useQuery({
     queryKey: ['CONTRACT_CURRENT_DATUM', tokenName],
     queryFn: async () => contractApi.getCurrentDatum(tokenName),
     refetchInterval
   })
 
-  const {
-    data: datumHistory,
-    isFetching: isFetchingDatumHistory
-  } = useQuery({
+  const { data: datumHistory, isFetching: isFetchingDatumHistory } = useQuery({
     queryKey: ['CONTRACT_DATUM_HISTORY', tokenName],
     queryFn: async () => contractApi.getDatumHistory(tokenName),
     refetchInterval
   })
 
-  const {
-    data: currentRedeemer,
-    isFetching: isFetchingRedeemer
-  } = useQuery({
+  const { data: currentRedeemer, isFetching: isFetchingRedeemer } = useQuery({
     queryKey: ['CONTRACT_CURRENT_REDEEMER', tokenName],
     queryFn: async () => contractApi.getCurrentRedeemer(tokenName),
     refetchInterval
   })
 
-  const {
-    data: organisation,
-    isFetching: isFetchingOrganisation
-  } = useQuery({
+  const { data: organisation, isFetching: isFetchingOrganisation } = useQuery({
     queryKey: ['CONTRACT_ORGANISATION', tokenName],
     queryFn: async () => contractApi.getOrganisationByAssetName(tokenName),
     enabled: !!tokenName,
@@ -88,24 +78,16 @@ export const ViewReportsV2 = () => {
   return (
     <>
       <LayoutPublic.Header isPublic>
-        <LayoutPublic.Header.Details
-          description="Interactive dashboard for viewing contract data, datum history, and redeemer information"
-          title="Contract Reports V2"
-        />
+        <LayoutPublic.Header.Details description="Explorer overview of asset tokens" title="Dashboard" />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={4}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, gap: 2 }}>
           <Box
             sx={{
               width: '100%',
-              maxWidth: 600,
-              background: theme.palette.background.paper,
+              maxWidth: 500,
               p: 2,
-              borderRadius: 2,
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-              flex: 1,
-            }}
-          >
+            }}>
             <FormControl fullWidth>
               <InputLabel id="token-select-label">Select Asset</InputLabel>
               <Select
@@ -113,14 +95,77 @@ export const ViewReportsV2 = () => {
                 id="token-select"
                 value={selectedToken}
                 label="Select Asset"
+                size="small"
+                IconComponent={ArrowDown2}
                 onChange={(e) => handleTokenChange(e.target.value)}
                 disabled={isLoadingAssets}
-                endAdornment={
-                  isLoadingAssets ? (
-                    <CircularProgress size={20} sx={{ mr: 2 }} />
-                  ) : null
-                }
-              >
+                endAdornment={isLoadingAssets ? <CircularProgress size={20} sx={{ mr: 2 }} /> : null}
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'center'
+                  },
+                  anchorReference: 'anchorEl',
+                  transformOrigin: {
+                    vertical: -4,
+                    horizontal: 'center'
+                  },
+                  slotProps: {
+                    root: {
+                      sx: {
+                        cursor: 'pointer'
+                      }
+                    },
+                    paper: {
+                      sx: {
+                        background: theme.palette.background.default,
+                        borderRadius: '0.5rem',
+                        boxShadow: `0 4px 16px -1px rgba(0, 0, 0, 0.1)`,
+
+                        '& .MuiList-root': {
+                          maxHeight: '11.25rem',
+                          padding: theme.spacing(1),
+                          overflow: 'hidden auto'
+                        },
+                        '& .MuiButtonBase-root': {
+                          marginBottom: '4px',
+                          borderRadius: '6px',
+
+                          '&:last-of-type': {
+                            marginBottom: 0
+                          },
+                          '&:hover': {
+                            backgroundColor: opacityColors.button[2]
+                          },
+                          '&.Mui-focusVisible': {
+                            backgroundColor: opacityColors.button[2]
+                          },
+                          '&.Mui-selected': {
+                            backgroundColor: opacityColors.button[4],
+
+                            '&:hover': {
+                              backgroundColor: opacityColors.button[2]
+                            },
+                            '&.Mui-focusVisible': {
+                              backgroundColor: opacityColors.button[2]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }}
+                sx={{
+                  '&&': {
+                    background: theme.palette.common.white,
+                    borderRadius: '0.5rem',
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)'
+                  },
+                  '& .MuiSelect-icon': {
+                    margin: theme.spacing(-0.5, 0.25, 0, 0)
+                  }
+                }}
+                variant="outlined">
                 {assets?.map((asset) => (
                   <MenuItem key={asset as string} value={asset as string}>
                     {asset as string}
@@ -148,14 +193,7 @@ export const ViewReportsV2 = () => {
       </LayoutPublic.Main>
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, mb: 1 }}>
         <FormControlLabel
-          control={
-            <Switch
-              checked={autoRefresh}
-              onChange={() => setAutoRefresh((v) => !v)}
-              size="small"
-              color="primary"
-            />
-          }
+          control={<Switch checked={autoRefresh} onChange={() => setAutoRefresh((v) => !v)} size="small" color="primary" />}
           label={<span style={{ fontSize: 13, color: '#888', fontWeight: 400 }}>Auto-Refresh alle 30s</span>}
           sx={{ userSelect: 'none', opacity: 0.7 }}
         />

@@ -4,7 +4,6 @@ import { LayoutPublicContext } from 'libs/layout-kit/layout-public/components/La
 
 export const useLayoutPublicContext = () => {
   const context = useContext(LayoutPublicContext)
-
   if (!context) {
     throw new Error('useLayoutPublicContext must be used within a LayoutPublicContextProvider')
   }

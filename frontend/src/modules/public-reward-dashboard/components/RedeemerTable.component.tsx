@@ -1,6 +1,5 @@
 import { useTheme } from '@mui/material'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
+import { Typography, Box } from 'features/mui/base'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -12,7 +11,7 @@ import { DocumentText } from 'iconsax-react'
 
 import { ContractResponse } from 'libs/api-connectors/backend-connector-reeve/api/contracts/publicContractApi.types'
 import { chartColors } from 'libs/ui-kit/theme/colors'
-import { snakeCaseToTitleCase, mapValuesToNumbers } from 'modules/public-reports-v2/utils/formatUtils'
+import { snakeCaseToTitleCase, mapValuesToNumbers } from 'modules/public-reward-dashboard/utils/formatUtils'
 
 interface RedeemerTableProps {
   data?: ContractResponse
@@ -29,7 +28,6 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
           background: theme.palette.background.default,
           borderRadius: 3,
           padding: 6,
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)',
           textAlign: 'center',
         }}
       >
@@ -48,7 +46,6 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
           background: theme.palette.background.default,
           borderRadius: 3,
           padding: 6,
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)',
           textAlign: 'center',
           border: `1px solid ${theme.palette.divider}`,
         }}
@@ -72,7 +69,6 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
         background: theme.palette.background.default,
         borderRadius: 2,
         padding: 2.5,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
       }}
     >
       <Box sx={{ mb: 2 }}>
@@ -95,7 +91,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
           <TableHead>
             <TableRow
               sx={{
-                background: `linear-gradient(135deg, ${chartColors.blue[700]} 0%, ${chartColors.cyan[800]} 100%)`,
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${chartColors.cyan[600]} 100%)`,
               }}
             >
               <TableCell
@@ -161,9 +157,8 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
                 <TableCell
                   align="right"
                   sx={{
-                    color: chartColors.blue[700],
+                    color: theme.palette.primary.dark,
                     fontWeight: 600,
-                    fontFamily: 'Courier New, monospace',
                     fontSize: '1.1rem',
                     borderBottom: `1px solid ${theme.palette.divider}`,
                     padding: 1.75,

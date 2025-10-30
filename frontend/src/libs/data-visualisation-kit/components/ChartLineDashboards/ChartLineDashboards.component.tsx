@@ -1,4 +1,13 @@
-import { ChartDataProvider, ChartsGrid, ChartsXAxis, ChartsYAxis, LinePlot, MarkPlot, type LineChartProps as LineChartPropsMUI, type LineSeriesType } from '@mui/x-charts'
+import {
+  ChartDataProvider,
+  ChartsGrid,
+  ChartsXAxis,
+  ChartsYAxis,
+  LinePlot,
+  MarkPlot,
+  type LineChartProps as LineChartPropsMUI,
+  type LineSeriesType,
+} from '@mui/x-charts'
 
 import { ChartsLegends } from 'libs/data-visualisation-kit/components/ChartsLegend/ChartsLegend.component'
 import { ChartsSurface } from 'libs/data-visualisation-kit/components/ChartsSurface/ChartsSurface.component'
@@ -6,19 +15,40 @@ import { ChartsTooltip } from 'libs/data-visualisation-kit/components/ChartsTool
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
 import { EmptyStateTable } from 'libs/ui-kit/components/EmptyStateTable/EmptyStateTable.component'
 
-type ChartLineSeries = Pick<LineSeriesType, 'id' | 'label' | 'data' | 'dataKey' | 'curve' | 'showMark' | 'connectNulls' | 'shape' | 'valueFormatter'> & {
+type ChartLineSeries = Pick<
+  LineSeriesType,
+  'id' | 'label' | 'data' | 'dataKey' | 'curve' | 'showMark' | 'connectNulls' | 'shape' | 'valueFormatter'
+> & {
   markSize?: number
 }
 
 interface ChartLineDashboardsProps extends Omit<LineChartPropsMUI, 'series' | 'xAxis' | 'yAxis'> {
   series: ChartLineSeries[]
-  xAxis: { data?: unknown[]; dataKey?: string; scaleType?: 'linear' | 'time' | 'log' | 'band'; valueFormatter?: (value: any) => string; min?: number | Date; max?: number | Date }
+  xAxis: {
+    data?: unknown[]
+    dataKey?: string
+    scaleType?: 'linear' | 'time' | 'log' | 'band'
+    valueFormatter?: (value: any) => string
+    min?: number | Date
+    max?: number | Date
+  }
   dataset?: Record<string, unknown>[]
   yAxis?: { min?: number; max?: number }[]
   isLegendHidden?: boolean
+  showPoints?: boolean // new prop to control MarkPlot
 }
 
-export const ChartLineDashboards = ({ colors, dataset, height = 360, series, title, xAxis, yAxis, isLegendHidden }: ChartLineDashboardsProps) => {
+export const ChartLineDashboards = ({
+  colors,
+  dataset,
+  height = 360,
+  series,
+  title,
+  xAxis,
+  yAxis,
+  isLegendHidden,
+  showPoints = false, // default false
+}: ChartLineDashboardsProps) => {
   const { t } = useTranslations()
 
   const hasSeries = Boolean(
@@ -40,11 +70,19 @@ export const ChartLineDashboards = ({ colors, dataset, height = 360, series, tit
   }
 
   return (
-    <ChartDataProvider colors={colors} dataset={dataset} series={series.map((s) => ({ type: 'line', ...s }))} title={title} xAxis={[xAxis]} yAxis={yAxis} height={height}>
+    <ChartDataProvider
+      colors={colors}
+      dataset={dataset}
+      series={series.map((s) => ({ type: 'line', ...s }))}
+      title={title}
+      xAxis={[xAxis]}
+      yAxis={yAxis}
+      height={height}
+    >
       <ChartsSurface>
-        <ChartsGrid vertical horizontal />
+        <ChartsGrid vertical={false} horizontal={false} />
         <LinePlot />
-        <MarkPlot />
+        {showPoints && <MarkPlot />} {/* only render points if showPoints=true */}
         <ChartsXAxis />
         <ChartsYAxis />
       </ChartsSurface>

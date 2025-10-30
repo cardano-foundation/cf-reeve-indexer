@@ -1,20 +1,21 @@
 import { createBrowserRouter, createRoutesFromElements, Outlet, Route } from 'react-router-dom'
 
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
-import { ViewPublicDashboard } from 'modules/public-dashboard/view/ViewPublicDashboard.component.tsx'
+import { ViewPublicDashboard } from 'modules/public-dashboard/view/ViewPublicDashboard.component'
 import { ViewPublicResources } from 'modules/public-resources/view/ViewPublicResources.component.tsx'
 import { ViewPublicResourcesGlossary } from 'modules/public-resources-glossary/view/ViewPublicResourcesGlossary.component'
 import { ViewPublicResourcesUserGuide } from 'modules/public-resources-user-guide/view/ViewPublicResourcesUserGuide.component'
 import { ViewPublicTransactions } from 'modules/public-transactions/view/ViewPublicTransactions.component.tsx'
 import { ViewPublicTransactionsResults } from 'modules/public-transactions-results/view/ViewPublicTransactionsResults.component.tsx'
 import { ViewReportsPublic } from 'modules/public-reports/view/ViewReportsPublic.component.tsx'
-import { ViewReportsV2 } from 'modules/public-reports-v2/view/ViewReportsV2.component.tsx'
+import { ViewPublicRewardDashboard } from 'modules/public-reward-dashboard/view/ViewPublicRewardDashboard.component.tsx'
 
 export const ROUTES_V2 = {
   ROOT: '/',
+  PUBLIC_DATA_EXPLORER: 'data-explorer',
   PUBLIC_DASHBOARD: 'dashboard',
+  PUBLIC_REWARD_DASHBOARD: 'reward-dashboard',
   PUBLIC_REPORTS: 'reports',
-  PUBLIC_REPORTS_V2: 'reports-v2',
   PUBLIC_TRANSACTIONS: 'transactions',
   PUBLIC_TRANSACTIONS_RESULTS: 'transactions-results',
   PUBLIC_RESOURCES: 'resources',
@@ -27,8 +28,8 @@ const createRoutePath = (routes: string[] = []) => `${ROUTES_V2.ROOT}${routes.jo
 export const PATHS = {
   ROOT: createRoutePath(),
   PUBLIC_DASHBOARD: createRoutePath([ROUTES_V2.PUBLIC_DASHBOARD]),
+  PUBLIC_REWARD_DASHBOARD: createRoutePath([ROUTES_V2.PUBLIC_REWARD_DASHBOARD]),
   PUBLIC_REPORTS: createRoutePath([ROUTES_V2.PUBLIC_REPORTS]),
-  PUBLIC_REPORTS_V2: createRoutePath([ROUTES_V2.PUBLIC_REPORTS_V2]),
   PUBLIC_TRANSACTIONS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS]),
   PUBLIC_TRANSACTIONS_RESULTS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS]),
   PUBLIC_RESOURCES: createRoutePath([ROUTES_V2.PUBLIC_RESOURCES]),
@@ -41,8 +42,8 @@ export const router = createBrowserRouter(
     <Route element={<Outlet />} path={ROUTES_V2.ROOT}>
       <Route element={<LayoutPublic />}>
         <Route element={<ViewPublicDashboard />} path={ROUTES_V2.PUBLIC_DASHBOARD} />
+        <Route element={<ViewPublicRewardDashboard />} path={ROUTES_V2.PUBLIC_REWARD_DASHBOARD} />
         <Route element={<ViewReportsPublic />} path={ROUTES_V2.PUBLIC_REPORTS} />
-        <Route element={<ViewReportsV2 />} path={ROUTES_V2.PUBLIC_REPORTS_V2} />
         <Route element={<ViewPublicTransactions />} path={ROUTES_V2.PUBLIC_TRANSACTIONS} />
         <Route element={<ViewPublicTransactionsResults />} path={ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS} />
         <Route element={<Outlet />} path={ROUTES_V2.PUBLIC_RESOURCES}>

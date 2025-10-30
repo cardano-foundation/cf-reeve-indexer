@@ -200,8 +200,8 @@
 
   "_Public sidebar": "public sidebar section",
   "publicDashboard": "Dashboard",
+  "publicRewardDashboard": "Dashboard",
   "publicReports": "Reports",
-  "publicReportsV2": "Reports V2",
   "publicTransactions": "Transactions",
   "publicResources": "Resources",
   "publicUserGuide": "User guide",
@@ -209,9 +209,15 @@
 
   "_Public dashboard": "public dashboard section",
   "publicDashboardViewTitle": "Dashboard",
-  "publicDashboardDescription": "Financial overview",
+  "publicDashboardDescription": "Explorer financial statement insights",
   "noPublicDashboardMessage": "No dashboard available",
   "noPublicDashboardHint": "{organisation} hasn’t created any dashboard yet—please check back soon!",
+
+  "_Public reward dashboard": "public reward dashboard section",
+  "publicRewardDashboardViewTitle": "Dashboard",
+  "publicRewardDashboardDescription": "Explorer overview of asset tokens",
+  "noPublicRewardDashboardMessage": "No dashboard available",
+  "noPublicRewardDashboardHint": "{organisation} hasn’t created any dashboard yet—please check back soon!",
 
   "_Public transactions": "public transactions section",
   "publicTransactionsViewTitle": "Transactions",

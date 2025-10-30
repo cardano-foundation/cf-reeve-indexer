@@ -1,14 +1,11 @@
-import { useTheme } from '@mui/material'
-import Box from '@mui/material/Box'
-import MenuItem from '@mui/material/MenuItem'
+import { useTheme, Box, MenuItem } from '@mui/material'
 import Select, { SelectProps as SelectPropsMUI } from '@mui/material/Select'
 import { ArrowDown2 } from 'iconsax-react'
-
-import { cardanoFoundationLogo } from 'assets/icons'
+import { cardanoFoundationLogo, issuranceSwissLogo } from 'assets/icons'
 import { OrganisationLabelStyled, OrganisationLogoStyled } from 'libs/form-kit/components/InputOrganisationsSelectField/InputOrganisationsSelectField.styles.tsx'
 import { SelectOption } from 'libs/ui-kit/components/InputSelect/InputSelect.component.tsx'
 
-type InputOrganisationsSelectFieldProps = SelectPropsMUI & {
+type InputOrganisationsSelectFieldProps = SelectPropsMUI<string> & {
   items: SelectOption[]
   value: string
   hasChevron?: boolean
@@ -20,20 +17,26 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
   return (
     <Select
       name={name}
+      value={value}
       renderValue={(value) => {
-        const name = items.find((item) => item.value === value)?.name
-
+        const org = items.find((item) => item.value === value)
         return (
           <Box alignItems="center" display="flex" gap={1}>
-            <OrganisationLogoStyled alt={name} src={cardanoFoundationLogo} />
+            <OrganisationLogoStyled
+              alt={org?.name}
+              src={
+                value === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
+                  ? cardanoFoundationLogo
+                  : issuranceSwissLogo
+              }
+            />
             <OrganisationLabelStyled component="h2" variant="h2">
-              {name}
+              {org?.name}
             </OrganisationLabelStyled>
           </Box>
         )
       }}
       size="medium"
-      value={value}
       variant="outlined"
       inputProps={{
         name,
@@ -83,8 +86,7 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
         }
       }}
       fullWidth
-      {...props}
-    >
+      {...props}>
       {items.map(({ name, value }) => (
         <MenuItem key={value} value={value}>
           {name}
