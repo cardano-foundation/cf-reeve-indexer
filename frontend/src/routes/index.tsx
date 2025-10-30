@@ -1,21 +1,20 @@
 import { createBrowserRouter, createRoutesFromElements, Outlet, Route } from 'react-router-dom'
 
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
-import { ViewPublicDataExplorer } from 'modules/public-data-explorer/view/ViewPublicDataExplorer.component'
-import { ViewPublicDataExplorerFinancialOverview } from 'modules/public-data-explorer-financial-overview/view/ViewPublicDataExplorerFinancialOverview.component.tsx'
+import { ViewPublicDashboard } from 'modules/public-dashboard/view/ViewPublicDashboard.component'
 import { ViewPublicResources } from 'modules/public-resources/view/ViewPublicResources.component.tsx'
 import { ViewPublicResourcesGlossary } from 'modules/public-resources-glossary/view/ViewPublicResourcesGlossary.component'
 import { ViewPublicResourcesUserGuide } from 'modules/public-resources-user-guide/view/ViewPublicResourcesUserGuide.component'
 import { ViewPublicTransactions } from 'modules/public-transactions/view/ViewPublicTransactions.component.tsx'
 import { ViewPublicTransactionsResults } from 'modules/public-transactions-results/view/ViewPublicTransactionsResults.component.tsx'
 import { ViewReportsPublic } from 'modules/public-reports/view/ViewReportsPublic.component.tsx'
-import { ViewPublicDataExplorerAssetOverview } from 'modules/public-data-explorer-asset-overview/view/ViewPublicDataExplorerAssetOverview.component.tsx'
+import { ViewPublicRewardDashboard } from 'modules/public-reward-dashboard/view/ViewPublicRewardDashboard.component.tsx'
 
 export const ROUTES_V2 = {
   ROOT: '/',
   PUBLIC_DATA_EXPLORER: 'data-explorer',
-  PUBLIC_DATA_EXPLORER_FINANCIAL_OVERVIEW: 'financial-overview',
-  PUBLIC_DATA_EXPLORER_ASSET_OVERVIEW: 'asset-overview',
+  PUBLIC_DASHBOARD: 'dashboard',
+  PUBLIC_REWARD_DASHBOARD: 'reward-dashboard',
   PUBLIC_REPORTS: 'reports',
   PUBLIC_TRANSACTIONS: 'transactions',
   PUBLIC_TRANSACTIONS_RESULTS: 'transactions-results',
@@ -28,9 +27,8 @@ const createRoutePath = (routes: string[] = []) => `${ROUTES_V2.ROOT}${routes.jo
 
 export const PATHS = {
   ROOT: createRoutePath(),
-  PUBLIC_DATA_EXPLORER: createRoutePath([ROUTES_V2.PUBLIC_DATA_EXPLORER]),
-  PUBLIC_DATA_EXPLORER_FINANCIAL_OVERVIEW: createRoutePath([ROUTES_V2.PUBLIC_DATA_EXPLORER, ROUTES_V2.PUBLIC_DATA_EXPLORER_FINANCIAL_OVERVIEW]),
-  PUBLIC_DATA_EXPLORER_ASSET_OVERVIEW: createRoutePath([ROUTES_V2.PUBLIC_DATA_EXPLORER, ROUTES_V2.PUBLIC_DATA_EXPLORER_ASSET_OVERVIEW]),
+  PUBLIC_DASHBOARD: createRoutePath([ROUTES_V2.PUBLIC_DASHBOARD]),
+  PUBLIC_REWARD_DASHBOARD: createRoutePath([ROUTES_V2.PUBLIC_REWARD_DASHBOARD]),
   PUBLIC_REPORTS: createRoutePath([ROUTES_V2.PUBLIC_REPORTS]),
   PUBLIC_TRANSACTIONS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS]),
   PUBLIC_TRANSACTIONS_RESULTS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS]),
@@ -43,11 +41,8 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Outlet />} path={ROUTES_V2.ROOT}>
       <Route element={<LayoutPublic />}>
-        <Route element={<Outlet />} path={ROUTES_V2.PUBLIC_DATA_EXPLORER}>
-          <Route element={<ViewPublicDataExplorer />} index />
-          <Route element={<ViewPublicDataExplorerFinancialOverview />} path={ROUTES_V2.PUBLIC_DATA_EXPLORER_FINANCIAL_OVERVIEW} />
-          <Route element={<ViewPublicDataExplorerAssetOverview />} path={ROUTES_V2.PUBLIC_DATA_EXPLORER_ASSET_OVERVIEW} />
-        </Route>
+        <Route element={<ViewPublicDashboard />} path={ROUTES_V2.PUBLIC_DASHBOARD} />
+        <Route element={<ViewPublicRewardDashboard />} path={ROUTES_V2.PUBLIC_REWARD_DASHBOARD} />
         <Route element={<ViewReportsPublic />} path={ROUTES_V2.PUBLIC_REPORTS} />
         <Route element={<ViewPublicTransactions />} path={ROUTES_V2.PUBLIC_TRANSACTIONS} />
         <Route element={<ViewPublicTransactionsResults />} path={ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS} />
