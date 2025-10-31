@@ -4,7 +4,7 @@ import { useTheme, CircularProgress } from '@mui/material'
 import { Activity } from 'iconsax-react'
 import { ContractResponse } from 'libs/api-connectors/backend-connector-reeve/api/contracts/publicContractApi.types'
 import { ChartLineDashboards } from 'libs/data-visualisation-kit/components/ChartLineDashboards/ChartLineDashboards.component'
-import { chartColors } from 'libs/ui-kit/theme/colors'
+import { caslChartColors } from 'libs/ui-kit/theme/colors'
 import { Chip } from 'libs/ui-kit/components/Chip/Chip.component'
 import { mapValuesToNumbers, snakeCaseToTitleCase } from 'modules/public-reward-dashboard/utils/formatUtils'
 
@@ -68,7 +68,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
           color: theme.palette.text.secondary,
         }}
       >
-        <CircularProgress sx={{ mb: 2, color: chartColors.cyan[600] }} size={48} />
+        <CircularProgress sx={{ mb: 2, color: caslChartColors.cyan[600] }} size={48} />
         <Typography variant="body1">Loading ADA price data...</Typography>
       </Box>
     )
@@ -96,8 +96,8 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
   // 4️⃣ Prepare chart series
   const colors = [
     theme.palette.primary.dark,
-    chartColors.cyan[600],
-    chartColors.cyan[800],
+    caslChartColors.cyan[600],
+    caslChartColors.cyan[800],
     theme.palette.success.main,
   ]
 

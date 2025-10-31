@@ -5,7 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { Refresh } from 'iconsax-react'
 import { Logo } from 'assets/images'
 import { ContractResponse } from 'libs/api-connectors/backend-connector-reeve/api/contracts/publicContractApi.types'
-import { chartColors } from 'libs/ui-kit/theme/colors'
+import { caslChartColors } from 'libs/ui-kit/theme/colors'
 import { snakeCaseToTitleCase, mapValuesToNumbers } from 'modules/public-reward-dashboard/utils/formatUtils'
 
 interface DatumCardProps {
@@ -29,7 +29,7 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
     return (
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${chartColors.cyan[600]} 100%)`,
+          background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${caslChartColors.cyan[600]} 100%)`,
           borderRadius: 3,
           padding: 3,
           color: 'white',
@@ -79,7 +79,7 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
   return (
     <Box
       sx={{
-        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${chartColors.cyan[600]} 100%)`,
+        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${caslChartColors.cyan[600]} 100%)`,
         borderRadius: 3,
         padding: 3,
         color: 'white',
@@ -92,7 +92,7 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
           left: 0,
           right: 0,
           height: '2px',
-          background: `linear-gradient(90deg, transparent, ${chartColors.cyan[600]}, transparent)`,
+          background: `linear-gradient(90deg, transparent, ${caslChartColors.cyan[600]}, transparent)`,
           animation: `${shimmer} 2s infinite`
         }
       }}>

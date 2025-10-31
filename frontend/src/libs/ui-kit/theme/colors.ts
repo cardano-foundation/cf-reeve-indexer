@@ -1,31 +1,28 @@
-export const chartColors = {
-  blue: {
-    600: '#2E8FC6',  // Darker, less bright blue
-    700: '#0066CC',  // Darker primary blue
-    800: '#004C99'   // Even darker blue
+export const cfChartColors = {
+  blueCorporate: {
+    900: '#7572d9ff',
+    700: '#7ab3ffff',
+    600: '#3e4151ff',
+    500: '#3f5fb9ff',
+    300: '#0084ff',
   },
-  green: {
-    600: '#2BA378',  // Darker, less bright green
-    700: '#008B5C',  // Darker primary green
-    800: '#006642'   // Even darker green
-  },
-  purple: {
-    600: '#D4C5FF',
-    700: '#CAB6FF',
-    800: '#7F70AA'
-  },
-  red: {
-    600: '#FF849A',
-    700: '#E58C9C',
-    800: '#AA2F45'
-  },
+  neutral: {
+    100: '#E5E7EB'
+  }
+}
+
+export const caslChartColors = {
   cyan: {
-    600: '#00B8D4',  // Darker cyan
-    800: '#0097A7'   // Even darker cyan
-  },
-  pink: {
-    600: '#D09CA5',
-    800: '#D2B8BD'
+    900: '#175e60',
+    800: '#1c818b',
+    700: '#1f95a2',
+    600: '#22aabc', // casl token primary color
+    500: '#25bacf',
+    400: '#36c4d5',
+    300: '#54cedd',
+    200: '#83dde7',
+    100: '#b3eaf0',
+    50: '#e0f7f9'
   }
 }
 

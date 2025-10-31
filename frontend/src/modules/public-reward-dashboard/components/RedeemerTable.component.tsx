@@ -10,7 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { DocumentText } from 'iconsax-react'
 
 import { ContractResponse } from 'libs/api-connectors/backend-connector-reeve/api/contracts/publicContractApi.types'
-import { chartColors } from 'libs/ui-kit/theme/colors'
+import { caslChartColors } from 'libs/ui-kit/theme/colors'
 import { snakeCaseToTitleCase, mapValuesToNumbers } from 'modules/public-reward-dashboard/utils/formatUtils'
 
 interface RedeemerTableProps {
@@ -91,7 +91,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
           <TableHead>
             <TableRow
               sx={{
-                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${chartColors.cyan[600]} 100%)`,
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${caslChartColors.cyan[600]} 100%)`,
               }}
             >
               <TableCell

@@ -2,7 +2,7 @@ import { useMediaQuery, useTheme } from '@mui/material'
 import { type DatasetElementType } from '@mui/x-charts/internals'
 
 import { ChartBarDashboards } from 'libs/data-visualisation-kit/components/ChartBarDashboards/ChartBarDashboards.component.tsx'
-import { chartColors } from 'libs/ui-kit/theme/colors.ts'
+import { cfChartColors } from 'libs/ui-kit/theme/colors.ts'
 import { formatNumber, formatNumberCurrency } from 'libs/utils/format.ts'
 
 interface Data extends DatasetElementType<number | string> {
@@ -14,7 +14,7 @@ interface ChartBarTotalExpensesProps {
   data: Data[]
 }
 
-const CHART_COLORS = [chartColors.blue[600]]
+const CHART_COLORS = Object.values(cfChartColors.blueCorporate);
 
 export const ChartBarTotalExpenses = ({ data }: ChartBarTotalExpensesProps) => {
   const theme = useTheme()

@@ -26,7 +26,7 @@ export const ChartPieDashboards = ({ colors, series, title }: ChartPieDashboards
   return (
     <ChartDataProvider colors={colors} series={[{ ...serie, labelMarkType: 'circle', type: 'pie' }]} title={title} xAxis={[{ position: 'none' }]} yAxis={[{ position: 'none' }]}>
       <ChartsSurface sx={{ maxHeight: '85%' }}>
-        <PiePlot slotProps={{ pieArc: { stroke: theme.palette.common.white, strokeWidth: 2 } }} />
+        <PiePlot slotProps={{ pieArc: { stroke: theme.palette.common.white, strokeWidth: 0 } }} />
       </ChartsSurface>
       <ChartsTooltip />
       <ChartsLegends />

@@ -3,7 +3,7 @@ import { DatasetElementType } from '@mui/x-charts/internals'
 
 import { ChartBarDashboards } from 'libs/data-visualisation-kit/components/ChartBarDashboards/ChartBarDashboards.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
-import { chartColors } from 'libs/ui-kit/theme/colors.ts'
+import { cfChartColors } from 'libs/ui-kit/theme/colors.ts'
 import { formatNumber, formatNumberCurrency } from 'libs/utils/format.ts'
 
 interface Data extends DatasetElementType<number | string> {
@@ -18,7 +18,7 @@ interface ChartBarBalanceSheetOverviewProps {
   data: Data[]
 }
 
-const CHART_COLORS = [...Object.values(chartColors).map((color) => color[600]), ...Object.values(chartColors).map((color) => color[800])]
+const CHART_COLORS = Object.values(cfChartColors.blueCorporate);
 
 export const ChartBarBalanceSheetOverview = ({ data }: ChartBarBalanceSheetOverviewProps) => {
   const { t } = useTranslations()
