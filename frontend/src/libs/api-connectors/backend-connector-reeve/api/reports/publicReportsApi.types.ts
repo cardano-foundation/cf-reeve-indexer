@@ -62,6 +62,7 @@ export type ReportApiResponse = {
   ver: number
   blockChainHash: string
   identityVerified: boolean
+  lei: string
   data: NestedMap
 }
 

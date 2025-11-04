@@ -57,6 +57,8 @@ public class ReportEntity {
 
     private boolean identityVerified;
 
+    private String identifier;
+
     private String metadataHash;
 
 }
