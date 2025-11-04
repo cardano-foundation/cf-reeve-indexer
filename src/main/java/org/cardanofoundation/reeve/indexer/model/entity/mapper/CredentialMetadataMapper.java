@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.model.entity.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.IdentityMetadata;
@@ -10,22 +11,27 @@ public final class CredentialMetadataMapper {
 
     private CredentialMetadataMapper() {}
 
+    @SuppressWarnings("unchecked")
     public static CredentialEntity toEntity(IdentityMetadata domain) {
         CredentialEntityBuilder builder = CredentialEntity.builder();
 
-        List<String> prefixes = domain.getPrefix();
-        String prefixId = null;
-        if (prefixes != null && !prefixes.isEmpty()) {
-            prefixId = prefixes.get(prefixes.size() - 1);
+        if(domain.getM() != null) {
+            if(domain.getM().containsKey("l")) {
+                List<String> labels = new ArrayList<>();
+                labels.addAll((List<String>) domain.getM().get("l"));
+                builder.labels(labels.isEmpty() ? null : labels);
+            }
+            if(domain.getM().containsKey("LEI")) {
+                builder.lei((String) domain.getM().get("LEI"));
+            }
         }
 
-        builder.prefixId(prefixId)
-                .prefixes(prefixes)
+        builder.prefixId(domain.getI())
                 .txHash(domain.getTxHash())
-                .type(domain.getType() == null ? null : domain.getType().name())
-                .vcp(domain.getVcp())
-                .iss(domain.getIss())
-                .acdc(domain.getAcdc());
+                .credentialChain(domain.getC())
+                .valid(true); // TODO check if credentialChain is valid
+
+
 
         return builder.build();
     }

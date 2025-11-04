@@ -38,7 +38,7 @@ store:
   metadata:
     api-enabled: false
 server:
-  port: 9000
+  port: 9003
 
 keri:
   enabled: true

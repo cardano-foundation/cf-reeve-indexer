@@ -141,20 +141,22 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
     private void handleIdentityTxs(List<IdentityMetadata> list) {
         list.forEach(rawMetadata -> {
-            if(rawMetadata.getType() == IdentityType.KERI) {
-            IdentityEventEntity identityEntity = IdentityEventEntity.builder()
+            if(rawMetadata.getT() == IdentityType.ATTEST) {
+                IdentityEventEntity identityEntity = IdentityEventEntity.builder()
                     .txHash(rawMetadata.getTxHash())
                     .sequenceNumber(rawMetadata.getS())
-                    .dataHash(rawMetadata.getA())
-                    .eventHash(rawMetadata.getD())
+                    .dataHash(rawMetadata.getD())
                     .identifier(rawMetadata.getI())
-                    .type(rawMetadata.getType().name())
+                    .type(rawMetadata.getT().name())
                 .build();
-            identityRepository.saveAndFlush(identityEntity);
-            keriService.verifyIdentityTx(identityEntity);
-            } else if (rawMetadata.getType() == IdentityType.CREDENTIAL) {
+                identityRepository.saveAndFlush(identityEntity);
+                keriService.verifyIdentityTx(identityEntity);
+
+            } else if (rawMetadata.getT() == IdentityType.AUTH_BEGIN) {
                 CredentialEntity entity = CredentialMetadataMapper.toEntity(rawMetadata);
                 credentialRepository.saveAndFlush(entity);
+            } else if(rawMetadata.getT() == IdentityType.AUTH_END) {
+                // TODO handle AUTH_END if needed
             }
         });
     }

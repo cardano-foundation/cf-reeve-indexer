@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS reeve_reports (
     fields JSONB,
     organisation_id VARCHAR(255) NOT NULL,
     identity_verified BOOLEAN DEFAULT FALSE,
+    identifier VARCHAR(255),
     metadata_hash VARCHAR(255)
 );
 ALTER SEQUENCE reeve_reports_seq OWNED BY reeve_reports.id;
@@ -70,12 +71,11 @@ ALTER SEQUENCE reeve_reports_seq OWNED BY reeve_reports.id;
 -- CredentialEntity
 CREATE TABLE IF NOT EXISTS identity_credential (
     prefix_id VARCHAR(255) PRIMARY KEY,
-    prefixes TEXT,
     tx_hash VARCHAR(255),
-    identity_type VARCHAR(100),
-    vcp TEXT,
-    iss TEXT,
-    acdc TEXT
+    credential_chain TEXT,
+    metadata_labels JSONB,
+    valid BOOLEAN,
+    lei VARCHAR(255)
 );
 
 -- IdentityEventEntity

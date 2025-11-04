@@ -1,6 +1,5 @@
 package org.cardanofoundation.reeve.indexer.model.domain.metadata;
 
-import java.util.List;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -8,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Getter
 @Setter
@@ -19,17 +20,16 @@ public class IdentityMetadata {
     private String txHash;
     // Sequence Number
     private String s;
-    // event hash
-    private String d;
     // data hash
-    private String a;
+    private String d;
     // Identifier
     private String i;
+    // Credential Data
+    @JsonDeserialize(using = RawJsonDeserializer.class)
+    private String c;
     // Type
-    private IdentityType type;
-
-    private EventAndAttachments vcp;
-    private EventAndAttachments iss;
-    private List<Map<String, Object>> acdc;
-    private List<String> prefix;
+    private IdentityType t;
+    // Additional Information
+    @JsonDeserialize(using = FlexibleMapDeserializer.class)
+    private Map<String, Object> m;
 }
