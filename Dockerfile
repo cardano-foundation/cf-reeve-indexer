@@ -1,11 +1,11 @@
-FROM eclipse-temurin:21-jdk-jammy AS build
+FROM eclipse-temurin:21 AS build
 
 WORKDIR /app
 COPY . /app
 
 RUN ./gradlew build -x test --no-daemon
 
-FROM eclipse-temurin:21-jre-jammy as backend
+FROM eclipse-temurin:21-jre AS backend
 COPY --from=build /app/build/libs/*-all.jar /app.jar
 COPY --from=build /app/aiken/plutus.json /app/plutus.json
 # Install libsodium system library so lazysodium can load it
