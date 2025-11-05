@@ -166,7 +166,7 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
                 {value.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
+                  maximumFractionDigits: 10,
                 })}
               </Typography>
             </Box>

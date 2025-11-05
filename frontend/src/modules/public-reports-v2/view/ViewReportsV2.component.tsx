@@ -32,7 +32,11 @@ export const ViewReportsV2 = () => {
   // Fetch available assets
   const { data: assets, isLoading: isLoadingAssets } = useQuery({
     queryKey: ['ASSETS'],
-    queryFn: async () => contractApi.getAssets(),
+    queryFn: async () => {
+      const result = await contractApi.getAssets()
+      // Sort assets by name
+      return result ? [...result].sort((a, b) => String(a).localeCompare(String(b))) : result
+    },
     refetchInterval
   })
 

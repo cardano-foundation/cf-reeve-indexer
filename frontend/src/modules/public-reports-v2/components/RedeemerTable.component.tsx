@@ -171,7 +171,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
                 >
                   {value.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
+                    maximumFractionDigits: 10,
                   })}
                 </TableCell>
               </TableRow>
