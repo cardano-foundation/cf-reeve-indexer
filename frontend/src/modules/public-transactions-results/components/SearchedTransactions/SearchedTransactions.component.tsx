@@ -76,10 +76,10 @@ export const SearchedTransactions = ({ pagination, rows, total, onPagination, is
       minWidth: 192
     },
     { field: 'transactionType', headerName: t({ id: 'transactionType' }), hideable: true, sortable: true, flex: 1, minWidth: 192 },
-    { field: 'documentNum', headerName: t({ id: 'documentNumber' }), hideable: true, sortable: true, flex: 1, minWidth: 192 },
+    { field: 'documentNumber', headerName: t({ id: 'documentNumber' }), hideable: true, sortable: true, flex: 1, minWidth: 192 },
     { field: 'documentCurrencyCustomerCode', headerName: t({ id: 'currency' }), hideable: false, sortable: true, flex: 1, minWidth: 192 },
     {
-      field: 'amountFcy',
+      field: 'amountLcy',
       headerName: t({ id: 'amount' }),
       valueFormatter: (value) => formatNumber(value),
       align: 'right',

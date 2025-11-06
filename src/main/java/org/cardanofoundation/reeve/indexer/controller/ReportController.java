@@ -63,6 +63,8 @@ public class ReportController {
 
                 return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByTypeAndPeriod(
                                 reportSearchRequest.getOrganisationId(),
+                                reportSearchRequest.getBlockChainHash(),
+                                reportSearchRequest.getCurrency(),
                                 reportSearchRequest.getReportType(),
                                 reportSearchRequest.getIntervalType(),
                                 reportSearchRequest.getYear(),

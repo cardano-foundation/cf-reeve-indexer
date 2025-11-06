@@ -24,6 +24,10 @@ public class ReportSearchRequest {
 
     private String intervalType;
 
+    private String blockChainHash;
+
+    private String currency;
+
     @Schema(example = "2024")
     private Short year;
 

@@ -63,6 +63,7 @@ public class TransactionController {
 
                 return ResponseEntity.ok().body(transactionService.findTransactionItems(
                                 transactionsRequest.getOrganisationId(),
+                                transactionsRequest.getTransactionInternalNumber(),
                                 transactionsRequest.getDateFrom(), transactionsRequest.getDateTo(),
                                 transactionsRequest.getEvents(),
                                 transactionsRequest.getCurrency(),

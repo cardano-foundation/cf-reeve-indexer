@@ -36,7 +36,7 @@ public class TransactionService {
         return transactionPage.map(TransactionView::fromEntity);
     }
 
-    public ExtractionTransactionView findTransactionItems(String organisationId, LocalDate dateFrom, LocalDate dateTo,
+    public ExtractionTransactionView findTransactionItems(String organisationId, String transactionInternalNumber, LocalDate dateFrom, LocalDate dateTo,
                                                           Set<String> events,
                                                           Set<String> currencies, Double minAmount,
                                                           Double maxAmount, Set<String> transactionHashes, Set<String> documentNumber, Set<String> type,
@@ -48,7 +48,7 @@ public class TransactionService {
                                                           Pageable pageable) {
         Page<TransactionItemEntity> transactionItems;
         try {
-            transactionItems = transactionItemRepository.searchItems(organisationId, Optional.ofNullable(dateFrom).orElse(LocalDate.of(1970, 1, 1)).atStartOfDay(),
+            transactionItems = transactionItemRepository.searchItems(organisationId,transactionInternalNumber, Optional.ofNullable(dateFrom).orElse(LocalDate.of(1970, 1, 1)).atStartOfDay(),
                     Optional.ofNullable(dateTo).orElse(LocalDate.now()).atStartOfDay(), events, currencies, minAmount, maxAmount, transactionHashes, documentNumber, type,
                     vatCustCode,
                     costCenterCustCode,
