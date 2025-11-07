@@ -1,5 +1,6 @@
 services:
   reeve-verifier-backend:
+    restart: unless-stopped
     build:
       context: .
     ports:
@@ -31,6 +32,7 @@ services:
 
 
   reeve-verifier-frontend:
+    restart: unless-stopped
     build:
       context: frontend
     ports:
@@ -50,6 +52,7 @@ services:
       - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
 
   postgres-indexer:
+    restart: unless-stopped
     image: postgres:15-alpine
     container_name: postgres-indexer
     environment:
