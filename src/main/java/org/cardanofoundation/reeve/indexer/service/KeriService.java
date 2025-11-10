@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +17,8 @@ import org.cardanofoundation.reeve.indexer.model.entity.IdentityEventEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.coring.Operation;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 
 @RequiredArgsConstructor
 @Service
@@ -29,12 +32,29 @@ public class KeriService {
     private final ReportRepository reportRepository;
     private final CredentialRepository credentialRepository;
 
+    private void resolveOobis() {
+        for (String oobi : keriProperties.getOobis()) {
+            client.ifPresent(c ->
+            {
+                try {
+                    Object object = c.oobis().resolve(oobi, null);
+                    c.operations().wait(Operation.fromObject(object));
+                } catch (LibsodiumException | IOException | InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            });
+
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public boolean verifyEvent(IdentityEventEntity identity) throws Exception {
         if(!keriEnabled) {
             log.warn("KERI is not enabled. Skipping identity verification for: {}", identity.getIdentifier());
             return false;
         }
+        resolveOobis();
         // TODO will fix this when we are finalizing the identity demo
         List<Object> keyEvents = (List<Object>)client.orElseThrow().keyEvents().get(identity.getIdentifier());
         int index;
@@ -44,7 +64,10 @@ public class KeriService {
             log.error("Invalid hex sequence number: {}", identity.getSequenceNumber(), e);
             throw e;
         }
-
+        if(keyEvents.size() <= index) {
+            log.error("KERI key events do not contain index {} for identifier {}", index, identity.getIdentifier());
+            return false;
+        }
         Map<String, Object> kelEvent = (Map<String, Object>) keyEvents.get(index);
         Map<String, Object> kedEvent = (Map<String, Object>) kelEvent.get("ked");
         List<String> aList = (List<String>) kedEvent.get("a");
@@ -58,7 +81,7 @@ public class KeriService {
         }
         reportRepository.findByTxHash(identityEntity.getTxHash()).ifPresent(report -> {
             try {
-                log.info("MetadataHash {} identiyEntityEventHash {}".formatted(report.getMetadataHash(), identityEntity.getDataHash()));
+                log.info("MetadataHash {} identiyEntityEventHash {}", report.getMetadataHash(), identityEntity.getDataHash());
                 if(report.getMetadataHash().equals(identityEntity.getDataHash())) {
                     boolean verifyEvent = verifyEvent(identityEntity);
                     Optional<CredentialEntity> credential = credentialRepository.findById(identityEntity.getIdentifier());
