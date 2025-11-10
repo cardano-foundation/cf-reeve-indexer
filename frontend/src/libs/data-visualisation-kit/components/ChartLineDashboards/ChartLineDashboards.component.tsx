@@ -49,7 +49,7 @@ export const ChartLineDashboards = ({
   yAxis,
   isLegendHidden,
   showPoints = false, // default false
-  showLines = true, // default true
+  showLines = false, // default false - changed from true
 }: ChartLineDashboardsProps) => {
   const { t } = useTranslations()
 
