@@ -16,21 +16,26 @@ interface DatumHistoryChartProps {
 export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) => {
   const theme = useTheme()
 
-  // 1️⃣ Sort by timestamp
   const sortedData = useMemo(
     () => [...data].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
     [data]
   )
 
-  // 2️⃣ Convert datum_data into numeric rows
   const dataset = useMemo(() => {
-    return sortedData.map((item) => ({
-      timestamp: new Date(item.timestamp),
-      ...mapValuesToNumbers(item.datum_data),
-    }))
+    return sortedData.map((item) => {
+      const values = mapValuesToNumbers(item.datum_data)
+      // Convert zero values to null so they don't appear in the chart
+      const filteredValues: Record<string, number | null> = {}
+      Object.entries(values).forEach(([key, value]) => {
+        filteredValues[key] = value === 0 ? null : value
+      })
+      return {
+        timestamp: new Date(item.timestamp),
+        ...filteredValues,
+      }
+    })
   }, [sortedData])
 
-  // 3️⃣ Identify available numeric keys
   const availableKeys = useMemo(() => {
     const set = new Set<string>()
     dataset.forEach((row) => {
@@ -41,13 +46,12 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
     return Array.from(set)
   }, [dataset])
 
-  // Default to ADA price series if present
+  // Default to all series enabled
   const [enabledSeries, setEnabledSeries] = useState<string[]>([])
 
   useEffect(() => {
     if (availableKeys.length > 0) {
-      const defaultSeries = availableKeys.find((k) => k.toLowerCase().includes('price')) ?? availableKeys[0]
-      setEnabledSeries([defaultSeries])
+      setEnabledSeries(availableKeys)
     }
   }, [availableKeys])
 
@@ -93,7 +97,6 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
     )
   }
 
-  // 4️⃣ Prepare chart series
   const colors = [
     theme.palette.primary.dark,
     caslChartColors.cyan[600],
@@ -101,14 +104,13 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
     theme.palette.success.main,
   ]
 
-  const series = enabledSeries.map((key, i) => ({
+  const series = enabledSeries.map((key) => ({
     id: key,
     label: snakeCaseToTitleCase(key),
     dataKey: key,
-    connectNulls: true,
+    connectNulls: false,
     showMark: true,
-    curve: 'monotoneX' as const,
-    markSize: 8,
+    curve: 'linear' as const,
     valueFormatter: (v: number | null) => (v != null ? v.toFixed(4) : '-'),
   }))
 
@@ -235,7 +237,14 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
           }}
           height={420}
           isLegendHidden={false}
-          showPoints={false}
+          showPoints={true}
+          showLines={true}
+          sx={{
+            '& .MuiMarkElement-root': {
+              scale: '1.8',
+              strokeWidth: 2,
+            },
+          }}
         />
       </Box>
     </Box>

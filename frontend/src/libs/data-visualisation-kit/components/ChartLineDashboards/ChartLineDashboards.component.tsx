@@ -36,6 +36,7 @@ interface ChartLineDashboardsProps extends Omit<LineChartPropsMUI, 'series' | 'x
   yAxis?: { min?: number; max?: number }[]
   isLegendHidden?: boolean
   showPoints?: boolean // new prop to control MarkPlot
+  showLines?: boolean // new prop to control LinePlot
 }
 
 export const ChartLineDashboards = ({
@@ -48,6 +49,7 @@ export const ChartLineDashboards = ({
   yAxis,
   isLegendHidden,
   showPoints = false, // default false
+  showLines = true, // default true
 }: ChartLineDashboardsProps) => {
   const { t } = useTranslations()
 
@@ -81,7 +83,7 @@ export const ChartLineDashboards = ({
     >
       <ChartsSurface>
         <ChartsGrid vertical={false} horizontal={false} />
-        <LinePlot />
+        {showLines && <LinePlot />} {/* only render lines if showLines=true */}
         {showPoints && <MarkPlot />} {/* only render points if showPoints=true */}
         <ChartsXAxis />
         <ChartsYAxis />
