@@ -238,7 +238,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
           height={420}
           isLegendHidden={false}
           showPoints={true}
-          showLines={false}
+          showLines={true}
           sx={{
             '& .MuiMarkElement-root': {
               scale: '1.8',
