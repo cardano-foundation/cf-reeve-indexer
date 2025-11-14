@@ -28,6 +28,8 @@ public class TransactionItemEntity {
     @Id
     @Column(name = "id", nullable = false)
     private String id;
+    @Column(name = "amount_fcy", nullable = true)
+    private BigDecimal amountFcy;
     @Column(name = "amount_lcy", nullable = false)
     private BigDecimal amountLcy;
     @Column(name = "fx_rate", nullable = false)

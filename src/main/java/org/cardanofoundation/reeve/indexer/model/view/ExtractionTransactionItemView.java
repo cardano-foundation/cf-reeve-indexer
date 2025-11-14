@@ -33,6 +33,7 @@ public class ExtractionTransactionItemView {
     private String transactionType;
     private String blockChainHash;
     private BigDecimal amountLcy;
+    private BigDecimal amountFcy;
     private String fxRate;
     private String costCenterCustomerCode;
     private String costCenterName;
@@ -55,6 +56,7 @@ public class ExtractionTransactionItemView {
                 .transactionType(entity.getTransaction().getType())
                 .blockChainHash(entity.getTransaction().getTxHash())
                 .amountLcy(entity.getAmountLcy()).fxRate(entity.getFxRate())
+                .amountFcy(entity.getAmountFcy())
                 .documentNumber(entity.getDocumentNumber())
                 .documentCurrencyCustomerCode(entity.getCurrency())
                 .costCenterCustomerCode(entity.getCostCenterCustCode())
