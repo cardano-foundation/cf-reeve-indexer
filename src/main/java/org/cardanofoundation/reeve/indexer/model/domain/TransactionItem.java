@@ -20,6 +20,7 @@ public class TransactionItem {
 
         private String id;
         private BigDecimal amount;
+        private BigDecimal amountLcy;
         private String fxRate;
         private Document document;
         private CostCenter costCenter;
@@ -28,7 +29,7 @@ public class TransactionItem {
         private Event event;
 
         public TransactionItemEntity toEntity() {
-                return TransactionItemEntity.builder().id(id).amountLcy(amount).fxRate(fxRate)
+                return TransactionItemEntity.builder().id(id).amountFcy(amount).amountLcy(amountLcy).fxRate(fxRate)
                                 .documentNumber(Optional.ofNullable(document)
                                                 .map(Document::getNumber).orElse(null))
                                 .currency(Optional.ofNullable(document).map(Document::getCurrency)

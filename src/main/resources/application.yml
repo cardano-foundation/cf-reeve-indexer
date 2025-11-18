@@ -21,6 +21,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+    #show-sql: true
+
 reeve:
   script-path: ${REEVE_SCRIPT_PATH:./aiken/plutus.json}
   label: 1447

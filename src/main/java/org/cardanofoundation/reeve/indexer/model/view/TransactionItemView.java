@@ -22,13 +22,15 @@ public class TransactionItemView {
 
     private String id;
     private BigDecimal amount;
+    private BigDecimal amountLcy;
     private String currency;
     private String documentNumber;
 
     public static TransactionItemView fromEntity(TransactionItemEntity entity) {
         return TransactionItemView.builder()
                 .id(entity.getId())
-                .amount(entity.getAmountLcy())
+                .amount(entity.getAmountFcy())
+                .amountLcy(entity.getAmountLcy())
                 .currency(entity.getCurrency())
                 .documentNumber(entity.getDocumentNumber())
                 .build();
