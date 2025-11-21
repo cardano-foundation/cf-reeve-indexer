@@ -16,7 +16,8 @@ export const InputTextarea = ({ dataTestId, label, ...rest }: InputTextareaProps
         },
         input: {
           notched: undefined
-        }
+        },
+        
       }}
       sx={{
         '.MuiInputBase-root': {
@@ -30,6 +31,7 @@ export const InputTextarea = ({ dataTestId, label, ...rest }: InputTextareaProps
       multiline
       rows={2}
       variant="outlined"
+      InputLabelProps={{ shrink: true }}
       {...rest}
     />
   )
