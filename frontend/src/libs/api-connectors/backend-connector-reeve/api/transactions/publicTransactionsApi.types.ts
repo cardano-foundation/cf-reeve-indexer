@@ -1,4 +1,4 @@
-export interface PublicTransactionResponse {
+export interface PostPublicTransactionResponse {
   id: string
   transactionInternalNumber: string
   transactionID: string
@@ -31,25 +31,39 @@ export interface PublicTransactionResponse {
   counterpartyName: string
 }
 
-export interface GetPublicTransactionsRequest {
-  organisationId: string
-  dateFrom?: string
-  dateTo?: string
-  currency?: string[]
-  events?: string[]
-  maxAmount?: number
-  minAmount?: number
-  transactionHashes?: string[]
-}
-
-export interface GetPublicTransactionsParameters {
+export interface PostPublicTransactionsRequestParameters {
   page: number
   size: number
+  sort: string[]
 }
 
-export interface GetPublicTransactionsResponse200 {
+export interface PostPublicTransactionsRequestBody {
+  organisationId: string
+  blockchainHash?: string
+  dateFrom?: string
+  dateTo?: string
+  transactionInternalNumber?: string[]
+  type?: string[]
+  documentNumber?: string[]
+  currency?: string[]
+  minAmount?: number
+  maxAmount?: number
+  vatCustCode?: string[]
+  projectCustCode?: string[]
+  costCenterCustCode?: string[]
+  counterPartyCustCode?: string[]
+  counterPartyType?: string[]
+  events?: string[]
+}
+
+export interface PostPublicTransactionsRequest {
+  body: PostPublicTransactionsRequestBody
+  parameters: PostPublicTransactionsRequestParameters
+}
+
+export interface PostPublicTransactionsResponse200 {
   success: boolean
   total: number
-  transactions: PublicTransactionResponse[]
+  transactions: PostPublicTransactionResponse[]
   error: null
 }
