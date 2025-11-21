@@ -16,8 +16,7 @@ export const InputTextarea = ({ dataTestId, label, ...rest }: InputTextareaProps
         },
         input: {
           notched: undefined
-        },
-        
+        }
       }}
       sx={{
         '.MuiInputBase-root': {
