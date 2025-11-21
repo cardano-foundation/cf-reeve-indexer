@@ -16,10 +16,7 @@ interface DatumHistoryChartProps {
 export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) => {
   const theme = useTheme()
 
-  const sortedData = useMemo(
-    () => [...data].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
-    [data]
-  )
+  const sortedData = useMemo(() => [...data].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()), [data])
 
   const dataset = useMemo(() => {
     return sortedData.map((item) => {
@@ -31,7 +28,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
       })
       return {
         timestamp: new Date(item.timestamp),
-        ...filteredValues,
+        ...filteredValues
       }
     })
   }, [sortedData])
@@ -56,9 +53,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
   }, [availableKeys])
 
   const toggleSeries = (key: string) => {
-    setEnabledSeries((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    )
+    setEnabledSeries((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]))
   }
 
   if (isLoading) {
@@ -69,7 +64,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
           borderRadius: 3,
           padding: 6,
           textAlign: 'center',
-          color: theme.palette.text.secondary,
+          color: theme.palette.text.secondary
         }}
       >
         <CircularProgress sx={{ mb: 2, color: caslChartColors.cyan[600] }} size={48} />
@@ -86,7 +81,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
           borderRadius: 3,
           padding: 6,
           textAlign: 'center',
-          color: theme.palette.text.secondary,
+          color: theme.palette.text.secondary
         }}
       >
         <Typography variant="h6" sx={{ mb: 1, color: theme.palette.text.primary }}>
@@ -97,12 +92,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
     )
   }
 
-  const colors = [
-    theme.palette.primary.dark,
-    caslChartColors.cyan[600],
-    caslChartColors.cyan[800],
-    theme.palette.success.main,
-  ]
+  const colors = [theme.palette.primary.dark, caslChartColors.cyan[600], caslChartColors.cyan[800], theme.palette.success.main]
 
   const series = enabledSeries.map((key) => ({
     id: key,
@@ -111,7 +101,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
     connectNulls: false,
     showMark: true,
     curve: 'linear' as const,
-    valueFormatter: (v: number | null) => (v != null ? v.toFixed(4) : '-'),
+    valueFormatter: (v: number | null) => (v != null ? v.toFixed(4) : '-')
   }))
 
   return (
@@ -120,7 +110,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
         background: theme.palette.background.default,
         borderRadius: 3,
         padding: 3,
-        border: `1px solid ${theme.palette.divider}`,
+        border: `1px solid ${theme.palette.divider}`
       }}
     >
       {/* Header */}
@@ -133,7 +123,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
           mb: 2,
           pb: 2,
           borderBottom: `2px solid ${theme.palette.divider}`,
-          flexWrap: 'wrap',
+          flexWrap: 'wrap'
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 220 }}>
@@ -144,16 +134,13 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
               color: theme.palette.text.primary,
               display: 'flex',
               alignItems: 'center',
-              gap: 1,
+              gap: 1
             }}
           >
             <Activity size={28} variant="Bold" color={theme.palette.primary.dark} />
             ADA Price Timeline
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}
-          >
+          <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}>
             {sortedData.length} data points
           </Typography>
         </Box>
@@ -167,7 +154,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
               gap: 1,
               justifyContent: 'flex-end',
               alignItems: 'center',
-              flex: 1,
+              flex: 1
             }}
           >
             {availableKeys.map((key, index) => {
@@ -186,7 +173,7 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
                         height: 12,
                         borderRadius: '50%',
                         backgroundColor: color,
-                        border: `1px solid ${theme.palette.divider}`,
+                        border: `1px solid ${theme.palette.divider}`
                       }}
                     />
                   }
@@ -203,13 +190,13 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
                     '& .MuiChip-label': { fontSize: 13 },
                     '& .MuiChip-icon': {
                       margin: 0,
-                      marginRight: theme.spacing(1),
+                      marginRight: theme.spacing(1)
                     },
                     '&:hover': {
                       transform: 'translateY(-2px)',
                       boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
-                      opacity: 1,
-                    },
+                      opacity: 1
+                    }
                   }}
                 />
               )
@@ -232,8 +219,8 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit',
-              }),
+                minute: '2-digit'
+              })
           }}
           height={420}
           isLegendHidden={false}
@@ -242,8 +229,8 @@ export const DatumHistoryChart = ({ data, isLoading }: DatumHistoryChartProps) =
           sx={{
             '& .MuiMarkElement-root': {
               scale: '1.8',
-              strokeWidth: 2,
-            },
+              strokeWidth: 2
+            }
           }}
         />
       </Box>

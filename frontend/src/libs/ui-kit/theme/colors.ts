@@ -4,7 +4,7 @@ export const cfChartColors = {
     700: '#7ab3ffff',
     600: '#3e4151ff',
     500: '#3f5fb9ff',
-    300: '#0084ff',
+    300: '#0084ff'
   },
   neutral: {
     100: '#E5E7EB'

@@ -5,7 +5,7 @@
 export const snakeCaseToTitleCase = (str: string): string => {
   return str
     .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')
 }
 
@@ -14,9 +14,9 @@ export const snakeCaseToTitleCase = (str: string): string => {
  */
 export const mapValuesToNumbers = (data?: Map<string, string>): Record<string, number> => {
   if (!data) return {}
-  
+
   const result: Record<string, number> = {}
-  
+
   // Handle both Map and plain object
   if (data instanceof Map) {
     data.forEach((value, key) => {
@@ -27,6 +27,6 @@ export const mapValuesToNumbers = (data?: Map<string, string>): Record<string, n
       result[key] = parseFloat(value as string) || 0
     })
   }
-  
+
   return result
 }

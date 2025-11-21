@@ -19,14 +19,5 @@ export const FieldOrganisations = ({ items, hasChevron }: FieldOrganisationsProp
     }
   }, [field.value, setSelectedOrganisation])
 
-  return (
-    <InputOrganisationsSelectField
-      id={field.name}
-      items={items}
-      name={field.name}
-      value={field.value}
-      onChange={field.onChange}
-      hasChevron={hasChevron}
-    />
-  )
+  return <InputOrganisationsSelectField id={field.name} items={items} name={field.name} value={field.value} onChange={field.onChange} hasChevron={hasChevron} />
 }

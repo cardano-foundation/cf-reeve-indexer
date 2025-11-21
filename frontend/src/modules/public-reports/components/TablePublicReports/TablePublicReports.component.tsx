@@ -86,9 +86,7 @@ export const TableReportsPublic = ({ data, onViewOpen, areFiltersSelected, isFet
     {
       field: 'identityVerified',
       headerName: t({ id: 'identityVerified' }),
-      renderCell: ({ row }) => (
-        <IdentityVerificationStatus isVerified={row.identityVerified} lei={row.lei} />
-      ),
+      renderCell: ({ row }) => <IdentityVerificationStatus isVerified={row.identityVerified} lei={row.lei} />,
       hideable: false,
       sortable: true,
       flex: 1,

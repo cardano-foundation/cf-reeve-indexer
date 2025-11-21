@@ -6,42 +6,42 @@ export const useContractData = (tokenName: string) => {
   const {
     data: currentDatum,
     isFetching: isFetchingDatum,
-    error: datumError,
+    error: datumError
   } = useQuery({
     queryKey: ['CONTRACT_CURRENT_DATUM', tokenName],
     queryFn: async () => {
       const { contractApi } = backendReeveApi()
       return await contractApi.getCurrentDatum(tokenName)
     },
-    enabled: !!tokenName,
+    enabled: !!tokenName
   })
 
   // Fetch datum history
   const {
     data: datumHistory,
     isFetching: isFetchingHistory,
-    error: historyError,
+    error: historyError
   } = useQuery({
     queryKey: ['CONTRACT_DATUM_HISTORY', tokenName],
     queryFn: async () => {
       const { contractApi } = backendReeveApi()
       return await contractApi.getDatumHistory(tokenName)
     },
-    enabled: !!tokenName,
+    enabled: !!tokenName
   })
 
   // Fetch current redeemer
   const {
     data: currentRedeemer,
     isFetching: isFetchingRedeemer,
-    error: redeemerError,
+    error: redeemerError
   } = useQuery({
     queryKey: ['CONTRACT_CURRENT_REDEEMER', tokenName],
     queryFn: async () => {
       const { contractApi } = backendReeveApi()
       return await contractApi.getCurrentRedeemer(tokenName)
     },
-    enabled: !!tokenName,
+    enabled: !!tokenName
   })
 
   return {
@@ -52,7 +52,7 @@ export const useContractData = (tokenName: string) => {
     errors: {
       datumError,
       historyError,
-      redeemerError,
-    },
+      redeemerError
+    }
   }
 }

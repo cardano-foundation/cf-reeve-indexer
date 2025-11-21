@@ -5,16 +5,14 @@ export const sumTotals = (values: string[]) => values.reduce((acc, value) => acc
 export const formatCurrency = (value: string) => value.slice(-3)
 
 export const snakeToNormal = (input: string): string => {
-    if (!input) return "";
+  if (!input) return ''
 
-    return input
-        .split("_") // split into words
-        .map((word, index) => {
-            const lower = word.toLowerCase();
-            // Capitalize the first word, keep others lowercase
-            return index === 0
-                ? lower.charAt(0).toUpperCase() + lower.slice(1)
-                : lower;
-        })
-        .join(" ");
+  return input
+    .split('_') // split into words
+    .map((word, index) => {
+      const lower = word.toLowerCase()
+      // Capitalize the first word, keep others lowercase
+      return index === 0 ? lower.charAt(0).toUpperCase() + lower.slice(1) : lower
+    })
+    .join(' ')
 }

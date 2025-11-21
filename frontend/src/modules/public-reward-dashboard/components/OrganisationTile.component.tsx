@@ -1,10 +1,10 @@
 import { Box, Typography } from 'features/mui/base'
 import { useTheme } from '@mui/material'
-import { Organisation } from 'libs/api-connectors/backend-connector-reeve/api/contracts/publicContractApi.types';
+import { Organisation } from 'libs/api-connectors/backend-connector-reeve/api/contracts/publicContractApi.types'
 
 interface OrganisationTileProps {
-  organisation?: Organisation;
-  isLoading?: boolean;
+  organisation?: Organisation
+  isLoading?: boolean
 }
 
 export const OrganisationTile = ({ organisation, isLoading }: OrganisationTileProps) => {
@@ -24,18 +24,27 @@ export const OrganisationTile = ({ organisation, isLoading }: OrganisationTilePr
         flexDirection: 'column',
         alignItems: 'flex-end',
         justifyContent: 'center',
-        gap: 0.5,
+        gap: 0.5
       }}
     >
       {isLoading ? (
-        <Typography variant="body2" sx={{ opacity: 0.7 }}>Loading organisation...</Typography>
+        <Typography variant="body2" sx={{ opacity: 0.7 }}>
+          Loading organisation...
+        </Typography>
       ) : organisation ? (
         <>
-          <Typography variant="body1" sx={{ opacity: 0.8, fontWeight: 500, mb: 0.2 }}>Organisation: <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{organisation.name}</Typography></Typography>
+          <Typography variant="body1" sx={{ opacity: 0.8, fontWeight: 500, mb: 0.2 }}>
+            Organisation:{' '}
+            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+              {organisation.name}
+            </Typography>
+          </Typography>
         </>
       ) : (
-        <Typography variant="body2" sx={{ opacity: 0.7 }}>No organisation data</Typography>
+        <Typography variant="body2" sx={{ opacity: 0.7 }}>
+          No organisation data
+        </Typography>
       )}
     </Box>
-  );
-};
+  )
+}
