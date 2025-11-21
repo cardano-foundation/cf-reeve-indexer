@@ -4,12 +4,12 @@ import { LayoutContentStyled } from 'libs/layout-kit/sections/LayoutContent/Layo
 
 interface LayoutContentProps {
   children: ReactNode
-  isPublic?: boolean
+  hasDrawer: boolean
 }
 
-export const LayoutContent = ({ children, isPublic }: LayoutContentProps) => {
+export const LayoutContent = ({ children, hasDrawer }: LayoutContentProps) => {
   return (
-    <LayoutContentStyled container direction="column" height="100%" size="grow" wrap="nowrap" $isPublic={isPublic}>
+    <LayoutContentStyled container direction="column" height="100%" size="grow" wrap="nowrap" $hasDrawer={hasDrawer}>
       {children}
     </LayoutContentStyled>
   )
