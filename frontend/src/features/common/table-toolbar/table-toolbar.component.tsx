@@ -1,78 +1,82 @@
 import { Form } from 'formik'
-import { Children, cloneElement, useLayoutEffect, useRef, useState } from 'react'
+import { Children, cloneElement, forwardRef, type ReactElement } from 'react'
 
 import { Grid } from 'features/mui/base'
-import { useDebouncedResizeObserver } from 'hooks'
 
-import type { ActionControlsProps, QuickFiltersProps, TableToolbarProps } from './table-toolbar.types'
+import { QuickFiltersContext, TableToolbarContext } from './table-toolbar.context'
+import { useActionControls, useQuickFilters, useQuickFiltersField, useQuickFiltersFieldGroup, useTableToolbar } from './table-toolbar.hooks'
+import type { ActionControlsProps, QuickFilterFieldGroupProps, QuickFiltersFieldProps, QuickFiltersProps, TableToolbarProps } from './table-toolbar.types'
 
-const QuickFilters = ({ children, gap = 16 }: QuickFiltersProps) => {
-  const [count, setCount] = useState(Children.count(children))
-
-  const gridRef = useRef<HTMLDivElement | null>(null)
-  const childRefs = useRef<HTMLDivElement[]>([])
-
-  const measureAvailableSpace = () => {
-    if (!gridRef.current) return
-
-    const gridWidth = gridRef.current?.offsetWidth || 0
-    const gapsWidth = (Children.count(children) - 1) * gap
-
-    const { count } = childRefs.current.reduce(
-      (acc, child, index) => {
-        if (acc.done) return acc
-
-        const childWidth = child?.getBoundingClientRect().width || 0
-
-        if (acc.total + childWidth + gapsWidth <= gridWidth) {
-          return {
-            total: acc.total + childWidth + index * gap,
-            count: acc.count + 1,
-            done: false
-          }
-        } else {
-          return { ...acc, done: true }
-        }
-      },
-      { total: 0, count: 0, done: false }
-    )
-
-    setCount(count)
-  }
-
-  useDebouncedResizeObserver(gridRef, measureAvailableSpace)
-
-  useLayoutEffect(() => {
-    measureAvailableSpace()
-  }, [])
+const QuickFiltersFieldGroup = forwardRef<HTMLDivElement, QuickFilterFieldGroupProps>(({ children, ...props }, ref) => {
+  useQuickFiltersFieldGroup()
 
   return (
-    <Grid container size="grow" spacing={2}>
-      <Grid container size="grow">
-        <Form style={{ width: '100%' }}>
-          <Grid container ref={gridRef} size="grow" spacing={2} wrap="nowrap">
-            {Children.map(children, (child, index) =>
-              cloneElement(child as React.ReactElement, {
-                ref: (el: HTMLDivElement | null) => {
-                  if (el) childRefs.current[index] = el as HTMLDivElement
-                },
-                key: index,
-                sx: {
-                  whiteSpace: 'nowrap',
-                  visibility: index < count ? 'visible' : 'hidden',
-                  position: index < count ? 'static' : 'absolute',
-                  pointerEvents: index < count ? 'auto' : 'none'
-                }
-              })
-            )}
+    <Grid container flexWrap="nowrap" size="auto" spacing={2} {...{ ref, ...props }}>
+      {children}
+    </Grid>
+  )
+})
+
+QuickFiltersFieldGroup.displayName = 'QuickFilterFieldGroup'
+
+const QuickFiltersField = forwardRef<HTMLDivElement, QuickFiltersFieldProps>(({ children, ...props }, ref) => {
+  useQuickFiltersField()
+
+  return (
+    <Grid width="16rem" size="auto" {...{ ref, ...props }}>
+      {children}
+    </Grid>
+  )
+})
+
+QuickFiltersField.displayName = 'QuickFilterField'
+
+const QuickFilters = ({ children, isFirstFieldSkipped = false }: QuickFiltersProps) => {
+  const { drawer, visibilityCount, childRefs, toolbarRef } = useQuickFilters()
+
+  const { isDrawerOpen } = drawer
+
+  return (
+    <QuickFiltersContext.Provider value={true}>
+      <Grid container size="grow" spacing={2}>
+        <Form style={{ width: '100%' }} noValidate>
+          <Grid container ref={toolbarRef} size="grow" spacing={2} wrap="nowrap">
+            {Children.toArray(children).map((child, index, array) => {
+              const isField = (child as ReactElement)?.type === QuickFiltersField || (child as ReactElement)?.type === QuickFiltersFieldGroup
+
+              const count = array.reduce<number>(
+                (acc, child) => (!((child as ReactElement)?.type === QuickFiltersField || (child as ReactElement)?.type === QuickFiltersFieldGroup) ? acc + 1 : acc),
+                0
+              )
+
+              return isField
+                ? cloneElement(child as ReactElement<HTMLDivElement>, {
+                    ref: (el: HTMLDivElement) => {
+                      if (el) childRefs.current[index] = el as HTMLDivElement
+                    },
+                    key: index,
+                    sx: {
+                      whiteSpace: 'nowrap',
+                      position: isFirstFieldSkipped && index === 0 ? 'static' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'static' : 'absolute',
+                      visibility: isFirstFieldSkipped && index === 0 ? 'visible' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'visible' : 'hidden',
+                      pointerEvents: isFirstFieldSkipped && index === 0 ? 'auto' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'auto' : 'none'
+                    }
+                  })
+                : child
+            })}
           </Grid>
         </Form>
       </Grid>
-    </Grid>
+    </QuickFiltersContext.Provider>
   )
 }
 
+QuickFilters.Field = QuickFiltersField
+QuickFilters.FieldGroup = QuickFiltersFieldGroup
+
 const ActionControls = ({ children }: ActionControlsProps) => {
+  useActionControls()
+
   return (
     <Grid container size="auto">
       {children}
@@ -80,8 +84,10 @@ const ActionControls = ({ children }: ActionControlsProps) => {
   )
 }
 
-export const TableToolbar = ({ children }: TableToolbarProps) => {
-  return <>{children}</>
+export const TableToolbar = ({ children, drawer, hasFiltersTouched }: TableToolbarProps) => {
+  const { visibilityCount, childRefs, toolbarRef } = useTableToolbar()
+
+  return <TableToolbarContext.Provider value={{ drawer, visibilityCount, childRefs, toolbarRef, hasFiltersTouched }}>{children}</TableToolbarContext.Provider>
 }
 
 TableToolbar.QuickFilters = QuickFilters

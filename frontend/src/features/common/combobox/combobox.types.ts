@@ -1,10 +1,15 @@
-import type { AutocompleteOption, AutocompleteProps, TextFieldProps } from 'features/mui/base'
+import type { AutocompleteProps, TextFieldProps } from 'features/mui/base'
 
 export interface ComboboxProps<
-  Value extends AutocompleteOption = AutocompleteOption,
-  Multiple extends boolean | undefined = true,
-  DisableClearable extends boolean | undefined = boolean,
-  FreeSolo extends boolean | undefined = boolean
-> extends Omit<AutocompleteProps<Value, Multiple, DisableClearable, FreeSolo>, 'multiple' | 'renderInput'> {
+  Multiple extends boolean | undefined,
+  DisableClearable extends boolean | undefined,
+  FreeSolo extends boolean | undefined,
+  ChipComponent extends React.ElementType = 'div'
+> extends Omit<AutocompleteProps<Multiple, DisableClearable, FreeSolo, ChipComponent>, 'renderInput'> {
   textField: Pick<TextFieldProps, 'helperText' | 'label' | 'name' | 'placeholder' | 'disabled' | 'error' | 'required'>
+  isGroupRendered?: boolean
+}
+
+export interface ListItemStyledProps {
+  $isMultiple?: boolean
 }

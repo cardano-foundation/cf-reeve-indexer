@@ -7,10 +7,9 @@ export interface AutocompleteOption {
   group?: string
 }
 
-export type AutocompleteProps<
-  Value,
+export interface AutocompleteProps<
   Multiple extends boolean | undefined,
   DisableClearable extends boolean | undefined,
   FreeSolo extends boolean | undefined,
   ChipComponent extends React.ElementType = 'div'
-> = AutocompleteMUIProps<Value, Multiple, DisableClearable, FreeSolo, ChipComponent>
+> extends AutocompleteMUIProps<AutocompleteOption, Multiple, DisableClearable, FreeSolo, ChipComponent> {}

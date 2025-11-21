@@ -1,28 +1,54 @@
+import { Fragment } from 'react'
+
+import { VirtualizedDropdownList } from 'features/common'
 import { Autocomplete, Box, Checkbox, Chip, TextField, Typography } from 'features/mui/base'
 
-import { ListItemStyled, PaperStyled } from './combobox.styles'
+import { ListItemGroupedStyled, ListItemStyled, ListStyled, ListSubheaderStyled, PaperStyled } from './combobox.styles'
 import type { ComboboxProps } from './combobox.types'
 
-export const Combobox = ({ limitTags, options, textField, ...props }: ComboboxProps) => {
+export const Combobox = <Multiple extends boolean | undefined, DisableClearable extends boolean | undefined, FreeSolo extends boolean | undefined>({
+  limitTags,
+  options,
+  textField,
+  value,
+  onChange,
+  multiple,
+  isGroupRendered,
+  ...props
+}: ComboboxProps<Multiple, DisableClearable, FreeSolo>) => {
   return (
     <Autocomplete
       options={options}
-      slots={{
-        paper: PaperStyled
-      }}
       slotProps={{
         listbox: {
-          sx: (theme) => ({
+          component: VirtualizedDropdownList,
+          sx: {
             maxHeight: '11.25rem',
-            padding: theme.spacing(1)
-          })
+            padding: 0
+          }
+        },
+        paper: {
+          component: PaperStyled
         }
       }}
       getLimitTagsText={(more) => <Chip label={`+${more}`} />}
+      groupBy={isGroupRendered ? (option) => (option.group ? option.group : '') : undefined}
+      renderGroup={({ children, key, group }) => (
+        <Fragment key={key}>
+          <ListSubheaderStyled>
+            <Typography component="span" variant="subtitle2">
+              {group}
+            </Typography>
+          </ListSubheaderStyled>
+          <ListItemGroupedStyled>
+            <ListStyled>{children}</ListStyled>
+          </ListItemGroupedStyled>
+        </Fragment>
+      )}
       renderInput={(props) => <TextField {...props} {...textField} />}
-      renderOption={({ key, ...props }, { description, label }, { selected }) => (
-        <ListItemStyled key={key} {...props}>
-          <Checkbox checked={selected} />
+      renderOption={({ key, ...props }, { description, label }, { selected }, { multiple }) => (
+        <ListItemStyled key={key} $isMultiple={multiple} {...props}>
+          {multiple && <Checkbox id={key} name={key} checked={selected} />}
           <Box overflow="hidden">
             <Typography color="textPrimary" variant="body1">
               {label}
@@ -35,26 +61,30 @@ export const Combobox = ({ limitTags, options, textField, ...props }: ComboboxPr
           </Box>
         </ListItemStyled>
       )}
-      renderValue={(selected, getItemProps) => {
-        if (selected.length === 0) return null
+      renderValue={
+        multiple
+          ? (selected, getItemProps, { limitTags }) => {
+              if (typeof selected === 'string' || !Array.isArray(selected) || selected.length === 0) return null
 
-        const count = selected.length
+              const count = selected.length
 
-        return (
-          <>
-            {selected.slice(0, limitTags).map((option, index) => {
-              const { key, ...rest } = getItemProps({ index })
+              return (
+                <>
+                  {selected.slice(0, limitTags).map((option, index) => {
+                    // @ts-expect-error - key seems to be only available for multiple select
+                    const { key, ...rest } = getItemProps({ index })
 
-              const label = typeof option === 'string' ? option : option.label
+                    const label = typeof option === 'string' ? option : option.label
 
-              return <Chip key={key} {...{ label, ...rest }} sx={{ '&&': { maxWidth: limitTags ? '6.25rem' : 'initial' } }} />
-            })}
-            {limitTags && count > limitTags && <Chip label={`+${count - limitTags}`} />}
-          </>
-        )
-      }}
-      multiple
-      {...{ limitTags, ...props }}
+                    return <Chip key={key} {...{ label, ...rest }} sx={{ '&&': { maxWidth: limitTags ? '6.25rem' : 'initial' } }} />
+                  })}
+                  {limitTags && count > limitTags && <Chip label={`+${count - limitTags}`} />}
+                </>
+              )
+            }
+          : undefined
+      }
+      {...{ limitTags, value, onChange, multiple, ...props }}
     />
   )
 }
