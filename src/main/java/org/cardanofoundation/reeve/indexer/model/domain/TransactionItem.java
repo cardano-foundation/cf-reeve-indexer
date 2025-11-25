@@ -31,12 +31,7 @@ public class TransactionItem {
     private Event event;
 
     public TransactionItemEntity toEntity() {
-        if (counterparty != null) {
-            log.info("\n\n\n##############\nConverting TransactionItem to TransactionItemEntity CounterPArty: {} y el Type:{}", counterparty.getCustCode(), counterparty.getType());
-        }else {
-            log.info("\n########## NAH ##########\n");
-        }
-
+        
         return TransactionItemEntity.builder().id(id).amountFcy(amount).amountLcy(amountLcy).fxRate(fxRate)
                 .documentNumber(Optional.ofNullable(document)
                         .map(Document::getNumber).orElse(null))
