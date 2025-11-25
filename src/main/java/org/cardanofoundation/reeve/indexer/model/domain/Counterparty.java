@@ -11,7 +11,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CounterParty {
+public class Counterparty {
 
     private String type;
     private String custCode;
