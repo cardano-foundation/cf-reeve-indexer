@@ -11,7 +11,6 @@ import { ViewPublicRewardDashboard } from 'modules/public-reward-dashboard/view/
 
 export const ROUTES = {
   ROOT: '/',
-  PUBLIC_DATA_EXPLORER: 'data-explorer',
   PUBLIC_DASHBOARD: 'dashboard',
   PUBLIC_REWARD_DASHBOARD: 'reward-dashboard',
   PUBLIC_REPORTS: 'reports',

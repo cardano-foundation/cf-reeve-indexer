@@ -16,8 +16,7 @@ export const usePublicTransactionsQueries = (state: PublicTransactionsQueriesSta
     sorting: { sortBy, sortOrder }
   } = state
 
-  // const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
-  const selectedOrganisation = '123456789'
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
 
   const filtersPayload = useMemo(() => mapSearchFiltersToRequestBody(filters), [filters])
 

@@ -6,11 +6,11 @@ export const DatePicker = ({ label, maxDate, minDate, name, slotProps, value, on
     <DatePickerStyled
       format="DD/MM/YYYY"
       slotProps={{
-        day: { sx: (theme) => ({ borderRadius: `${theme.shape.borderRadius * 2}px` }), ...slotProps?.day },
+        day: { sx: (theme) => ({ borderRadius: `${Number(theme.shape.borderRadius) * 2}px` }), ...slotProps?.day },
         desktopPaper: {
           sx: (theme) => ({
             background: theme.palette.background.default,
-            borderRadius: `${theme.shape.borderRadius * 2}px`,
+            borderRadius: `${Number(theme.shape.borderRadius) * 2}px`,
             boxShadow: '0 4px 16px -1px rgba(0, 0, 0, 0.1)'
           }),
           ...slotProps?.desktopPaper
@@ -19,7 +19,7 @@ export const DatePicker = ({ label, maxDate, minDate, name, slotProps, value, on
         mobilePaper: {
           sx: (theme) => ({
             background: theme.palette.background.default,
-            borderRadius: `${theme.shape.borderRadius * 2}px`,
+            borderRadius: `${Number(theme.shape.borderRadius) * 2}px`,
             boxShadow: '0 4px 16px -1px rgba(0, 0, 0, 0.1)'
           }),
           ...slotProps?.mobilePaper

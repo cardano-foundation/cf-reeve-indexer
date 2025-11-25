@@ -57,7 +57,7 @@ const QuickFilters = ({ children, isFirstFieldSkipped = false }: QuickFiltersPro
                     key: index,
                     sx: {
                       whiteSpace: 'nowrap',
-                      position: isFirstFieldSkipped && index === 0 ? 'static' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'static' : 'absolute',
+                      position: isFirstFieldSkipped && index === 0 ? 'static' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'static' : 'relative',
                       visibility: isFirstFieldSkipped && index === 0 ? 'visible' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'visible' : 'hidden',
                       pointerEvents: isFirstFieldSkipped && index === 0 ? 'auto' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'auto' : 'none'
                     }

@@ -24,7 +24,7 @@ export const ViewPublicTransactions = () => {
 
   return (
     <PublicTransactionsContextProvider value={{ filters, options }}>
-      <LayoutPublic.Header isPublic>
+      <LayoutPublic.Header>
         <LayoutPublic.Header.Details description={t({ id: 'publicTransactionsViewDescription' })} title={t({ id: 'publicTransactionsViewTitle' })} />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={6} isHeightRestricted>

@@ -16,7 +16,7 @@ export const ViewReportsPublic = () => {
 
   return (
     <>
-      <LayoutPublic.Header isPublic>
+      <LayoutPublic.Header>
         <LayoutPublic.Header.Details description={t({ id: 'publicInterfaceViewDescription' })} title={t({ id: 'reports' })} />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={6} isHeightRestricted>

@@ -81,7 +81,7 @@ export const ViewPublicRewardDashboard = () => {
 
   return (
     <>
-      <LayoutPublic.Header isPublic>
+      <LayoutPublic.Header>
         <LayoutPublic.Header.Details description="Explorer overview of asset tokens" title="Dashboard" />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={4}>

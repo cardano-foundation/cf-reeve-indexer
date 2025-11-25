@@ -9,14 +9,22 @@ export const DatePickerStyled = styled(DatePickerMUI)<DatePickerStyledProps>(
   && {
     & .MuiInputBase-root {
       background: ${theme.palette.background.default};
-      border-radius: ${theme.shape.borderRadius * 2}px;
+      border-radius: ${Number(theme.shape.borderRadius) * 2}px;
       box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    & .MuiInputLabel-root,
+    & .MuiInputLabel-asterisk,
+    & .MuiFormHelperText-root {
+      &.Mui-error {
+        color: ${theme.palette.error.dark};
+      }
     }
   }
 `
 )
 
-export const OpenPickerIconStyled = styled(() => <Calendar1 size={24} variant="Outline" />)(
+export const OpenPickerIconStyled = styled(() => <Calendar1 color="currentColor" size={24} variant="Outline" />)(
   ({ theme }) => `
   && {
     color: ${theme.palette.action.active};
@@ -24,7 +32,7 @@ export const OpenPickerIconStyled = styled(() => <Calendar1 size={24} variant="O
 `
 )
 
-export const LeftArrowIconStyled = styled(() => <ArrowCircleLeft size={24} variant="Outline" />)(
+export const LeftArrowIconStyled = styled(() => <ArrowCircleLeft color="currentColor" size={24} variant="Outline" />)(
   ({ theme }) => `
   && {
     color: ${theme.palette.action.active};
@@ -32,7 +40,7 @@ export const LeftArrowIconStyled = styled(() => <ArrowCircleLeft size={24} varia
 `
 )
 
-export const RightArrowIconStyled = styled(() => <ArrowCircleRight size={24} variant="Outline" />)(
+export const RightArrowIconStyled = styled(() => <ArrowCircleRight color="currentColor" size={24} variant="Outline" />)(
   ({ theme }) => `
   && {
     color: ${theme.palette.action.active};
@@ -40,7 +48,7 @@ export const RightArrowIconStyled = styled(() => <ArrowCircleRight size={24} var
 `
 )
 
-export const SwitchViewIconStyled = styled(() => <ArrowDown2 size={16} variant="Outline" />)(
+export const SwitchViewIconStyled = styled(() => <ArrowDown2 color="currentColor" size={16} variant="Outline" />)(
   ({ theme }) => `
   && {
     color: ${theme.palette.action.active};

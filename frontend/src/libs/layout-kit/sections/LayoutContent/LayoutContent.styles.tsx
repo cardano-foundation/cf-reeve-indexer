@@ -18,7 +18,6 @@ export const LayoutContentStyled = styled(Grid)<LayoutContentStyledProps>`
     ${({ theme }) => `
       ${theme.breakpoints.down('sm')} {
         margin: 0;
-        padding: ${theme.spacing(0, 0, 0, 11)};
         overflow: initial;
       }
     `}
