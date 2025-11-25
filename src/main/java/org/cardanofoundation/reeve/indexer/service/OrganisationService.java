@@ -6,7 +6,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
@@ -15,6 +14,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
 import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
+import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
 
 @Service
 @Slf4j
@@ -52,35 +52,35 @@ public class OrganisationService {
                 .map(currencyEntity -> new CurrencyView(currencyEntity.getId().getCurrencyId(), currencyEntity.getCustCode()))
                 .toList();
     }
-    
+
     public List<String> getDistinctInternalNumbersForOrganisation(String orgId) {
         return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId);
     }
-    
+
     public List<String> getDistinctTransactionTypesForOrganisation(String orgId) {
         return transactionRepository.findDistinctTransactionTypesByOrganisationId(orgId);
     }
-    
+
     public List<String> getDistinctDocumentNumbersForOrganisation(String orgId) {
         return transactionRepository.findDistinctDocumentNumbersByOrganisationId(orgId);
     }
-    
+
     public List<String> getDistinctVatCustCodesForOrganisation(String orgId) {
         return transactionRepository.findDistinctVatCustCodesByOrganisationId(orgId);
     }
-    
+
     public List<String> getDistinctCostCenterCustCodesForOrganisation(String orgId) {
         return transactionRepository.findDistinctCostCenterCustCodesByOrganisationId(orgId);
     }
-    
+
     public List<String> getDistinctCounterPartyAccountNamesForOrganisation(String orgId) {
         return transactionRepository.findDistinctCounterPartyAccountNamesByOrganisationId(orgId);
     }
-    
+
     public List<String> getDistinctCounterPartyCustCodesForOrganisation(String orgId) {
         return transactionRepository.findDistinctCounterPartyCustCodesByOrganisationId(orgId);
     }
-    
+
     public List<EventCodeView> getDistinctEventCodeNamePairsForOrganisation(String orgId) {
         return transactionRepository.findDistinctEventCodeNamePairsByOrganisationId(orgId);
     }

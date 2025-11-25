@@ -8,8 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
 import lombok.extern.slf4j.Slf4j;
+
 import org.cardanofoundation.reeve.indexer.model.entity.TransactionItemEntity;
 
 @Getter
@@ -31,7 +31,7 @@ public class TransactionItem {
     private Event event;
 
     public TransactionItemEntity toEntity() {
-        
+
         return TransactionItemEntity.builder().id(id).amountFcy(amount).amountLcy(amountLcy).fxRate(fxRate)
                 .documentNumber(Optional.ofNullable(document)
                         .map(Document::getNumber).orElse(null))
