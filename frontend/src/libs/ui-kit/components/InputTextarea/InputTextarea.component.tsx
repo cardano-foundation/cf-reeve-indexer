@@ -30,6 +30,7 @@ export const InputTextarea = ({ dataTestId, label, ...rest }: InputTextareaProps
       multiline
       rows={2}
       variant="outlined"
+      InputLabelProps={{ shrink: true }}
       {...rest}
     />
   )
