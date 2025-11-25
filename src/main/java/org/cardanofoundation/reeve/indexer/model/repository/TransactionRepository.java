@@ -8,8 +8,16 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.reeve.indexer.model.entity.TransactionEntity;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
+import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, String> {
+
+    @Query("SELECT DISTINCT NEW org.cardanofoundation.reeve.indexer.model.view.ProjectView(ti.projectCustCode, ti.projectName) " +
+           "FROM TransactionEntity t " +
+           "JOIN t.items ti " +
+           "WHERE t.organisationId = :orgId AND ti.projectCustCode IS NOT NULL " +
+           "GROUP BY ti.projectCustCode, ti.projectName")
+    List<ProjectView> findDistinctProjectCodesAndNamesByOrganisationId(@Param("orgId") String orgId);
 
     @Query("SELECT DISTINCT t.internalNumber FROM TransactionEntity t WHERE t.organisationId = :orgId")
     List<String> findDistinctInternalNumbersByOrganisationId(@Param("orgId") String orgId);

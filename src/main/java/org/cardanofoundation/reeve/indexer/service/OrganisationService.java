@@ -15,6 +15,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.OrganisationReposito
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
 import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
+import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
 
 @Service
 @Slf4j
@@ -83,5 +84,10 @@ public class OrganisationService {
 
     public List<EventCodeView> getDistinctEventCodeNamePairsForOrganisation(String orgId) {
         return transactionRepository.findDistinctEventCodeNamePairsByOrganisationId(orgId);
+    }
+
+    public List<ProjectView> getDistinctProjectCodesAndNamesForOrganisation(String orgId) {
+        log.info("Fetching distinct project codes and names for organisation: {}", orgId);
+        return transactionRepository.findDistinctProjectCodesAndNamesByOrganisationId(orgId);
     }
 }
