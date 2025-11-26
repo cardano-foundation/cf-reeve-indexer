@@ -8,6 +8,7 @@ import { useFormPublicTransactionsValidation } from 'libs/form-kit/validations/u
 import { toDayjs } from 'libs/utils/toDayjs.ts'
 import { PublicTransactionsFormValues } from 'modules/public-transactions/components/PublicTransactionsForm/PublicTransactionsForm.types.ts'
 import { PATHS } from 'routes'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 
 interface TransactionsFormState {
   organisations: OrganisationsApiResponse | null
@@ -18,8 +19,7 @@ export const usePublicTransactionsForm = (state: TransactionsFormState) => {
   const { organisations, locationState } = state
 
   const navigate = useNavigate()
-
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
+  const { selectedOrganisation } = useLayoutPublicContext()
 
   const [initialValues, setInitialValues] = useState<PublicTransactionsFormValues>({
     organisation: locationState?.organisation ?? selectedOrganisation,

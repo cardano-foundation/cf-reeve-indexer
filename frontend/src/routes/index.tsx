@@ -1,4 +1,4 @@
-import { createBrowserRouter, createRoutesFromElements, Outlet, Route } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Outlet, Route, Navigate } from 'react-router-dom'
 
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { ViewPublicDashboard } from 'modules/public-dashboard/view/ViewPublicDashboard.component'
@@ -8,13 +8,11 @@ import { ViewPublicResourcesUserGuide } from 'modules/public-resources-user-guid
 import { ViewPublicTransactions } from 'modules/public-transactions/view/ViewPublicTransactions.component.tsx'
 import { ViewPublicTransactionsResults } from 'modules/public-transactions-results/view/ViewPublicTransactionsResults.component.tsx'
 import { ViewReportsPublic } from 'modules/public-reports/view/ViewReportsPublic.component.tsx'
-import { ViewPublicRewardDashboard } from 'modules/public-reward-dashboard/view/ViewPublicRewardDashboard.component.tsx'
 
 export const ROUTES_V2 = {
   ROOT: '/',
   PUBLIC_DATA_EXPLORER: 'data-explorer',
   PUBLIC_DASHBOARD: 'dashboard',
-  PUBLIC_REWARD_DASHBOARD: 'reward-dashboard',
   PUBLIC_REPORTS: 'reports',
   PUBLIC_TRANSACTIONS: 'transactions',
   PUBLIC_TRANSACTIONS_RESULTS: 'transactions-results',
@@ -28,7 +26,6 @@ const createRoutePath = (routes: string[] = []) => `${ROUTES_V2.ROOT}${routes.jo
 export const PATHS = {
   ROOT: createRoutePath(),
   PUBLIC_DASHBOARD: createRoutePath([ROUTES_V2.PUBLIC_DASHBOARD]),
-  PUBLIC_REWARD_DASHBOARD: createRoutePath([ROUTES_V2.PUBLIC_REWARD_DASHBOARD]),
   PUBLIC_REPORTS: createRoutePath([ROUTES_V2.PUBLIC_REPORTS]),
   PUBLIC_TRANSACTIONS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS]),
   PUBLIC_TRANSACTIONS_RESULTS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS]),
@@ -40,9 +37,9 @@ export const PATHS = {
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Outlet />} path={ROUTES_V2.ROOT}>
+      <Route index element={<Navigate to={ROUTES_V2.PUBLIC_DASHBOARD} replace />} />
       <Route element={<LayoutPublic />}>
         <Route element={<ViewPublicDashboard />} path={ROUTES_V2.PUBLIC_DASHBOARD} />
-        <Route element={<ViewPublicRewardDashboard />} path={ROUTES_V2.PUBLIC_REWARD_DASHBOARD} />
         <Route element={<ViewReportsPublic />} path={ROUTES_V2.PUBLIC_REPORTS} />
         <Route element={<ViewPublicTransactions />} path={ROUTES_V2.PUBLIC_TRANSACTIONS} />
         <Route element={<ViewPublicTransactionsResults />} path={ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS} />

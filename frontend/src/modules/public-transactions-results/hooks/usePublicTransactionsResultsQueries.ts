@@ -2,6 +2,7 @@ import { useGetPublicTransactionsModel } from 'libs/models/transactions-model/Ge
 import { toDayjs } from 'libs/utils/toDayjs.ts'
 import { PublicTransactionsFormValues } from 'modules/public-transactions/components/PublicTransactionsForm/PublicTransactionsForm.types.ts'
 import { formatToFloatReadyFormat } from 'modules/public-reports/utils/format.ts'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 
 interface PublicTransactionsResultsQueriesState {
   locationState: PublicTransactionsFormValues | null
@@ -14,8 +15,7 @@ export const usePublicTransactionsResultsQueries = (state: PublicTransactionsRes
   const { currency, dateFrom, dateTo, maxAmount, minAmount, blockchainHash } = locationState ?? {}
 
   const { page, rowsPerPage } = pagination
-
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
+  const { selectedOrganisation } = useLayoutPublicContext()
 
   const DEFAULT_REQUEST_PAYLOAD = {
     organisationId: selectedOrganisation,

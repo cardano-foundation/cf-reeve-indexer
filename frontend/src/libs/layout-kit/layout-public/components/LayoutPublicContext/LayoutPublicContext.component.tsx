@@ -57,14 +57,8 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   }, [pathname, isSidebarOpen, toggledSection])
 
   useEffect(() => {
-    if (selectedOrganisation === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca95') {
-      setToggledSection(null)
-      handleToggleSidebar()
-      navigate(PATHS.PUBLIC_REWARD_DASHBOARD)
-    } else if (selectedOrganisation === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94') {
-      setToggledSection(null)
-      navigate(PATHS.PUBLIC_DASHBOARD)
-    }
+    setToggledSection(null)
+    navigate(PATHS.PUBLIC_DASHBOARD)
   }, [selectedOrganisation, navigate])
 
   return (

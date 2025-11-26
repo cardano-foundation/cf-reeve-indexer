@@ -5,8 +5,7 @@ import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useL
 import { LayoutSidebar } from 'libs/layout-kit/sections/LayoutSidebar/LayoutSidebar.component.tsx'
 
 export const LayoutPublicSidebar = () => {
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
-  const { handleSidebarToggle, isSidebarOpen } = useLayoutPublicContext()
+  const { handleSidebarToggle, isSidebarOpen, selectedOrganisation } = useLayoutPublicContext()
 
   const initialValues = {
     organisations: selectedOrganisation

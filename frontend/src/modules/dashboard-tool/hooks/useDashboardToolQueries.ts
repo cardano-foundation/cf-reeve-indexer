@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { FormikProps } from 'formik'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 
 import { useGetDashboardsModel } from 'libs/models/dashboards-model/GetDashboards/GetDashboardsModel.service.ts'
 import { useGetAvailableMetricsModel } from 'libs/models/metrics-model/GetAvailableMetrics/GetAvailableMetricsModel.service.ts'
@@ -24,8 +25,7 @@ export const useDashboardBuillderQueries = (state: DashboardBuilderQueriesState)
   const { formik } = state
 
   const { values } = formik
-
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
+  const { selectedOrganisation } = useLayoutPublicContext()
 
   const { availableMetrics, isAvailableMetricsFetching } = useGetAvailableMetricsModel()
   const { metrics, isMetricsFetching } = useGetMetricsModel(

@@ -76,6 +76,6 @@ export interface GetPublicReportsRequest {
 
 export interface GetReportsResponse200 {
   success: boolean
-  report: ReportApiResponse[]
+  reports: ReportApiResponse[]
   error: null
 }
