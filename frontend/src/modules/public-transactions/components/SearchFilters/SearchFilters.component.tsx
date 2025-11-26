@@ -16,12 +16,12 @@ export const SearchFilters = () => {
     counterpartyOptions,
     counterpartyTypeOptions,
     currencyOptions,
-    documentNumbersOptions,
+    documentNumberOptions,
     eventOptions,
     projectOptions,
-    transactionNumbersOptions,
+    transactionNumberOptions,
     transactionTypeOptions,
-    vatCodesOptions
+    vatCodeOptions
   } = options
 
   return (
@@ -36,7 +36,7 @@ export const SearchFilters = () => {
             <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom || dateToMinDate} maxDate={dateToMaxDate} />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'transactionNumber' })} name="transactionNumber" options={transactionNumbersOptions} multiple />
+            <FieldCombobox label={t({ id: 'transactionNumber' })} name="transactionNumber" options={transactionNumberOptions} multiple />
           </Grid>
           <Grid size={12}>
             <FieldCombobox label={t({ id: 'transactionType' })} name="transactionType" options={transactionTypeOptions} multiple />
@@ -46,7 +46,7 @@ export const SearchFilters = () => {
         <Grid container size="grow" columnSpacing={2} rowSpacing={3}>
           <Typography variant="h3">{t({ id: 'transactionItems' })}</Typography>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'documentNumber' })} name="documentNumber" options={documentNumbersOptions} multiple />
+            <FieldCombobox label={t({ id: 'documentNumber' })} name="documentNumber" options={documentNumberOptions} multiple />
           </Grid>
           <Grid size={12}>
             <FieldCombobox label={t({ id: 'currency' })} name="currency" options={currencyOptions} multiple />
@@ -58,7 +58,7 @@ export const SearchFilters = () => {
             <FieldNumeric label={t({ id: 'maxAmount' })} name="maxAmount" />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'vatCode' })} name="vatCode" options={vatCodesOptions} multiple />
+            <FieldCombobox label={t({ id: 'vatCode' })} name="vatCode" options={vatCodeOptions} multiple />
           </Grid>
           <Grid size={12}>
             <FieldCombobox label={t({ id: 'costCenter' })} name="costCenter" options={costCenterOptions} multiple />

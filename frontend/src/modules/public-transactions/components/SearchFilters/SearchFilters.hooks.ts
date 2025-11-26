@@ -2,67 +2,68 @@ import { useFormik, useFormikContext } from 'formik'
 import { noop } from 'lodash'
 
 import { useDatesRange } from 'hooks'
-// import { FilterType } from 'libs/api-connectors/backend-connector-lob/api/transactions/transactionsApi.types'
-// import { useSelectedOrganisation } from 'libs/authentication/user/userSelctedOrganisation'
-// import { useGetCostCentersModel } from 'libs/models/cost-centers/GetCostCentersModel.service'
-// import { useGetEventCodesModel } from 'libs/models/event-codes/GetEventCodes.service'
-// import { useGetCurrenciesModel } from 'libs/models/organisation-model/GetCurrencies/GetCurrencies.service'
-// import { useGetOrganisationProjectsModel } from 'libs/models/organisation-model/GetOrganisationProjects/GetOrganisationProjectsModel.service'
-// import { useGetFilterOptionsModel } from 'libs/models/transactions-model/GetFilterOptions/GetFilterOptionsModel.service'
-// import { useGetVatCodesModel } from 'libs/models/vat-codes/GetVatCodesModel.service'
-// import {
-//   getAllCostCenterOptions,
-//   getAllCounterpartyOptions,
-//   getAllCounterpartyTypeOptions,
-//   getAllCurrenciesOptions,
-//   getAllDocumentNumbersOptions,
-//   getAllEventOptions,
-//   getAllProjectOptions,
-//   getAllTransactionNumbersOptions,
-//   getAllTransactionTypeOptions,
-//   getAllVatCodesOptions
-// } from 'libs/utils/formFieldOptions'
+import { useGetOrganisationCostCentersModel } from 'libs/models/organisation-model/GetOrganisationCostCenters/GetOrganisationCostCenters.service'
+import { useGetOrganisationCounterpartiesModel } from 'libs/models/organisation-model/GetOrganisationCounterparties/GetOrganisationCounterparties.service'
+import { useGetOrganisationCounterpartyTypesModel } from 'libs/models/organisation-model/GetOrganisationCounterpartyTypes/GetOrganisationCounterpartyTypes.service'
+import { useGetOrganisationCurrenciesModel } from 'libs/models/organisation-model/GetOrganisationCurrencies/GetOrganisationCurrencies.service'
+import { useGetOrganisationDocumentNumbersModel } from 'libs/models/organisation-model/GetOrganisationDocumentNumbers/GetOrganisationDocumentNumbers.service'
+import { useGetOrganisationEventsModel } from 'libs/models/organisation-model/GetOrganisationEvents/GetOrganisationEvents.service'
+import { useGetOrganisationProjectsModel } from 'libs/models/organisation-model/GetOrganisationProjects/GetOrganisationsProjects.service'
+import { useGetOrganisationTransactionNumbersModel } from 'libs/models/organisation-model/GetOrganisationTransactionNumbers/GetOrganisationTransactionNumbers.service'
+import { useGetOrganisationTransactionTypesModel } from 'libs/models/organisation-model/GetOrganisationTransactionTypes/GetOrganisationTransactionTypes.service'
+import { useGetOrganisationVatCodesModel } from 'libs/models/organisation-model/GetOrganisationVatCodes/GetOrganisationVatCodes.service'
+import {
+  getAllCostCenterOptions,
+  getAllCounterpartyOptions,
+  getAllCounterpartyTypeOptions,
+  getAllCurrencyOptions,
+  getAllDocumentNumberOptions,
+  getAllEventOptions,
+  getAllProjectOptions,
+  getAllTransactionNumberOptions,
+  getAllTransactionTypeOptions,
+  getAllVatCodeOptions
+} from 'libs/utils/formFieldOptions'
 
 import { DEFAULT_SEARCH_FILTERS_VALUES } from './SearchFilters.consts'
 import { SearchFiltersValues } from './SearchFilters.types'
 
 export const useSearchFiltersOptions = () => {
-  // const selectedOrganisation = useSelectedOrganisation()
+  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca95'
 
-  // const { filterOptions } = useGetFilterOptionsModel({
-  //   parameters: {
-  //     organisationId: selectedOrganisation,
-  //     filterOptions: [FilterType.COUNTER_PARTY_TYPE, FilterType.COUNTER_PARTY, FilterType.DOCUMENT_NUMBERS, FilterType.TRANSACTION_NUMBERS, FilterType.TRANSACTION_TYPES]
-  //   }
-  // })
-  // const { costCenters } = useGetCostCentersModel(selectedOrganisation)
-  // const { currencies } = useGetCurrenciesModel(selectedOrganisation)
-  // const { eventCodes } = useGetEventCodesModel(selectedOrganisation)
-  // const { organisationProjects } = useGetOrganisationProjectsModel({ id: selectedOrganisation })
-  // const { vatCodes } = useGetVatCodesModel(selectedOrganisation)
+  const { costCenters } = useGetOrganisationCostCentersModel({ parameters: { organisationId: selectedOrganisation } })
+  const { counterparties } = useGetOrganisationCounterpartiesModel({ parameters: { organisationId: selectedOrganisation } })
+  const { counterpartyTypes } = useGetOrganisationCounterpartyTypesModel({ parameters: { organisationId: selectedOrganisation } })
+  const { currencies } = useGetOrganisationCurrenciesModel({ parameters: { organisationId: selectedOrganisation } })
+  const { documentNumbers } = useGetOrganisationDocumentNumbersModel({ parameters: { organisationId: selectedOrganisation } })
+  const { events } = useGetOrganisationEventsModel({ parameters: { organisationId: selectedOrganisation } })
+  const { projects } = useGetOrganisationProjectsModel({ parameters: { organisationId: selectedOrganisation } })
+  const { transactionNumbers } = useGetOrganisationTransactionNumbersModel({ parameters: { organisationId: selectedOrganisation } })
+  const { transactionTypes } = useGetOrganisationTransactionTypesModel({ parameters: { organisationId: selectedOrganisation } })
+  const { vatCodes } = useGetOrganisationVatCodesModel({ parameters: { organisationId: selectedOrganisation } })
 
-  // const costCenterOptions = getAllCostCenterOptions(costCenters)
-  // const counterpartyOptions = getAllCounterpartyOptions(filterOptions?.COUNTER_PARTY)
-  // const counterpartyTypeOptions = getAllCounterpartyTypeOptions(filterOptions?.COUNTER_PARTY_TYPE)
-  // const currencyOptions = getAllCurrenciesOptions(currencies)
-  // const documentNumbersOptions = getAllDocumentNumbersOptions(filterOptions?.DOCUMENT_NUMBERS)
-  // const eventOptions = getAllEventOptions(eventCodes)
-  // const projectOptions = getAllProjectOptions(organisationProjects)
-  // const transactionNumbersOptions = getAllTransactionNumbersOptions(filterOptions?.TRANSACTION_NUMBERS)
-  // const transactionTypeOptions = getAllTransactionTypeOptions(filterOptions?.TRANSACTION_TYPES)
-  // const vatCodesOptions = getAllVatCodesOptions(vatCodes)
+  const costCenterOptions = getAllCostCenterOptions(costCenters)
+  const counterpartyOptions = getAllCounterpartyOptions(counterparties)
+  const counterpartyTypeOptions = getAllCounterpartyTypeOptions(counterpartyTypes)
+  const currencyOptions = getAllCurrencyOptions(currencies)
+  const documentNumberOptions = getAllDocumentNumberOptions(documentNumbers)
+  const eventOptions = getAllEventOptions(events)
+  const projectOptions = getAllProjectOptions(projects)
+  const transactionNumberOptions = getAllTransactionNumberOptions(transactionNumbers)
+  const transactionTypeOptions = getAllTransactionTypeOptions(transactionTypes)
+  const vatCodeOptions = getAllVatCodeOptions(vatCodes)
 
   return {
-    costCenterOptions: [],
-    counterpartyOptions: [],
-    counterpartyTypeOptions: [],
-    currencyOptions: [],
-    documentNumbersOptions: [],
-    eventOptions: [],
-    projectOptions: [],
-    transactionNumbersOptions: [],
-    transactionTypeOptions: [],
-    vatCodesOptions: []
+    costCenterOptions,
+    counterpartyOptions,
+    counterpartyTypeOptions,
+    currencyOptions,
+    documentNumberOptions,
+    eventOptions,
+    projectOptions,
+    transactionNumberOptions,
+    transactionTypeOptions,
+    vatCodeOptions
   }
 }
 
@@ -85,12 +86,12 @@ export const useSearchFilters = () => {
     counterpartyOptions,
     counterpartyTypeOptions,
     currencyOptions,
-    documentNumbersOptions,
+    documentNumberOptions,
     eventOptions,
     projectOptions,
-    transactionNumbersOptions,
+    transactionNumberOptions,
     transactionTypeOptions,
-    vatCodesOptions
+    vatCodeOptions
   } = useSearchFiltersOptions()
 
   const { dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate } = useDatesRange()
@@ -106,12 +107,12 @@ export const useSearchFilters = () => {
       counterpartyOptions,
       counterpartyTypeOptions,
       currencyOptions,
-      documentNumbersOptions,
+      documentNumberOptions,
       eventOptions,
       projectOptions,
-      transactionNumbersOptions,
+      transactionNumberOptions,
       transactionTypeOptions,
-      vatCodesOptions
+      vatCodeOptions
     }
   }
 }

@@ -1,120 +1,83 @@
-export interface OrganisationApiResponse {
+interface OrganisationEntityRequestParameters {
+  organisationId: string
+}
+
+interface OrganisationEntityRequest {
+  parameters: OrganisationEntityRequestParameters
+}
+
+export interface OrganisationEntity {
   id: string
-  taxIdNumber: string
-  address: string
-  postCode: string
-  province: string
-  city: string
-  countryCode: string
   name: string
-  websiteUrl: string
-  description: string
-  phoneNumber: string
+  currency_id: string
+  country_code: string
+  tax_id_number: string
+}
+
+export type OrganisationCostCenterEntity = string
+
+export type OrganisationCounterpartyEntity = string
+
+export type OrganisationCounterpartyTypeEntity = string
+
+export interface OrganisationCurrencyEntity {
   currencyId: string
-  organisationCurrencies: string[]
-  reportCurrencyId: string
-  accountPeriodFrom: string
-  accountPeriodTo: string
-  adminEmail: string
-  logo: string
-}
-
-export interface UpdateOrganisationDTO
-  extends Pick<
-    OrganisationApiResponse,
-    'id' | 'name' | 'adminEmail' | 'phoneNumber' | 'websiteUrl' | 'city' | 'postCode' | 'province' | 'currencyId' | 'reportCurrencyId' | 'address'
-  > {}
-
-export interface OrganisationsApiResponse extends Array<OrganisationApiResponse> {}
-
-interface OrganisationEntity {
   customerCode: string
-  externalCustomerCode: string
-  name: string
 }
 
-export enum AccountType {
-  ASSET = 'ASSET',
-  EXPENSES = 'EXPENSES',
-  FOUNDATION_CAPITAL = 'FOUNDATION_CAPITAL',
-  LIABILITY = 'LIABILITY',
-  REVENUES = 'REVENUES'
+export type OrganisationDocumentNumberEntity = string
+
+export type OrganisationEventEntity = string
+
+export interface OrganisationProjectEntity {
+  projectCustCode: string
+  projectName: string
 }
 
-export enum AssetAccountSubtype {
-  CASH_AND_CASH_EQUIVALENTS = 'CASH_AND_CASH_EQUIVALENTS',
-  CRYPTO_ASSETS = 'CRYPTO_ASSETS',
-  FINANCIAL_ASSETS = 'FINANCIAL_ASSETS',
-  INTANGIBLE_ASSETS = 'INTANGIBLE_ASSETS',
-  MOVABLE_TANGIBLE_ASSETS = 'MOVABLE_TANGIBLE_ASSETS',
-  OTHER_SHORT_TERM_RECEIVABLES = 'OTHER_SHORT_TERM_RECEIVABLES',
-  PREPAID_EXPENSES_AND_ACCRUED_INCOME = 'PREPAID_EXPENSES_AND_ACCRUED_INCOME'
-}
+export type OrganisationTransactionNumberEntity = string
 
-export enum ExpensesAccountSubtype {
-  ADVERTISING_EXPENSES = 'ADVERTISING_EXPENSES',
-  AMORTIZATION_ON_INTANGIBLE_ASSETS = 'AMORTIZATION_ON_INTANGIBLE_ASSETS',
-  DEPRECIATION_AND_IMPAIRMENT_LOSSES_ON_MOVABLE_TANGIBLE_ASSETS = 'DEPRECIATION_AND_IMPAIRMENT_LOSSES_ON_MOVABLE_TANGIBLE_ASSETS',
-  DIRECT_TAXES = 'DIRECT_TAXES',
-  EXTERNAL_SERVICES = 'EXTERNAL_SERVICES',
-  EXTRAORDINARY_NON_RECURRING_OR_PRIOR_PERIOD_EXPENSES = 'EXTRAORDINARY_NON_RECURRING_OR_PRIOR_PERIOD_EXPENSES',
-  FINANCIAL_EXPENSES = 'FINANCIAL_EXPENSES',
-  FINANCIAL_INCOME = 'FINANCIAL_INCOME',
-  NET_INCOME_OPTION_SALES = 'NET_INCOME_OPTION_SALES',
-  OFFICE_AND_ADMINISTRATIVE_EXPENSES = 'OFFICE_AND_ADMINISTRATIVE_EXPENSES',
-  PERSONNEL_EXPENSES = 'PERSONNEL_EXPENSES',
-  REALISED_GAINS_ON_SALE_OF_CRYPTO_CURRENCIES = 'REALISED_GAINS_ON_SALE_OF_CRYPTO_CURRENCIES',
-  RENT_EXPENSES = 'RENT_EXPENSES',
-  STAKING_REWARDS_INCOME = 'STAKING_REWARDS_INCOME'
-}
+export type OrganisationTransactionTypeEntity = string
 
-export enum FoundationCapitalAccountSubtype {
-  FOUNDATION_CAPITAL = 'FOUNDATION_CAPITAL',
-  PROFIT_FOR_THE_YEAR = 'PROFIT_FOR_THE_YEAR',
-  RESULTS_CARRIED_FORWARD = 'RESULTS_CARRIED_FORWARD'
-}
+export type OrganisationVatCodeEntity = string
 
-export enum LiabilityAccountSubtype {
-  ACCRUED_EXPENSES_DEFERRED_INCOME_AND_SHORT_TERM_PROVISIONS = 'ACCRUED_EXPENSES_DEFERRED_INCOME_AND_SHORT_TERM_PROVISIONS',
-  OTHER_SHORT_TERM_LIABILITIES = 'OTHER_SHORT_TERM_LIABILITIES',
-  PROVISIONS = 'PROVISIONS',
-  TRADE_ACCOUNTS_PAYABLE = 'TRADE_ACCOUNTS_PAYABLE'
-}
+export type GetOrganisationsResponse200 = OrganisationEntity[]
 
-export enum RevenuesAccountSubtype {
-  BUILD_OF_LONG_TERM_PROVISIONS = 'BUILD_OF_LONG_TERM_PROVISIONS'
-}
+export type GetOrganisationCostCentersRequest = OrganisationEntityRequest
 
-export interface OrganisationChartCodesResponse {
-  customerCode: string
-  refCode: string
-  eventRefCode: string
-  name: string
-}
+export type GetOrganisationCostCentersResponse200 = OrganisationCostCenterEntity[]
 
-export interface OrganisationChartSubtypeResponse {
-  id: number
-  name: AssetAccountSubtype | ExpensesAccountSubtype | FoundationCapitalAccountSubtype | LiabilityAccountSubtype | RevenuesAccountSubtype
-  organisationId: string
-  chartOfAccounts?: OrganisationChartCodesResponse[]
-}
+export type GetOrganisationCounterpartiesRequest = OrganisationEntityRequest
 
-export interface OrganisationChartTypesResponse {
-  id: number
-  name: AccountType
-  organisationId: string
-  subType: OrganisationChartSubtypeResponse[]
-}
+export type GetOrganisationCounterpartiesResponse200 = OrganisationCounterpartyEntity[]
 
-export type OrganisationChartTypesApiResponse200 = OrganisationChartTypesResponse[]
+export type GetOrganisationCounterpartyTypesRequest = OrganisationEntityRequest
 
-export type OrganisationCostCentersApiResponse200 = OrganisationEntity[]
+export type GetOrganisationCounterpartyTypesResponse200 = OrganisationCounterpartyTypeEntity[]
 
-export type OrganisationProjectsApiResponse200 = OrganisationEntity[]
+export type GetOrganisationCurrenciesRequest = OrganisationEntityRequest
 
-export interface Currency {
-  customerCode: string
-  currencyId: string
-}
+export type GetOrganisationCurrenciesResponse200 = OrganisationCurrencyEntity[]
 
-export type CurrenciesApiResponse = Currency[]
+export type GetOrganisationDocumentNumbersRequest = OrganisationEntityRequest
+
+export type GetOrganisationDocumentNumbersResponse200 = OrganisationDocumentNumberEntity[]
+
+export type GetOrganisationEventsRequest = OrganisationEntityRequest
+
+export type GetOrganisationEventsResponse200 = OrganisationEventEntity[]
+
+export type GetOrganisationProjectsRequest = OrganisationEntityRequest
+
+export type GetOrganisationProjectsResponse200 = OrganisationProjectEntity[]
+
+export type GetOrganisationTransactionNumbersRequest = OrganisationEntityRequest
+
+export type GetOrganisationTransactionNumbersResponse200 = OrganisationTransactionNumberEntity[]
+
+export type GetOrganisationTransactionTypesRequest = OrganisationEntityRequest
+
+export type GetOrganisationTransactionTypesResponse200 = OrganisationTransactionTypeEntity[]
+
+export type GetOrganisationVatCodesRequest = OrganisationEntityRequest
+
+export type GetOrganisationVatCodesResponse200 = OrganisationVatCodeEntity[]

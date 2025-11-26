@@ -14,7 +14,7 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
 
   const { dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, values } = useSearchQuickFilters()
 
-  const { transactionNumbersOptions, transactionTypeOptions } = options
+  const { transactionNumberOptions, transactionTypeOptions } = options
 
   return (
     <TableToolbar.QuickFilters isFirstFieldSkipped>
@@ -31,7 +31,7 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
         </TableToolbar.QuickFilters.Field>
       </TableToolbar.QuickFilters.FieldGroup>
       <TableToolbar.QuickFilters.Field>
-        <FieldCombobox label={t({ id: 'transactionNumber' })} limitTags={1} name="transactionNumber" options={transactionNumbersOptions} multiple />
+        <FieldCombobox label={t({ id: 'transactionNumber' })} limitTags={1} name="transactionNumber" options={transactionNumberOptions} multiple />
       </TableToolbar.QuickFilters.Field>
       <TableToolbar.QuickFilters.Field>
         <FieldCombobox label={t({ id: 'transactionType' })} limitTags={1} name="transactionType" options={transactionTypeOptions} multiple />

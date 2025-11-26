@@ -11,5 +11,5 @@ export interface SearchQuickFiltersValues extends Record<string, unknown> {
 }
 
 export interface SearchQuickFiltersProps {
-  options: Pick<ReturnType<typeof useSearchFiltersOptions>, 'transactionNumbersOptions' | 'transactionTypeOptions'>
+  options: Pick<ReturnType<typeof useSearchFiltersOptions>, 'transactionNumberOptions' | 'transactionTypeOptions'>
 }
