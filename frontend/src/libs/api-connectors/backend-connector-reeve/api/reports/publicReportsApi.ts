@@ -1,8 +1,5 @@
 import { httpService } from 'libs/api-connectors/backend-connector-reeve/api/httpService.ts'
-import {
-  GetReportsResponse200,
-  GetPublicReportsRequest,
-} from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { GetReportsResponse200, GetPublicReportsRequest } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 
 export const reportsApi = (baseUrl: string) => {
   const { post } = httpService(baseUrl)

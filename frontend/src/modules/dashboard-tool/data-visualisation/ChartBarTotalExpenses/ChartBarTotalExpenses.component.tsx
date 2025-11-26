@@ -14,7 +14,7 @@ interface ChartBarTotalExpensesProps {
   data: Data[]
 }
 
-const CHART_COLORS = Object.values(cfChartColors.blueCorporate);
+const CHART_COLORS = Object.values(cfChartColors.blueCorporate)
 
 export const ChartBarTotalExpenses = ({ data }: ChartBarTotalExpensesProps) => {
   const theme = useTheme()

@@ -1,28 +1,29 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import { backendReeveApi } from 'libs/api-connectors/backend-connector-reeve/api/backendReeveApi'
-import { GetPublicTransactionsParameters, GetPublicTransactionsRequest } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types.ts'
+import { PostPublicTransactionsRequest } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types.ts'
 
-const getPublicTransactionsQuery = async (request: GetPublicTransactionsRequest, parameters: GetPublicTransactionsParameters) => {
+const getPublicTransactionsQuery = async (request: PostPublicTransactionsRequest) => {
   const { transactionsApi } = backendReeveApi()
 
-  const data = await transactionsApi.getTransactions(request, parameters)
+  const data = await transactionsApi.getTransactions(request)
 
   if (!data) return null
 
   return data
 }
 
-export const useGetPublicTransactionsModel = (request: GetPublicTransactionsRequest, parameters: GetPublicTransactionsParameters) => {
+export const useGetPublicTransactionsModel = (request: PostPublicTransactionsRequest, dependencies: unknown[] = [], isEnabled: boolean = true) => {
   const { data, isFetching } = useQuery({
-    queryKey: ['PUBLIC_TRANSACTIONS', request, parameters],
-    queryFn: () => getPublicTransactionsQuery(request, parameters),
+    queryKey: ['PUBLIC_TRANSACTIONS', ...dependencies],
+    queryFn: () => getPublicTransactionsQuery(request),
+    enabled: isEnabled,
+    retry: false,
     placeholderData: keepPreviousData
   })
 
   return {
-    transactions: data?.transactions ?? null,
-    total: data?.total,
+    transactions: data ?? null,
     isTransactionsFetching: isFetching
   }
 }

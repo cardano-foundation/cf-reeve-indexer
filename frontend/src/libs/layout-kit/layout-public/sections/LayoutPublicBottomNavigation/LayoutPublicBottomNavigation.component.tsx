@@ -16,7 +16,7 @@ export const LayoutPublicBottomNavigation = () => {
 
   const isActiveRouteOrDescendant = (route: string) => pathname === route || pathname.startsWith(route)
 
-  const isDashboard = isActiveRouteOrDescendant(PATHS.PUBLIC_DATA_EXPLORER)
+  const isDashboard = isActiveRouteOrDescendant(PATHS.PUBLIC_DASHBOARD)
   const isTransactions = isActiveRouteOrDescendant(PATHS.PUBLIC_TRANSACTIONS)
   const isReports = isActiveRouteOrDescendant(PATHS.PUBLIC_REPORTS)
   const isResources = isActiveRouteOrDescendant(PATHS.PUBLIC_RESOURCES)
@@ -27,7 +27,7 @@ export const LayoutPublicBottomNavigation = () => {
         component={RouterLink}
         icon={<Graph color={theme.palette.primary.main} size={24} variant={isDashboard ? 'Bold' : 'Outline'} />}
         label={t({ id: 'publicDashboard' })}
-        to={PATHS.PUBLIC_DATA_EXPLORER}
+        to={PATHS.PUBLIC_DASHBOARD}
       />
       <LayoutBottomNavigation.Action
         component={RouterLink}

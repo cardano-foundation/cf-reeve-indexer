@@ -24,11 +24,7 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
           <Box alignItems="center" display="flex" gap={1}>
             <OrganisationLogoStyled
               alt={org?.name}
-              src={
-                value === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
-                  ? cardanoFoundationLogo
-                  : issuranceSwissLogo
-              }
+              src={value === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94' ? cardanoFoundationLogo : issuranceSwissLogo}
             />
             <OrganisationLabelStyled component="h2" variant="h2">
               {org?.name}
@@ -86,7 +82,8 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
         }
       }}
       fullWidth
-      {...props}>
+      {...props}
+    >
       {items.map(({ name, value }) => (
         <MenuItem key={value} value={value}>
           {name}

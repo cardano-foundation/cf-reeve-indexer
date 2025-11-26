@@ -44,7 +44,7 @@ export const UploadFileResults = ({ error, file, fileSize = DEFAULT_FILE_SIZE, f
               {`${formatNumber(file.size / (1000 * 1000), { minimumFractionDigits: 0, maximumFractionDigits: 2 })} MB`}
             </Typography>
           </Box>
-            {isFileSizeValid && isFileTypeValid ? <CheckIconStyled /> : null}
+          {isFileSizeValid && isFileTypeValid ? <CheckIconStyled /> : null}
         </CardContentStyled>
         <CardActionsStyled>
           <ButtonClose onClick={onClose} disabled={isDisabled} />

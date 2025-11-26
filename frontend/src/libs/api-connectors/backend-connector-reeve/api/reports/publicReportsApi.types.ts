@@ -50,7 +50,7 @@ export interface ReportDetailsResponse400Error {
   title: ReportDetailsErrorTitle
 }
 
-export type NestedMap = { [key: string]: string | NestedMap };
+export type NestedMap = { [key: string]: string | NestedMap }
 
 export type ReportApiResponse = {
   organisationId: string

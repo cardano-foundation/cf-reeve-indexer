@@ -1,13 +1,4 @@
-import {
-  ChartDataProvider,
-  ChartsGrid,
-  ChartsXAxis,
-  ChartsYAxis,
-  LinePlot,
-  MarkPlot,
-  type LineChartProps as LineChartPropsMUI,
-  type LineSeriesType,
-} from '@mui/x-charts'
+import { ChartDataProvider, ChartsGrid, ChartsXAxis, ChartsYAxis, LinePlot, MarkPlot, type LineChartProps as LineChartPropsMUI, type LineSeriesType } from '@mui/x-charts'
 
 import { ChartsLegends } from 'libs/data-visualisation-kit/components/ChartsLegend/ChartsLegend.component'
 import { ChartsSurface } from 'libs/data-visualisation-kit/components/ChartsSurface/ChartsSurface.component'
@@ -15,10 +6,7 @@ import { ChartsTooltip } from 'libs/data-visualisation-kit/components/ChartsTool
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
 import { EmptyStateTable } from 'libs/ui-kit/components/EmptyStateTable/EmptyStateTable.component'
 
-type ChartLineSeries = Pick<
-  LineSeriesType,
-  'id' | 'label' | 'data' | 'dataKey' | 'curve' | 'showMark' | 'connectNulls' | 'shape' | 'valueFormatter'
-> & {
+type ChartLineSeries = Pick<LineSeriesType, 'id' | 'label' | 'data' | 'dataKey' | 'curve' | 'showMark' | 'connectNulls' | 'shape' | 'valueFormatter'> & {
   markSize?: number
 }
 
@@ -49,7 +37,7 @@ export const ChartLineDashboards = ({
   yAxis,
   isLegendHidden,
   showPoints = false, // default false
-  showLines = false, // default false - changed from true
+  showLines = false // default false - changed from true
 }: ChartLineDashboardsProps) => {
   const { t } = useTranslations()
 
@@ -72,15 +60,7 @@ export const ChartLineDashboards = ({
   }
 
   return (
-    <ChartDataProvider
-      colors={colors}
-      dataset={dataset}
-      series={series.map((s) => ({ type: 'line', ...s }))}
-      title={title}
-      xAxis={[xAxis]}
-      yAxis={yAxis}
-      height={height}
-    >
+    <ChartDataProvider colors={colors} dataset={dataset} series={series.map((s) => ({ type: 'line', ...s }))} title={title} xAxis={[xAxis]} yAxis={yAxis} height={height}>
       <ChartsSurface>
         <ChartsGrid vertical={false} horizontal={false} />
         {showLines && <LinePlot />} {/* only render lines if showLines=true */}

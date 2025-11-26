@@ -13,10 +13,10 @@ export interface ChartPieAnalyticsProps<T = unknown> {
   data: Data<T>[]
 }
 
-const CHART_COLORS = Object.values(cfChartColors.blueCorporate);
+const CHART_COLORS = Object.values(cfChartColors.blueCorporate)
 
 export const ChartPieAnalytics = <T extends string>({ data }: ChartPieAnalyticsProps<T>) => {
-  const transformedData = useChartPie<T>(data);
+  const transformedData = useChartPie<T>(data)
 
   return (
     <ChartPieDashboards
@@ -24,9 +24,9 @@ export const ChartPieAnalytics = <T extends string>({ data }: ChartPieAnalyticsP
       series={[
         {
           data: transformedData,
-          valueFormatter: ({ value }) => formatNumberPercentage(value / 100),
-        },
+          valueFormatter: ({ value }) => formatNumberPercentage(value / 100)
+        }
       ]}
     />
-  );
-};
+  )
+}

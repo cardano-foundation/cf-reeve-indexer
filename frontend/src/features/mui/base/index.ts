@@ -52,8 +52,14 @@ export type { IconButtonProps } from './icon-button/icon-button.types'
 export { InputLabel } from './input-label/input-label.component'
 export type { InputLabelProps } from './input-label/input-label.types'
 
+export { List } from './list/list.component'
+export type { ListProps } from './list/list.types'
+
 export { ListItem } from './list-item/list-item.component'
 export type { ListItemProps } from './list-item/list-item.types'
+
+export { ListSubheader } from './list-subheader/list-subheader.component'
+export type { ListSubheaderProps } from './list-subheader/list-subheader.types'
 
 export { MenuItem } from './menu-item/menu-item.component'
 export type { MenuItemProps } from './menu-item/menu-item.types'

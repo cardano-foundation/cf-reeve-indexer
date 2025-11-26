@@ -17,6 +17,6 @@ export const backendReeveApi = () => {
     organisationApi: organisationApi(parsedApiUrl),
     reportsApi: reportsApi(parsedApiUrl),
     transactionsApi: transactionsApi(parsedApiUrl),
-    contractApi: ContractAPI(parsedApiUrl),
+    contractApi: ContractAPI(parsedApiUrl)
   }
 }

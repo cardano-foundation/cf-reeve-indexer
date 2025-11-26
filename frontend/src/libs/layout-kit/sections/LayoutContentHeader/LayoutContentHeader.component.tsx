@@ -9,10 +9,9 @@ import { ButtonBack } from 'libs/ui-kit/components/ButtonBack/ButtonBack.compone
 
 interface LayoutContentHeaderProps extends BoxPropsMUI {
   children: ReactNode
-  isPublic?: boolean
 }
 
-export const LayoutContentHeader = ({ children, isPublic, ...props }: LayoutContentHeaderProps) => {
+export const LayoutContentHeader = ({ children, ...props }: LayoutContentHeaderProps) => {
   const theme = useTheme()
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -21,7 +20,7 @@ export const LayoutContentHeader = ({ children, isPublic, ...props }: LayoutCont
     <LayoutContentHeaderStyled component="header">
       <Box alignItems="center" display="flex" gap={{ xs: 2, sm: 3 }} height="100%" width="100%" {...props}>
         {children}
-        {isPublic && isMobile && <Organisation />}
+        {isMobile && <Organisation />}
       </Box>
     </LayoutContentHeaderStyled>
   )

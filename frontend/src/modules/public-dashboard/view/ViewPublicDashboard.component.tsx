@@ -12,7 +12,7 @@ export const ViewPublicDashboard = () => {
 
   return (
     <>
-      <LayoutPublic.Header isPublic>
+      <LayoutPublic.Header>
         <LayoutPublic.Header.Details description={t({ id: 'publicDashboardDescription' })} title={t({ id: 'publicDashboardViewTitle' })} />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={{ xs: 2, sm: 6 }}>

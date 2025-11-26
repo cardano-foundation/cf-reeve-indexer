@@ -39,7 +39,8 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center'
-        }}>
+        }}
+      >
         <CircularProgress sx={{ color: 'white', mb: 2 }} size={48} />
         <Typography variant="body1" sx={{ opacity: 0.9 }}>
           Loading latest data...
@@ -63,7 +64,8 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center'
-        }}>
+        }}
+      >
         <Typography variant="h6" sx={{ mb: 1, color: theme.palette.text.primary }}>
           No Data Available
         </Typography>
@@ -95,36 +97,37 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
           background: `linear-gradient(90deg, transparent, ${caslChartColors.cyan[600]}, transparent)`,
           animation: `${shimmer} 2s infinite`
         }
-      }}>
-       <Box
-  sx={{
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 350,
-    height: 250,
-    opacity: 0.15,
-    pointerEvents: 'none',
-    transition: 'opacity 0.3s ease, transform 0.3s ease',
-    userSelect: 'none',
-    '&:hover': {
-      opacity: 0.25,
-      transform: 'scale(1.05)',
-    },
-  }}
->
-  <img
-    src={Logo}
-    alt="Cardano logo"
-    style={{
-      width: '350px',
-      height: '250px',
-      objectFit: 'cover',
-      display: 'block',
-    }}
-  />
-</Box>
- 
+      }}
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: 350,
+          height: 250,
+          opacity: 0.15,
+          pointerEvents: 'none',
+          transition: 'opacity 0.3s ease, transform 0.3s ease',
+          userSelect: 'none',
+          '&:hover': {
+            opacity: 0.25,
+            transform: 'scale(1.05)'
+          }
+        }}
+      >
+        <img
+          src={Logo}
+          alt="Cardano logo"
+          style={{
+            width: '350px',
+            height: '250px',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
+      </Box>
+
       <Box
         sx={{
           display: 'flex',
@@ -133,7 +136,8 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
           mb: 2.5,
           pb: 2,
           borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
-        }}>
+        }}
+      >
         <Typography variant="h5" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
           <Refresh size={28} variant="Bold" />
           Latest Data Point
@@ -178,7 +182,8 @@ export const DatumCard = ({ data, isLoading }: DatumCardProps) => {
                     transform: 'translateY(0)'
                   }
                 }
-              }}>
+              }}
+            >
               <Typography variant="caption" sx={{ opacity: 0.9, fontWeight: 500, textTransform: 'capitalize' }}>
                 {snakeCaseToTitleCase(key)}
               </Typography>

@@ -11,12 +11,14 @@ import { formatNumber } from 'libs/utils/format'
 
 export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const { t } = useTranslations()
-  
+
   const { currency, period, intervalType, year, data, type } = report
 
   return (
     <Modal onClose={onClose} isOpen={isOpen}>
-      <Modal.Header hasCloseButton>{t({ id: 'reportViewTitle' }, { currency: formatCurrency(currency), period: getReportPeriod(intervalType, period, year), type: t({ id: type }) })}</Modal.Header>
+      <Modal.Header hasCloseButton>
+        {t({ id: 'reportViewTitle' }, { currency: formatCurrency(currency), period: getReportPeriod(intervalType, period, year), type: t({ id: type }) })}
+      </Modal.Header>
       <Modal.Content>
         <NestedGrid data={data} />
       </Modal.Content>
@@ -25,11 +27,10 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
 }
 
 const NestedGrid: React.FC<{ data: NestedMap }> = ({ data }) => {
-
   return (
     <Grid container direction="column" mb={1} spacing={1}>
       {Object.entries(data).map(([key, value]) => {
-        const isNested = typeof value === "object" && value !== null;
+        const isNested = typeof value === 'object' && value !== null
 
         if (isNested) {
           return (
@@ -39,14 +40,12 @@ const NestedGrid: React.FC<{ data: NestedMap }> = ({ data }) => {
               </Typography>
               <NestedGrid data={value as NestedMap} />
             </Grid>
-          );
+          )
         }
         return (
           <Grid key={`item-${key}`} alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }}>
             <Grid container size={{ xs: 12, sm: 'grow' }}>
-              <Typography component="span">
-                {snakeToNormal(key)}
-              </Typography>
+              <Typography component="span">{snakeToNormal(key)}</Typography>
             </Grid>
             <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '14.5rem' }} size="grow">
               <Typography color={'text.primary'} component="span" variant="h3" pr={1.75}>
@@ -54,8 +53,8 @@ const NestedGrid: React.FC<{ data: NestedMap }> = ({ data }) => {
               </Typography>
             </Grid>
           </Grid>
-        );
+        )
       })}
     </Grid>
-  );
-};
+  )
+}

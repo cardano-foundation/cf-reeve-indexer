@@ -27,4 +27,8 @@ export { Picker } from './picker/picker.component'
 export type { PickerProps } from './picker/picker.types'
 
 export { TableToolbar } from './table-toolbar/table-toolbar.component'
+export { useTableToolbarContext } from './table-toolbar/table-toolbar.hooks'
 export type { TableToolbarProps } from './table-toolbar/table-toolbar.types'
+
+export { VirtualizedDropdownList } from './virtualized-dropdown-list/virtualized-dropdown-list.component'
+export type { VirtualizedDropdownListProps } from './virtualized-dropdown-list/virtualized-dropdown-list.types'

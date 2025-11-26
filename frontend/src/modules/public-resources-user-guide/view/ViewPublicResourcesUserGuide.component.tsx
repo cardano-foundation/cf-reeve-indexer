@@ -8,7 +8,7 @@ export const ViewPublicResourcesUserGuide = () => {
 
   return (
     <>
-      <LayoutPublic.Header isPublic>
+      <LayoutPublic.Header>
         <LayoutPublic.Header.Details description={t({ id: 'publicUserGuideDescription' })} title={t({ id: 'publicUserGuideViewTitle' })} />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={{ xs: 4, sm: 6 }} p={{ xs: 4, sm: 0 }}>

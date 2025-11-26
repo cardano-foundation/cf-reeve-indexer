@@ -19,7 +19,7 @@ function generateMockAdaData() {
     data.push({
       timestamp,
       datum_data: { ADA: parseFloat(price.toFixed(6)) },
-      redeemer_data: null,
+      redeemer_data: null
     })
   }
 
