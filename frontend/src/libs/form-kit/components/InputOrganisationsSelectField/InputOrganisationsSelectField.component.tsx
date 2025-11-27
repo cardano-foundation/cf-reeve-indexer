@@ -23,14 +23,7 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
         const org = items.find((item) => item.value === value)
         return (
           <Box alignItems="center" display="flex" gap={1}>
-<<<<<<< HEAD
             <Avatar alt={org?.name} data-testid={org?.name}>{getInitials(org?.name)}</Avatar>
-=======
-            <OrganisationLogoStyled
-              alt={org?.name}
-              src={value === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94' ? cardanoFoundationLogo : issuranceSwissLogo}
-            />
->>>>>>> main
             <OrganisationLabelStyled component="h2" variant="h2">
               {org?.name}
             </OrganisationLabelStyled>

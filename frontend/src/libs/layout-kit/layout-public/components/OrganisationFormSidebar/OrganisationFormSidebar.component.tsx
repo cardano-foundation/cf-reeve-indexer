@@ -13,19 +13,7 @@ interface OrganisationFormLayoutProps {
   items: { name: string; value: string }[]
 }
 
-<<<<<<< HEAD
 const OrganisationFormLayout = ({ isSidebarOpen, items }: OrganisationFormLayoutProps) => {
-=======
-const OrganisationFormLayout = ({ isSidebarOpen }: OrganisationFormLayoutProps) => {
-  const CFOrganisationId = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
-  const ISOrganisationId = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca95'
-
-  const organisationsOptions = [
-    { name: 'Cardano Foundation', value: CFOrganisationId },
-    { name: 'Issuance Swiss', value: ISOrganisationId }
-  ]
-
->>>>>>> main
   return (
     <OrganisationsFormStyled noValidate>
       <FieldOrganisations items={items} hasChevron={isSidebarOpen} />

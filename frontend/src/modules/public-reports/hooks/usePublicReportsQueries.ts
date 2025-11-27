@@ -1,13 +1,8 @@
 import { useGetPublicReportsModel } from 'libs/models/reports-model/GetReportsModel/GetPublicReports.service.ts'
-<<<<<<< HEAD
-import { getSearchReportPayload } from 'modules/public-reports/utils/payload.ts'
-import { PublicReportsFiltersFormValues } from 'modules/public-reports/components/Filters/Filters.types.ts'
-import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
-=======
 import { ReportsFiltersValues } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.types'
 import { ReportsQuickFiltersValues } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.types'
 import { mapSearchFiltersToRequestBody } from 'modules/public-reports/utils/payload'
->>>>>>> main
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 
 interface PublicReportsQueriesState {
   filters: ReportsQuickFiltersValues & ReportsFiltersValues
@@ -22,18 +17,7 @@ export const usePublicReportsQueries = (state: PublicReportsQueriesState) => {
     sorting: { sortBy, sortOrder }
   } = state
 
-<<<<<<< HEAD
-  const { values } = formik
   const { selectedOrganisation } = useLayoutPublicContext()
-
-  const { reports, isFetching } = useGetPublicReportsModel({
-    ...(values?.period ? getSearchReportPayload(values.period) : {}),
-    ...(values?.report && { reportType: values.report }),
-    organisationId: selectedOrganisation,
-  });
-  
-=======
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
 
   const filtersPayload = mapSearchFiltersToRequestBody(filters)
 
@@ -54,7 +38,6 @@ export const usePublicReportsQueries = (state: PublicReportsQueriesState) => {
     [filters, page, size, sortBy, sortOrder]
   )
 
->>>>>>> main
   return {
     reports,
     isFetching

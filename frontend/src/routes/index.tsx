@@ -22,45 +22,23 @@ const createRoutePath = (routes: string[] = []) => `${ROUTES.ROOT}${routes.join(
 
 export const PATHS = {
   ROOT: createRoutePath(),
-<<<<<<< HEAD
-  PUBLIC_DASHBOARD: createRoutePath([ROUTES_V2.PUBLIC_DASHBOARD]),
-  PUBLIC_REPORTS: createRoutePath([ROUTES_V2.PUBLIC_REPORTS]),
-  PUBLIC_TRANSACTIONS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS]),
-  PUBLIC_TRANSACTIONS_RESULTS: createRoutePath([ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS]),
-  PUBLIC_RESOURCES: createRoutePath([ROUTES_V2.PUBLIC_RESOURCES]),
-  PUBLIC_RESOURCES_GLOSSARY: createRoutePath([ROUTES_V2.PUBLIC_RESOURCES, ROUTES_V2.PUBLIC_RESOURCES_GLOSSARY]),
-  PUBLIC_RESOURCES_USERGUIDE: createRoutePath([ROUTES_V2.PUBLIC_RESOURCES, ROUTES_V2.PUBLIC_RESOURCES_USERGUIDE]),
-=======
   PUBLIC_DASHBOARD: createRoutePath([ROUTES.PUBLIC_DASHBOARD]),
-  PUBLIC_REWARD_DASHBOARD: createRoutePath([ROUTES.PUBLIC_REWARD_DASHBOARD]),
   PUBLIC_REPORTS: createRoutePath([ROUTES.PUBLIC_REPORTS]),
   PUBLIC_TRANSACTIONS: createRoutePath([ROUTES.PUBLIC_TRANSACTIONS]),
   PUBLIC_RESOURCES: createRoutePath([ROUTES.PUBLIC_RESOURCES]),
   PUBLIC_RESOURCES_GLOSSARY: createRoutePath([ROUTES.PUBLIC_RESOURCES, ROUTES.PUBLIC_RESOURCES_GLOSSARY]),
-  PUBLIC_RESOURCES_USERGUIDE: createRoutePath([ROUTES.PUBLIC_RESOURCES, ROUTES.PUBLIC_RESOURCES_USERGUIDE])
->>>>>>> main
+  PUBLIC_RESOURCES_USERGUIDE: createRoutePath([ROUTES.PUBLIC_RESOURCES, ROUTES.PUBLIC_RESOURCES_USERGUIDE]),
 } as const
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
-<<<<<<< HEAD
-    <Route element={<Outlet />} path={ROUTES_V2.ROOT}>
-      <Route index element={<Navigate to={ROUTES_V2.PUBLIC_DASHBOARD} replace />} />
-      <Route element={<LayoutPublic />}>
-        <Route element={<ViewPublicDashboard />} path={ROUTES_V2.PUBLIC_DASHBOARD} />
-        <Route element={<ViewReportsPublic />} path={ROUTES_V2.PUBLIC_REPORTS} />
-        <Route element={<ViewPublicTransactions />} path={ROUTES_V2.PUBLIC_TRANSACTIONS} />
-        <Route element={<ViewPublicTransactionsResults />} path={ROUTES_V2.PUBLIC_TRANSACTIONS_RESULTS} />
-        <Route element={<Outlet />} path={ROUTES_V2.PUBLIC_RESOURCES}>
-=======
     <Route element={<Outlet />} path={ROUTES.ROOT}>
+      <Route index element={<Navigate to={ROUTES.PUBLIC_DASHBOARD} replace />} />
       <Route element={<LayoutPublic />}>
         <Route element={<ViewPublicDashboard />} path={ROUTES.PUBLIC_DASHBOARD} />
-        <Route element={<ViewPublicRewardDashboard />} path={ROUTES.PUBLIC_REWARD_DASHBOARD} />
         <Route element={<ViewReportsPublic />} path={ROUTES.PUBLIC_REPORTS} />
         <Route element={<ViewPublicTransactions />} path={ROUTES.PUBLIC_TRANSACTIONS} />
         <Route element={<Outlet />} path={ROUTES.PUBLIC_RESOURCES}>
->>>>>>> main
           <Route element={<ViewPublicResources />} index />
           <Route element={<ViewPublicResourcesGlossary />} path={ROUTES.PUBLIC_RESOURCES_GLOSSARY} />
           <Route element={<ViewPublicResourcesUserGuide />} path={ROUTES.PUBLIC_RESOURCES_USERGUIDE} />

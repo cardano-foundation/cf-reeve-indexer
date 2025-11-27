@@ -12,31 +12,16 @@ import { MenuCategory } from '../LayoutPublicContext/LayoutPublicContext.compone
 export const NavigationSidebar = () => {
   const { t } = useTranslations()
   const { pathname } = useLocationState()
-<<<<<<< HEAD
   const { handleSectionMenuToggle, isSidebarOpen, isResourcesOpen } = useLayoutPublicContext()
-=======
-  const { handleSectionMenuToggle, isSidebarOpen, isResourcesOpen, selectedOrganisation } = useLayoutPublicContext()
->>>>>>> main
 
   const getCurrentPage = (route: string) => pathname === route
   const { RESOURCES_ROUTES } = useNavigationRoutes()
 
-<<<<<<< HEAD
   const menuItems = [
     { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
     { icon: Note1, label: t({ id: 'publicReports' }), route: PATHS.PUBLIC_REPORTS },
     { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: PATHS.PUBLIC_TRANSACTIONS }
   ]
-=======
-  const menuItems =
-    selectedOrganisation === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
-      ? [
-          { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
-          { icon: Note1, label: t({ id: 'publicReports' }), route: PATHS.PUBLIC_REPORTS },
-          { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: PATHS.PUBLIC_TRANSACTIONS }
-        ]
-      : [{ icon: TrendUp, label: t({ id: 'publicRewardDashboard' }), route: PATHS.PUBLIC_REWARD_DASHBOARD }]
->>>>>>> main
 
   return (
     <NavigationStyled>

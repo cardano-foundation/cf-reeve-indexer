@@ -71,11 +71,7 @@ export interface GetPublicReportsRequest {
 
 export interface GetPublicReportsResponse200 {
   success: boolean
-<<<<<<< HEAD
-  reports: ReportApiResponse[]
-=======
   reports: ReportEntity[]
   total: number
->>>>>>> main
   error: null
 }
