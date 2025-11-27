@@ -1,32 +1,35 @@
-import { useLocationState } from 'hooks'
-import { PublicTransactionsFormValues } from 'modules/public-transactions/components/PublicTransactionsForm/PublicTransactionsForm.types.ts'
-import { usePublicTransactionsForm } from 'modules/public-transactions/hooks/usePublicTransactionsForm.ts'
+import { usePagination } from 'libs/hooks/usePagination.ts'
+import { useSorting } from 'libs/hooks/useSorting'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
+import { useSearchFiltersOptions } from 'modules/public-transactions/components/SearchFilters/SearchFilters.hooks.ts'
+import { usePublicTransactionsFilters } from 'modules/public-transactions/hooks/usePublicTransactionsFilters.ts'
 import { usePublicTransactionsQueries } from 'modules/public-transactions/hooks/usePublicTransactionsQueries.ts'
 
 export const usePublicTransactions = () => {
-  const { state } = useLocationState<PublicTransactionsFormValues>()
+  const drawer = useLayoutPublicContext()
 
-  const { organisations, currencies, isFetching } = usePublicTransactionsQueries()
+  const filters = usePublicTransactionsFilters()
 
-  const { dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, initialValues, validationSchema, handleFormReset, handleFormSubmit } = usePublicTransactionsForm({
-    organisations,
-    locationState: state
+  const pagination = usePagination()
+
+  const sorting = useSorting({ field: 'entryDate', sort: 'desc' })
+
+  const options = useSearchFiltersOptions()
+
+  const data = usePublicTransactionsQueries({
+    filters: filters.combinedFilters,
+    pagination: { page: pagination.page, size: pagination.rowsPerPage },
+    sorting: { sortBy: sorting.sortBy, sortOrder: sorting.sortOrder }
   })
 
-  const hasInitialValues = Boolean(state)
+  const hasEmptyPageState = !data.isFetching && !filters.hasFiltersSelected && !data.transactions?.transactions.length
 
   return {
-    currencies,
-    dateFromMaxDate,
-    dateFromMinDate,
-    dateToMaxDate,
-    dateToMinDate,
-    initialValues,
-    organisations,
-    validationSchema,
-    handleFormReset,
-    handleFormSubmit,
-    hasInitialValues,
-    isFetching
+    data: { ...data, hasEmptyPageState },
+    drawer,
+    filters,
+    options,
+    pagination,
+    sorting
   }
 }

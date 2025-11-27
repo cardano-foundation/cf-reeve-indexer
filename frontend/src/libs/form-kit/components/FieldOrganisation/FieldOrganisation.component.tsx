@@ -16,14 +16,5 @@ export const FieldOrganisation = ({ organisations, isDisabled }: FieldOrganisati
 
   const items = organisations?.map(({ id, name }) => ({ name, value: id })) ?? []
 
-  return (
-    <InputSelect
-      items={items}
-      label={t({ id: 'organization' })}
-      name={field.name}
-      value={field.value}
-      onChange={field.onChange}
-      disabled={isDisabled}
-    />
-  )
+  return <InputSelect items={items} label={t({ id: 'organization' })} name={field.name} value={field.value} onChange={field.onChange} disabled={isDisabled} />
 }

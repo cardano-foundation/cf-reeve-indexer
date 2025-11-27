@@ -33,26 +33,9 @@ export enum ReportMonth {
   DEC = 'DEC'
 }
 
-export enum ReportStatus {
-  PUBLISH = 'PUBLISH',
-  PUBLISHED = 'PUBLISHED'
-}
+export type NestedMap = { [key: string]: string | NestedMap }
 
-export enum ReportDetailsErrorTitle {
-  INVALID_REPORT_DATA = 'INVALID_REPORT_DATA',
-  PROFIT_FOR_THE_YEAR_MISMATCH = 'PROFIT_FOR_THE_YEAR_MISMATCH'
-}
-
-export interface ReportDetailsResponse400Error {
-  detail: string
-  reportId: string
-  status: number
-  title: ReportDetailsErrorTitle
-}
-
-export type NestedMap = { [key: string]: string | NestedMap };
-
-export type ReportApiResponse = {
+export type ReportEntity = {
   organisationId: string
   type: ReportType
   intervalType: IntervalType
@@ -66,16 +49,33 @@ export type ReportApiResponse = {
   data: NestedMap
 }
 
-export interface GetPublicReportsRequest {
-  organisationId: string
-  reportType?: ReportType | string
-  intervalType?: IntervalType
-  year?: number
-  period?: number
+export interface GetPublicReportsRequestParameters {
+  page?: number
+  size?: number
+  sort?: string[]
 }
 
-export interface GetReportsResponse200 {
+export interface GetPublicReportsRequestBody {
+  organisationId: string
+  reportType?: ReportType[] | string[]
+  intervalType?: IntervalType[]
+  blockChainHash?: string
+  year?: number[]
+  period?: number[]
+}
+
+export interface GetPublicReportsRequest {
+  parameters: GetPublicReportsRequestParameters
+  body: GetPublicReportsRequestBody
+}
+
+export interface GetPublicReportsResponse200 {
   success: boolean
+<<<<<<< HEAD
   reports: ReportApiResponse[]
+=======
+  reports: ReportEntity[]
+  total: number
+>>>>>>> main
   error: null
 }

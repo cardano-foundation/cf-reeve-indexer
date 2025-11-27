@@ -62,7 +62,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "15433:5432"
     networks:
       - lob
 

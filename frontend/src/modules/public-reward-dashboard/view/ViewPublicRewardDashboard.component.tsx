@@ -81,7 +81,7 @@ export const ViewPublicRewardDashboard = () => {
 
   return (
     <>
-      <LayoutPublic.Header isPublic>
+      <LayoutPublic.Header>
         <LayoutPublic.Header.Details description="Explorer overview of asset tokens" title="Dashboard" />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={4}>
@@ -90,8 +90,9 @@ export const ViewPublicRewardDashboard = () => {
             sx={{
               width: '100%',
               maxWidth: 500,
-              p: 2,
-            }}>
+              p: 2
+            }}
+          >
             <FormControl fullWidth>
               <InputLabel id="token-select-label">Select Asset</InputLabel>
               <Select
@@ -169,7 +170,8 @@ export const ViewPublicRewardDashboard = () => {
                     margin: theme.spacing(-0.5, 0.25, 0, 0)
                   }
                 }}
-                variant="outlined">
+                variant="outlined"
+              >
                 {assets?.map((asset) => (
                   <MenuItem key={asset as string} value={asset as string}>
                     {asset as string}

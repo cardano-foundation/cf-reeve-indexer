@@ -13,9 +13,7 @@ export const useLayoutDrawer = () => {
 
   const type = isMobile ? dialogType : drawerType
 
-  const isFiltersDrawerOpen = type === DRAWER_TYPES.FILTERS
-  const isInsightsDrawerOpen = type === DRAWER_TYPES.INSIGHTS
-  const isDrawerOpen = isFiltersDrawerOpen || isInsightsDrawerOpen
+  const isDrawerOpen = type === DRAWER_TYPES.FILTERS
 
   const handleCloseDrawer = useCallback(() => {
     isMobile ? setDialogType(null) : setDrawerType(null)
@@ -32,5 +30,5 @@ export const useLayoutDrawer = () => {
     handleCloseDrawer()
   }, [pathname])
 
-  return { type, handleCloseDrawer, handleOpenDrawer, isDrawerOpen, isFiltersDrawerOpen, isInsightsDrawerOpen }
+  return { type, handleCloseDrawer, handleOpenDrawer, isDrawerOpen }
 }

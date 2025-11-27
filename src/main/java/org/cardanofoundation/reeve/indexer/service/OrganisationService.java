@@ -12,7 +12,10 @@ import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
+import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
 import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
+import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
+import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
 
 @Service
 @Slf4j
@@ -21,6 +24,7 @@ public class OrganisationService {
 
     private final OrganisationRepository organisationRepository;
     private final CurrencyRepository currencyRepository;
+    private final TransactionRepository transactionRepository;
 
     public Optional<OrganisationEntity> findById(String organisationId) {
         return organisationRepository.findById(organisationId);
@@ -48,5 +52,42 @@ public class OrganisationService {
         return currencyRepository.findAllByOrgId(orgId).stream()
                 .map(currencyEntity -> new CurrencyView(currencyEntity.getId().getCurrencyId(), currencyEntity.getCustCode()))
                 .toList();
+    }
+
+    public List<String> getDistinctInternalNumbersForOrganisation(String orgId) {
+        return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId);
+    }
+
+    public List<String> getDistinctTransactionTypesForOrganisation(String orgId) {
+        return transactionRepository.findDistinctTransactionTypesByOrganisationId(orgId);
+    }
+
+    public List<String> getDistinctDocumentNumbersForOrganisation(String orgId) {
+        return transactionRepository.findDistinctDocumentNumbersByOrganisationId(orgId);
+    }
+
+    public List<String> getDistinctVatCustCodesForOrganisation(String orgId) {
+        return transactionRepository.findDistinctVatCustCodesByOrganisationId(orgId);
+    }
+
+    public List<String> getDistinctCostCenterCustCodesForOrganisation(String orgId) {
+        return transactionRepository.findDistinctCostCenterCustCodesByOrganisationId(orgId);
+    }
+
+    public List<String> getDistinctCounterPartyAccountNamesForOrganisation(String orgId) {
+        return transactionRepository.findDistinctCounterPartyAccountNamesByOrganisationId(orgId);
+    }
+
+    public List<String> getDistinctCounterPartyCustCodesForOrganisation(String orgId) {
+        return transactionRepository.findDistinctCounterPartyCustCodesByOrganisationId(orgId);
+    }
+
+    public List<EventCodeView> getDistinctEventCodeNamePairsForOrganisation(String orgId) {
+        return transactionRepository.findDistinctEventCodeNamePairsByOrganisationId(orgId);
+    }
+
+    public List<ProjectView> getDistinctProjectCodesAndNamesForOrganisation(String orgId) {
+        log.info("Fetching distinct project codes and names for organisation: {}", orgId);
+        return transactionRepository.findDistinctProjectCodesAndNamesByOrganisationId(orgId);
     }
 }

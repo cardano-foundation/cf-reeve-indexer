@@ -49,18 +49,20 @@ Install the app with npm:
 **Step 1**: Install packages
 Open terminal and run commad: `npm install`
 
-**Step 2**: 
+**Step 2**:
 
-1. Create a `.env` file at the root of the project.  
-2. Use `.env.example` as a template.  
+1. Create a `.env` file at the root of the project.
+2. Use `.env.example` as a template.
 3. Ask a team member for the required environment variables & corresponding values for the API.
 
 **Step 3** Update env variables:
-- Update port for application. 
-    >Example: `PORT=3000`
 
-- Update API URL for Reeve Platform API service. 
-    >Example: `VITE_API_URL=http://localhost:9000`
+- Update port for application.
+
+  > Example: `PORT=3000`
+
+- Update API URL for Reeve Platform API service.
+  > Example: `VITE_API_URL=http://localhost:9000`
 
 ## More documentation
 

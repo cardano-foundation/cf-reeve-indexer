@@ -1,4 +1,3 @@
-import { verify } from 'crypto'
 import {
   Add,
   AddCircle,
@@ -47,8 +46,10 @@ import {
   Note1,
   RefreshCircle,
   ShieldTick,
+  SearchNormal1,
   Setting,
   Setting2,
+  Sort,
   Stop,
   Warning2,
   TickCircle,
@@ -105,8 +106,10 @@ const MINUS_SQUARE = 'MINUS_SQUARE'
 const NOTE1 = 'NOTE1'
 const REFRESH_CIRCLE = 'REFRESH_CIRCLE'
 const SHIELD_TICK = 'SHIELD_TICK'
+const SEARCH_NORMAL1 = 'SEARCH_NORMAL1'
 const SETTING = 'SETTING'
 const SETTING2 = 'SETTING2'
+const SORT = 'SORT'
 const STOP = 'STOP'
 const WARNING2 = 'WARNING2'
 const TICK_CIRCLE = 'TICK_CIRCLE'
@@ -163,8 +166,10 @@ export const ICONSAX_NAMES = {
   NOTE1,
   REFRESH_CIRCLE,
   SHIELD_TICK,
+  SEARCH_NORMAL1,
   SETTING,
   SETTING2,
+  SORT,
   STOP,
   WARNING2,
   TICK_CIRCLE,
@@ -222,13 +227,15 @@ export const ICONSAX_ICONS = {
   [ICONSAX_NAMES.NOTE1]: Note1,
   [ICONSAX_NAMES.REFRESH_CIRCLE]: RefreshCircle,
   [ICONSAX_NAMES.SHIELD_TICK]: ShieldTick,
+  [ICONSAX_NAMES.SEARCH_NORMAL1]: SearchNormal1,
   [ICONSAX_NAMES.SETTING]: Setting,
   [ICONSAX_NAMES.SETTING2]: Setting2,
+  [ICONSAX_NAMES.SORT]: Sort,
   [ICONSAX_NAMES.STOP]: Stop,
   [ICONSAX_NAMES.WARNING2]: Warning2,
   [ICONSAX_NAMES.TICK_CIRCLE]: TickCircle,
   [ICONSAX_NAMES.TICK_SQUARE]: TickSquare,
   [ICONSAX_NAMES.TRASH]: Trash,
   [ICONSAX_NAMES.TREND_UP]: TrendUp,
-  [ICONSAX_NAMES.VERIFY]: Verify,
+  [ICONSAX_NAMES.VERIFY]: Verify
 } as const

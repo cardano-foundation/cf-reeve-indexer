@@ -13,7 +13,7 @@ export const FieldDateCombobox = ({ helperText, label, maxDate, minDate, name, d
 
   const handleChange = useCallback(
     (newDate: Dayjs | null) => {
-      const value = newDate ? newDate.format('DD-MM-YYYY') : null
+      const value = newDate ? newDate : null
 
       field.onChange({ target: { name: field.name, value } })
       helpers.setTouched(true, false)
@@ -25,7 +25,7 @@ export const FieldDateCombobox = ({ helperText, label, maxDate, minDate, name, d
     <DateCombobox
       name={field.name}
       textField={{ helperText: hasError ? meta.error : helperText, label, error: hasError, required }}
-      value={field.value ? dayjs(field.value, 'DD-MM-YYYY') : null}
+      value={field.value ? dayjs(field.value) : null}
       onChange={handleChange}
       {...{ maxDate, minDate, disabled, ...props }}
     />

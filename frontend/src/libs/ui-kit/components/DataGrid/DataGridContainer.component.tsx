@@ -1,3 +1,5 @@
+import { useTheme } from '@mui/material'
+import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import { ReactNode } from 'react'
 
@@ -13,6 +15,7 @@ const DataGridContainer = ({ children }: DataGridContainerProps) => (
     {children}
   </DataGridContainerStyled>
 )
+
 DataGridContainer.displayName = 'DataGridContainer'
 
 interface HeaderProps {
@@ -20,9 +23,25 @@ interface HeaderProps {
 }
 
 const Header = ({ children }: HeaderProps) => <DataGridHeaderStyled>{children}</DataGridHeaderStyled>
+
 Header.displayName = 'DataGridContainer.Header'
+
+interface ToolbarProps {
+  children: ReactNode
+}
+
+const Toolbar = ({ children }: ToolbarProps) => {
+  const theme = useTheme()
+
+  return (
+    <Box borderBottom={`1px solid ${theme.palette.divider}`} display="flex" gap={4} p={2}>
+      {children}
+    </Box>
+  )
+}
 
 DataGridContainer.Header = Header
 DataGridContainer.Table = DataGrid
+DataGridContainer.Toolbar = Toolbar
 
 export { DataGridContainer }

@@ -1,11 +1,12 @@
-import { AutocompleteStyled, PopupIconStyled } from './autocomplete.styles'
-import type { AutocompleteOption, AutocompleteProps } from './autocomplete.types'
+import AutocompleteMUI from '@mui/material/Autocomplete'
+
+import { PopupIconStyled } from './autocomplete.styles'
+import type { AutocompleteProps } from './autocomplete.types'
 
 export const Autocomplete = <
-  Value extends AutocompleteOption = AutocompleteOption,
-  Multiple extends boolean | undefined = boolean,
-  DisableClearable extends boolean | undefined = boolean,
-  FreeSolo extends boolean | undefined = boolean,
+  Multiple extends boolean | undefined,
+  DisableClearable extends boolean | undefined,
+  FreeSolo extends boolean | undefined,
   ChipComponent extends React.ElementType = 'div'
 >({
   limitTags,
@@ -20,11 +21,12 @@ export const Autocomplete = <
   disabled,
   disableClearable,
   disableCloseOnSelect = true,
+  freeSolo,
   multiple,
   ...props
-}: AutocompleteProps<Value, Multiple, DisableClearable, FreeSolo, ChipComponent>) => {
+}: AutocompleteProps<Multiple, DisableClearable, FreeSolo, ChipComponent>) => {
   return (
-    <AutocompleteStyled
+    <AutocompleteMUI
       popupIcon={<PopupIconStyled />}
       slotProps={{
         ...slotProps,
@@ -32,9 +34,9 @@ export const Autocomplete = <
           modifiers: [{ name: 'offset', options: { offset: [0, 4] } }]
         }
       }}
-      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+      getOptionLabel={(option) => (typeof option === 'string' ? option : (option.label ?? ''))}
       isOptionEqualToValue={(option, selected) => option.value === selected.value}
-      {...{ limitTags, options, size, value, groupBy, renderGroup, renderInput, onChange, disabled, disableClearable, disableCloseOnSelect, multiple, ...props }}
+      {...{ limitTags, options, size, value, groupBy, renderGroup, renderInput, onChange, disabled, disableClearable, disableCloseOnSelect, freeSolo, multiple, ...props }}
     />
   )
 }

@@ -4,8 +4,11 @@ import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import { GridColDef } from '@mui/x-data-grid'
 import { ExportSquare } from 'iconsax-react'
+import { useMemo, useRef } from 'react'
 
-import { ReportApiResponse } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { GetPublicReportsResponse200, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { usePagination } from 'libs/hooks/usePagination'
+import { useSorting } from 'libs/hooks/useSorting'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx'
@@ -13,20 +16,35 @@ import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridConta
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
-import { Filters } from 'modules/public-reports/components/Filters/Filters.component.tsx'
 import { IdentityVerificationStatus } from 'modules/public-reports/components/IdentityVerificationStatus/IdentityVerificationStatus.component.tsx'
+import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
 
 interface TableReportsPublicProps {
-  data: ReportApiResponse[] | null
-  onViewOpen: (report: ReportApiResponse) => void
-  areFiltersSelected: boolean
+  data: GetPublicReportsResponse200 | null
+  pagination: ReturnType<typeof usePagination>
+  sorting: ReturnType<typeof useSorting>
+  onViewOpen: (report: ReportEntity) => void
+  hasFiltersSelected: boolean
   isFetching: boolean
 }
 
-export const TableReportsPublic = ({ data, onViewOpen, areFiltersSelected, isFetching }: TableReportsPublicProps) => {
+export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasFiltersSelected, isFetching }: TableReportsPublicProps) => {
+  const { page, rowsPerPage, handlePagination } = pagination
+  const { handleSorting } = sorting
+
   const { t } = useTranslations()
 
   const theme = useTheme()
+
+  const rowCountRef = useRef(data?.total || 0)
+
+  const rowCount = useMemo(() => {
+    if (data?.total !== undefined) {
+      rowCountRef.current = data.total
+    }
+
+    return rowCountRef.current
+  }, [data?.total])
 
   const columns: GridColDef[] = [
     {
@@ -86,9 +104,7 @@ export const TableReportsPublic = ({ data, onViewOpen, areFiltersSelected, isFet
     {
       field: 'identityVerified',
       headerName: t({ id: 'identityVerified' }),
-      renderCell: ({ row }) => (
-        <IdentityVerificationStatus isVerified={row.identityVerified} lei={row.lei} />
-      ),
+      renderCell: ({ row }) => <IdentityVerificationStatus isVerified={row.identityVerified} lei={row.lei} />,
       hideable: false,
       sortable: true,
       flex: 1,
@@ -111,19 +127,35 @@ export const TableReportsPublic = ({ data, onViewOpen, areFiltersSelected, isFet
 
   return (
     <DataGridContainer>
-      <DataGridContainer.Header>
-        <Filters areFiltersSelected={areFiltersSelected} />
-      </DataGridContainer.Header>
+      <DataGridContainer.Toolbar>
+        <ReportsToolbar />
+      </DataGridContainer.Toolbar>
       <DataGridContainer.Table
         initialState={{
           sorting: {
             sortModel: [{ field: 'period', sort: 'desc' }]
           }
         }}
+        noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: 'Cardano Foundation' })}
+        noRowsMessage={t({ id: 'nothingHereMessage' })}
+        paginationModel={{ page, pageSize: rowsPerPage }}
+        paginationMode="server"
+        sortingMode="server"
+        rowCount={rowCount}
         columns={columns}
-        rows={data ?? []}
+        rows={data?.reports ?? []}
         getRowId={(row) => `${row.organisationId}-${row.type}-${row.intervalType}-${row.year}-${row.period}-${row.ver}`}
-        hasFiltersSelected={areFiltersSelected}
+        onPaginationModelChange={(model) => {
+          const { page, pageSize } = model
+
+          handlePagination(page, pageSize)
+        }}
+        onSortModelChange={(model) => {
+          const [current] = model
+
+          handleSorting(current.field, current.sort)
+        }}
+        hasFiltersSelected={hasFiltersSelected}
         isLoading={isFetching}
         disableColumnMenu
       />

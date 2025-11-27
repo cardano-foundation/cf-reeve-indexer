@@ -1,17 +1,24 @@
-import { ReactNode, createContext, useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useLocationState } from 'hooks'
-import { useLayoutSidebar } from 'libs/layout-kit/hooks/useLayoutSidebar.ts'
+
+import { DrawerType } from 'consts'
+import { useLocationState, useMediaQueries } from 'hooks'
+import { useLayoutDrawer } from 'libs/layout-kit/hooks/useLayoutDrawer'
+import { useLayoutSidebar } from 'libs/layout-kit/hooks/useLayoutSidebar'
 import { PATHS } from 'routes'
 
 interface LayoutPublicContextProps {
-  handleSidebarToggle: () => void
-  isSidebarOpen: boolean
-  toggledSection: MenuCategory | null
-  handleSectionMenuToggle: (category?: MenuCategory) => void
-  isResourcesOpen: boolean
   selectedOrganisation: string
+  toggledSection: MenuCategory | null
+  type: DrawerType | null
+  handleDrawerClose: () => void
+  handleDrawerOpen: (event: MouseEvent<HTMLElement>, newValue: DrawerType) => void
+  handleSectionMenuToggle: (category?: MenuCategory) => void
+  handleSidebarToggle: () => void
   setSelectedOrganisation: (org: string) => void
+  isDrawerOpen: boolean
+  isResourcesOpen: boolean
+  isSidebarOpen: boolean
 }
 
 export enum MenuCategory {
@@ -24,9 +31,17 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   const [toggledSection, setToggledSection] = useState<MenuCategory | null>(null)
   const [selectedOrganisation, setSelectedOrganisation] = useState<string>('')
 
+  const timeoutId = useRef<number | null>(null)
+
+  const { isDesktop, isMobile } = useMediaQueries()
+
   const { pathname } = useLocationState()
-  const { handleToggleSidebar, isSidebarOpen } = useLayoutSidebar()
+
   const navigate = useNavigate()
+
+  const { handleCloseSidebar, handleOpenSidebar, handleToggleSidebar, isSidebarOpen } = useLayoutSidebar()
+
+  const { type, handleCloseDrawer, handleOpenDrawer, isDrawerOpen } = useLayoutDrawer()
 
   const isResourcesOpen = toggledSection === MenuCategory.RESOURCES
 
@@ -45,6 +60,41 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
     handleToggleSidebar()
   }, [handleToggleSidebar])
 
+  const handleDrawerClose = useCallback(() => {
+    if (isDesktop && !isMobile && !isSidebarOpen) {
+      handleOpenSidebar()
+    }
+
+    handleCloseDrawer()
+  }, [handleCloseDrawer, handleOpenSidebar, isDesktop, isMobile, isSidebarOpen])
+
+  const handleDrawerOpen = useCallback(
+    (event: MouseEvent<HTMLElement>, newValue: DrawerType) => {
+      timeoutId.current && window.clearTimeout(timeoutId.current)
+
+      const value = ((event.target as HTMLButtonElement)?.value as DrawerType) ?? newValue
+
+      if (isDesktop && !isMobile && isSidebarOpen) {
+        handleCloseSidebar()
+
+        setToggledSection(null)
+      }
+
+      if (type !== null && type !== value) {
+        handleCloseDrawer()
+
+        timeoutId.current = window.setTimeout(() => {
+          handleOpenDrawer(value)
+        }, 350)
+
+        return
+      }
+
+      handleOpenDrawer(value)
+    },
+    [type, handleCloseDrawer, handleOpenDrawer, handleCloseSidebar, isDesktop, isMobile, isSidebarOpen]
+  )
+
   useEffect(() => {
     if (isSidebarOpen && !toggledSection) {
       const categories = {
@@ -61,17 +111,28 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
     navigate(PATHS.PUBLIC_DASHBOARD)
   }, [selectedOrganisation, navigate])
 
+  useEffect(() => {
+    return () => {
+      timeoutId.current && window.clearTimeout(timeoutId.current)
+    }
+  }, [])
+
   return (
     <LayoutPublicContext.Provider
       value={{
+        selectedOrganisation,
+        toggledSection,
+        type,
+        handleDrawerClose,
+        handleDrawerOpen,
         handleSidebarToggle,
         handleSectionMenuToggle,
-        isSidebarOpen,
-        toggledSection,
+        setSelectedOrganisation,
+        isDrawerOpen,
         isResourcesOpen,
-        selectedOrganisation,
-        setSelectedOrganisation
-      }}>
+        isSidebarOpen
+      }}
+    >
       {children}
     </LayoutPublicContext.Provider>
   )

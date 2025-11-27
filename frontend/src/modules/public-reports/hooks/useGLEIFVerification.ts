@@ -34,16 +34,16 @@ export const useGLEIFVerification = (lei?: string) => {
     queryKey: ['gleif-verification', lei],
     queryFn: async (): Promise<GLEIFLegalEntity | null> => {
       if (!lei) return null
-      
+
       try {
         const response = await fetch(`https://api.gleif.org/api/v1/lei-records/${lei}`)
-        
+
         if (!response.ok) {
           return null
         }
-        
+
         const data: GLEIFResponse = await response.json()
-        
+
         if (data.data?.attributes?.entity) {
           const entity = data.data.attributes.entity
           return {
@@ -52,7 +52,7 @@ export const useGLEIFVerification = (lei?: string) => {
             entityStatus: entity.entityStatus
           }
         }
-        
+
         return null
       } catch (error) {
         console.error('GLEIF API error:', error)

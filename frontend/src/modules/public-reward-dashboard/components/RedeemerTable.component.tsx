@@ -28,7 +28,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
           background: theme.palette.background.default,
           borderRadius: 3,
           padding: 6,
-          textAlign: 'center',
+          textAlign: 'center'
         }}
       >
         <CircularProgress sx={{ mb: 2 }} size={48} />
@@ -47,7 +47,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
           borderRadius: 3,
           padding: 6,
           textAlign: 'center',
-          border: `1px solid ${theme.palette.divider}`,
+          border: `1px solid ${theme.palette.divider}`
         }}
       >
         <DocumentText size={48} variant="Bold" color={theme.palette.text.disabled} style={{ marginBottom: 16 }} />
@@ -68,7 +68,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
       sx={{
         background: theme.palette.background.default,
         borderRadius: 2,
-        padding: 2.5,
+        padding: 2.5
       }}
     >
       <Box sx={{ mb: 2 }}>
@@ -84,14 +84,14 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
       <TableContainer
         sx={{
           borderRadius: 2,
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
       >
         <Table>
           <TableHead>
             <TableRow
               sx={{
-                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${caslChartColors.cyan[600]} 100%)`,
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${caslChartColors.cyan[600]} 100%)`
               }}
             >
               <TableCell
@@ -101,7 +101,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
                   fontSize: '0.95rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
-                  padding: 2,
+                  padding: 2
                 }}
               >
                 Field
@@ -114,7 +114,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
                   fontSize: '0.95rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
-                  padding: 2,
+                  padding: 2
                 }}
               >
                 Value
@@ -129,19 +129,19 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
                   backgroundColor: theme.palette.background.default,
                   transition: 'background-color 0.2s ease',
                   '&:hover': {
-                    backgroundColor: theme.palette.action.hover,
+                    backgroundColor: theme.palette.action.hover
                   },
                   animation: `fadeIn 0.3s ease-out ${index * 0.05}s both`,
                   '@keyframes fadeIn': {
                     from: {
                       opacity: 0,
-                      transform: 'translateX(-10px)',
+                      transform: 'translateX(-10px)'
                     },
                     to: {
                       opacity: 1,
-                      transform: 'translateX(0)',
-                    },
-                  },
+                      transform: 'translateX(0)'
+                    }
+                  }
                 }}
               >
                 <TableCell
@@ -149,7 +149,7 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
                     fontWeight: 500,
                     color: theme.palette.text.primary,
                     borderBottom: `1px solid ${theme.palette.divider}`,
-                    padding: 1.75,
+                    padding: 1.75
                   }}
                 >
                   {snakeCaseToTitleCase(key)}
@@ -161,12 +161,12 @@ export const RedeemerTable = ({ data, isLoading }: RedeemerTableProps) => {
                     fontWeight: 600,
                     fontSize: '1.1rem',
                     borderBottom: `1px solid ${theme.palette.divider}`,
-                    padding: 1.75,
+                    padding: 1.75
                   }}
                 >
                   {value.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 10,
+                    maximumFractionDigits: 10
                   })}
                 </TableCell>
               </TableRow>

@@ -15,14 +15,5 @@ export const LayoutSidebarStyled = styled(Grid)<LayoutSidebarStyledProps>`
     border-right: ${({ theme }) => `1px solid ${theme.palette.divider}`};
     overflow: hidden;
     transition: max-width 0.3s ease-in-out;
-
-    ${({ theme }) => `
-      ${theme.breakpoints.down('sm')} {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 5;
-      }
-    `}
   }
 `
