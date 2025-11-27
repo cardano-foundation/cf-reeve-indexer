@@ -136,7 +136,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
             sortModel: [{ field: 'period', sort: 'desc' }]
           }
         }}
-        noRowsHint={t({ id: 'noReportsHint' })}
+        noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: 'Cardano Foundation' })}
         noRowsMessage={t({ id: 'nothingHereMessage' })}
         paginationModel={{ page, pageSize: rowsPerPage }}
         paginationMode="server"

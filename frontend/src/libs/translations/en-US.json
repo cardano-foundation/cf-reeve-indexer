@@ -236,9 +236,8 @@
   "openInExplorer": "Open in explorer",
   "publicTransactionResultsSuccessMessage": "Search completed",
   "publicTransactionsResultsLoadingMessage": "Search in progress...",
-  "noPublicTransactionsMessage": "No results found",
-  "noPublicTransactionsHint": "Adjust your filters and try again",
-  "noSearchedTransactionsHint": "No transactions have been published yet",
+  "noPublicTransactionsMessage": "No transactions available",
+  "noPublicTransactionsHint": "{organisation} hasn’t published any transactions yet—please check back soon!",
   "specialCharactersNotAllowed": "To enter multiple blockchain transaction hashes, separate them with a comma or a space.",
 
   "_Public resources": "public resources section",

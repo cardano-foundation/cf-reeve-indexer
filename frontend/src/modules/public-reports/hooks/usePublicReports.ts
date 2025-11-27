@@ -25,10 +25,10 @@ export const usePublicReports = () => {
 
   const modal = useModalReportView()
 
-  // const hasEmptyPageState = !isFetching && !areFiltersSelected && reports?.length === 0
+  const hasEmptyPageState = !data.isFetching && !filters.hasFiltersSelected && !data.reports?.reports.length
 
   return {
-    data,
+    data: { ...data, hasEmptyPageState },
     drawer,
     filters,
     options,

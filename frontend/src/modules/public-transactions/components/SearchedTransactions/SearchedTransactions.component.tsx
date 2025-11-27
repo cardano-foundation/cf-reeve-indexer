@@ -206,7 +206,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
             sortModel: [{ field: 'entryDate', sort: 'desc' }]
           }
         }}
-        noRowsHint={t({ id: 'noSearchedTransactionsHint' })}
+        noRowsHint={t({ id: 'noPublicTransactionsHint' }, { organisation: 'Cardano Foundation' })}
         noRowsMessage={t({ id: 'nothingHereMessage' })}
         paginationModel={{ page, pageSize: rowsPerPage }}
         paginationMode="server"
