@@ -1,19 +1,36 @@
 import dayjs from 'dayjs'
 
-import { IntervalType, ReportMonth, ReportQuarter } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types.ts'
+import { GetPublicReportsRequestBody, IntervalType, ReportMonth, ReportQuarter } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types.ts'
+import { ReportsFiltersValues } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.types'
+import { ReportsQuickFiltersValues } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.types'
 
-export const getSearchReportPayload = (period: string) => {
-  const [year, timeFrame] = period.split(/\s/g)
+const getReportPeriodPayload = (periods: string[]) => {
+  const yearAndTimeFramePeriods = periods.map((period) => period.split(/\s/g))
 
-  if (Object.values(ReportMonth).includes(timeFrame.toUpperCase() as ReportMonth)) {
-    return { intervalType: IntervalType.MONTH, period: dayjs(new Date(period)).month() + 1, year: Number(year) }
-  }
+  return yearAndTimeFramePeriods.reduce(
+    (acc, [year, timeFrame]) => {
+      if (Object.values(ReportMonth).includes(timeFrame.toUpperCase() as ReportMonth)) {
+        acc.intervalType.push(IntervalType.MONTH)
+        acc.period.push(dayjs(new Date(`${year} ${timeFrame}`)).month() + 1)
+        acc.year.push(Number(year))
+      }
 
-  if (Object.values(ReportQuarter).includes(timeFrame as ReportQuarter)) {
-    return { intervalType: IntervalType.QUARTER, period: Number(period.slice(period.length - 1)), year: Number(year) }
-  }
+      if (Object.values(ReportQuarter).includes(timeFrame as ReportQuarter)) {
+        acc.intervalType.push(IntervalType.QUARTER)
+        acc.period.push(Number(timeFrame.slice(1)))
+        acc.year.push(Number(year))
+      }
 
-  return { intervalType: IntervalType.YEAR, period: 1, year: Number(year) }
+      if (timeFrame === 'FY') {
+        acc.intervalType.push(IntervalType.YEAR)
+        acc.period.push(1)
+        acc.year.push(Number(year))
+      }
+
+      return acc
+    },
+    { intervalType: [] as IntervalType[], period: [] as number[], year: [] as number[] }
+  )
 }
 
 export const getReportPeriod = (intervalType: IntervalType, period: number, year: number) => {
@@ -34,3 +51,9 @@ export const getReportPeriod = (intervalType: IntervalType, period: number, year
 
   return `${year} FY`
 }
+
+export const mapSearchFiltersToRequestBody = (values: ReportsFiltersValues & ReportsQuickFiltersValues): Omit<GetPublicReportsRequestBody, 'organisationId'> => ({
+  blockChainHash: values.search ? values.search : undefined,
+  reportType: values.report.length ? values.report : undefined,
+  ...(values.period.length ? getReportPeriodPayload(values.period) : { intervalType: undefined, period: undefined, year: undefined })
+})

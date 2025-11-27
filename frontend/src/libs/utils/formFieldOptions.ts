@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 import { type AutocompleteOption } from 'features/mui/base'
 import {
   OrganisationCostCenterEntity,
@@ -11,6 +13,23 @@ import {
   OrganisationTransactionTypeEntity,
   OrganisationVatCodeEntity
 } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types'
+import { ReportMonth, ReportQuarter, ReportType } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { intl } from 'libs/translations/utils/intl'
+
+const BASE_YEAR = '2023'
+
+const getYears = (periodFrom: string): number[] => {
+  if (!periodFrom) return []
+
+  const years = []
+  const currentYear = dayjs().year()
+
+  for (let year = currentYear; year >= Number(periodFrom); year--) {
+    years.push(year)
+  }
+
+  return years
+}
 
 export const getAllCostCenterOptions = (costCenters: OrganisationCostCenterEntity[] | null | undefined) => {
   return costCenters
@@ -82,6 +101,42 @@ export const getAllProjectOptions = (projects: OrganisationProjectEntity[] | nul
           return { label: projectCustCode, value: projectCustCode }
         })
     : []
+}
+
+export const getAllReportPeriodOptions = (periodFrom: string = BASE_YEAR) => {
+  const years = getYears(periodFrom)
+  const quarters = Object.values(ReportQuarter)
+  const months = Object.values(ReportMonth)
+
+  return years.flatMap<AutocompleteOption>((year) => {
+    const yearOption = {
+      label: intl.formatMessage({ id: 'reportPeriod' }, { year, period: intl.formatMessage({ id: 'fullYear' }) }),
+      value: `${year} FY`
+    }
+
+    const quarterOptions = quarters.map<AutocompleteOption>((quarter, index) => ({
+      label: intl.formatMessage({ id: 'reportPeriod' }, { year, period: intl.formatMessage({ id: 'quarterPrefix' }, { index: index + 1 }) }),
+      value: `${year} ${quarter}`
+    }))
+
+    const monthOptions = months.map<AutocompleteOption>((month, index) => {
+      const currentMonth = index < 9 ? `0${index + 1}` : `${index + 1}`
+      const date = new Date(`${year}-${currentMonth}-01`)
+
+      return {
+        label: intl.formatMessage({ id: 'reportPeriod' }, { year, period: new Intl.DateTimeFormat('en-US', { month: 'short' }).format(date) }),
+        value: `${year} ${month.charAt(0)?.toUpperCase()}${month.slice(1).toLowerCase()}`
+      }
+    })
+
+    return [yearOption, ...quarterOptions.flatMap<AutocompleteOption>((option, index) => [option, ...monthOptions.slice(index * 3, (index + 1) * 3)])]
+  })
+}
+
+export const getAllReportTypeOptions = () => {
+  return Object.keys(ReportType)
+    .sort((current, next) => current.localeCompare(next))
+    .map<AutocompleteOption>((type) => ({ label: intl.formatMessage({ id: type }), value: type }))
 }
 
 export const getAllTransactionNumberOptions = (transactionNumbers: OrganisationTransactionNumberEntity[] | null | undefined) => {
