@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
+import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
 import org.cardanofoundation.reeve.indexer.service.OrganisationService;
 
 
@@ -96,7 +97,13 @@ public class OrganisationController {
     public ResponseEntity<List<EventCodeView>> getEventCodes(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         log.info("Fetching distinct event codes for organisation: {}", orgId);
         List<EventCodeView> eventPairs = organisationService.getDistinctEventCodeNamePairsForOrganisation(orgId);
-
         return ResponseEntity.ok(eventPairs);
+    }
+
+    @GetMapping("/{orgId}/projects")
+    public ResponseEntity<List<ProjectView>> getProjects(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+        log.info("Fetching distinct project codes and names for organisation: {}", orgId);
+        List<ProjectView> projects = organisationService.getDistinctProjectCodesAndNamesForOrganisation(orgId);
+        return ResponseEntity.ok(projects);
     }
 }
