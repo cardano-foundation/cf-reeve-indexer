@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
 
 import { useGetPublicTransactionsModel } from 'libs/models/transactions-model/GetPublicTransactions/GetPublicTransactionsModel.service.ts'
+import { SearchFiltersValues } from 'modules/public-transactions/components/SearchFilters/SearchFilters.types'
+import { SearchQuickFiltersValues } from 'modules/public-transactions/components/SearchToolbar/SearchToolbar.types'
 import { mapSearchFiltersToRequestBody } from 'modules/public-transactions/utils/payload.ts'
 
 interface PublicTransactionsQueriesState {
-  filters: any
+  filters: SearchQuickFiltersValues & SearchFiltersValues
   pagination: { page: number; size: number }
   sorting: { sortBy: string; sortOrder: 'asc' | 'desc' | null | undefined }
 }

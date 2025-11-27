@@ -22,7 +22,7 @@ export const usePublicTransactions = () => {
     sorting: { sortBy: sorting.sortBy, sortOrder: sorting.sortOrder }
   })
 
-  const hasEmptyPageState = !data.isFetching && data.transactions?.length === 0
+  const hasEmptyPageState = !data.isFetching && !filters.hasFiltersSelected && !data.transactions?.transactions.length
 
   return {
     data: { ...data, hasEmptyPageState },
