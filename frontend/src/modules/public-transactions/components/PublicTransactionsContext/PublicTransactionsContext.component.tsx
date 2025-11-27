@@ -1,7 +1,9 @@
 import React from 'react'
 
-export const PublicTransactionsContext = React.createContext(undefined)
+import type { PublicTransactionsContextProps, PublicTransactionsContextProviderProps } from './PublicTransactionsContext.types'
 
-export const PublicTransactionsContextProvider = ({ children, value }) => {
+export const PublicTransactionsContext = React.createContext<PublicTransactionsContextProps | undefined>(undefined)
+
+export const PublicTransactionsContextProvider = ({ children, value }: PublicTransactionsContextProviderProps) => {
   return <PublicTransactionsContext.Provider value={value}>{children}</PublicTransactionsContext.Provider>
 }

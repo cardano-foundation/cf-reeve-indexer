@@ -11,6 +11,7 @@
   "transactionDetails": "Transaction details",
   "transactionItems": "Transaction items",
   "publicTransactionsSearchPlaceholder": "Search by Blockchain hash...",
+  "publicReportsSearchPlaceholder": "Search by Blockchain hash...",
   "import": "Import",
   "importTransactions": "Import transactions",
   "importSetupData": "Import setup data",
