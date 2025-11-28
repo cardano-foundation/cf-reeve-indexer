@@ -1,14 +1,13 @@
 import Avatar from '@mui/material/Avatar'
 import { styled } from 'styled-components'
 
-import { colors as paletteColors } from 'libs/ui-kit/theme/colors.ts'
+import { theme } from 'libs/ui-kit/theme/theme'
 
 export const AvatarStyled = styled(Avatar)`
   && {
     width: 2.5rem;
     height: 2.5rem;
-    background: ${paletteColors.blue[700]};
-    font-size: ${({ theme }) => theme.typography.body2};
+    background: ${theme.palette.primary.main};
     line-height: 1;
   }
 `

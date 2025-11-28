@@ -1,9 +1,10 @@
 import { useTheme, Box, MenuItem } from '@mui/material'
 import Select, { SelectProps as SelectPropsMUI } from '@mui/material/Select'
 import { ArrowDown2 } from 'iconsax-react'
-import { cardanoFoundationLogo, issuranceSwissLogo } from 'assets/icons'
-import { OrganisationLabelStyled, OrganisationLogoStyled } from 'libs/form-kit/components/InputOrganisationsSelectField/InputOrganisationsSelectField.styles.tsx'
+import { OrganisationLabelStyled } from 'libs/form-kit/components/InputOrganisationsSelectField/InputOrganisationsSelectField.styles.tsx'
 import { SelectOption } from 'libs/ui-kit/components/InputSelect/InputSelect.component.tsx'
+import { Avatar } from 'libs/ui-kit/components/Avatar/Avatar.component.tsx'
+import { getInitials } from 'libs/utils/getInitials'
 
 type InputOrganisationsSelectFieldProps = SelectPropsMUI<string> & {
   items: SelectOption[]
@@ -22,10 +23,7 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
         const org = items.find((item) => item.value === value)
         return (
           <Box alignItems="center" display="flex" gap={1}>
-            <OrganisationLogoStyled
-              alt={org?.name}
-              src={value === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94' ? cardanoFoundationLogo : issuranceSwissLogo}
-            />
+            <Avatar alt={org?.name} data-testid={org?.name}>{getInitials(org?.name)}</Avatar>
             <OrganisationLabelStyled component="h2" variant="h2">
               {org?.name}
             </OrganisationLabelStyled>

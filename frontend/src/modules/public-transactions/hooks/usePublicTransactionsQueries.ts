@@ -4,6 +4,7 @@ import { useGetPublicTransactionsModel } from 'libs/models/transactions-model/Ge
 import { SearchFiltersValues } from 'modules/public-transactions/components/SearchFilters/SearchFilters.types'
 import { SearchQuickFiltersValues } from 'modules/public-transactions/components/SearchToolbar/SearchToolbar.types'
 import { mapSearchFiltersToRequestBody } from 'modules/public-transactions/utils/payload.ts'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 
 interface PublicTransactionsQueriesState {
   filters: SearchQuickFiltersValues & SearchFiltersValues
@@ -18,7 +19,7 @@ export const usePublicTransactionsQueries = (state: PublicTransactionsQueriesSta
     sorting: { sortBy, sortOrder }
   } = state
 
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
+  const { selectedOrganisation } = useLayoutPublicContext()
 
   const filtersPayload = useMemo(() => mapSearchFiltersToRequestBody(filters), [filters])
 

@@ -1,2 +1,1 @@
 export const PRESELECTED_DATA_SOURCE = 'oracleNetsuite'
-export const PRESELECTED_ORGANISATION = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'

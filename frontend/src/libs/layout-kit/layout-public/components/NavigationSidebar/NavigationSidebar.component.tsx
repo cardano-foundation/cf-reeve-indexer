@@ -12,19 +12,16 @@ import { MenuCategory } from '../LayoutPublicContext/LayoutPublicContext.compone
 export const NavigationSidebar = () => {
   const { t } = useTranslations()
   const { pathname } = useLocationState()
-  const { handleSectionMenuToggle, isSidebarOpen, isResourcesOpen, selectedOrganisation } = useLayoutPublicContext()
+  const { handleSectionMenuToggle, isSidebarOpen, isResourcesOpen } = useLayoutPublicContext()
 
   const getCurrentPage = (route: string) => pathname === route
   const { RESOURCES_ROUTES } = useNavigationRoutes()
 
-  const menuItems =
-    selectedOrganisation === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
-      ? [
-          { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
-          { icon: Note1, label: t({ id: 'publicReports' }), route: PATHS.PUBLIC_REPORTS },
-          { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: PATHS.PUBLIC_TRANSACTIONS }
-        ]
-      : [{ icon: TrendUp, label: t({ id: 'publicRewardDashboard' }), route: PATHS.PUBLIC_REWARD_DASHBOARD }]
+  const menuItems = [
+    { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
+    { icon: Note1, label: t({ id: 'publicReports' }), route: PATHS.PUBLIC_REPORTS },
+    { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: PATHS.PUBLIC_TRANSACTIONS }
+  ]
 
   return (
     <NavigationStyled>
@@ -33,19 +30,17 @@ export const NavigationSidebar = () => {
           <ButtonNavItem key={route} icon={icon} label={label} route={route} getCurrentPage={getCurrentPage} hasTooltip={!isSidebarOpen} />
         ))}
 
-        {selectedOrganisation === '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94' && (
-          <CollapseNavItem
-            icon={Book1}
-            label={t({ id: 'publicResources' })}
-            route={PATHS.PUBLIC_RESOURCES}
-            subRoutes={RESOURCES_ROUTES}
-            getCurrentPage={getCurrentPage}
-            hasMainRoute
-            onToggleMenu={() => handleSectionMenuToggle(MenuCategory.RESOURCES)}
-            hasTooltip={!isSidebarOpen}
-            isOpen={isResourcesOpen}
-          />
-        )}
+        <CollapseNavItem
+          icon={Book1}
+          label={t({ id: 'publicResources' })}
+          route={PATHS.PUBLIC_RESOURCES}
+          subRoutes={RESOURCES_ROUTES}
+          getCurrentPage={getCurrentPage}
+          hasMainRoute
+          onToggleMenu={() => handleSectionMenuToggle(MenuCategory.RESOURCES)}
+          hasTooltip={!isSidebarOpen}
+          isOpen={isResourcesOpen}
+        />
       </ListStyled>
     </NavigationStyled>
   )

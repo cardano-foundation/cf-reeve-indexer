@@ -2,6 +2,7 @@ import { useGetPublicReportsModel } from 'libs/models/reports-model/GetReportsMo
 import { ReportsFiltersValues } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.types'
 import { ReportsQuickFiltersValues } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.types'
 import { mapSearchFiltersToRequestBody } from 'modules/public-reports/utils/payload'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 
 interface PublicReportsQueriesState {
   filters: ReportsQuickFiltersValues & ReportsFiltersValues
@@ -16,7 +17,7 @@ export const usePublicReportsQueries = (state: PublicReportsQueriesState) => {
     sorting: { sortBy, sortOrder }
   } = state
 
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
+  const { selectedOrganisation } = useLayoutPublicContext()
 
   const filtersPayload = mapSearchFiltersToRequestBody(filters)
 
