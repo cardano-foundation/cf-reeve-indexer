@@ -64,6 +64,6 @@ export interface PostPublicTransactionsRequest {
 export interface PostPublicTransactionsResponse200 {
   success: boolean
   total: number
-  transactions: PostPublicTransactionResponse[]
+  transactions?: PostPublicTransactionResponse[]
   error: null
 }
