@@ -34,10 +34,15 @@ public class ReportService {
     private final Clock clock;
     private final CredentialRepository credentialRepository;
 
-    public List<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency, String reportType,
-            String intervalType, Short year, Short period, Pageable pageable) {
-       return reportRepository.findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                organisationId, blockChainHash,currency, reportType, intervalType != null ? Interval.valueOf(intervalType) : null, year, period, pageable)
+    public List<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency,
+            List<String> reportTypes, List<String> intervalTypes, List<Integer> years, List<Integer> periods, Pageable pageable) {
+        List<Interval> intervals = intervalTypes != null ?
+            intervalTypes.stream()
+                .map(Interval::valueOf)
+                .toList() : null;
+
+        return reportRepository.findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+                organisationId, blockChainHash, currency, reportTypes, intervals, years, periods, pageable)
                 .stream()
                 .map(reportEntity -> {
                     try {
