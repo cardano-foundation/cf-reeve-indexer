@@ -18,17 +18,22 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             SELECT r FROM ReportEntity r
             INNER JOIN OrganisationEntity o ON r.organisationId = o.id
             WHERE (:organisationId IS NULL OR r.organisationId = :organisationId)
-            AND (:subType IS NULL OR r.subType = :subType)
-            AND (:interval IS NULL OR r.interval = :interval)
-            AND (:year IS NULL OR r.year = :year)
-            AND (:period IS NULL OR r.period = :period)
+            AND (:subTypes IS NULL OR r.subType IN :subTypes)
+            AND (:intervals IS NULL OR r.interval IN :intervals)
+            AND (:years IS NULL OR r.year IN :years)
+            AND (:periods IS NULL OR r.period IN :periods)
             AND (:blockChainHash IS NULL OR r.txHash = :blockChainHash)
             AND (:currency IS NULL OR o.currencyId = :currency)
             """)
     List<ReportEntity> findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-            @Param("organisationId") String organisationId, @Param("blockChainHash") String blockChainHash,@Param("currency") String currency, @Param("subType") String subType,
-            @Param("interval") Interval interval, @Param("year") Short year,
-            @Param("period") Short period, Pageable pageable);
+            @Param("organisationId") String organisationId,
+            @Param("blockChainHash") String blockChainHash,
+            @Param("currency") String currency,
+            @Param("subTypes") List<String> subTypes,
+            @Param("intervals") List<Interval> intervals,
+            @Param("years") List<Integer> years,
+            @Param("periods") List<Integer> periods,
+            Pageable pageable);
 
 
     @Query("""
