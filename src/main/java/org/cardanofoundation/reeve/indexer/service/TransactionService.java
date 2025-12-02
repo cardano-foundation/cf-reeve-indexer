@@ -4,12 +4,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Service;
@@ -46,19 +49,48 @@ public class TransactionService {
                                                           Set<String> counterPartyType,
                                                           Set<String> counterPartyCustCode,
                                                           Pageable pageable) {
+        // Create a new Pageable with the correct sort field
+        Pageable sortedPageable = PageRequest.of(
+            pageable.getPageNumber(),
+            pageable.getPageSize(),
+            Sort.by(pageable.getSort().stream()
+                .map(order -> {
+                    if ("entryDate".equals(order.getProperty())) {
+                        return new Sort.Order(order.getDirection(), "transaction.date");
+                    }
+                    return order;
+                })
+                .collect(Collectors.toList())
+            )
+        );
+
         Page<TransactionItemEntity> transactionItems;
         try {
-            transactionItems = transactionItemRepository.searchItems(organisationId,transactionInternalNumber, Optional.ofNullable(dateFrom).orElse(LocalDate.of(1970, 1, 1)).atStartOfDay(),
-                    Optional.ofNullable(dateTo).orElse(LocalDate.now()).atStartOfDay(), events, currencies, minAmount, maxAmount, transactionHashes, documentNumber, type,
-                    vatCustCode,
-                    costCenterCustCode,
-                    projectCustCode,
-                    counterPartyType,
-                    counterPartyCustCode,
-                    pageable);
+            transactionItems = transactionItemRepository.searchItems(
+                organisationId,
+                transactionInternalNumber,
+                Optional.ofNullable(dateFrom).orElse(LocalDate.of(1970, 1, 1)).atStartOfDay(),
+                Optional.ofNullable(dateTo).orElse(LocalDate.now()).atStartOfDay(),
+                events,
+                currencies,
+                minAmount,
+                maxAmount,
+                transactionHashes,
+                documentNumber,
+                type,
+                vatCustCode,
+                costCenterCustCode,
+                projectCustCode,
+                counterPartyType,
+                counterPartyCustCode,
+                sortedPageable
+            );
         } catch (Exception e) {
             log.error("Error occurred while searching transaction items", e);
-            return ExtractionTransactionView.createFail(ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Error occurred while searching transaction items"));
+            return ExtractionTransactionView.createFail(ProblemDetail.forStatusAndDetail(
+                HttpStatusCode.valueOf(400),
+                "Error occurred while searching transaction items: " + e.getMessage()
+            ));
         }
         List<ExtractionTransactionItemView> itemViews = transactionItems.stream()
                 .map(ExtractionTransactionItemView::fromEntity).toList();
