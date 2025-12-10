@@ -6,6 +6,9 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
@@ -48,46 +51,69 @@ public class OrganisationService {
                 .build();
     }
 
-    public List<CurrencyView> getCurrenciesForOrganisation(String orgId) {
-        return currencyRepository.findAllByOrgId(orgId).stream()
+    /**
+     * Maps external sort property names to entity/JPQL field names.
+     * Handles cases where API names differ from entity field names or require alias prefixes.
+     */
+    private Pageable mapSortProperties(Pageable pageable, java.util.Map<String, String> propertyMap) {
+        Sort mappedSort = Sort.by(pageable.getSort().stream()
+                .map(order -> {
+                    String property = order.getProperty();
+                    String mappedProperty = propertyMap.getOrDefault(property, property);
+                    return order.withProperty(mappedProperty);
+                })
+                .toArray(Sort.Order[]::new));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mappedSort);
+    }
+
+    public List<CurrencyView> getCurrenciesForOrganisation(String orgId, Pageable pageable) {
+        Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("customerCode", "custCode"));
+        return currencyRepository.findAllByOrgId(orgId, mappedPageable).stream()
                 .map(currencyEntity -> new CurrencyView(currencyEntity.getId().getCurrencyId(), currencyEntity.getCustCode()))
                 .toList();
     }
 
-    public List<String> getDistinctInternalNumbersForOrganisation(String orgId) {
-        return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId);
+    public List<String> getDistinctInternalNumbersForOrganisation(String orgId, Pageable pageable) {
+        return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId, pageable).getContent();
     }
 
-    public List<String> getDistinctTransactionTypesForOrganisation(String orgId) {
-        return transactionRepository.findDistinctTransactionTypesByOrganisationId(orgId);
+    public List<String> getDistinctTransactionTypesForOrganisation(String orgId, Pageable pageable) {
+        return transactionRepository.findDistinctTransactionTypesByOrganisationId(orgId, pageable).getContent();
     }
 
-    public List<String> getDistinctDocumentNumbersForOrganisation(String orgId) {
-        return transactionRepository.findDistinctDocumentNumbersByOrganisationId(orgId);
+    public List<String> getDistinctDocumentNumbersForOrganisation(String orgId, Pageable pageable) {
+        Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("documentNumber", "ti.documentNumber"));
+        return transactionRepository.findDistinctDocumentNumbersByOrganisationId(orgId, mappedPageable).getContent();
     }
 
-    public List<String> getDistinctVatCustCodesForOrganisation(String orgId) {
-        return transactionRepository.findDistinctVatCustCodesByOrganisationId(orgId);
+    public List<String> getDistinctVatCustCodesForOrganisation(String orgId, Pageable pageable) {
+        Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("vatCustCode", "ti.vatCustCode"));
+        return transactionRepository.findDistinctVatCustCodesByOrganisationId(orgId, mappedPageable).getContent();
     }
 
-    public List<String> getDistinctCostCenterCustCodesForOrganisation(String orgId) {
-        return transactionRepository.findDistinctCostCenterCustCodesByOrganisationId(orgId);
+    public List<String> getDistinctCostCenterCustCodesForOrganisation(String orgId, Pageable pageable) {
+        Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("costCenterCustCode", "ti.costCenterCustCode"));
+        return transactionRepository.findDistinctCostCenterCustCodesByOrganisationId(orgId, mappedPageable).getContent();
     }
 
-    public List<String> getDistinctCounterPartyAccountNamesForOrganisation(String orgId) {
-        return transactionRepository.findDistinctCounterPartyAccountNamesByOrganisationId(orgId);
+    public List<String> getDistinctCounterPartyAccountNamesForOrganisation(String orgId, Pageable pageable) {
+        Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("counterPartyCustCode", "ti.counterPartyCustCode"));
+        return transactionRepository.findDistinctCounterPartyAccountNamesByOrganisationId(orgId, mappedPageable).getContent();
     }
 
-    public List<String> getDistinctCounterPartyCustCodesForOrganisation(String orgId) {
-        return transactionRepository.findDistinctCounterPartyCustCodesByOrganisationId(orgId);
+    public List<String> getDistinctCounterPartyCustCodesForOrganisation(String orgId, Pageable pageable) {
+        Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("counterPartyCustCode", "ti.counterPartyCustCode"));
+        return transactionRepository.findDistinctCounterPartyCustCodesByOrganisationId(orgId, mappedPageable).getContent();
     }
 
-    public List<EventCodeView> getDistinctEventCodeNamePairsForOrganisation(String orgId) {
-        return transactionRepository.findDistinctEventCodeNamePairsByOrganisationId(orgId);
+    public List<EventCodeView> getDistinctEventCodeNamePairsForOrganisation(String orgId, Pageable pageable) {
+        Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("eventCode", "ti.eventCode"));
+        return transactionRepository.findDistinctEventCodeNamePairsByOrganisationId(orgId, mappedPageable).getContent();
     }
 
-    public List<ProjectView> getDistinctProjectCodesAndNamesForOrganisation(String orgId) {
+    public List<ProjectView> getDistinctProjectCodesAndNamesForOrganisation(String orgId, Pageable pageable) {
         log.info("Fetching distinct project codes and names for organisation: {}", orgId);
-        return transactionRepository.findDistinctProjectCodesAndNamesByOrganisationId(orgId);
+        Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("projectCustCode", "ti.projectCustCode"));
+        return transactionRepository.findDistinctProjectCodesAndNamesByOrganisationId(orgId, mappedPageable).getContent();
     }
 }

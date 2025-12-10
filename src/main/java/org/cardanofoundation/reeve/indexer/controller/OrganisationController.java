@@ -5,6 +5,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,71 +41,91 @@ public class OrganisationController {
     }
 
     @GetMapping("/{orgId}/currencies")
-    public ResponseEntity<List<CurrencyView>> getCurrencies(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
-        List<CurrencyView> currencies = organisationService.getCurrenciesForOrganisation(orgId);
+    public ResponseEntity<List<CurrencyView>> getCurrencies(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
+        List<CurrencyView> currencies = organisationService.getCurrenciesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(currencies);
     }
 
     @GetMapping("/{orgId}/internalNumber")
-    public ResponseEntity<List<String>> getInternalNumbers(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<String>> getInternalNumbers(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct internal numbers for organisation: {}", orgId);
-        List<String> internalNumbers = organisationService.getDistinctInternalNumbersForOrganisation(orgId);
+        List<String> internalNumbers = organisationService.getDistinctInternalNumbersForOrganisation(orgId, pageable);
         return ResponseEntity.ok(internalNumbers);
     }
 
     @GetMapping("/{orgId}/transactionType")
-    public ResponseEntity<List<String>> getTransactionTypes(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<String>> getTransactionTypes(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct transaction types for organisation: {}", orgId);
-        List<String> transactionTypes = organisationService.getDistinctTransactionTypesForOrganisation(orgId);
+        List<String> transactionTypes = organisationService.getDistinctTransactionTypesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(transactionTypes);
     }
 
     @GetMapping("/{orgId}/documentNumber")
-    public ResponseEntity<List<String>> getDocumentNumbers(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<String>> getDocumentNumbers(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct document numbers for organisation: {}", orgId);
-        List<String> documentNumbers = organisationService.getDistinctDocumentNumbersForOrganisation(orgId);
+        List<String> documentNumbers = organisationService.getDistinctDocumentNumbersForOrganisation(orgId, pageable);
         return ResponseEntity.ok(documentNumbers);
     }
 
     @GetMapping("/{orgId}/vatCode")
-    public ResponseEntity<List<String>> getVatCodes(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<String>> getVatCodes(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct vat codes for organisation: {}", orgId);
-        List<String> vatCodes = organisationService.getDistinctVatCustCodesForOrganisation(orgId);
+        List<String> vatCodes = organisationService.getDistinctVatCustCodesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(vatCodes);
     }
 
     @GetMapping("/{orgId}/costCenter")
-    public ResponseEntity<List<String>> getCostCenters(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<String>> getCostCenters(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct cost center codes for organisation: {}", orgId);
-        List<String> costCenters = organisationService.getDistinctCostCenterCustCodesForOrganisation(orgId);
+        List<String> costCenters = organisationService.getDistinctCostCenterCustCodesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(costCenters);
     }
 
     @GetMapping("/{orgId}/counterPartyType")
-    public ResponseEntity<List<String>> getCounterPartyTypes(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<String>> getCounterPartyTypes(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct counter party types for organisation: {}", orgId);
-        List<String> counterPartyTypes = organisationService.getDistinctCounterPartyAccountNamesForOrganisation(orgId);
+        List<String> counterPartyTypes = organisationService.getDistinctCounterPartyAccountNamesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(counterPartyTypes);
     }
 
     @GetMapping("/{orgId}/counterParty")
-    public ResponseEntity<List<String>> getCounterParties(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<String>> getCounterParties(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct counter party cust codes for organisation: {}", orgId);
-        List<String> counterParties = organisationService.getDistinctCounterPartyCustCodesForOrganisation(orgId);
+        List<String> counterParties = organisationService.getDistinctCounterPartyCustCodesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(counterParties);
     }
 
     @GetMapping("/{orgId}/events")
-    public ResponseEntity<List<EventCodeView>> getEventCodes(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<EventCodeView>> getEventCodes(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct event codes for organisation: {}", orgId);
-        List<EventCodeView> eventPairs = organisationService.getDistinctEventCodeNamePairsForOrganisation(orgId);
+        List<EventCodeView> eventPairs = organisationService.getDistinctEventCodeNamePairsForOrganisation(orgId, pageable);
         return ResponseEntity.ok(eventPairs);
     }
 
     @GetMapping("/{orgId}/projects")
-    public ResponseEntity<List<ProjectView>> getProjects(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+    public ResponseEntity<List<ProjectView>> getProjects(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Fetching distinct project codes and names for organisation: {}", orgId);
-        List<ProjectView> projects = organisationService.getDistinctProjectCodesAndNamesForOrganisation(orgId);
+        List<ProjectView> projects = organisationService.getDistinctProjectCodesAndNamesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(projects);
     }
 }

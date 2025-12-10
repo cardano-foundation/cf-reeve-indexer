@@ -1,7 +1,8 @@
 package org.cardanofoundation.reeve.indexer.model.repository;
 
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,5 +21,5 @@ public interface CurrencyRepository extends JpaRepository<CurrencyEntity, Curren
                         @Param("custCode") String custCode);
 
     @Query("SELECT c FROM CurrencyEntity c WHERE c.id.orgId = :orgId")
-    List<CurrencyEntity> findAllByOrgId(@Param("orgId") String orgId);
+    Page<CurrencyEntity> findAllByOrgId(@Param("orgId") String orgId, Pageable pageable);
 }
