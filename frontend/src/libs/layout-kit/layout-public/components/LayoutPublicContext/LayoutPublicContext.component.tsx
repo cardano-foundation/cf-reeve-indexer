@@ -16,6 +16,8 @@ interface LayoutPublicContextProps {
   handleSectionMenuToggle: (category?: MenuCategory) => void
   handleSidebarToggle: () => void
   setSelectedOrganisation: (org: string) => void
+  organisations: any[]
+  setOrganisations: (orgs: any[]) => void
   isDrawerOpen: boolean
   isResourcesOpen: boolean
   isSidebarOpen: boolean
@@ -29,7 +31,8 @@ export const LayoutPublicContext = createContext<LayoutPublicContextProps | unde
 
 export const LayoutPublicContextProvider = ({ children }: { children: ReactNode }) => {
   const [toggledSection, setToggledSection] = useState<MenuCategory | null>(null)
-  const [selectedOrganisation, setSelectedOrganisation] = useState<string>('')
+  const [selectedOrganisation, setSelectedOrganisationState] = useState<string>('')
+  const [organisations, setOrganisations] = useState<any[]>([])
 
   const timeoutId = useRef<number | null>(null)
 
@@ -117,6 +120,17 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
     }
   }, [])
 
+  const resolveOrgValue = (o: any) => {
+    if (!o && o !== '') return ''
+    if (typeof o === 'string') return o
+    return o?.value ?? o?.id ?? o?.name ?? o?.label ?? ''
+  }
+
+  // expose a setter that accepts either an object or a string and normalizes to a string id/value
+  const setSelectedOrganisation = useCallback((org: any) => {
+    setSelectedOrganisationState(resolveOrgValue(org))
+  }, [])
+
   return (
     <LayoutPublicContext.Provider
       value={{
@@ -127,7 +141,10 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
         handleDrawerOpen,
         handleSidebarToggle,
         handleSectionMenuToggle,
+        // expose the normalized setter and the raw state value
         setSelectedOrganisation,
+        organisations,
+        setOrganisations,
         isDrawerOpen,
         isResourcesOpen,
         isSidebarOpen
