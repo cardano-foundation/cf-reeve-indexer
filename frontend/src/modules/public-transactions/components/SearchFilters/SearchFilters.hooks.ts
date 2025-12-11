@@ -2,6 +2,7 @@ import { useFormik, useFormikContext } from 'formik'
 import { noop } from 'lodash'
 
 import { useDatesRange } from 'hooks'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 import { useGetOrganisationCostCentersModel } from 'libs/models/organisation-model/GetOrganisationCostCenters/GetOrganisationCostCenters.service'
 import { useGetOrganisationCounterpartiesModel } from 'libs/models/organisation-model/GetOrganisationCounterparties/GetOrganisationCounterparties.service'
 import { useGetOrganisationCounterpartyTypesModel } from 'libs/models/organisation-model/GetOrganisationCounterpartyTypes/GetOrganisationCounterpartyTypes.service'
@@ -29,7 +30,7 @@ import { DEFAULT_SEARCH_FILTERS_VALUES } from './SearchFilters.consts'
 import { SearchFiltersValues } from './SearchFilters.types'
 
 export const useSearchFiltersOptions = () => {
-  const selectedOrganisation = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca95'
+  const { selectedOrganisation } = useLayoutPublicContext()
 
   const { costCenters } = useGetOrganisationCostCentersModel({ parameters: { organisationId: selectedOrganisation } })
   const { counterparties } = useGetOrganisationCounterpartiesModel({ parameters: { organisationId: selectedOrganisation } })

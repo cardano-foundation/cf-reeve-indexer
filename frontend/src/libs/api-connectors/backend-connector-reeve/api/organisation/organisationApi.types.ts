@@ -27,7 +27,10 @@ export interface OrganisationCurrencyEntity {
 
 export type OrganisationDocumentNumberEntity = string
 
-export type OrganisationEventEntity = string
+export interface OrganisationEventEntity {
+  eventCode: string
+  eventName: string
+}
 
 export interface OrganisationProjectEntity {
   projectCustCode: string

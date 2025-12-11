@@ -21,3 +21,26 @@ export const mapSearchFiltersToRequestBody = (values: SearchFiltersValues & Sear
   counterPartyType: values.counterpartyType.length ? values.counterpartyType : undefined,
   events: values.event.length ? values.event : undefined
 })
+
+export const mapSearchSortToRequestParameters = (sortBy: string, sortOrder: 'asc' | 'desc' | null | undefined) => {
+  const sortMapping: Record<string, string> = {
+    blockChainHash: 'blockChainHash',
+    transactionInternalNumber: 'transactionInternalNumber',
+    entryDate: 'entryDate',
+    transactionType: 'transactionType',
+    documentNumber: 'documentNumber',
+    documentCurrencyCustomerCode: 'documentCurrencyCustomerCode',
+    amountFcy: 'amountFcy',
+    amountLcy: 'amountLcy',
+    fxRate: 'fxRate',
+    vatRate: 'vatRate',
+    vatCustomerCode: 'vatCustomerCode',
+    costCenter: 'costCenter',
+    project: 'project',
+    counterpartyCustomerCode: 'counterpartyCustomerCode',
+    counterpartyType: 'counterpartyType',
+    accountEvent: 'accountEvent'
+  }
+
+  return Array.isArray(sortMapping[sortBy]) ? sortMapping[sortBy].map((param) => `${param},${sortOrder}`) : [`${sortMapping[sortBy]},${sortOrder}`]
+}
