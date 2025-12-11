@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 import { ExportSquare } from 'iconsax-react'
 import { useMemo, useRef } from 'react'
 
-// import { PublicTransactionResponse } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types.ts'
+import { PostPublicTransactionsResponse200 } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
@@ -18,7 +18,7 @@ import { formatNumber, formatNumberPercentage } from 'libs/utils/format.ts'
 import { SearchToolbar } from 'modules/public-transactions/components/SearchToolbar/SearchToolbar.component'
 
 interface SearchedTransactionsProps {
-  data: any
+  data: PostPublicTransactionsResponse200 | null
   pagination: ReturnType<typeof usePagination>
   sorting: ReturnType<typeof useSorting>
   hasFiltersSelected: boolean
@@ -75,7 +75,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
     {
       field: 'entryDate',
       headerName: t({ id: 'transactionDate' }),
-      valueFormatter: (value) => dayjs(value, 'YYYY-MM-DD').format('DD/MM/YYYY'),
+      valueFormatter: (value) => value ? dayjs(value, 'YYYY-MM-DD').format('DD/MM/YYYY') : null,
       hideable: false,
       sortable: true,
       flex: 1,
@@ -87,7 +87,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
     {
       field: 'amountFcy',
       headerName: t({ id: 'amountFCY' }),
-      valueFormatter: (value) => formatNumber(value),
+      valueFormatter: (value) => value ? formatNumber(value) : null,
       align: 'right',
       headerAlign: 'right',
       hideable: false,
@@ -98,7 +98,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
     {
       field: 'amountLcy',
       headerName: t({ id: 'amountLCY' }),
-      valueFormatter: (value) => formatNumber(value),
+      valueFormatter: (value) => value ? formatNumber(value) : null,
       align: 'right',
       headerAlign: 'right',
       hideable: false,
@@ -109,7 +109,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
     {
       field: 'fxRate',
       headerName: t({ id: 'exchangeRate' }),
-      renderCell: ({ value }) => formatNumber(value, { minimumFractionDigits: 5, maximumFractionDigits: 5 }),
+      renderCell: ({ value }) => value ? formatNumber(value, { minimumFractionDigits: 5, maximumFractionDigits: 5 }) : null,
       align: 'right',
       headerAlign: 'right',
       hideable: false,
@@ -120,7 +120,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
     {
       field: 'vatRate',
       headerName: t({ id: 'vatRate' }),
-      valueFormatter: (value) => formatNumberPercentage(value),
+      valueFormatter: (value) => value ? formatNumberPercentage(value) : null,
       align: 'right',
       headerAlign: 'right',
       hideable: true,

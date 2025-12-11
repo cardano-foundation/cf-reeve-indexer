@@ -85,9 +85,9 @@ export const getAllDocumentNumberOptions = (documentNumbers: OrganisationDocumen
 export const getAllEventOptions = (events: OrganisationEventEntity[] | null | undefined) => {
   return events
     ? events
-        .sort((current, next) => current.localeCompare(next))
-        .map<AutocompleteOption>((option) => {
-          return { label: option, value: option }
+        .sort((current, next) => current.eventCode.localeCompare(next.eventCode))
+        .map<AutocompleteOption>(({ eventCode, eventName }) => {
+          return { description: eventName, label: eventCode, value: eventCode }
         })
     : []
 }

@@ -5,7 +5,7 @@ import { SearchFiltersValues } from 'modules/public-transactions/components/Sear
 import { SearchQuickFiltersValues } from 'modules/public-transactions/components/SearchToolbar/SearchToolbar.types.ts'
 
 export const mapSearchFiltersToRequestBody = (values: SearchFiltersValues & SearchQuickFiltersValues): Omit<PostPublicTransactionsRequestBody, 'organisationId'> => ({
-  blockchainHash: values.search ? values.search : undefined,
+  transactionHashes: values.search ? [values.search] : undefined,
   dateFrom: dayjs(values.dateFrom).isValid() ? dayjs(values.dateFrom).format('YYYY-MM-DD') : undefined,
   dateTo: dayjs(values.dateTo).isValid() ? dayjs(values.dateTo).format('YYYY-MM-DD') : undefined,
   transactionInternalNumber: values.transactionNumber.length ? values.transactionNumber : undefined,
@@ -21,3 +21,26 @@ export const mapSearchFiltersToRequestBody = (values: SearchFiltersValues & Sear
   counterPartyType: values.counterpartyType.length ? values.counterpartyType : undefined,
   events: values.event.length ? values.event : undefined
 })
+
+export const mapSearchSortToRequestParameters = (sortBy: string, sortOrder: 'asc' | 'desc' | null | undefined) => {
+  const sortMapping: Record<string, string> = {
+    blockChainHash: 'blockChainHash',
+    transactionInternalNumber: 'transactionInternalNumber',
+    entryDate: 'entryDate',
+    transactionType: 'transactionType',
+    documentNumber: 'documentNumber',
+    documentCurrencyCustomerCode: 'documentCurrencyCustomerCode',
+    amountFcy: 'amountFcy',
+    amountLcy: 'amountLcy',
+    fxRate: 'fxRate',
+    vatRate: 'vatRate',
+    vatCustomerCode: 'vatCustomerCode',
+    costCenter: 'costCenterCustCode',
+    project: 'projectCustCode',
+    counterpartyCustomerCode: 'counterPartyCustCode',
+    counterpartyType: 'counterPartyType',
+    accountEvent: 'eventCode'
+  }
+
+  return Array.isArray(sortMapping[sortBy]) ? sortMapping[sortBy].map((param) => `${param},${sortOrder}`) : [`${sortMapping[sortBy]},${sortOrder}`]
+}

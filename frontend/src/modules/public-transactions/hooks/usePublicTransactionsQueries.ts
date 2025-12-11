@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useGetPublicTransactionsModel } from 'libs/models/transactions-model/GetPublicTransactions/GetPublicTransactionsModel.service.ts'
 import { SearchFiltersValues } from 'modules/public-transactions/components/SearchFilters/SearchFilters.types'
 import { SearchQuickFiltersValues } from 'modules/public-transactions/components/SearchToolbar/SearchToolbar.types'
-import { mapSearchFiltersToRequestBody } from 'modules/public-transactions/utils/payload.ts'
+import { mapSearchFiltersToRequestBody, mapSearchSortToRequestParameters } from 'modules/public-transactions/utils/payload.ts'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 
 interface PublicTransactionsQueriesState {
@@ -27,7 +27,7 @@ export const usePublicTransactionsQueries = (state: PublicTransactionsQueriesSta
 
   const { transactions, isTransactionsFetching } = useGetPublicTransactionsModel(
     {
-      parameters: { page, size, sort: [`${sortBy},${sortOrder}`] },
+      parameters: { page, size, sort: mapSearchSortToRequestParameters(sortBy, sortOrder) },
       body: {
         organisationId: selectedOrganisation,
         ...(hasSomeFilters ? filtersPayload : {})
