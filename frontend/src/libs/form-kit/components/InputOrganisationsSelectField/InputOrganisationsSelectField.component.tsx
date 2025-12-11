@@ -14,7 +14,6 @@ type InputOrganisationsSelectFieldProps = SelectPropsMUI<string> & {
 
 export const InputOrganisationsSelectField = ({ items, name, value, hasChevron = true, ...props }: InputOrganisationsSelectFieldProps) => {
   const theme = useTheme()
-  console.log('Rendering InputOrganisationsSelectField with items:', items)
   return (
     <Select
       name={name}
