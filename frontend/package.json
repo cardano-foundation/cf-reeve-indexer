@@ -1,7 +1,7 @@
 {
-  "name": "reeve-public-frontend",
+  "name": "reeve-indexer-ui",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "reeve-platform-version": "release/1.2.0",
   "scripts": {

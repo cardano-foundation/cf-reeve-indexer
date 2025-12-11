@@ -1,4 +1,4 @@
-# Reeve Public Frontend
+# Reeve Indexer UI
 
 <p>
   <a href="https://conventionalcommits.org">
