@@ -120,15 +120,10 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
     }
   }, [])
 
-  const resolveOrgValue = (o: any) => {
-    if (!o && o !== '') return ''
-    if (typeof o === 'string') return o
-    return o?.value ?? o?.id ?? o?.name ?? o?.label ?? ''
-  }
-
-  // expose a setter that accepts either an object or a string and normalizes to a string id/value
   const setSelectedOrganisation = useCallback((org: any) => {
-    setSelectedOrganisationState(resolveOrgValue(org))
+    // normalize incoming value to a string id
+    const resolve = (o: any) => (o == null ? '' : typeof o === 'string' ? o : (o?.value ?? o?.id ?? ''))
+    setSelectedOrganisationState(resolve(org))
   }, [])
 
   return (
@@ -141,15 +136,13 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
         handleDrawerOpen,
         handleSidebarToggle,
         handleSectionMenuToggle,
-        // expose the normalized setter and the raw state value
         setSelectedOrganisation,
         organisations,
         setOrganisations,
         isDrawerOpen,
         isResourcesOpen,
         isSidebarOpen
-      }}
-    >
+      }}>
       {children}
     </LayoutPublicContext.Provider>
   )
