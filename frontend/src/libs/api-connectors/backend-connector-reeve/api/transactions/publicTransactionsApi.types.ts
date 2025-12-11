@@ -39,7 +39,7 @@ export interface PostPublicTransactionsRequestParameters {
 
 export interface PostPublicTransactionsRequestBody {
   organisationId: string
-  blockchainHash?: string
+  transactionHashes?: string[]
   dateFrom?: string
   dateTo?: string
   transactionInternalNumber?: string[]
