@@ -14,7 +14,6 @@ type InputOrganisationsSelectFieldProps = SelectPropsMUI<string> & {
 
 export const InputOrganisationsSelectField = ({ items, name, value, hasChevron = true, ...props }: InputOrganisationsSelectFieldProps) => {
   const theme = useTheme()
-
   return (
     <Select
       name={name}
@@ -23,7 +22,9 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
         const org = items.find((item) => item.value === value)
         return (
           <Box alignItems="center" display="flex" gap={1}>
-            <Avatar alt={org?.name} data-testid={org?.name}>{getInitials(org?.name)}</Avatar>
+            <Avatar alt={org?.name} data-testid={org?.name}>
+              {getInitials(org?.name)}
+            </Avatar>
             <OrganisationLabelStyled component="h2" variant="h2">
               {org?.name}
             </OrganisationLabelStyled>
@@ -64,24 +65,43 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
       }}
       sx={{
         '&&': {
-          padding: 0
+          padding: 0,
+          background: theme.palette.background.default,
+          borderRadius: '0.75rem',
+          boxShadow: `inset 0 -1px 0 ${theme.palette.divider}`,
+          '&:hover': {
+            boxShadow: `0 4px 12px rgba(16,24,40,0.04)`
+          }
         },
         '&& .MuiSelect-select': {
           minHeight: 'unset',
-          padding: theme.spacing(1.5, 3, 1.5, 2)
+          padding: theme.spacing(1.25, 2),
+          display: 'flex',
+          alignItems: 'center'
         },
         '&& .MuiSelect-icon': {
-          width: hasChevron ? '18px' : '0px',
+          width: hasChevron ? 18 : 0,
           margin: theme.spacing(-0.5, 0, 0, 0),
-          right: '5px'
+          right: 8,
+          color: theme.palette.text.secondary
         },
         '&& .MuiOutlinedInput-notchedOutline': {
           display: 'none'
+        },
+        '& .MuiMenuItem-root': {
+          px: 2,
+          py: 1,
+          display: 'flex',
+          gap: theme.spacing(1.5),
+          alignItems: 'center'
+        },
+        '& .MuiMenuItem-root.Mui-selected': {
+          background: `${theme.palette.primary.main}22 !important`,
+          color: theme.palette.primary.main
         }
       }}
       fullWidth
-      {...props}
-    >
+      {...props}>
       {items.map(({ name, value }) => (
         <MenuItem key={value} value={value}>
           {name}

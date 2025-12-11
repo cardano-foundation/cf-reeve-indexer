@@ -28,7 +28,7 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
 ### Prerequisites
 
 - **Java 21** or higher
-- **Node.js 18+** and npm
+- **Node.js v20.10.0+** and npm
 - **Docker & Docker Compose** (recommended)
 - **Git**
 
@@ -59,7 +59,7 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
    - Backend API: http://localhost:9000
    - OpenAPI Documentation: http://localhost:9000/swagger-ui.html
    - Database: localhost:5432 (postgres/postgres)
-   - Frontend: http://localhost:3000
+   - Frontend: http://localhost:3003
 
 ### Option 2: Local Development
 

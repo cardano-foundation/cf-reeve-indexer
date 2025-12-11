@@ -12,8 +12,8 @@ export const LayoutContentHeaderStyled = styled(Grid)<LayoutContentHeaderStyledP
 
     ${({ theme }) => `
       ${theme.breakpoints.down('sm')} {
-        max-height: 6rem;
-        min-height: 6rem;
+        max-height: 11rem;
+        min-height: 11rem;
         padding: ${theme.spacing(2, 3)};
       }
     `}

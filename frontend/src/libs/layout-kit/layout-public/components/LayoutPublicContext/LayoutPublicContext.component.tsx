@@ -16,6 +16,8 @@ interface LayoutPublicContextProps {
   handleSectionMenuToggle: (category?: MenuCategory) => void
   handleSidebarToggle: () => void
   setSelectedOrganisation: (org: string) => void
+  organisations: any[]
+  setOrganisations: (orgs: any[]) => void
   isDrawerOpen: boolean
   isResourcesOpen: boolean
   isSidebarOpen: boolean
@@ -29,7 +31,8 @@ export const LayoutPublicContext = createContext<LayoutPublicContextProps | unde
 
 export const LayoutPublicContextProvider = ({ children }: { children: ReactNode }) => {
   const [toggledSection, setToggledSection] = useState<MenuCategory | null>(null)
-  const [selectedOrganisation, setSelectedOrganisation] = useState<string>('')
+  const [selectedOrganisation, setSelectedOrganisationState] = useState<string>('')
+  const [organisations, setOrganisations] = useState<any[]>([])
 
   const timeoutId = useRef<number | null>(null)
 
@@ -117,6 +120,12 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
     }
   }, [])
 
+  const setSelectedOrganisation = useCallback((org: any) => {
+    // normalize incoming value to a string id
+    const resolve = (o: any) => (o == null ? '' : typeof o === 'string' ? o : (o?.value ?? o?.id ?? ''))
+    setSelectedOrganisationState(resolve(org))
+  }, [])
+
   return (
     <LayoutPublicContext.Provider
       value={{
@@ -128,11 +137,12 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
         handleSidebarToggle,
         handleSectionMenuToggle,
         setSelectedOrganisation,
+        organisations,
+        setOrganisations,
         isDrawerOpen,
         isResourcesOpen,
         isSidebarOpen
-      }}
-    >
+      }}>
       {children}
     </LayoutPublicContext.Provider>
   )

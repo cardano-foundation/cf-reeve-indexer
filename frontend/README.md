@@ -1,4 +1,4 @@
-# Reeve Public Frontend
+# Reeve Indexer UI
 
 <p>
   <a href="https://conventionalcommits.org">
@@ -7,7 +7,7 @@
   <img alt="React" src="https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react" />
   <img alt="Vite" src="https://img.shields.io/badge/Vite-5.1.0-646CFF?logo=vite&logoColor=white" />
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.2.2-3178C6?logo=typescript" />
-  <img alt="MUI" src="https://img.shields.io/badge/MUI-5.x-007FFF?logo=mui&logoColor=white" />
+  <img alt="MUI" src="https://img.shields.io/badge/MUI-7.x-007FFF?logo=mui&logoColor=white" />
   <img alt="TanStack Query" src="https://img.shields.io/badge/TanStack%20Query-5.36.0-FF4154?logo=react-query" />
   <img alt="Formik" src="https://img.shields.io/badge/Formik-2.4.6-025E8C?logo=formik" />
   <img alt="i18n" src="https://img.shields.io/badge/i18n-enabled-yellow?logo=translate" />
@@ -63,9 +63,12 @@ Open terminal and run commad: `npm install`
 
 - Update API URL for Reeve Platform API service.
   > Example: `VITE_API_URL=http://localhost:9000`
+- If you prefer Backend service from dev environment then replace it with dev env API url.
+  > Example: `VITE_API_URL=https://api.indexer.dev.reeve.****`
 
 ## More documentation
 
 - [Development](documentation/DEVELOPMENT.md) - description of our conventions and explanation of some concepts
-- [Testing](documentation/TESTING.md) - description how to run tests on local env
 - [Backend Documentation](https://docs.reeve.technology/) - The main components of Reeve are within the [Reeve Platform Repository](https://github.com/cardano-foundation/cf-reeve-platform) . This repository contains all core modules which are needed to run Reeve. [The Reeve Application](https://github.com/cardano-foundation/cf-reeve-application)  repository contains the actual implementation of the Reeve Platform, including configurations and examples of how to run the Reeve application.
+
+**Built with ❤️ for the Cardano ecosystem**
