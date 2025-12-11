@@ -1,7 +1,9 @@
 package org.cardanofoundation.reeve.indexer.service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +35,31 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionItemRepository transactionItemRepository;
 
+    private static final Map<String, String> SORT_FIELD_MAPPING = new HashMap<>();
+
+    static {
+        SORT_FIELD_MAPPING.put("id", "i.id");
+        SORT_FIELD_MAPPING.put("transactionInternalNumber", "i.transaction.internalNumber");
+        SORT_FIELD_MAPPING.put("entryDate", "i.transaction.date");
+        SORT_FIELD_MAPPING.put("transactionType", "i.transaction.type");
+        SORT_FIELD_MAPPING.put("blockChainHash", "i.transaction.txHash");
+        SORT_FIELD_MAPPING.put("amountLcy", "i.amountLcy");
+        SORT_FIELD_MAPPING.put("amountFcy", "i.amountFcy");
+        SORT_FIELD_MAPPING.put("fxRate", "i.fxRate");
+        SORT_FIELD_MAPPING.put("costCenterCustomerCode", "i.costCenterCustCode");
+        SORT_FIELD_MAPPING.put("costCenterName", "i.costCenterName");
+        SORT_FIELD_MAPPING.put("projectCustomerCode", "i.projectCustCode");
+        SORT_FIELD_MAPPING.put("projectName", "i.projectName");
+        SORT_FIELD_MAPPING.put("accountEventCode", "i.eventCode");
+        SORT_FIELD_MAPPING.put("accountEventName", "i.eventName");
+        SORT_FIELD_MAPPING.put("documentNumber", "i.documentNumber");
+        SORT_FIELD_MAPPING.put("documentCurrencyCustomerCode", "i.currency");
+        SORT_FIELD_MAPPING.put("vatCustomerCode", "i.vatCustCode");
+        SORT_FIELD_MAPPING.put("vatRate", "i.vatRate");
+        SORT_FIELD_MAPPING.put("counterPartyType", "i.counterPartyType");
+        SORT_FIELD_MAPPING.put("counterPartyCustCode", "i.counterPartyCustCode");
+    }
+
     public Page<TransactionView> findAllTransactions(Pageable pageable) {
         Page<TransactionEntity> transactionPage = transactionRepository.findAll(pageable);
         // Map the entity page to a DTO page
@@ -49,16 +76,14 @@ public class TransactionService {
                                                           Set<String> counterPartyType,
                                                           Set<String> counterPartyCustCode,
                                                           Pageable pageable) {
-        // Create a new Pageable with the correct sort field
+        // Create a new Pageable with the correct sort field mapping
         Pageable sortedPageable = PageRequest.of(
             pageable.getPageNumber(),
             pageable.getPageSize(),
             Sort.by(pageable.getSort().stream()
                 .map(order -> {
-                    if ("entryDate".equals(order.getProperty())) {
-                        return new Sort.Order(order.getDirection(), "transaction.date");
-                    }
-                    return order;
+                    String mappedField = SORT_FIELD_MAPPING.getOrDefault(order.getProperty(), order.getProperty());
+                    return new Sort.Order(order.getDirection(), mappedField);
                 })
                 .collect(Collectors.toList())
             )
