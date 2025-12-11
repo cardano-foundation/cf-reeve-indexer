@@ -13,8 +13,6 @@
   <img alt="i18n" src="https://img.shields.io/badge/i18n-enabled-yellow?logo=translate" />
 </p>
 
-![Overview Image](documentation/images/reeve-frontend-homepage.png)
-
 ## 🚀 Project Description
 
 This repository houses the **public frontend application** for **Reeve**.
