@@ -15,6 +15,7 @@ import { CellCodeDetails } from 'libs/ui-kit/components/CellCodeDetails/CellCode
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber, formatNumberPercentage } from 'libs/utils/format.ts'
+import { formatCurrency } from 'modules/public-reports/utils/format'
 import { SearchToolbar } from 'modules/public-transactions/components/SearchToolbar/SearchToolbar.component'
 
 interface SearchedTransactionsProps {
@@ -83,7 +84,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
     },
     { field: 'transactionType', headerName: t({ id: 'transactionType' }), hideable: true, sortable: true, flex: 1, minWidth: 192 },
     { field: 'documentNumber', headerName: t({ id: 'documentNumber' }), hideable: true, sortable: true, flex: 1, minWidth: 192 },
-    { field: 'documentCurrencyCustomerCode', headerName: t({ id: 'currency' }), hideable: false, sortable: true, flex: 1, minWidth: 192 },
+    { field: 'documentCurrencyCustomerCode', headerName: t({ id: 'currency' }), valueFormatter: (value) => value ? formatCurrency(value) : null, hideable: false, sortable: true, flex: 1, minWidth: 192 },
     {
       field: 'amountFcy',
       headerName: t({ id: 'amountFCY' }),

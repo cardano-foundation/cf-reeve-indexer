@@ -66,8 +66,8 @@ export const getAllCurrencyOptions = (currencies: OrganisationCurrencyEntity[] |
     ? currencies
         .filter((option) => Boolean(option) && Object.keys(option).length > 0)
         .sort((current, next) => current.customerCode.localeCompare(next.customerCode))
-        .map<AutocompleteOption>(({ customerCode }) => {
-          return { label: customerCode, value: customerCode }
+        .map<AutocompleteOption>(({ currencyId, customerCode }) => {
+          return { label: customerCode, value: currencyId }
         })
     : []
 }
