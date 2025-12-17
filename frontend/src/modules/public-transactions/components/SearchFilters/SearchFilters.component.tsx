@@ -52,10 +52,10 @@ export const SearchFilters = () => {
             <FieldCombobox label={t({ id: 'currency' })} name="currency" options={currencyOptions} multiple />
           </Grid>
           <Grid size={6}>
-            <FieldNumeric label={t({ id: 'minAmount' })} name="minAmount" />
+            <FieldNumeric label={t({ id: 'minAmountLCY' })} name="minAmountLcy" />
           </Grid>
           <Grid size={6}>
-            <FieldNumeric label={t({ id: 'maxAmount' })} name="maxAmount" />
+            <FieldNumeric label={t({ id: 'maxAmountLCY' })} name="maxAmountLcy" />
           </Grid>
           <Grid size={12}>
             <FieldCombobox label={t({ id: 'vatCode' })} name="vatCode" options={vatCodeOptions} multiple />

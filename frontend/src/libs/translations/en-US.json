@@ -60,6 +60,8 @@
   "eventCode": "Event code",
   "minAmount": "Min. amount",
   "maxAmount": "Max. amount",
+  "minAmountLCY": "Min. amount LCY",
+  "maxAmountLCY": "Max. amount LCY",
   "accountCode": "Account code",
   "accountSubtype": "Account subtype",
   "accountType": "Account type",

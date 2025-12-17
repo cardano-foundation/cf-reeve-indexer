@@ -9,8 +9,8 @@ export interface SearchFiltersValues extends Record<string, unknown> {
   dateTo: Dayjs | null
   documentNumber: string[]
   event: string[]
-  minAmount: string
-  maxAmount: string
+  minAmountLcy: string
+  maxAmountLcy: string
   project: string[]
   transactionNumber: string[]
   transactionType: string[]
