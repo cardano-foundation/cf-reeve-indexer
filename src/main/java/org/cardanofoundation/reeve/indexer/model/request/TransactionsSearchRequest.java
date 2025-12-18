@@ -34,9 +34,13 @@ public class TransactionsSearchRequest {
 
     private Set<String> currency;
 
-    private Double minAmount;
+    private Double minAmountLcy;
 
-    private Double maxAmount;
+    private Double maxAmountLcy;
+
+    private Double minAmountFcy;
+
+    private Double maxAmountFcy;
 
     private Set<String> transactionHashes;
 
