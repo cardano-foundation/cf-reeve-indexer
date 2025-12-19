@@ -9,6 +9,8 @@ export const DEFAULT_SEARCH_FILTERS_VALUES: SearchFiltersValues = {
   dateTo: null,
   documentNumber: [],
   event: [],
+  minAmountFcy: '',
+  maxAmountFcy: '',
   minAmountLcy: '',
   maxAmountLcy: '',
   project: [],

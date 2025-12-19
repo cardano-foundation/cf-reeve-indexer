@@ -52,6 +52,12 @@ export const SearchFilters = () => {
             <FieldCombobox label={t({ id: 'currency' })} name="currency" options={currencyOptions} multiple />
           </Grid>
           <Grid size={6}>
+            <FieldNumeric label={t({ id: 'minAmountFCY' })} name="minAmountFcy" />
+          </Grid>
+          <Grid size={6}>
+            <FieldNumeric label={t({ id: 'maxAmountFCY' })} name="maxAmountFcy" />
+          </Grid>
+          <Grid size={6}>
             <FieldNumeric label={t({ id: 'minAmountLCY' })} name="minAmountLcy" />
           </Grid>
           <Grid size={6}>
