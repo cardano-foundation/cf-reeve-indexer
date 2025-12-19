@@ -2,7 +2,11 @@ export const formatToFloatReadyFormat = (value: string) => (value && !isNaN(pars
 
 export const sumTotals = (values: string[]) => values.reduce((acc, value) => acc + parseFloat(formatToFloatReadyFormat(value)), 0)
 
-export const formatCurrency = (value: string) => value.slice(-3)
+export const formatCurrency = (value: string) => {
+  const startIndex = value.indexOf(':')
+
+  return value.slice(startIndex + 1, startIndex + 4)
+}
 
 export const snakeToNormal = (input: string): string => {
   if (!input) return ''

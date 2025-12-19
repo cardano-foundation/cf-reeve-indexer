@@ -46,8 +46,10 @@ export interface PostPublicTransactionsRequestBody {
   type?: string[]
   documentNumber?: string[]
   currency?: string[]
-  minAmount?: number
-  maxAmount?: number
+  minAmountFcy?: number
+  maxAmountFcy?: number
+  minAmountLcy?: number
+  maxAmountLcy?: number
   vatCustCode?: string[]
   projectCustCode?: string[]
   costCenterCustCode?: string[]
