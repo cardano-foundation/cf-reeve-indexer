@@ -66,7 +66,7 @@ public class TransactionService {
         return transactionPage.map(TransactionView::fromEntity);
     }
 
-    public ExtractionTransactionView findTransactionItems(String organisationId, String transactionInternalNumber, LocalDate dateFrom, LocalDate dateTo,
+    public ExtractionTransactionView findTransactionItems(String organisationId, Set<String> transactionInternalNumber, LocalDate dateFrom, LocalDate dateTo,
                                                           Set<String> events,
                                                           Set<String> currencies, Double minAmountLcy,
                                                           Double maxAmountLcy, Double minAmountFcy,
