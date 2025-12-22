@@ -28,7 +28,7 @@ public class TransactionsSearchRequest {
     @Schema(example = "2023-31-01")
     private LocalDate dateTo;
 
-    private String transactionInternalNumber;
+    private Set<String> transactionInternalNumber;
 
     private Set<String> events;
 

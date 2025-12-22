@@ -19,7 +19,7 @@ public interface TransactionItemRepository extends JpaRepository<TransactionItem
     @Query("""
             SELECT i FROM TransactionItemEntity i
             WHERE (:organisationId IS NULL OR i.transaction.organisationId = :organisationId)
-            AND (:transactionInternalNumber IS NULL OR LOWER(i.transaction.internalNumber) LIKE LOWER(CONCAT('%', CAST(:transactionInternalNumber AS string), '%')))
+            AND (:transactionInternalNumber IS NULL OR i.transaction.internalNumber IN :transactionInternalNumber)
             AND i.transaction.date >= COALESCE(:dateFrom, i.transaction.date)
             AND i.transaction.date <= COALESCE(:dateTo, i.transaction.date)
             AND (:events IS NULL OR i.eventCode IN :events)
@@ -39,7 +39,7 @@ public interface TransactionItemRepository extends JpaRepository<TransactionItem
             """)
     Page<TransactionItemEntity> searchItems(
             @Param("organisationId") String organisationId,
-            @Param("transactionInternalNumber") String transactionInternalNumber,
+            @Param("transactionInternalNumber") Set<String> transactionInternalNumber,
             @Param("dateFrom") LocalDateTime dateFrom,
             @Param("dateTo") LocalDateTime dateTo,
             @Param("events") Set<String> events,
