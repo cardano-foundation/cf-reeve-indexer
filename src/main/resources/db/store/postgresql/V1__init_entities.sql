@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS identity_credential (
     tx_hash VARCHAR(255),
     credential_chain TEXT,
     metadata_labels JSONB,
-    valid BOOLEAN,
-    lei VARCHAR(255)
+    lei VARCHAR(255),
+    valid BOOLEAN
 );
 
 -- IdentityEventEntity

@@ -28,9 +28,10 @@ dependencies {
     // Jackson annotations are useful for the generated classes
     implementation("com.fasterxml.jackson.core:jackson-annotations")
     implementation("org.postgresql:postgresql")
-    
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
+
     // Keri
-    implementation("org.cardanofoundation:signify:0.1.1")
+    implementation("org.cardanofoundation:signify:0.1.2-ebfb904-SNAPSHOT")
 
     // Yaci store
     implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")

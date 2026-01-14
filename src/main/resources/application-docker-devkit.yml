@@ -50,7 +50,7 @@ server:
 
 keri:
   enabled: false
-  metadata-label: 1
+  metadata-label: 170
   url: ${KERI_URL:http://127.0.0.1:1901}
   bootUrl: ${KERI_BOOT_URL:http://127.0.0.1:1903}
   oobis: ${KERI_OOBIS:http://keria:3902/oobi/EJO54wp79Apo4pOyAloOVQw9BQlVohycPWV0FaurG8Br/agent/EOS8r7jbPS1rYKR7duLMfuSwQsNUuUPmuFq4b-ORm9ih}
