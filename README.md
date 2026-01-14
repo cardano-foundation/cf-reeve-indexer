@@ -7,6 +7,8 @@
 
 A comprehensive example application demonstrating how to index, verify, and visualize [Reeve](https://reeve.technology) on-chain financial data from the Cardano blockchain. This project showcases blockchain data integration with modern web technologies.
 
+Additionally, it servers as the reference implemenation how to verify vLEI credentials using KERI identifiers based on the [proposal of CIP-170](https://github.com/cardano-foundation/CIPs/pull/1113).
+
 ## 🎯 Project Overview
 
 Reeve is a transparency and accountability platform developed by the Cardano Foundation that publishes financial data of organizations directly onto the Cardano blockchain. This repository provides a complete solution for:
@@ -15,6 +17,7 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
 - **Parsing and storing** financial reports and organizational data
 - **Exposing REST APIs** for data access
 - **Visualizing data** through a modern React frontend
+- **Verifying KERI identifiers** for vLEI credentials
 
 ### 🔗 Related Links
 
@@ -22,6 +25,7 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
 - [Reeve Backend Repository](https://github.com/cardano-foundation/cf-reeve-platform) - Official Cardano Foundation Reeve implementation
 - [Yaci Store](https://github.com/bloxbean/yaci-store) - Modular Cardano indexer used in this project
 - [Example Reeve Transaction](https://explorer.cardano.org/transaction/99a20f54f25bf9168719cb2ce00e25ab01c4a458e0500cf3a699a7c8ce3c0cdf) - Live transaction on Cardano Explorer
+- []
 
 ## 🚀 Quick Start
 

@@ -1,0 +1,4 @@
+KERI_ENABLED=true
+KERI_URL=https://keria.cardano-foundation.app.reeve.technology/
+KERI_BOOT_URL=https://keria-boot.cardano-foundation.app.reeve.technology/
+KERI_OOBIS=https://gleif-it.github.io/.well-known/keri/oobi/EINmHd5g7iV-UldkkkKyBIH052bIyxZNBn9pq-zNrYoS,http://euro.origincloud.net:3902/oobi/ED88Jn6CnWpNbSYz6vp9DOSpJH2_Di5MSwWTf1l34JJm,https://keria-ext.pro.cf-lob.eu-west-1.app.reeve.technology/oobi/ENDdL-55S7EQA8pnyrBpuSL5DzI_kkA4R7NXIpOELAV1/agent/ECue2GzBmCGx0ceTnnTf-Bts8f--A3vhN-_9qyIHTw10
