@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import io.hypersistence.utils.hibernate.type.json.JsonType;
-
 import org.hibernate.annotations.Type;
 
 

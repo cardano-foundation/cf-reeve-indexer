@@ -1,6 +1,5 @@
 package org.cardanofoundation.reeve.indexer.yaci;
 
-import java.io.IOException;
 import java.security.DigestException;
 import java.util.List;
 import java.util.Objects;

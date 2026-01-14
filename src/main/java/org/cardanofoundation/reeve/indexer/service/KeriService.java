@@ -6,17 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.cardanofoundation.signify.app.credentialing.registries.RegistryVerifyOptions;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.CESRStreamUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.cardanofoundation.reeve.indexer.config.KeriProperties;
 import org.cardanofoundation.reeve.indexer.model.entity.CredentialEntity;
@@ -25,7 +22,10 @@ import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operation;
+import org.cardanofoundation.signify.app.credentialing.registries.RegistryVerifyOptions;
+import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.cesr.util.CESRStreamUtil;
 
 @RequiredArgsConstructor
 @Service
