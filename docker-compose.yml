@@ -10,6 +10,10 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - REEVE_SCRIPT_PATH=/app/plutus.json
+      - KERI_ENABLED=${KERI_ENABLED:-true}
+      - KERI_BOOT_URL=${KERI_BOOT_URL:-http://keri-boot:8080}
+      - KERI_URL=${KERI_URL:-http://keri:8080}
+      - KERI_OOBIS=${KERI_OOBIS:-}
     depends_on:
       - postgres-db
     labels:

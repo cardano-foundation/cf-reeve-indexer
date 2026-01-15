@@ -62,7 +62,7 @@ public class KeriService {
             log.warn("KERI is not enabled. Skipping identity verification for: {}", identity.getIdentifier());
             return false;
         }
-//        resolveOobis();
+        resolveOobis();
         // TODO will fix this when we are finalizing the identity demo
         List<Object> keyEvents = (List<Object>)client.orElseThrow().keyEvents().get(identity.getIdentifier());
         int index;
@@ -118,6 +118,7 @@ public class KeriService {
     }
 
     public void verifyCredentialEntity(CredentialEntity entity) throws Exception {
+        resolveOobis();
         String credentialChain = entity.getCredentialChain();
         ObjectMapper objectMapper = new ObjectMapper();
         List<String> chain = objectMapper.readValue(credentialChain, new TypeReference<List<String>>() {});
