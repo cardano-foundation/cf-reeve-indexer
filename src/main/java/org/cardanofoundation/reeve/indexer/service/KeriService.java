@@ -2,6 +2,7 @@ package org.cardanofoundation.reeve.indexer.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class KeriService {
             log.warn("KERI is not enabled. Skipping identity verification for: {}", identity.getIdentifier());
             return false;
         }
-        resolveOobis();
+//        resolveOobis();
         // TODO will fix this when we are finalizing the identity demo
         List<Object> keyEvents = (List<Object>)client.orElseThrow().keyEvents().get(identity.getIdentifier());
         int index;
@@ -77,8 +78,20 @@ public class KeriService {
         }
         Map<String, Object> kelEvent = (Map<String, Object>) keyEvents.get(index);
         Map<String, Object> kedEvent = (Map<String, Object>) kelEvent.get("ked");
-        List<String> aList = (List<String>) kedEvent.get("a");
-        return aList.getFirst().equals(identity.getDataHash());
+        List<Object> aList = (List<Object>) kedEvent.get("a");
+        Object first = aList.getFirst();
+        if (first instanceof String a) {
+            return a.equals(identity.getDataHash());
+        } else if (first instanceof LinkedHashMap<?, ?> map) {
+            // safely cast keys/values if you know they are String
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<String, String> stringMap = (LinkedHashMap<String, String>) map;
+            return stringMap.containsKey("d") && stringMap.get("d").equals(identity.getDataHash());
+        } else {
+            log.info("KERI identity event data hash is not a string: {}",
+                    first != null ? first.getClass().getName() : "null");
+            return false; // ensure all code paths return a boolean
+        }
     }
 
     public void verifyIdentityTx(IdentityEventEntity identityEntity) {

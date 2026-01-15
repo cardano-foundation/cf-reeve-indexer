@@ -185,6 +185,8 @@
   "identityVerification": "Identity verification",
   "verifyingLEI": "Verifying LEI...",
   "leiRegistered": "LEI registered",
+  "noLeiProvided": "No LEI Provided",
+  "notVerified": "Not verified",
   "_Sidebar": "sidebar section",
   "navigation": "navigation",
   "home": "Home",
