@@ -2,7 +2,6 @@ package org.cardanofoundation.reeve.indexer.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -12,21 +11,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.cardanofoundation.reeve.indexer.model.entity.CredentialEntity;
-import org.cardanofoundation.reeve.indexer.model.response.LEIResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
+import org.cardanofoundation.reeve.indexer.model.response.LEIResponse;
 import org.cardanofoundation.reeve.indexer.model.view.ReportView;
 
 @Service
