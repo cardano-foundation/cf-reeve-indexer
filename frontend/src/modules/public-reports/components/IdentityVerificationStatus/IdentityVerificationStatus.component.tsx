@@ -72,14 +72,14 @@ export const IdentityVerificationStatus = ({ isVerified, lei }: IdentityVerifica
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CircularProgress size={14} sx={{ color: 'rgba(255, 255, 255, 0.7)' }} />
                 <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontStyle: 'italic' }}>
-                  {t({ id: 'verifyingWithGLEIF' })}
+                  {t({ id: 'verifyingLEI' })}
                 </Typography>
               </Box>
             ) : (
               <>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
-                    {t({ id: 'gleifVerified' })}:
+                    {t({ id: 'leiRegistered' })}:
                   </Typography>
                   <Typography
                     variant="body2"

@@ -52,7 +52,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
     @Value("${reeve.label}")
     private String reeveMetadataLabel;
-    @Value("${keri.metadata-label:1}")
+    @Value("${keri.metadata-label:170}")
     private String keriMetadataLabel;
     @Value("${keri.enabled:false}")
     private boolean keriEnabled;
@@ -154,6 +154,11 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
             } else if (rawMetadata.getT() == IdentityType.AUTH_BEGIN) {
                 CredentialEntity entity = CredentialMetadataMapper.toEntity(rawMetadata);
+                try {
+                    keriService.verifyCredentialEntity(entity);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 credentialRepository.saveAndFlush(entity);
             } else if(rawMetadata.getT() == IdentityType.AUTH_END) {
                 // TODO handle AUTH_END if needed

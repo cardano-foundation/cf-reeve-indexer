@@ -1,11 +1,13 @@
 package org.cardanofoundation.reeve.indexer.model.view;
 
+import java.util.List;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,11 +17,13 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
+import org.cardanofoundation.reeve.indexer.model.response.LEIResponse;
 
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
 @Getter
+@Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
 public class ReportView {
@@ -40,10 +44,9 @@ public class ReportView {
 
     private Map<String, Object> data; // Assuming fields is a JSON string, adjust as necessary
 
-    private boolean identityVerified;
-    private String lei;
+    private List<LEIResponse> identites;
 
-    public static ReportView fromEntity(ReportEntity entity, OrganisationEntity organisationEntity, ObjectMapper objectMapper, String lei) throws JsonProcessingException {
+    public static ReportView fromEntity(ReportEntity entity, OrganisationEntity organisationEntity, ObjectMapper objectMapper) throws JsonProcessingException {
         return ReportView.builder()
                 .organisationId(entity.getOrganisationId())
                 .type(entity.getSubType())
@@ -54,8 +57,6 @@ public class ReportView {
                 .currency(organisationEntity.getCurrencyId())
                 .blockChainHash(entity.getTxHash())
                 .data(objectMapper.readValue(entity.getFields(), Map.class))
-                .identityVerified(entity.isIdentityVerified())
-                .lei(lei)
                 .build();
     }
 }

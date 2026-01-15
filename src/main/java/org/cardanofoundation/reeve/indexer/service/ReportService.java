@@ -4,10 +4,12 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
+import org.cardanofoundation.reeve.indexer.model.response.LEIResponse;
 import org.cardanofoundation.reeve.indexer.model.view.ReportView;
 
 @Service
@@ -40,51 +44,38 @@ public class ReportService {
             intervalTypes.stream()
                 .map(Interval::valueOf)
                 .toList() : null;
+        List<ReportEntity> allReports = reportRepository.findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+                organisationId, blockChainHash, currency, reportTypes, intervals, years, periods, pageable);
+        Map<String, List<ReportEntity>> reportsByHash = allReports.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(ReportEntity::getMetadataHash));
 
-        return reportRepository.findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                organisationId, blockChainHash, currency, reportTypes, intervals, years, periods, pageable)
-                .stream()
-                .map(reportEntity -> {
-                    try {
-                        String lei;
-                        if(reportEntity.isIdentityVerified()) {
-                            lei = credentialRepository.findById(reportEntity.getIdentifier()).map(credential -> credential.getLei()).orElse(null);
-                        } else {
-                            lei = null;
-                        }
-                        return ReportView.fromEntity(reportEntity,
-                                organisationService.findById(reportEntity.getOrganisationId()).orElseThrow(),
-                                objectMapper, lei);
-                    } catch (Exception e) {
-                        log.error("Error converting ReportEntity to ReportView: {}", e.getMessage());
-                        return null;
-                    }
-                })
-                .filter(java.util.Objects::nonNull)
-                .toList();
-    }
+        return reportsByHash.values().stream().flatMap(group -> {
+            ReportEntity mainReport = group.get(0); // pick one as main
+            ReportView view;
+            try {
+                view = ReportView.fromEntity(mainReport,
+                        organisationService.findById(mainReport.getOrganisationId())
+                                .orElseThrow(),
+                        objectMapper);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
 
-    public List<ReportView> findAll() {
-        return reportRepository.findAll()
-                .stream()
-                .map(reportEntity -> {
-                    try {
-                        String lei;
-                        if(reportEntity.isIdentityVerified()) {
-                            lei = credentialRepository.findById(reportEntity.getIdentifier()).map(credential -> credential.getLei()).orElse(null);
-                        } else {
-                            lei = null;
-                        }
-                        return ReportView.fromEntity(reportEntity,
-                                organisationService.findById(reportEntity.getOrganisationId()).orElseThrow(),
-                                objectMapper, lei);
-                    } catch (Exception e) {
-                        log.error("Error converting ReportEntity to ReportView: {}", e.getMessage());
-                        return null;
-                    }
-                })
-                .filter(java.util.Objects::nonNull)
-                .toList();
+            List<LEIResponse> leiResponses = group.stream()
+                    .filter(ReportEntity::isIdentityVerified)
+                    .map(r -> credentialRepository.findById(r.getIdentifier())
+                            .map(cred -> LEIResponse.builder()
+                                    .identityVerified(true)
+                                    .lei(cred.getLei())
+                                    .build()))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
+
+            view.setIdentites(leiResponses);
+            return Stream.of(view);
+        }).toList();
     }
 
     public Set<ReportEntity> findReportsInDateRange(String organisationId,

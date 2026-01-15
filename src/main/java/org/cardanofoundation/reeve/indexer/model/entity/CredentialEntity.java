@@ -13,8 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+import org.hibernate.annotations.Type;
 
 
 @Entity
@@ -36,8 +36,8 @@ public class CredentialEntity {
     @Column(name = "credential_chain")
     private String credentialChain;
 
+    @Type(JsonType.class)
     @Column(name = "metadata_labels", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
     private List<String> labels;
 
     @Column(name = "lei")

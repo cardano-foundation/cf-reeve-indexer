@@ -104,12 +104,22 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
     {
       field: 'identityVerified',
       headerName: t({ id: 'identityVerified' }),
-      renderCell: ({ row }) => <IdentityVerificationStatus isVerified={row.identityVerified} lei={row.lei} />,
-      hideable: false,
-      sortable: true,
-      flex: 1,
-      minWidth: 50
-    },
+      renderCell: ({ row }) => (
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
+            {row.identites?.map((item, index) => (
+              <IdentityVerificationStatus
+                key={index}
+                isVerified={item.identityVerified}
+                lei={item.lei}
+              />
+            ))}
+          </div>
+        ),
+        hideable: false,
+        sortable: true,
+        flex: 1,
+        minWidth: 50
+      },
     {
       field: 'actions',
       headerName: '',

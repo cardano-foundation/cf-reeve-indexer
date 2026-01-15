@@ -6,14 +6,23 @@ spring:
   application:
     name: reeve-indexing-example
   flyway:
+    url: jdbc:postgresql://localhost:15433/reeve_verifier?currentSchema=reeve_verifier
+    user: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    schemas: ${DB_SCHEMA:reeve_verifier}
     locations: classpath:db/store/{vendor}
     out-of-order: true
+    cleanDisabled: ${FLYWAY_CLEAN_DISABLED:false}
+    cleanOnValidationError: ${FLYWAY_CLEAN_ON_ERROR:true}
   datasource:
-    url: jdbc:postgresql://localhost:5433/reeve-verifier?currentSchema=reeve
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:15433/reeve_verifier?currentSchema=reeve_verifier
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
   jackson:
     property-naming-strategy: SNAKE_CASE
+  jpa:
+    hibernate:
+      ddl-auto: none
 reeve:
   label: 1447
   dashboard-folder-path: ./dashboards
@@ -42,7 +51,7 @@ server:
 
 keri:
   enabled: true
-  metadata-label: 1
+  metadata-label: 170
   url: http://127.0.0.1:3901
   bootUrl: http://127.0.0.1:3903
   oobis: 
