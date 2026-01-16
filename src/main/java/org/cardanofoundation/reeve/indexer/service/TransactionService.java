@@ -25,6 +25,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.TransactionItemRepos
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
 import org.cardanofoundation.reeve.indexer.model.view.ExtractionTransactionItemView;
 import org.cardanofoundation.reeve.indexer.model.view.ExtractionTransactionView;
+import org.cardanofoundation.reeve.indexer.model.view.TransactionFullView;
 import org.cardanofoundation.reeve.indexer.model.view.TransactionView;
 
 @Service
@@ -64,6 +65,37 @@ public class TransactionService {
         Page<TransactionEntity> transactionPage = transactionRepository.findAll(pageable);
         // Map the entity page to a DTO page
         return transactionPage.map(TransactionView::fromEntity);
+    }
+
+    public Page<TransactionFullView> findTransactionsByDateRange(
+        String organisationId,
+        LocalDate dateFrom,
+        LocalDate dateTo,
+        Pageable pageable) {
+
+        LocalDate fromDate = dateFrom != null ? dateFrom : LocalDate.of(1970, 1, 1);
+        LocalDate toDate = dateTo != null ? dateTo : LocalDate.now();
+
+        Pageable sortedPageable = PageRequest.of(
+            pageable.getPageNumber(),
+            pageable.getPageSize(),
+            Sort.by(pageable.getSort().stream()
+                .map(order -> {
+                    String mappedField = SORT_FIELD_MAPPING.getOrDefault(
+                        order.getProperty().replace("transaction.", ""),
+                        order.getProperty()
+                    );
+                    return new Sort.Order(order.getDirection(), mappedField);
+                })
+                .collect(Collectors.toList())
+            )
+        );
+
+        Page<TransactionEntity> transactions = transactionRepository.findByDateRangeAndOrganisationId(
+            organisationId, fromDate, toDate, sortedPageable
+        );
+
+        return transactions.map(TransactionFullView::fromEntity);
     }
 
     public ExtractionTransactionView findTransactionItems(String organisationId, Set<String> transactionInternalNumber, LocalDate dateFrom, LocalDate dateTo,

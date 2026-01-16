@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -24,8 +25,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
+import org.cardanofoundation.reeve.indexer.model.request.TransactionDateRangeRequest;
 import org.cardanofoundation.reeve.indexer.model.request.TransactionsSearchRequest;
 import org.cardanofoundation.reeve.indexer.model.view.ExtractionTransactionView;
+import org.cardanofoundation.reeve.indexer.model.view.TransactionFullView;
 import org.cardanofoundation.reeve.indexer.service.OrganisationService;
 import org.cardanofoundation.reeve.indexer.service.TransactionService;
 
@@ -80,6 +83,32 @@ public class TransactionController {
                                 transactionsRequest.getCounterPartyType(),
                                 transactionsRequest.getCounterPartyCustCode(),
                                 pageable));
+        }
+
+        @Tag(name = "Public", description = "Get transactions by date range")
+        @PostMapping("/by-date-range")
+        @Operation(description = "Get transactions with items by date range - Public interface", responses = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved transactions",
+                content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = Page.class)))
+        })
+        public ResponseEntity<Page<TransactionFullView>> getTransactionsByDateRange(
+                @Valid @RequestBody TransactionDateRangeRequest request,
+                Pageable pageable) {
+
+            if (request.getOrganisationId() != null) {
+                Optional<OrganisationEntity> orgM = organisationService.findById(request.getOrganisationId());
+                if (orgM.isEmpty()) {
+                    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                            HttpStatus.NOT_FOUND,
+                            "Unable to find Organisation by Id: %s".formatted(request.getOrganisationId()));
+                    problemDetail.setTitle("ORGANISATION_NOT_FOUND");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                }
+            }
+
+            return ResponseEntity.ok().body(transactionService.findTransactionsByDateRange(
+                request.getOrganisationId(), request.getDateFrom(), request.getDateTo(), pageable));
         }
 
 }
