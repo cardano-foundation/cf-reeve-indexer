@@ -1,6 +1,8 @@
 package org.cardanofoundation.reeve.indexer.model.repository;
 
 
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +14,17 @@ import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
 import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, String> {
+
+    @Query("SELECT t FROM TransactionEntity t " +
+            "WHERE (:organisationId IS NULL OR t.organisationId = :organisationId) " +
+            "AND (cast(:startDate as date) IS NULL OR t.date >= :startDate) " +
+            "AND (cast(:endDate as date) IS NULL OR t.date <= :endDate)")
+    Page<TransactionEntity> findByDateRangeAndOrganisationId(
+            @Param("organisationId") String organisationId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable
+    );
 
     @Query(
             value = "SELECT DISTINCT NEW org.cardanofoundation.reeve.indexer.model.view.ProjectView(ti.projectCustCode, ti.projectName) " +
@@ -30,31 +43,31 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     Page<String> findDistinctInternalNumbersByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
     @Query("SELECT DISTINCT ti.documentNumber FROM TransactionEntity t " +
-           "JOIN t.items ti " +
-           "WHERE t.organisationId = :orgId AND ti.documentNumber IS NOT NULL")
+            "JOIN t.items ti " +
+            "WHERE t.organisationId = :orgId AND ti.documentNumber IS NOT NULL")
     Page<String> findDistinctDocumentNumbersByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
     @Query("SELECT DISTINCT ti.vatCustCode FROM TransactionEntity t " +
-           "JOIN t.items ti " +
-           "WHERE t.organisationId = :orgId AND ti.vatCustCode IS NOT NULL")
+            "JOIN t.items ti " +
+            "WHERE t.organisationId = :orgId AND ti.vatCustCode IS NOT NULL")
     Page<String> findDistinctVatCustCodesByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
     @Query("SELECT DISTINCT ti.costCenterCustCode FROM TransactionEntity t " +
-           "JOIN t.items ti " +
-           "WHERE t.organisationId = :orgId AND ti.costCenterCustCode IS NOT NULL")
+            "JOIN t.items ti " +
+            "WHERE t.organisationId = :orgId AND ti.costCenterCustCode IS NOT NULL")
     Page<String> findDistinctCostCenterCustCodesByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
     @Query("SELECT DISTINCT t.type FROM TransactionEntity t WHERE t.organisationId = :orgId")
     Page<String> findDistinctTransactionTypesByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
     @Query("SELECT DISTINCT ti.counterPartyCustCode FROM TransactionEntity t " +
-           "JOIN t.items ti " +
-           "WHERE t.organisationId = :orgId AND ti.counterPartyCustCode IS NOT NULL")
+            "JOIN t.items ti " +
+            "WHERE t.organisationId = :orgId AND ti.counterPartyCustCode IS NOT NULL")
     Page<String> findDistinctCounterPartyAccountNamesByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
     @Query("SELECT DISTINCT ti.counterPartyCustCode FROM TransactionEntity t " +
-           "JOIN t.items ti " +
-           "WHERE t.organisationId = :orgId AND ti.counterPartyCustCode IS NOT NULL")
+            "JOIN t.items ti " +
+            "WHERE t.organisationId = :orgId AND ti.counterPartyCustCode IS NOT NULL")
     Page<String> findDistinctCounterPartyCustCodesByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
     @Query(
