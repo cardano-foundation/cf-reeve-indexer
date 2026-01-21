@@ -86,7 +86,7 @@ public class TransactionController {
         }
 
         @Tag(name = "Public", description = "Get transactions by date range")
-        @PostMapping("/by-date-range")
+        @PostMapping(value = "/by-date-range", produces = "application/json", consumes = "application/json")
         @Operation(description = "Get transactions with items by date range - Public interface", responses = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved transactions",
                 content = @Content(mediaType = "application/json",
