@@ -8,7 +8,7 @@ plugins {
 
 group = "org.cardanofoundation"
 // x-release-please-start-version
-version = "1.0.0-SNAPSHOT"
+version = "1.0.1-SNAPSHOT"
 // x-release-please-end
 
 java {
