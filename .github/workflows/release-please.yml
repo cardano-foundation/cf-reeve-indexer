@@ -24,9 +24,6 @@ jobs:
       - name: Run release-please (monorepo)
         uses: google-github-actions/release-please-action@v3
         with:
-          # Token used to create the release PR and tags. The default GITHUB_TOKEN is usually fine.
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # Treat this repo as a monorepo and operate on multiple packages.
-          monorepo: true
-          # Adjust default branch if your main branch is not 'main'
+          command: manifest
+          token: ${{secrets.GITHUB_TOKEN}}
           default-branch: main
