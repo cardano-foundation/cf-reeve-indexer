@@ -1,0 +1,14 @@
+{
+  "packages": [
+    {
+      "path": "frontend",
+      "packageName": "reeve-indexer-ui",
+      "releaseType": "node"
+    },
+    {
+      "path": ".",
+      "packageName": "cf-reeve-indexer",
+      "releaseType": "gradle"
+    }
+  ]
+}
