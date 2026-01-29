@@ -1,7 +1,10 @@
 {
   "packages": {
     ".": {
-      "release-type": "gradle"
+      "release-type": "java",
+      "extra-files": [
+        "build.gradle.kts"
+      ]
     },
     "frontend": {
       "release-type": "node"
