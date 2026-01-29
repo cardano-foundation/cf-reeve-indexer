@@ -15,9 +15,7 @@ It is mandatory to resolve them otherwise the identifiers won't be known to your
   - https://gleif-it.github.io/.well-known/keri/oobi/EINmHd5g7iV-UldkkkKyBIH052bIyxZNBn9pq-zNrYoS
 - Provenant -  a Qualified vLEI Issuer (QvLEI-I) that issues verifiable LEI credentials on behalf of the Global Legal Entity Identifier Foundation (GLEIF).
   - http://euro.origincloud.net:3902/oobi/ED88Jn6CnWpNbSYz6vp9DOSpJH2_Di5MSwWTf1l34JJm
-- Grant Thornton Legal Entity - An audited legal entity registered with GLEIF.
+- Grant Thornton Legal Entity - An audited legal entity registered with GLEIF
+  - http://euro.origincloud.net:3902/oobi/EIWFZLJRFOsTagwSIUzgudrAy1xGwRD6llcPseY21rrG
 - Grant Thornton Reeve Identifier - a decentralized identifier managed by Grant Thornton which is used for onChain Audits
   - https://keria-ext.pro.cf-lob.eu-west-1.app.reeve.technology/oobi/ENDdL-55S7EQA8pnyrBpuSL5DzI_kkA4R7NXIpOELAV1/agent/ECue2GzBmCGx0ceTnnTf-Bts8f--A3vhN-_9qyIHTw10
-
-
-## How to use it

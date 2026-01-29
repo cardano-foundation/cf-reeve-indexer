@@ -1,3 +1,13 @@
+x-healthcheck: &healthcheck
+  interval: 2s
+  timeout: 3s
+  retries: 5
+  start_period: 2s
+
+x-python-env: &python-env
+  PYTHONUNBUFFERED: 1
+  PYTHONIOENCODING: UTF-8
+
 services:
   reeve-verifier-backend:
     restart: unless-stopped
@@ -11,8 +21,8 @@ services:
       - DB_PASSWORD=postgres
       - REEVE_SCRIPT_PATH=/app/plutus.json
       - KERI_ENABLED=${KERI_ENABLED:-true}
-      - KERI_BOOT_URL=${KERI_BOOT_URL:-http://keri-boot:8080}
-      - KERI_URL=${KERI_URL:-http://keri:8080}
+      - KERI_BOOT_URL=${KERI_BOOT_URL:-http://keria:3903}
+      - KERI_URL=${KERI_URL:-http://keria:3901}
       - KERI_OOBIS=${KERI_OOBIS:-}
     depends_on:
       - postgres-db
@@ -55,7 +65,22 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "15432:5432"
-
+  keria:
+    image: ${KERIA_IMAGE:-docker.io/cardanofoundation/cf-idw-keria}:${KERIA_IMAGE_TAG:-c6498308}
+    restart: unless-stopped
+    environment:
+      KERI_AGENT_CORS: 1
+      <<: *python-env
+    volumes:
+      - ./keri-config/keria.json:/keria/config/keri/cf/keria.json
+    command: start --config-dir /keria/config --config-file keria.json --name agent
+    healthcheck:
+      test: wget --spider http://keria:3902/spec.yaml
+      <<: *healthcheck
+    ports:
+      - 3901:3901
+      - 3902:3902
+      - 3903:3903
 volumes:
   postgres-data:
   yaci-data:

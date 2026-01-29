@@ -19,13 +19,15 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
 - **Visualizing data** through a modern React frontend
 - **Verifying KERI identifiers** for vLEI credentials
 
+This repository also provides the known oobis for resolving credential chains on the Cardano Mainnet. These oobis need to be added to the runtime environment to ensure proper resolution and verification of vLEI credentials.
+The detailed explanation of the oobis can be found [here](./Keri-oobis.md) and they are also added ready to use in the `.env.example` file.
+
 ### 🔗 Related Links
 
 - [Reeve Platform](https://reeve.technology) - Official Reeve website
 - [Reeve Backend Repository](https://github.com/cardano-foundation/cf-reeve-platform) - Official Cardano Foundation Reeve implementation
 - [Yaci Store](https://github.com/bloxbean/yaci-store) - Modular Cardano indexer used in this project
 - [Example Reeve Transaction](https://explorer.cardano.org/transaction/99a20f54f25bf9168719cb2ce00e25ab01c4a458e0500cf3a699a7c8ce3c0cdf) - Live transaction on Cardano Explorer
-- []
 
 ## 🚀 Quick Start
 
@@ -45,6 +47,12 @@ Reeve is a transparency and accountability platform developed by the Cardano Fou
    ```
 
 2. **Start the application:**
+   Prepare the environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   And adjust the values in `.env` as needed.
+
    On Mainnet:
    ```bash
    docker compose up
