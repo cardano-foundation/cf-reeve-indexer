@@ -1,10 +1,4 @@
 {
-  "packages": {
-    ".": {
-      "release-type": "gradle"
-    },
-    "frontend": {
-      "release-type": "node"
-    }
-  } 
+  ".": "1.0.0",
+  "frontend": "1.0.0"
 }
