@@ -1,0 +1,32 @@
+name: Release Please (monorepo)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Create release PRs with release-please
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run release-please (monorepo)
+        uses: google-github-actions/release-please-action@v3
+        with:
+          # Token used to create the release PR and tags. The default GITHUB_TOKEN is usually fine.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Treat this repo as a monorepo and operate on multiple packages.
+          monorepo: true
+          # Adjust default branch if your main branch is not 'main'
+          default-branch: main
