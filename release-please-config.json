@@ -1,13 +1,12 @@
 {
   "packages": {
     ".": {
-      "release-type": "java",
+      "release-type": "simple",
       "extra-files": [
-        "build.gradle.kts"
+        "build.gradle.kts",
+        "frontend/package.json",
+        "frontend/package-lock.json"
       ]
-    },
-    "frontend": {
-      "release-type": "node"
     }
   }
 }
