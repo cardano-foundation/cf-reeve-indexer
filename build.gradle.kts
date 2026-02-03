@@ -42,7 +42,7 @@ dependencies {
     implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
 
     // Keri
-    implementation("org.cardanofoundation:signify:0.1.2-ebfb904-SNAPSHOT")
+    implementation("org.cardanofoundation:signify:0.1.2-d6aea58-SNAPSHOT")
 
     // Yaci store
     implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")
