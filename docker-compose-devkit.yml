@@ -28,7 +28,7 @@ services:
 
   postgres-indexer:
     restart: unless-stopped
-    image: postgres:15-alpine
+    image: postgres:17
     container_name: postgres-indexer
     environment:
       - POSTGRES_DB=reeve_verifier
