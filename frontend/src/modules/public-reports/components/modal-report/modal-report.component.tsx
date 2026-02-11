@@ -49,7 +49,7 @@ const NestedGrid: React.FC<{ data: NestedMap }> = ({ data }) => {
             </Grid>
             <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '14.5rem' }} size="grow">
               <Typography color={'text.primary'} component="span" variant="h3" pr={1.75}>
-                {formatNumber(Number.parseInt(value as string))}
+                {formatNumber(Number.parseFloat(value as string))}
               </Typography>
             </Grid>
           </Grid>
