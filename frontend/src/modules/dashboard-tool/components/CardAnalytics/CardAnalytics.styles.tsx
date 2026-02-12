@@ -58,6 +58,8 @@ export const CardContentStyled = styled(CardContent)`
     flex: 1 0 auto;
     flex-flow: column nowrap;
     justify-content: center;
+    font-size: 1.875rem;
+    font-weight: 600;
 
     &:last-child {
       padding: ${({ theme }) => theme.spacing(2)};
