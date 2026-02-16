@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: ⛮ cf-gha-baseline
-        uses: cardano-foundation/cf-gha-workflows/./actions/cf-gha-baseline@fix/pipx
+        uses: cardano-foundation/cf-gha-workflows/./actions/cf-gha-baseline@main
         id: cf-gha-baseline
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
