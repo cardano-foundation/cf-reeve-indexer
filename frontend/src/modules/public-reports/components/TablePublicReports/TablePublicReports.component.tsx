@@ -48,7 +48,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
 
   const columns: GridColDef[] = [
     {
-      field: 'type',
+      field: 'subType',
       headerName: t({ id: 'report' }),
       valueFormatter: (value) => t({ id: value }),
       hideable: false,
@@ -61,7 +61,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       headerName: t({ id: 'currency' }),
       valueFormatter: (value) => formatCurrency(value),
       hideable: false,
-      sortable: true,
+      sortable: false,
       flex: 1,
       minWidth: 192
     },
@@ -79,7 +79,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       minWidth: 192
     },
     {
-      field: 'blockChainHash',
+      field: 'txHash',
       headerName: t({ id: 'blockchainHash' }),
       renderCell: ({ value }) =>
         value ? (
@@ -154,7 +154,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
         rowCount={rowCount}
         columns={columns}
         rows={data?.reports ?? []}
-        getRowId={(row) => `${row.organisationId}-${row.type}-${row.intervalType}-${row.year}-${row.period}-${row.ver}`}
+        getRowId={(row) => `${row.organisationId}-${row.subType}-${row.intervalType}-${row.year}-${row.period}-${row.ver}`}
         onPaginationModelChange={(model) => {
           const { page, pageSize } = model
 

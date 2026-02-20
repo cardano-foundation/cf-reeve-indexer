@@ -2,6 +2,7 @@ package org.cardanofoundation.reeve.indexer.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -9,12 +10,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,13 +46,38 @@ public class ReportService {
             intervalTypes.stream()
                 .map(Interval::valueOf)
                 .toList() : null;
+
+        // That's a workaround to make sure that if the sorting contains period, we also sort by year and interval before
+        // because period is not unique without them, so we need to make sure that the sorting is consistent with the way we group the reports later
+        if (pageable.getSort().isSorted()) {
+            List<Sort.Order> list = new ArrayList<>(pageable.getSort().stream().toList());
+            Optional<Sort.Order> periodO = list.stream().filter(order -> order.getProperty().equals("period")).findFirst();
+            // sorting has period
+            if(periodO.isPresent()) {
+                Sort.Order order = periodO.get();
+                int i = list.indexOf(order);
+                list.remove(order);
+                list.add(i, new Sort.Order(order.getDirection(), "year"));
+                list.add(i + 1, new Sort.Order(order.getDirection(), "interval"));
+                list.add(i + 2, new Sort.Order(order.getDirection(), "period"));
+
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(list));
+            }
+        }
+
         List<ReportEntity> allReports = reportRepository.findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 organisationId, blockChainHash, currency, reportTypes, intervals, years, periods, pageable);
+
+        // Group by metadataHash while preserving the order
         Map<String, List<ReportEntity>> reportsByHash = allReports.stream()
                 .filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(ReportEntity::getMetadataHash));
+                .collect(Collectors.groupingBy(
+                    ReportEntity::getMetadataHash,
+                    java.util.LinkedHashMap::new, // Preserve insertion order
+                    Collectors.toList()
+                ));
 
-        return reportsByHash.values().stream().flatMap(group -> {
+        return reportsByHash.values().stream().map(group -> {
             ReportEntity mainReport = group.get(0); // pick one as main
             ReportView view;
             try {
@@ -74,7 +101,7 @@ public class ReportService {
                     .toList();
 
             view.setIdentites(leiResponses);
-            return Stream.of(view);
+            return view;
         }).toList();
     }
 

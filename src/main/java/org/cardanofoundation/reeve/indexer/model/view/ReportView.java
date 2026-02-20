@@ -30,9 +30,9 @@ public class ReportView {
 
     private String organisationId;
     private String currency;
-    private String type;
+    private String subType;
 
-    private String blockChainHash;
+    private String txHash;
 
     private String intervalType;
 
@@ -49,13 +49,13 @@ public class ReportView {
     public static ReportView fromEntity(ReportEntity entity, OrganisationEntity organisationEntity, ObjectMapper objectMapper) throws JsonProcessingException {
         return ReportView.builder()
                 .organisationId(entity.getOrganisationId())
-                .type(entity.getSubType())
+                .subType(entity.getSubType())
                 .intervalType(entity.getInterval().name()) // Assuming Interval is an Enum
                 .year(entity.getYear())
                 .period(entity.getPeriod())
                 .ver(entity.getVer())
                 .currency(organisationEntity.getCurrencyId())
-                .blockChainHash(entity.getTxHash())
+                .txHash(entity.getTxHash())
                 .data(objectMapper.readValue(entity.getFields(), Map.class))
                 .build();
     }
