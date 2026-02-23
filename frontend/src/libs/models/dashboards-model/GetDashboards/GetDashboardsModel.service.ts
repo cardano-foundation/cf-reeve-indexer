@@ -13,8 +13,8 @@ const getDashboardsQuery = async (request: GetDashboardsRequest) => {
   return data
 }
 
-export const useGetDashboardsModel = (request: GetDashboardsRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['DASHBOARDS', request], queryFn: () => getDashboardsQuery(request) })
+export const useGetDashboardsModel = (request: GetDashboardsRequest, isEnabled: boolean) => {
+  const { data, isFetching } = useQuery({ queryKey: ['DASHBOARDS', request], queryFn: () => getDashboardsQuery(request), enabled: isEnabled })
 
   return {
     dashboards: data ?? null,
