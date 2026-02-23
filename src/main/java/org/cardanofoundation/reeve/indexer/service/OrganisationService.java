@@ -74,7 +74,7 @@ public class OrganisationService {
     }
 
     public List<String> getDistinctInternalNumbersForOrganisation(String orgId) {
-        return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId).getContent();
+        return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId);
     }
 
     public List<String> getDistinctTransactionTypesForOrganisation(String orgId, Pageable pageable) {
