@@ -73,8 +73,8 @@ public class OrganisationService {
                 .toList();
     }
 
-    public List<String> getDistinctInternalNumbersForOrganisation(String orgId, Pageable pageable) {
-        return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId, pageable).getContent();
+    public List<String> getDistinctInternalNumbersForOrganisation(String orgId) {
+        return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId).getContent();
     }
 
     public List<String> getDistinctTransactionTypesForOrganisation(String orgId, Pageable pageable) {

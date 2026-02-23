@@ -50,10 +50,9 @@ public class OrganisationController {
 
     @GetMapping("/{orgId}/internalNumber")
     public ResponseEntity<List<String>> getInternalNumbers(
-            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
-            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         log.info("Fetching distinct internal numbers for organisation: {}", orgId);
-        List<String> internalNumbers = organisationService.getDistinctInternalNumbersForOrganisation(orgId, pageable);
+        List<String> internalNumbers = organisationService.getDistinctInternalNumbersForOrganisation(orgId);
         return ResponseEntity.ok(internalNumbers);
     }
 
