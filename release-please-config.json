@@ -2,6 +2,7 @@
   "packages": {
     ".": {
       "release-type": "simple",
+      "include-v-in-tag": false,
       "extra-files": [
         "build.gradle.kts",
         "frontend/package.json",
