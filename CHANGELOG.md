@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.0.0...1.0.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* added important tag ([d67f7df](https://github.com/cardano-foundation/cf-reeve-indexer/commit/d67f7df76463f6971cc922874176a693fa5577b0))
+* fixing sorting for reporting page ([feda42f](https://github.com/cardano-foundation/cf-reeve-indexer/commit/feda42f554823752c701fdc729fc66781b07df12))
+* removed pageable to avoid 2000 lines cap ([9ef6477](https://github.com/cardano-foundation/cf-reeve-indexer/commit/9ef6477e712963f889301f673ff984c4b924dc71))
+
 ## [1.0.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/v1.0.0...v1.0.0) (2026-02-12)
 
 
