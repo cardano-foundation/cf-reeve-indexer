@@ -9,14 +9,15 @@ x-python-env: &python-env
   PYTHONIOENCODING: UTF-8
 
 services:
-  reeve-verifier-backend:
+
+  api:
     restart: unless-stopped
     build:
       context: .
     ports:
       - "9002:9000"
     environment:
-      - DB_URL=jdbc:postgresql://postgres-db:5432/reeve_verifier?currentSchema=reeve_verifier
+      - DB_URL=jdbc:postgresql://postgres-indexer:5432/postgres?currentSchema=indexer
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - REEVE_SCRIPT_PATH=/app/plutus.json
@@ -27,7 +28,7 @@ services:
       - STORE_CARDANO_SYNC_START_SLOT=${STORE_CARDANO_SYNC_START_SLOT:-159983856}
       - STORE_CARDANO_SYNC_START_BLOCKHASH=${STORE_CARDANO_SYNC_START_BLOCKHASH:-739cbc4d7ae7a15805ce2ede010b3a24c6d2e18489e3940731822f9f5488d670}
     depends_on:
-      - postgres-db
+      - postgres
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend-http.entrypoints=web"
@@ -37,7 +38,7 @@ services:
       - "traefik.http.routers.backend-https.tls=true"
       - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
 
-  reeve-verifier-frontend:
+  frontend:
     restart: unless-stopped
     build:
       context: frontend
@@ -55,18 +56,19 @@ services:
       - "traefik.http.routers.frontend-https.tls=true"
       - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
 
-  postgres-db:
+  postgres:
     restart: unless-stopped
     image: postgres:17
-    container_name: postgres-db
+    hostname: postgres-indexer
     environment:
-      - POSTGRES_DB=reeve_verifier
+      - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "15432:5432"
+
   keria:
     image: ${KERIA_IMAGE:-docker.io/cardanofoundation/cf-idw-keria}:${KERIA_IMAGE_TAG:-c6498308}
     restart: unless-stopped
@@ -83,6 +85,7 @@ services:
       - 3901:3901
       - 3902:3902
       - 3903:3903
+
 volumes:
   postgres-data:
   yaci-data:

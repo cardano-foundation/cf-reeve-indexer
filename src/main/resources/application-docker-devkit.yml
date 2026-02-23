@@ -9,13 +9,13 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres}
     user: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
-    schemas: ${DB_SCHEMA:reeve_verifier}
+    schemas: ${DB_SCHEMA:indexer}
     locations: classpath:db/store/{vendor}
     out-of-order: true
     cleanDisabled: ${FLYWAY_CLEAN_DISABLED:false}
     cleanOnValidationError: ${FLYWAY_CLEAN_ON_ERROR:true}
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres?currentSchema=reeve_verifier}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres?currentSchema=indexer}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
   jackson:

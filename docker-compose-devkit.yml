@@ -1,12 +1,13 @@
 services:
-  reeve-verifier-backend:
+
+  api:
     restart: unless-stopped
     build:
       context: .
     ports:
       - "9000:9000"
     environment:
-      - DB_URL=jdbc:postgresql://postgres-indexer:5432/reeve_verifier?currentSchema=reeve_verifier
+      - DB_URL=jdbc:postgresql://postgres-indexer:5433/postgres?currentSchema=indexer
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=docker-devkit
@@ -14,9 +15,9 @@ services:
       - STORE_CARDANO_HOST=host.docker.internal
       - KERI_ENABLED=${KERI_ENABLED:-false}
     depends_on:
-      - postgres-indexer
+      - postgres
 
-  reeve-verifier-frontend:
+  frontend:
     restart: unless-stopped
     build:
       context: frontend
@@ -26,12 +27,12 @@ services:
       PORT: "3000"
       VITE_API_URL: http://localhost:9000
 
-  postgres-indexer:
+  postgres:
     restart: unless-stopped
     image: postgres:17
-    container_name: postgres-indexer
+    hostname: postgres-indexer
     environment:
-      - POSTGRES_DB=reeve_verifier
+      - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
@@ -39,7 +40,6 @@ services:
     ports:
       - "15432:5432"
 
-  
   yaci-cli:
     restart: unless-stopped
     image: bloxbean/yaci-cli:0.10.6

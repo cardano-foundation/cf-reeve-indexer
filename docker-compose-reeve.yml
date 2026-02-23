@@ -1,12 +1,13 @@
 services:
-  reeve-verifier-backend:
+
+  api:
     restart: unless-stopped
     build:
       context: .
     ports:
       - "9002:9000"
     environment:
-      - DB_URL=jdbc:postgresql://postgres-indexer:5432/reeve_verifier?currentSchema=reeve_verifier
+      - DB_URL=jdbc:postgresql://postgres-indexer:5432/postgres?currentSchema=indexer
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=docker-devkit
@@ -17,7 +18,7 @@ services:
       - KERI_URL=${KERI_URL:-http://host.docker.internal:3901}
       - KERI_BOOT_URL=${KERI_BOOT_URL:-http://host.docker.internal:3903}
     depends_on:
-      - postgres-indexer
+      - postgres
     networks:
       - lob
     labels:
@@ -30,8 +31,7 @@ services:
       - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.services.backend-indexer.loadbalancer.server.port=9000"
 
-
-  reeve-verifier-frontend:
+  frontend:
     restart: unless-stopped
     build:
       context: frontend
@@ -51,12 +51,12 @@ services:
       - "traefik.http.routers.frontend-indexer-https.tls=true"
       - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
 
-  postgres-indexer:
+  postgres:
     restart: unless-stopped
     image: postgres:17
-    container_name: postgres-indexer
+    hostname: postgres-indexer
     environment:
-      - POSTGRES_DB=reeve_verifier
+      - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
