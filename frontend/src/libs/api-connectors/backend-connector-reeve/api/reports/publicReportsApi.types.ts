@@ -37,7 +37,7 @@ export type NestedMap = { [key: string]: string | NestedMap }
 
 export type ReportEntity = {
   organisationId: string
-  type: ReportType
+  subType: ReportType
   intervalType: IntervalType
   currency: string
   year: number
