@@ -12,12 +12,12 @@ import { formatNumber } from 'libs/utils/format'
 export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const { t } = useTranslations()
 
-  const { currency, period, intervalType, year, data, type } = report
+  const { currency, period, intervalType, year, data, subType } = report
 
   return (
     <Modal onClose={onClose} isOpen={isOpen}>
       <Modal.Header hasCloseButton>
-        {t({ id: 'reportViewTitle' }, { currency: formatCurrency(currency), period: getReportPeriod(intervalType, period, year), type: t({ id: type }) })}
+        {t({ id: 'reportViewTitle' }, { currency: formatCurrency(currency), period: getReportPeriod(intervalType, period, year), type: t({ id: subType }) })}
       </Modal.Header>
       <Modal.Content>
         <NestedGrid data={data} />
