@@ -36,7 +36,7 @@ export const usePublicDashboardQueries = (state: PublicDashboardQueriesState) =>
     },
     Boolean(availableMetrics)
   )
-  const { dashboards, isDashboardsFetching } = useGetDashboardsModel({ organisationId: selectedOrganisation })
+  const { dashboards, isDashboardsFetching } = useGetDashboardsModel({ organisationId: selectedOrganisation }, Boolean(selectedOrganisation))
 
   const [dashboard] = dashboards ?? []
 
