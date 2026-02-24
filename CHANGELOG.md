@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.0.1...1.0.2) (2026-02-24)
+
+
+### Bug Fixes
+
+* dashboard api calls, report modal ([#43](https://github.com/cardano-foundation/cf-reeve-indexer/issues/43)) ([0ce7dfe](https://github.com/cardano-foundation/cf-reeve-indexer/commit/0ce7dfe63fc2eb947890b9c2a5fef52a78749fa7))
+
 ## [1.0.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.0.0...1.0.1) (2026-02-23)
 
 
