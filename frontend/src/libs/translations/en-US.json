@@ -590,6 +590,7 @@
 
   "_ReportView": "report view section",
   "reportViewTitle": "{type} for {period}, {currency}",
+  "reportDialogPreviewTitle": "Report preview",
 
   "_ReportPublish": "report publish section",
   "reportPublished": "Report successfully published",
