@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +28,7 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
     }
 
     @Override
-    public ReeveMetadata deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+    public ReeveMetadata deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
         // Get the codec from the parser to work with JSON nodes
         ObjectCodec codec = parser.getCodec();
         // Read the entire JSON structure into a JsonNode tree
@@ -38,7 +39,12 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
         if (typeNode == null || typeNode.isNull()) {
             throw new IOException("'type' field is missing or null");
         }
-        ReeveTransactionType type = ReeveTransactionType.valueOf(typeNode.asText());
+        ReeveTransactionType type;
+        try {
+            type = ReeveTransactionType.valueOf(typeNode.asText());
+        } catch (IllegalArgumentException e) {
+            throw new JsonProcessingException("Unknown transaction type: " + typeNode.asText()) {};
+        }
 
         // 2. Deserialize the 'data' field based on the 'type'
         JsonNode dataNode = rootNode.get("data");
