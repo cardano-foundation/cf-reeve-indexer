@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.0.2...1.1.0) (2026-03-11)
+
+
+### Features
+
+* matching the preview of the report based on heirarchy struture ([85decd3](https://github.com/cardano-foundation/cf-reeve-indexer/commit/85decd3116b2b3f28f995a0b011a06d720bd43fc))
+
+
+### Bug Fixes
+
+* metadata deserializer handles unknown types ([#48](https://github.com/cardano-foundation/cf-reeve-indexer/issues/48)) ([d743e5a](https://github.com/cardano-foundation/cf-reeve-indexer/commit/d743e5a9aa4af3a873ddde925a05cdabb7f038a6))
+
 ## [1.0.2](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.0.1...1.0.2) (2026-02-24)
 
 
