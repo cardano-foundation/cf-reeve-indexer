@@ -35,6 +35,7 @@ public class ReeveMetadata {
 
     private Object data;
     private List<Transaction> transactions;
+    private String ipfs;
 
     // In case it's a report
     private Interval interval;

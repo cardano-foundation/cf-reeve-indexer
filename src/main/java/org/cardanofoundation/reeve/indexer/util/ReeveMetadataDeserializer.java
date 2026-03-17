@@ -80,6 +80,9 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
         if (rootNode.has("ver")) {
             rawMetadata.setVer(rootNode.get("ver").asLong());
         }
+        if(rootNode.has("ipfs")) {
+            rawMetadata.setIpfs(rootNode.get("ipfs").asText());
+        }
         if (rootNode.has("year")) {
             rawMetadata.setYear(rootNode.get("year").asInt());
         }

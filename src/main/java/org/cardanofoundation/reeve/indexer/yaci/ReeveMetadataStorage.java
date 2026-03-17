@@ -1,6 +1,12 @@
 package org.cardanofoundation.reeve.indexer.yaci;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.security.DigestException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,6 +58,9 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
     @Value("${reeve.label}")
     private String reeveMetadataLabel;
+    @Value("${ipfs.gateway:https://ipfs.io/ipfs/}")
+    private String ipfsGateway;
+    private final HttpClient httpClient = HttpClient.newHttpClient();
     @Value("${keri.metadata-label:170}")
     private String keriMetadataLabel;
     @Value("${keri.enabled:false}")
@@ -176,10 +185,30 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                     rawMetadata.getTxHash()
             );
             // verifiy identity
-            boolean identityVerified = false; // TODO need to implement identity verification
+            boolean identityVerified = false;
             if (rawMetadata.getType() == ReeveTransactionType.INDIVIDUAL_TRANSACTIONS) {
+                List<Transaction> transactions = new ArrayList<>(Optional.ofNullable((List<Transaction>) rawMetadata.getData()).orElse(new ArrayList<>()));
+                if(rawMetadata.getIpfs() != null) {
+                    try {
+                        String cid = rawMetadata.getIpfs().replace("ipfs://", "");
+                        HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(ipfsGateway + cid))
+                                .GET()
+                                .build();
+                        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                        if (response.statusCode() == 200) {
+                            Transaction[] ipfsTransactions = objectMapper.treeToValue(
+                                    objectMapper.readTree(response.body()).get("data"), Transaction[].class);
+                            transactions.addAll(Arrays.asList(ipfsTransactions));
+                        } else {
+                            log.error("Failed to fetch IPFS data for tx {}: HTTP {}", rawMetadata.getTxHash(), response.statusCode());
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to fetch IPFS data for tx {}: {}", rawMetadata.getTxHash(), e.getMessage());
+                    }
+                }
                 List<TransactionEntity> transactionEntities =
-                        ((List<Transaction>) rawMetadata.getData()).stream().map(transaction -> {
+                        transactions.stream().map(transaction -> {
                             TransactionEntity entity = transaction.toEntity();
                             // storing currencies if not exists
                             transaction.getItems().forEach(item -> {
