@@ -41,6 +41,8 @@ public class TransactionEntity {
     private String type;
     @Column(name = "date", nullable = false)
     private LocalDate date;
+    @Column(name = "ipfs", nullable = true)
+    private String ipfs;
     @OneToMany(mappedBy = "transaction", orphanRemoval = true, cascade = CascadeType.ALL)
     @Builder.Default
     private List<TransactionItemEntity> items = new ArrayList<>();

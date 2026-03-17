@@ -210,6 +210,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                 List<TransactionEntity> transactionEntities =
                         transactions.stream().map(transaction -> {
                             TransactionEntity entity = transaction.toEntity();
+                            entity.setIpfs(rawMetadata.getIpfs());
                             // storing currencies if not exists
                             transaction.getItems().forEach(item -> {
                                 Optional.ofNullable(item.getDocument()).ifPresent(doc -> {
