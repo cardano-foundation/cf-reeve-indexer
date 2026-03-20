@@ -40,8 +40,8 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     )
     Page<ProjectView> findDistinctProjectCodesAndNamesByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
-    @Query("SELECT DISTINCT t.internalNumber FROM TransactionEntity t WHERE t.organisationId = :orgId")
-    List<String> findDistinctInternalNumbersByOrganisationId(@Param("orgId") String orgId);
+    @Query("SELECT DISTINCT t.internalNumber FROM TransactionEntity t WHERE t.organisationId = :orgId AND t.internalNumber LIKE %:number%")
+    List<String> findDistinctInternalNumbersByOrganisationId(@Param("orgId") String orgId, @Param("number") String number);
 
     @Query("SELECT DISTINCT ti.documentNumber FROM TransactionEntity t " +
             "JOIN t.items ti " +

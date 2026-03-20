@@ -80,10 +80,12 @@ export const organisationApi = (baseUrl: string) => {
 
   const getOrganisationInternalNumbers = (request: GetOrganisationTransactionNumbersRequest) => {
     const {
-      parameters: { organisationId }
+      parameters: { organisationId, number }
     } = request
 
-    return get<GetOrganisationTransactionNumbersResponse200>(`api/v1/organisations/${organisationId}/internalNumber`)
+    return get<GetOrganisationTransactionNumbersResponse200>(`api/v1/organisations/${organisationId}/internalNumber`,
+      { number }
+    )
   }
 
   const getOrganisationProjects = (request: GetOrganisationProjectsRequest) => {

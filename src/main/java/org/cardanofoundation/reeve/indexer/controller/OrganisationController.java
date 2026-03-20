@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -50,9 +51,9 @@ public class OrganisationController {
 
     @GetMapping("/{orgId}/internalNumber")
     public ResponseEntity<List<String>> getInternalNumbers(
-            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId, @RequestParam(value = "number", required = false, defaultValue = "") String number) {
         log.info("Fetching distinct internal numbers for organisation: {}", orgId);
-        List<String> internalNumbers = organisationService.getDistinctInternalNumbersForOrganisation(orgId);
+        List<String> internalNumbers = organisationService.getDistinctInternalNumbersForOrganisation(orgId, number);
         return ResponseEntity.ok(internalNumbers);
     }
 

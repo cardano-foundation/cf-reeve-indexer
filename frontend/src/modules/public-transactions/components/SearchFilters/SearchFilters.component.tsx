@@ -9,7 +9,7 @@ import { useSearchFilters } from './SearchFilters.hooks'
 export const SearchFilters = () => {
   const { t } = useTranslations()
 
-  const { values, dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, options } = useSearchFilters()
+  const { values, dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, options, transactionNumberSearchTerm, setTransactionNumberSearchTerm, debouncedTransactionNumberSearchTerm } = useSearchFilters()
 
   const {
     costCenterOptions,
@@ -36,7 +36,16 @@ export const SearchFilters = () => {
             <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom || dateToMinDate} maxDate={dateToMaxDate} />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'transactionNumber' })} name="transactionNumber" options={transactionNumberOptions} multiple />
+            <FieldCombobox 
+              label={t({ id: 'transactionNumber' })} 
+              name="transactionNumber" 
+              options={transactionNumberOptions} 
+              multiple 
+              noOptionsText={debouncedTransactionNumberSearchTerm ? t({ id: 'noOptionsTransactionNumber' }) : t({ id: 'transactionNumberSearchPlaceholder' })}
+              inputValue={transactionNumberSearchTerm} 
+              onInputChange={(_event, value, reason) => { 
+                if (reason !== 'reset') setTransactionNumberSearchTerm(value) }} 
+              filterOptions={(x) => x} />
           </Grid>
           <Grid size={12}>
             <FieldCombobox label={t({ id: 'transactionType' })} name="transactionType" options={transactionTypeOptions} multiple />

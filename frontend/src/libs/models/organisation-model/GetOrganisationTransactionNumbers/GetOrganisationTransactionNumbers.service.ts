@@ -14,7 +14,7 @@ const getOrganisationTransactionNumbersQuery = async (request: GetOrganisationTr
 }
 
 export const useGetOrganisationTransactionNumbersModel = (request: GetOrganisationTransactionNumbersRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_TRANSACTION_NUMBERS'], queryFn: () => getOrganisationTransactionNumbersQuery(request) })
+  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_TRANSACTION_NUMBERS', request.parameters.number], queryFn: () => getOrganisationTransactionNumbersQuery(request), enabled: !!request.parameters.number })
 
   return {
     transactionNumbers: data ?? null,
