@@ -1,7 +1,8 @@
+import { useMemo, useState } from 'react'
 import { useFormik, useFormikContext } from 'formik'
 import { noop } from 'lodash'
 
-import { useDatesRange } from 'hooks'
+import { useDatesRange, useDebounce } from 'hooks'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 import { useGetOrganisationCostCentersModel } from 'libs/models/organisation-model/GetOrganisationCostCenters/GetOrganisationCostCenters.service'
 import { useGetOrganisationCounterpartiesModel } from 'libs/models/organisation-model/GetOrganisationCounterparties/GetOrganisationCounterparties.service'
@@ -29,8 +30,11 @@ import {
 import { DEFAULT_SEARCH_FILTERS_VALUES } from './SearchFilters.consts'
 import { SearchFiltersValues } from './SearchFilters.types'
 
-export const useSearchFiltersOptions = () => {
+export const useSearchFiltersOptions = (selectedTransactionNumbers: string[] = []) => {
   const { selectedOrganisation } = useLayoutPublicContext()
+
+  const [transactionNumberSearchTerm, setTransactionNumberSearchTerm] = useState<string>('')
+  const debouncedTransactionNumberSearchTerm = useDebounce(transactionNumberSearchTerm)
 
   const { costCenters } = useGetOrganisationCostCentersModel({ parameters: { organisationId: selectedOrganisation } })
   const { counterparties } = useGetOrganisationCounterpartiesModel({ parameters: { organisationId: selectedOrganisation } })
@@ -39,7 +43,9 @@ export const useSearchFiltersOptions = () => {
   const { documentNumbers } = useGetOrganisationDocumentNumbersModel({ parameters: { organisationId: selectedOrganisation } })
   const { events } = useGetOrganisationEventsModel({ parameters: { organisationId: selectedOrganisation } })
   const { projects } = useGetOrganisationProjectsModel({ parameters: { organisationId: selectedOrganisation } })
-  const { transactionNumbers } = useGetOrganisationTransactionNumbersModel({ parameters: { organisationId: selectedOrganisation } })
+
+  const { transactionNumbers } = useGetOrganisationTransactionNumbersModel({ parameters: { organisationId: selectedOrganisation, number: debouncedTransactionNumberSearchTerm ?? undefined } })
+
   const { transactionTypes } = useGetOrganisationTransactionTypesModel({ parameters: { organisationId: selectedOrganisation } })
   const { vatCodes } = useGetOrganisationVatCodesModel({ parameters: { organisationId: selectedOrganisation } })
 
@@ -50,7 +56,17 @@ export const useSearchFiltersOptions = () => {
   const documentNumberOptions = getAllDocumentNumberOptions(documentNumbers)
   const eventOptions = getAllEventOptions(events)
   const projectOptions = getAllProjectOptions(projects)
-  const transactionNumberOptions = getAllTransactionNumberOptions(transactionNumbers)
+
+
+  const transactionNumberOptions = useMemo(() => {
+    const fetchedOptions = getAllTransactionNumberOptions(transactionNumbers)
+    const selectedAsOptions = selectedTransactionNumbers
+      .filter(v => !fetchedOptions.find(o => o.value === v))
+      .map(v => ({ label: v, value: v }))
+    return [...fetchedOptions, ...selectedAsOptions]
+  }, [transactionNumbers, selectedTransactionNumbers])
+
+
   const transactionTypeOptions = getAllTransactionTypeOptions(transactionTypes)
   const vatCodeOptions = getAllVatCodeOptions(vatCodes)
 
@@ -64,7 +80,10 @@ export const useSearchFiltersOptions = () => {
     projectOptions,
     transactionNumberOptions,
     transactionTypeOptions,
-    vatCodeOptions
+    vatCodeOptions,
+    transactionNumberSearchTerm,
+    debouncedTransactionNumberSearchTerm,
+    setTransactionNumberSearchTerm
   }
 }
 
@@ -92,8 +111,11 @@ export const useSearchFilters = () => {
     projectOptions,
     transactionNumberOptions,
     transactionTypeOptions,
-    vatCodeOptions
-  } = useSearchFiltersOptions()
+    vatCodeOptions, 
+    transactionNumberSearchTerm,
+    debouncedTransactionNumberSearchTerm,
+    setTransactionNumberSearchTerm
+  } = useSearchFiltersOptions(values.transactionNumber ?? [])
 
   const { dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate } = useDatesRange()
 
@@ -103,6 +125,9 @@ export const useSearchFilters = () => {
     dateFromMinDate,
     dateToMaxDate,
     dateToMinDate,
+    transactionNumberSearchTerm,
+    debouncedTransactionNumberSearchTerm,
+    setTransactionNumberSearchTerm,
     options: {
       costCenterOptions,
       counterpartyOptions,
