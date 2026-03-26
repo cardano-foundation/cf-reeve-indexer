@@ -34,8 +34,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             @Param("intervals") List<Interval> intervals,
             @Param("years") List<Integer> years,
             @Param("periods") List<Integer> periods,
-            Pageable pageable
-            );
+            Pageable pageable);
 
     @Query("""
             SELECT r FROM ReportEntity r
@@ -43,7 +42,11 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             AND r.subType = :reportType
             AND r.year >= :startYear AND r.year <= :endYear
             """)
-    Set<ReportEntity> findByTypeAndWithinYearRange(@Param("organisationId") String organisationId, @Param("reportType") String reportType, @Param("startYear") int startYear, @Param("endYear") int endYear);
+    Set<ReportEntity> findByTypeAndWithinYearRange(
+            @Param("organisationId") String organisationId,
+            @Param("reportType") String reportType,
+            @Param("startYear") int startYear,
+            @Param("endYear") int endYear);
 
     Optional<ReportEntity> findByTxHash(String txHash);
 
