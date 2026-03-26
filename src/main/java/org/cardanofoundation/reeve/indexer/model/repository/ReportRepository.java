@@ -14,7 +14,7 @@ import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 
 public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
 
-    @Query("""
+    @Query(value = """
             SELECT r FROM ReportEntity r
             INNER JOIN OrganisationEntity o ON r.organisationId = o.id
             WHERE (:organisationId IS NULL OR r.organisationId = :organisationId)
@@ -24,8 +24,9 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             AND (:periods IS NULL OR r.period IN :periods)
             AND (:blockChainHash IS NULL OR r.txHash = :blockChainHash)
             AND (:currency IS NULL OR o.currencyId = :currency)
+            AND (r.id in (SELECT MIN(sub.id) FROM ReportEntity sub GROUP BY sub.metadataHash))
             """)
-    List<ReportEntity> findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+    List<ReportEntity> findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
             @Param("organisationId") String organisationId,
             @Param("blockChainHash") String blockChainHash,
             @Param("currency") String currency,
@@ -33,8 +34,8 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             @Param("intervals") List<Interval> intervals,
             @Param("years") List<Integer> years,
             @Param("periods") List<Integer> periods,
-            Pageable pageable);
-
+            Pageable pageable
+            );
 
     @Query("""
             SELECT r FROM ReportEntity r
@@ -45,4 +46,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
     Set<ReportEntity> findByTypeAndWithinYearRange(@Param("organisationId") String organisationId, @Param("reportType") String reportType, @Param("startYear") int startYear, @Param("endYear") int endYear);
 
     Optional<ReportEntity> findByTxHash(String txHash);
+
+    List<ReportEntity> findByMetadataHash(String metdataHash);
+
 }
