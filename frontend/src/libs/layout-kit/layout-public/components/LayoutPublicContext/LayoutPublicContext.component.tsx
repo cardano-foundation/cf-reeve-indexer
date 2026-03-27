@@ -5,6 +5,7 @@ import { DrawerType } from 'consts'
 import { useLocationState, useMediaQueries } from 'hooks'
 import { useLayoutDrawer } from 'libs/layout-kit/hooks/useLayoutDrawer'
 import { useLayoutSidebar } from 'libs/layout-kit/hooks/useLayoutSidebar'
+import { useGetOrganisationsModel } from 'libs/models/organisation-model/GetOrganisations/GetOrganisations.service'
 import { PATHS } from 'routes'
 
 interface LayoutPublicContextProps {
@@ -41,6 +42,7 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   const { pathname } = useLocationState()
 
   const navigate = useNavigate()
+  const { organisations: availableOrganisations } = useGetOrganisationsModel()
 
   const { handleCloseSidebar, handleOpenSidebar, handleToggleSidebar, isSidebarOpen } = useLayoutSidebar()
 
@@ -110,10 +112,18 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   }, [pathname, isSidebarOpen, toggledSection])
 
   useEffect(() => {
+    if (!availableOrganisations?.length) return
+
+    setOrganisations(availableOrganisations)
+
+    if (!selectedOrganisation) {
+      setSelectedOrganisationState(String(availableOrganisations[0]?.id ?? ''))
+    }
+  }, [availableOrganisations, selectedOrganisation])
+
+  useEffect(() => {
     setToggledSection(null)
-    // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
-    navigate(PATHS.PUBLIC_REPORTS)
-  }, [selectedOrganisation, navigate])
+  }, [selectedOrganisation])
 
   useEffect(() => {
     return () => {

@@ -13,8 +13,12 @@ const getOrganisationCounterpartiesQuery = async (request: GetOrganisationCounte
   return data
 }
 
-export const useGetOrganisationCounterpartiesModel = (request: GetOrganisationCounterpartiesRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_COUNTERPARTIES'], queryFn: () => getOrganisationCounterpartiesQuery(request) })
+export const useGetOrganisationCounterpartiesModel = (request: GetOrganisationCounterpartiesRequest, isEnabled: boolean = true) => {
+  const { data, isFetching } = useQuery({
+    queryKey: ['ORGANISATION_COUNTERPARTIES', request.parameters.organisationId],
+    queryFn: () => getOrganisationCounterpartiesQuery(request),
+    enabled: isEnabled
+  })
 
   return {
     counterparties: data ?? null,

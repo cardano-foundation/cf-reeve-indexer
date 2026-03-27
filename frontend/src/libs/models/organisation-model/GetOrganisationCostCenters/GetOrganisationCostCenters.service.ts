@@ -13,8 +13,12 @@ const getOrganisationCostCentersQuery = async (request: GetOrganisationCostCente
   return data
 }
 
-export const useGetOrganisationCostCentersModel = (request: GetOrganisationCostCentersRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_COST_CENTERS'], queryFn: () => getOrganisationCostCentersQuery(request) })
+export const useGetOrganisationCostCentersModel = (request: GetOrganisationCostCentersRequest, isEnabled: boolean = true) => {
+  const { data, isFetching } = useQuery({
+    queryKey: ['ORGANISATION_COST_CENTERS', request.parameters.organisationId],
+    queryFn: () => getOrganisationCostCentersQuery(request),
+    enabled: isEnabled
+  })
 
   return {
     costCenters: data ?? null,
