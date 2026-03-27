@@ -155,7 +155,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
         rowCount={rowCount}
         columns={columns}
         rows={data?.reports ?? []}
-        getRowId={(row) => `${row.organisationId}-${row.subType}-${row.intervalType}-${row.year}-${row.period}-${row.ver}`}
+        getRowId={(row) => `${row.organisationId}-${row.subType}-${row.intervalType}-${row.year}-${row.period}-${row.ver}-${row.txHash}`}
         onPaginationModelChange={(model) => {
           const { page, pageSize } = model
 
