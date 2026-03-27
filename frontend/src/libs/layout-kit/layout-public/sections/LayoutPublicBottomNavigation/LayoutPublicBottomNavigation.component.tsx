@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material'
-import { ArrowSwapHorizontal, Graph, Note1, Book1 } from 'iconsax-react'
+import { ArrowSwapHorizontal, Note1, Book1 } from 'iconsax-react'
 import { Link as RouterLink } from 'react-router-dom'
 
 import { useLocationState } from 'hooks'
@@ -16,19 +16,21 @@ export const LayoutPublicBottomNavigation = () => {
 
   const isActiveRouteOrDescendant = (route: string) => pathname === route || pathname.startsWith(route)
 
-  const isDashboard = isActiveRouteOrDescendant(PATHS.PUBLIC_DASHBOARD)
+  // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
+  // const isDashboard = isActiveRouteOrDescendant(PATHS.PUBLIC_DASHBOARD)
   const isTransactions = isActiveRouteOrDescendant(PATHS.PUBLIC_TRANSACTIONS)
   const isReports = isActiveRouteOrDescendant(PATHS.PUBLIC_REPORTS)
   const isResources = isActiveRouteOrDescendant(PATHS.PUBLIC_RESOURCES)
 
   return (
     <LayoutBottomNavigation>
-      <LayoutBottomNavigation.Action
+      {/* NOTE: [LOB-2061] revoke dashboard route since it requires additional changes */}
+      {/* <LayoutBottomNavigation.Action
         component={RouterLink}
         icon={<Graph color={theme.palette.primary.main} size={24} variant={isDashboard ? 'Bold' : 'Outline'} />}
         label={t({ id: 'publicDashboard' })}
         to={PATHS.PUBLIC_DASHBOARD}
-      />
+      /> */}
       <LayoutBottomNavigation.Action
         component={RouterLink}
         icon={<Note1 color={theme.palette.primary.main} size={24} variant={isReports ? 'Bold' : 'Outline'} />}
