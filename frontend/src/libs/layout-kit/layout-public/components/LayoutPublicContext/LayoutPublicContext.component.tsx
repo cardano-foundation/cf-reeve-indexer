@@ -111,7 +111,8 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
 
   useEffect(() => {
     setToggledSection(null)
-    navigate(PATHS.PUBLIC_DASHBOARD)
+    // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
+    navigate(PATHS.PUBLIC_REPORTS)
   }, [selectedOrganisation, navigate])
 
   useEffect(() => {

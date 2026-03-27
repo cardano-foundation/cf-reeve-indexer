@@ -1,7 +1,8 @@
 import { createBrowserRouter, createRoutesFromElements, Outlet, Route, Navigate } from 'react-router-dom'
 
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
-import { ViewPublicDashboard } from 'modules/public-dashboard/view/ViewPublicDashboard.component'
+// NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
+// import { ViewPublicDashboard } from 'modules/public-dashboard/view/ViewPublicDashboard.component'
 import { ViewPublicResources } from 'modules/public-resources/view/ViewPublicResources.component.tsx'
 import { ViewPublicResourcesGlossary } from 'modules/public-resources-glossary/view/ViewPublicResourcesGlossary.component'
 import { ViewPublicResourcesUserGuide } from 'modules/public-resources-user-guide/view/ViewPublicResourcesUserGuide.component'
@@ -10,7 +11,8 @@ import { ViewReportsPublic } from 'modules/public-reports/view/ViewReportsPublic
 
 export const ROUTES = {
   ROOT: '/',
-  PUBLIC_DASHBOARD: 'dashboard',
+  // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
+  // PUBLIC_DASHBOARD: 'dashboard',
   PUBLIC_REPORTS: 'reports',
   PUBLIC_TRANSACTIONS: 'transactions',
   PUBLIC_RESOURCES: 'resources',
@@ -22,7 +24,8 @@ const createRoutePath = (routes: string[] = []) => `${ROUTES.ROOT}${routes.join(
 
 export const PATHS = {
   ROOT: createRoutePath(),
-  PUBLIC_DASHBOARD: createRoutePath([ROUTES.PUBLIC_DASHBOARD]),
+  // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
+  // PUBLIC_DASHBOARD: createRoutePath([ROUTES.PUBLIC_DASHBOARD]),
   PUBLIC_REPORTS: createRoutePath([ROUTES.PUBLIC_REPORTS]),
   PUBLIC_TRANSACTIONS: createRoutePath([ROUTES.PUBLIC_TRANSACTIONS]),
   PUBLIC_RESOURCES: createRoutePath([ROUTES.PUBLIC_RESOURCES]),
@@ -33,9 +36,10 @@ export const PATHS = {
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Outlet />} path={ROUTES.ROOT}>
-      <Route index element={<Navigate to={ROUTES.PUBLIC_DASHBOARD} replace />} />
+      <Route index element={<Navigate to={ROUTES.PUBLIC_REPORTS} replace />} />
       <Route element={<LayoutPublic />}>
-        <Route element={<ViewPublicDashboard />} path={ROUTES.PUBLIC_DASHBOARD} />
+        {/* NOTE: [LOB-2061] revoke dashboard route since it requires additional changes */}
+        {/* <Route element={<ViewPublicDashboard />} path={ROUTES.PUBLIC_DASHBOARD} /> */}
         <Route element={<ViewReportsPublic />} path={ROUTES.PUBLIC_REPORTS} />
         <Route element={<ViewPublicTransactions />} path={ROUTES.PUBLIC_TRANSACTIONS} />
         <Route element={<Outlet />} path={ROUTES.PUBLIC_RESOURCES}>

@@ -1,4 +1,4 @@
-import { ArrowSwapHorizontal, TrendUp, Note1, Book1 } from 'iconsax-react'
+import { ArrowSwapHorizontal, Note1, Book1 } from 'iconsax-react'
 import { useLocationState } from 'hooks'
 import { ButtonNavItem } from 'libs/layout-kit/components/ButtonNavItem/ButtonNavItem.component.tsx'
 import { CollapseNavItem } from 'libs/layout-kit/components/CollapseNavItem/CollapseNavItem.component.tsx'
@@ -18,7 +18,8 @@ export const NavigationSidebar = () => {
   const { RESOURCES_ROUTES } = useNavigationRoutes()
 
   const menuItems = [
-    { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
+    // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
+    // { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
     { icon: Note1, label: t({ id: 'publicReports' }), route: PATHS.PUBLIC_REPORTS },
     { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: PATHS.PUBLIC_TRANSACTIONS }
   ]
