@@ -6,7 +6,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ExportSquare } from 'iconsax-react'
 import { useMemo, useRef } from 'react'
 
-import { GetPublicReportsResponse200, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { GetPublicReportsResponse200, ReportEntity, LEIResponse } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
@@ -102,15 +102,16 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       minWidth: 192
     },
     {
-      field: 'identityVerified',
+      field: 'identities',
       headerName: t({ id: 'identityVerified' }),
-      renderCell: ({ row }) => (
+        renderCell: ({ row }) => (
           <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
-            {row.identites?.map((item, index) => (
+            {row.identities?.map((item: LEIResponse, index: number) => (
               <IdentityVerificationStatus
                 key={index}
                 isVerified={item.identityVerified}
                 lei={item.lei}
+                txHash={item.txHash}
               />
             ))}
           </div>

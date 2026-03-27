@@ -74,6 +74,7 @@
   "search": "Search",
   "system": "system",
   "blockchainHash": "Blockchain hash",
+  "txHash": "Blockchain hash",
   "identityVerified": "Identity",
   "transactionHash": "Transaction hash",
   "transactionId": "Transaction ID",

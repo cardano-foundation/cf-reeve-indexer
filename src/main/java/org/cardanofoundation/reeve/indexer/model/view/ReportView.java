@@ -44,7 +44,7 @@ public class ReportView {
 
     private Map<String, Object> data; // Assuming fields is a JSON string, adjust as necessary
 
-    private List<LEIResponse> identites;
+    private List<LEIResponse> identities;
 
     public static ReportView fromEntity(ReportEntity entity, OrganisationEntity organisationEntity, ObjectMapper objectMapper) throws JsonProcessingException {
         return ReportView.builder()
