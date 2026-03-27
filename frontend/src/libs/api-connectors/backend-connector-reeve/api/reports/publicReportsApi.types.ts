@@ -44,13 +44,14 @@ export type ReportEntity = {
   period: number
   ver: number
   blockChainHash: string
-  identityVerified: LEIResponse[]
+  identities: LEIResponse[]
   data: NestedMap
 }
 
 export interface LEIResponse {
     identityVerified: boolean
     lei: string
+    txHash?: string
 }
 
 export interface GetPublicReportsRequestParameters {

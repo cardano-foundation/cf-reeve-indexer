@@ -94,7 +94,7 @@ public class ReportService {
                     .map(Optional::get)
                     .toList();
 
-            view.setIdentites(leiResponses);
+            view.setIdentities(leiResponses);
             return view;
         }).toList();
     }

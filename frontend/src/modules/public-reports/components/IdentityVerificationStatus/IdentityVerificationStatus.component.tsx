@@ -1,7 +1,9 @@
 import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
+import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
+import { ExportSquare } from 'iconsax-react'
 
 import { IconsaxIcon, ICONSAX_NAMES } from 'features/iconsax'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
@@ -12,9 +14,10 @@ import { useGLEIFVerification } from 'modules/public-reports/hooks/useGLEIFVerif
 interface IdentityVerificationStatusProps {
   isVerified: boolean
   lei?: string
+  txHash?: string
 }
 
-export const IdentityVerificationStatus = ({ isVerified, lei }: IdentityVerificationStatusProps) => {
+export const IdentityVerificationStatus = ({ isVerified, lei, txHash }: IdentityVerificationStatusProps) => {
   const theme = useTheme()
   const { t } = useTranslations()
 
@@ -91,6 +94,46 @@ export const IdentityVerificationStatus = ({ isVerified, lei }: IdentityVerifica
                     {leiKnownToGLEIF ? t({ id: 'yes' }) : t({ id: 'no' })}
                   </Typography>
                 </Box>
+                {txHash && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
+                      {t({ id: 'blockchainHash' })}:
+                    </Typography>
+                    <Box alignItems="center" display="flex" gap={1}>
+                      <Tooltip
+                        title={txHash}
+                        disableInteractive={false}
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              userSelect: 'text'
+                            }
+                          }
+                        }}
+                      >
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          sx={{
+                            fontFamily: 'monospace',
+                            fontSize: '0.85rem',
+                            color: theme.palette.common.white
+                          }}
+                        >
+                          {`${txHash.slice(0, 4)}...${txHash.slice(-4)}`}
+                        </Typography>
+                      </Tooltip>
+                      <Link
+                        display="flex"
+                        href={`https://explorer.cardano.org/transaction/${txHash}`}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <ExportSquare color={theme.palette.action.active} size={16} variant="Outline" />
+                      </Link>
+                    </Box>
+                  </Box>
+                )}
                 {gleifData && legalName && (
                   <>
                     <Box
