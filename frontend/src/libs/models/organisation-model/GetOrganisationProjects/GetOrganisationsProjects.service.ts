@@ -13,8 +13,12 @@ const getOrganisationProjectsQuery = async (request: GetOrganisationProjectsRequ
   return data
 }
 
-export const useGetOrganisationProjectsModel = (request: GetOrganisationProjectsRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_PROJECTS'], queryFn: () => getOrganisationProjectsQuery(request) })
+export const useGetOrganisationProjectsModel = (request: GetOrganisationProjectsRequest, isEnabled: boolean = true) => {
+  const { data, isFetching } = useQuery({
+    queryKey: ['ORGANISATION_PROJECTS', request.parameters.organisationId],
+    queryFn: () => getOrganisationProjectsQuery(request),
+    enabled: isEnabled
+  })
 
   return {
     projects: data ?? null,

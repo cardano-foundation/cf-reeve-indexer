@@ -13,8 +13,12 @@ const getOrganisationEventsQuery = async (request: GetOrganisationEventsRequest)
   return data
 }
 
-export const useGetOrganisationEventsModel = (request: GetOrganisationEventsRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_EVENTS'], queryFn: () => getOrganisationEventsQuery(request) })
+export const useGetOrganisationEventsModel = (request: GetOrganisationEventsRequest, isEnabled: boolean = true) => {
+  const { data, isFetching } = useQuery({
+    queryKey: ['ORGANISATION_EVENTS', request.parameters.organisationId],
+    queryFn: () => getOrganisationEventsQuery(request),
+    enabled: isEnabled
+  })
 
   return {
     events: data ?? null,

@@ -33,7 +33,8 @@ export const usePublicTransactionsQueries = (state: PublicTransactionsQueriesSta
         ...(hasSomeFilters ? filtersPayload : {})
       }
     },
-    [filters, page, size, sortBy, sortOrder]
+    [selectedOrganisation, filters, page, size, sortBy, sortOrder],
+    Boolean(selectedOrganisation)
   )
 
   const isFetching = isTransactionsFetching

@@ -13,8 +13,12 @@ const getOrganisationVatCodesQuery = async (request: GetOrganisationVatCodesRequ
   return data
 }
 
-export const useGetOrganisationVatCodesModel = (request: GetOrganisationVatCodesRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_VAT_CODES'], queryFn: () => getOrganisationVatCodesQuery(request) })
+export const useGetOrganisationVatCodesModel = (request: GetOrganisationVatCodesRequest, isEnabled: boolean = true) => {
+  const { data, isFetching } = useQuery({
+    queryKey: ['ORGANISATION_VAT_CODES', request.parameters.organisationId],
+    queryFn: () => getOrganisationVatCodesQuery(request),
+    enabled: isEnabled
+  })
 
   return {
     vatCodes: data ?? null,

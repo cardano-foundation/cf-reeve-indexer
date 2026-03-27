@@ -35,7 +35,8 @@ export const usePublicReportsQueries = (state: PublicReportsQueriesState) => {
         ...(hasSomeFilters ? filtersPayload : {})
       }
     },
-    [filters, page, size, sortBy, sortOrder]
+    [selectedOrganisation, filters, page, size, sortBy, sortOrder],
+    Boolean(selectedOrganisation)
   )
 
   return {

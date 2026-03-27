@@ -32,22 +32,26 @@ import { SearchFiltersValues } from './SearchFilters.types'
 
 export const useSearchFiltersOptions = (selectedTransactionNumbers: string[] = []) => {
   const { selectedOrganisation } = useLayoutPublicContext()
+  const isOrganisationSelected = Boolean(selectedOrganisation)
 
   const [transactionNumberSearchTerm, setTransactionNumberSearchTerm] = useState<string>('')
   const debouncedTransactionNumberSearchTerm = useDebounce(transactionNumberSearchTerm)
 
-  const { costCenters } = useGetOrganisationCostCentersModel({ parameters: { organisationId: selectedOrganisation } })
-  const { counterparties } = useGetOrganisationCounterpartiesModel({ parameters: { organisationId: selectedOrganisation } })
-  const { counterpartyTypes } = useGetOrganisationCounterpartyTypesModel({ parameters: { organisationId: selectedOrganisation } })
-  const { currencies } = useGetOrganisationCurrenciesModel({ parameters: { organisationId: selectedOrganisation } })
-  const { documentNumbers } = useGetOrganisationDocumentNumbersModel({ parameters: { organisationId: selectedOrganisation } })
-  const { events } = useGetOrganisationEventsModel({ parameters: { organisationId: selectedOrganisation } })
-  const { projects } = useGetOrganisationProjectsModel({ parameters: { organisationId: selectedOrganisation } })
+  const { costCenters } = useGetOrganisationCostCentersModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { counterparties } = useGetOrganisationCounterpartiesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { counterpartyTypes } = useGetOrganisationCounterpartyTypesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { currencies } = useGetOrganisationCurrenciesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { documentNumbers } = useGetOrganisationDocumentNumbersModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { events } = useGetOrganisationEventsModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { projects } = useGetOrganisationProjectsModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
 
-  const { transactionNumbers } = useGetOrganisationTransactionNumbersModel({ parameters: { organisationId: selectedOrganisation, number: debouncedTransactionNumberSearchTerm ?? undefined } })
+  const { transactionNumbers } = useGetOrganisationTransactionNumbersModel(
+    { parameters: { organisationId: selectedOrganisation, number: debouncedTransactionNumberSearchTerm ?? undefined } },
+    isOrganisationSelected
+  )
 
-  const { transactionTypes } = useGetOrganisationTransactionTypesModel({ parameters: { organisationId: selectedOrganisation } })
-  const { vatCodes } = useGetOrganisationVatCodesModel({ parameters: { organisationId: selectedOrganisation } })
+  const { transactionTypes } = useGetOrganisationTransactionTypesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { vatCodes } = useGetOrganisationVatCodesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
 
   const costCenterOptions = getAllCostCenterOptions(costCenters)
   const counterpartyOptions = getAllCounterpartyOptions(counterparties)

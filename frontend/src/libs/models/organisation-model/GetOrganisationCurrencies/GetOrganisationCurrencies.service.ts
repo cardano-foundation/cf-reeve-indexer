@@ -13,8 +13,12 @@ const getOrganisationCurrenciesQuery = async (request: GetOrganisationCurrencies
   return data
 }
 
-export const useGetOrganisationCurrenciesModel = (request: GetOrganisationCurrenciesRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_CURRENCIES'], queryFn: () => getOrganisationCurrenciesQuery(request) })
+export const useGetOrganisationCurrenciesModel = (request: GetOrganisationCurrenciesRequest, isEnabled: boolean = true) => {
+  const { data, isFetching } = useQuery({
+    queryKey: ['ORGANISATION_CURRENCIES', request.parameters.organisationId],
+    queryFn: () => getOrganisationCurrenciesQuery(request),
+    enabled: isEnabled
+  })
 
   return {
     currencies: data ?? null,
