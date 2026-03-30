@@ -47,7 +47,7 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
             </Grid>
           </Grid>
           <Divider flexItem />
-          <NestedGrid data={data} depth={0} safeT={safeT} />
+          <NestedGrid data={data} depth={0} safeT={safeT} isIncomeStatement={subType === 'INCOME_STATEMENT'} />
         </ContentStyled>
       </Modal.Content>
     </Modal>
@@ -58,9 +58,10 @@ interface NestedGridProps {
   data: NestedMap
   depth?: number
   safeT: (id?: string, variables?: Record<string, any>, fallback?: string) => string
+  isIncomeStatement?: boolean
 }
 
-const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT }) => {
+const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, isIncomeStatement }) => {
   const indent = depth * 3
   const borderSX =
     depth > 0
@@ -80,14 +81,31 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT }) => {
   const getLabel = (key: string) => safeT(key, {}, snakeToNormal(key))
   const getTotalLabel = (key: string, label: string) => safeT(`total${camelize(key)}`, {}, `Total ${label.toLowerCase()}`)
 
+  // For income statements with a "result_for_the_year" section: sort it last and
+  // override its displayed total with the grand sum of all top-level sections.
+  const isSpecialIncomeStatement = isIncomeStatement && depth === 0 && 'result_for_the_year' in data
+  const entries = isSpecialIncomeStatement
+    ? Object.entries(data).sort(([a], [b]) => {
+        if (a === 'result_for_the_year') return 1
+        if (b === 'result_for_the_year') return -1
+        return a.localeCompare(b)
+      })
+    : Object.entries(data)
+  const grandTotal = isSpecialIncomeStatement
+    ? entries.reduce((sum, [, value]) => {
+        if (typeof value === 'object' && value !== null) return sum + computeNestedSum(value as NestedMap)
+        return sum
+      }, 0)
+    : 0
+
   return (
     <Grid container direction="column" mb={1} spacing={1} sx={{ pl: indent, ...borderSX }}>
-      {Object.entries(data).map(([key, value]) => {
+      {entries.map(([key, value]) => {
         const isNested = typeof value === 'object' && value !== null
         const label = getLabel(key)
 
         if (isNested) {
-          const subtotal = computeNestedSum(value as NestedMap)
+          const subtotal = isSpecialIncomeStatement && key === 'result_for_the_year' ? grandTotal : computeNestedSum(value as NestedMap)
           const totalLabel = getTotalLabel(key, label)
           return (
             <Grid key={`nested-${key}`}>
@@ -103,7 +121,7 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT }) => {
                 {label}
               </Typography>
 
-              <NestedGrid data={value as NestedMap} depth={depth + 1} safeT={safeT} />
+              <NestedGrid data={value as NestedMap} depth={depth + 1} safeT={safeT} isIncomeStatement={isIncomeStatement} />
 
               <Grid alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }} sx={{ fontWeight: 'bold', mt: 0.5 }}>
                 <Grid container size={{ xs: 12, sm: 'grow' }}>
