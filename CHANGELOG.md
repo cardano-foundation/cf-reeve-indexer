@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.2.0...1.2.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* income_statement fields force order ([#58](https://github.com/cardano-foundation/cf-reeve-indexer/issues/58)) ([a817b3c](https://github.com/cardano-foundation/cf-reeve-indexer/commit/a817b3cefe9b7588d3b44503085d7a89d8e0e12b))
+* legacy report rules ([#59](https://github.com/cardano-foundation/cf-reeve-indexer/issues/59)) ([41df37d](https://github.com/cardano-foundation/cf-reeve-indexer/commit/41df37d13581f79147044141ea48b1db3137ee59))
+
 ## [1.2.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.1.0...1.2.0) (2026-03-27)
 
 
