@@ -14,7 +14,7 @@ export const usePublicTransactions = () => {
 
   const sorting = useSorting({ field: 'entryDate', sort: 'desc' })
 
-  const options = useSearchFiltersOptions()
+  const options = useSearchFiltersOptions(filters.quickFilters.values.transactionNumber ?? [])
 
   const data = usePublicTransactionsQueries({
     filters: filters.combinedFilters,

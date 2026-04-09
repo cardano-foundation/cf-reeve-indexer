@@ -74,6 +74,7 @@
   "search": "Search",
   "system": "system",
   "blockchainHash": "Blockchain hash",
+  "txHash": "Blockchain hash",
   "identityVerified": "Identity",
   "transactionHash": "Transaction hash",
   "transactionId": "Transaction ID",
@@ -245,6 +246,8 @@
   "noPublicTransactionsMessage": "No transactions available",
   "noPublicTransactionsHint": "{organisation} hasn’t published any transactions yet—please check back soon!",
   "specialCharactersNotAllowed": "To enter multiple blockchain transaction hashes, separate them with a comma or a space.",
+  "noOptionsTransactionNumber": "No options",
+  "transactionNumberSearchPlaceholder": "Search transaction number",
 
   "_Public resources": "public resources section",
   "publicResourcesViewTitle": "Resources",

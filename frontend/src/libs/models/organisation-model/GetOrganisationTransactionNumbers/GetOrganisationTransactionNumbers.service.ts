@@ -13,8 +13,12 @@ const getOrganisationTransactionNumbersQuery = async (request: GetOrganisationTr
   return data
 }
 
-export const useGetOrganisationTransactionNumbersModel = (request: GetOrganisationTransactionNumbersRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_TRANSACTION_NUMBERS'], queryFn: () => getOrganisationTransactionNumbersQuery(request) })
+export const useGetOrganisationTransactionNumbersModel = (request: GetOrganisationTransactionNumbersRequest, isEnabled: boolean = true) => {
+  const { data, isFetching } = useQuery({
+    queryKey: ['ORGANISATION_TRANSACTION_NUMBERS', request.parameters.organisationId, request.parameters.number],
+    queryFn: () => getOrganisationTransactionNumbersQuery(request),
+    enabled: isEnabled && !!request.parameters.number
+  })
 
   return {
     transactionNumbers: data ?? null,

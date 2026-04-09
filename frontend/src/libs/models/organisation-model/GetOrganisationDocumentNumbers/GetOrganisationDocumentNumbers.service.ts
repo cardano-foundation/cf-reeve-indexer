@@ -13,8 +13,12 @@ const getOrganisationDocumentNumbersQuery = async (request: GetOrganisationDocum
   return data
 }
 
-export const useGetOrganisationDocumentNumbersModel = (request: GetOrganisationDocumentNumbersRequest) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATION_DOCUMENT_NUMBERS'], queryFn: () => getOrganisationDocumentNumbersQuery(request) })
+export const useGetOrganisationDocumentNumbersModel = (request: GetOrganisationDocumentNumbersRequest, isEnabled: boolean = true) => {
+  const { data, isFetching } = useQuery({
+    queryKey: ['ORGANISATION_DOCUMENT_NUMBERS', request.parameters.organisationId],
+    queryFn: () => getOrganisationDocumentNumbersQuery(request),
+    enabled: isEnabled
+  })
 
   return {
     documentNumbers: data ?? null,

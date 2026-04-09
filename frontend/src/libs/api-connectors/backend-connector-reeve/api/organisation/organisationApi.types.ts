@@ -37,6 +37,11 @@ export interface OrganisationProjectEntity {
   projectName: string
 }
 
+interface GetOrganisationTransactionNumbersRequestParameters {
+  organisationId: string
+  number?: string
+}
+
 export type OrganisationTransactionNumberEntity = string
 
 export type OrganisationTransactionTypeEntity = string
@@ -73,7 +78,9 @@ export type GetOrganisationProjectsRequest = OrganisationEntityRequest
 
 export type GetOrganisationProjectsResponse200 = OrganisationProjectEntity[]
 
-export type GetOrganisationTransactionNumbersRequest = OrganisationEntityRequest
+export type GetOrganisationTransactionNumbersRequest = {
+  parameters: GetOrganisationTransactionNumbersRequestParameters
+}
 
 export type GetOrganisationTransactionNumbersResponse200 = OrganisationTransactionNumberEntity[]
 

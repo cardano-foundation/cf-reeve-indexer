@@ -14,7 +14,7 @@ import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 
 public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
 
-    @Query("""
+    @Query(value = """
             SELECT r FROM ReportEntity r
             INNER JOIN OrganisationEntity o ON r.organisationId = o.id
             WHERE (:organisationId IS NULL OR r.organisationId = :organisationId)
@@ -24,8 +24,9 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             AND (:periods IS NULL OR r.period IN :periods)
             AND (:blockChainHash IS NULL OR r.txHash = :blockChainHash)
             AND (:currency IS NULL OR o.currencyId = :currency)
+            AND (r.id in (SELECT MIN(sub.id) FROM ReportEntity sub GROUP BY sub.metadataHash))
             """)
-    List<ReportEntity> findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+    List<ReportEntity> findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
             @Param("organisationId") String organisationId,
             @Param("blockChainHash") String blockChainHash,
             @Param("currency") String currency,
@@ -35,14 +36,20 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             @Param("periods") List<Integer> periods,
             Pageable pageable);
 
-
     @Query("""
             SELECT r FROM ReportEntity r
             WHERE r.organisationId = :organisationId
             AND r.subType = :reportType
             AND r.year >= :startYear AND r.year <= :endYear
             """)
-    Set<ReportEntity> findByTypeAndWithinYearRange(@Param("organisationId") String organisationId, @Param("reportType") String reportType, @Param("startYear") int startYear, @Param("endYear") int endYear);
+    Set<ReportEntity> findByTypeAndWithinYearRange(
+            @Param("organisationId") String organisationId,
+            @Param("reportType") String reportType,
+            @Param("startYear") int startYear,
+            @Param("endYear") int endYear);
 
     Optional<ReportEntity> findByTxHash(String txHash);
+
+    List<ReportEntity> findByMetadataHash(String metdataHash);
+
 }

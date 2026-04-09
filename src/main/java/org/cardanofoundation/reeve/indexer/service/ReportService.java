@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -65,42 +64,37 @@ public class ReportService {
             }
         }
 
-        List<ReportEntity> allReports = reportRepository.findAllByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+        // finds all first reports (with min id grouped by metadataHash)
+        List<ReportEntity> firstReports = reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 organisationId, blockChainHash, currency, reportTypes, intervals, years, periods, pageable);
 
-        // Group by metadataHash while preserving the order
-        Map<String, List<ReportEntity>> reportsByHash = allReports.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(
-                    ReportEntity::getMetadataHash,
-                    java.util.LinkedHashMap::new, // Preserve insertion order
-                    Collectors.toList()
-                ));
-
-        return reportsByHash.values().stream().map(group -> {
-            ReportEntity mainReport = group.get(0); // pick one as main
+        return firstReports.stream().map(report -> {
             ReportView view;
             try {
-                view = ReportView.fromEntity(mainReport,
-                        organisationService.findById(mainReport.getOrganisationId())
+                view = ReportView.fromEntity(report,
+                        organisationService.findById(report.getOrganisationId())
                                 .orElseThrow(),
                         objectMapper);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
 
-            List<LEIResponse> leiResponses = group.stream()
+            // load all of the reports associated with metadata hash
+            var allReports = reportRepository.findByMetadataHash(report.getMetadataHash());
+
+            List<LEIResponse> leiResponses = allReports.stream()
                     .filter(ReportEntity::isIdentityVerified)
                     .map(r -> credentialRepository.findById(r.getIdentifier())
                             .map(cred -> LEIResponse.builder()
                                     .identityVerified(true)
                                     .lei(cred.getLei())
+                                    .txHash(r.getTxHash())
                                     .build()))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .toList();
 
-            view.setIdentites(leiResponses);
+            view.setIdentities(leiResponses);
             return view;
         }).toList();
     }

@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.2.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.2.0...1.2.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* income_statement fields force order ([#58](https://github.com/cardano-foundation/cf-reeve-indexer/issues/58)) ([a817b3c](https://github.com/cardano-foundation/cf-reeve-indexer/commit/a817b3cefe9b7588d3b44503085d7a89d8e0e12b))
+* legacy report rules ([#59](https://github.com/cardano-foundation/cf-reeve-indexer/issues/59)) ([41df37d](https://github.com/cardano-foundation/cf-reeve-indexer/commit/41df37d13581f79147044141ea48b1db3137ee59))
+
+## [1.2.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.1.0...1.2.0) (2026-03-27)
+
+
+### Features
+
+* [LOB-1956] Dynamic search for transaction numbers ([5792d4b](https://github.com/cardano-foundation/cf-reeve-indexer/commit/5792d4b813b8e302b30abbde04ac653a77cfb849))
+* **reports:** proper pagination, show tx hash of first report tx ([#55](https://github.com/cardano-foundation/cf-reeve-indexer/issues/55)) ([70f2b62](https://github.com/cardano-foundation/cf-reeve-indexer/commit/70f2b623a5e18c0efeb1d23729de7413f80ca0be))
+
+
+### Bug Fixes
+
+* apply spotless formatting ([7fa00db](https://github.com/cardano-foundation/cf-reeve-indexer/commit/7fa00dbc9bbd6d7e761af37ad06962c397167911))
+* links to components, do not force redirect to default page ([#57](https://github.com/cardano-foundation/cf-reeve-indexer/issues/57)) ([88e3699](https://github.com/cardano-foundation/cf-reeve-indexer/commit/88e369969c2b1cf6cbc2516f2aee89b049e170de))
+* **reports:** ensure unique row id ([2399397](https://github.com/cardano-foundation/cf-reeve-indexer/commit/23993978c66de7588939c3b07cb6c76602350d18))
+* translation broken when no id found ([bb69c05](https://github.com/cardano-foundation/cf-reeve-indexer/commit/bb69c050a82506054ba8aa74193295086ccf2df2))
+
 ## [1.1.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.0.2...1.1.0) (2026-03-11)
 
 

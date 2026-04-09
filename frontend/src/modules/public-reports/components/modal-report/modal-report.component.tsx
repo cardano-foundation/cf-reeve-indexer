@@ -3,24 +3,40 @@ import { useTranslations } from 'libs/translations/hooks/useTranslations'
 
 import type { ModalReportProps } from './modal-report.types'
 import { getReportPeriod } from 'modules/public-reports/utils/payload'
-import { formatCurrency } from 'modules/public-reports/utils/format'
+import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
 import { Grid, Divider } from 'features/mui/base'
 import { NestedMap } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import Typography from '@mui/material/Typography'
 import { formatNumber } from 'libs/utils/format'
 import { ContentStyled } from './modal-report.styles'
-import { computeNestedSum, getLabel, getTotalLabel } from './modal-report.utils'
+import { computeNestedSum } from './modal-report.utils'
+import { getLegacyReportConfig } from './modal-report.legacy-configs'
+
+const createSafeT = (t: any) => (id?: string, variables?: Record<string, any>, fallback?: string) => {
+  if (!id) return fallback || ''
+  return t({ id, defaultMessage: fallback || snakeToNormal(id) }, variables)
+}
 
 export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const { t } = useTranslations()
+  const safeT = createSafeT(t)
 
-  const { currency, period, intervalType, year, data, subType } = report
-  const titleText = t({ id: 'reportViewTitle' }, { currency: formatCurrency(currency), period: getReportPeriod(intervalType, period, year), type: t({ id: subType }) })
+  const { txHash, currency, period, intervalType, year, data, subType } = report
+
+  const titleText = safeT(
+    'reportViewTitle',
+    {
+      currency: formatCurrency(currency),
+      period: getReportPeriod(intervalType, period, year),
+      type: safeT(subType)
+    },
+    'Report for {currency} - {period} ({type})'
+  )
 
   return (
     <Modal aria-labelledby="modal-report-title" onClose={onClose} isOpen={isOpen}>
       <Modal.Header id="modal-report-title" hasCloseButton>
-        {t({ id: 'reportDialogPreviewTitle' })}
+        {safeT('reportDialogPreviewTitle', {}, 'Preview Report')}
       </Modal.Header>
       <Modal.Content>
         <ContentStyled container direction="column" spacing={2}>
@@ -32,14 +48,21 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
             </Grid>
           </Grid>
           <Divider flexItem />
-          <NestedGrid data={data} t={t} />
+          <NestedGrid data={data} depth={0} safeT={safeT} reportHash={txHash} />
         </ContentStyled>
       </Modal.Content>
     </Modal>
   )
 }
 
-const NestedGrid: React.FC<{ data: NestedMap; depth?: number; t: any }> = ({ data, depth = 0, t }) => {
+interface NestedGridProps {
+  data: NestedMap
+  depth?: number
+  safeT: (id?: string, variables?: Record<string, any>, fallback?: string) => string
+  reportHash?: string
+}
+
+const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportHash }) => {
   const indent = depth * 3
   const borderSX =
     depth > 0
@@ -50,15 +73,48 @@ const NestedGrid: React.FC<{ data: NestedMap; depth?: number; t: any }> = ({ dat
         }
       : {}
 
+  const camelize = (s: string) =>
+    s
+      .split(/_|(?=[A-Z])/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join('')
+
+  const getLabel = (key: string) => safeT(key, {}, snakeToNormal(key))
+  const getTotalLabel = (key: string, label: string) => safeT(`total${camelize(key)}`, {}, `Total ${label.toLowerCase()}`)
+
+  // For known legacy income statement formats: apply explicit field ordering and
+  // cumulative totals, where the grand-total section sums all previous sections.
+  const legacyConfig = depth === 0 && reportHash != null ? getLegacyReportConfig(reportHash) : undefined
+  const entries = legacyConfig
+    ? Object.entries(data).sort(([a], [b]) => {
+        const ai = legacyConfig.fieldOrder.indexOf(a)
+        const bi = legacyConfig.fieldOrder.indexOf(b)
+        if (ai === -1 && bi === -1) return a.localeCompare(b)
+        if (ai === -1) return -1
+        if (bi === -1) return 1
+        return ai - bi
+      })
+    : Object.entries(data)
+  const cumulativeTotals = new Map<string, number>()
+  if (legacyConfig?.cumulativeSections || legacyConfig?.grandTotalField) {
+    let running = 0
+    entries.forEach(([key, value]) => {
+      if (typeof value === 'object' && value !== null) {
+        running += computeNestedSum(value as NestedMap)
+        cumulativeTotals.set(key, running)
+      }
+    })
+  }
+
   return (
     <Grid container direction="column" mb={1} spacing={1} sx={{ pl: indent, ...borderSX }}>
-      {Object.entries(data).map(([key, value]) => {
+      {entries.map(([key, value]) => {
         const isNested = typeof value === 'object' && value !== null
-        const label = getLabel(key, t)
+        const label = getLabel(key)
 
         if (isNested) {
-          const subtotal = computeNestedSum(value as NestedMap)
-          const totalLabel = getTotalLabel(key, label, t)
+          const subtotal = cumulativeTotals.has(key) ? cumulativeTotals.get(key)! : computeNestedSum(value as NestedMap)
+          const totalLabel = getTotalLabel(key, label)
           return (
             <Grid key={`nested-${key}`}>
               <Typography
@@ -72,7 +128,9 @@ const NestedGrid: React.FC<{ data: NestedMap; depth?: number; t: any }> = ({ dat
                 }}>
                 {label}
               </Typography>
-              <NestedGrid data={value as NestedMap} depth={depth + 1} t={t} />
+
+              <NestedGrid data={value as NestedMap} depth={depth + 1} safeT={safeT} reportHash={reportHash} />
+
               <Grid alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }} sx={{ fontWeight: 'bold', mt: 0.5 }}>
                 <Grid container size={{ xs: 12, sm: 'grow' }}>
                   <Typography component="span" sx={{ fontWeight: 700 }}>
