@@ -62,6 +62,10 @@ public class KeriService {
             log.warn("KERI is not enabled. Skipping identity verification for: {}", identity.getIdentifier());
             return false;
         }
+        // TODO This is currently a workaround. KERIA needs some time to propagate these events.
+        // The 5 seconds is an OK trade-off between speed and ensuring it is working
+        resolveOobis();
+        Thread.sleep(5000); // 5 seconds
         resolveOobis();
         // TODO will fix this when we are finalizing the identity demo
         List<Object> keyEvents = (List<Object>)client.orElseThrow().keyEvents().get(identity.getIdentifier());
