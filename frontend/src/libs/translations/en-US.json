@@ -75,6 +75,8 @@
   "system": "system",
   "blockchainHash": "Blockchain hash",
   "txHash": "Blockchain hash",
+  "attestationTxHash": "Attestation Tx Hash",
+  "credentialTxHash": "Credential Tx Hash",
   "identityVerified": "Identity",
   "transactionHash": "Transaction hash",
   "transactionId": "Transaction ID",

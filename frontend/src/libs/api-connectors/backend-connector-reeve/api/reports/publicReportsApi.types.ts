@@ -52,6 +52,7 @@ export interface LEIResponse {
     identityVerified: boolean
     lei: string
     txHash?: string
+    credentialTxHash?: string
 }
 
 export interface GetPublicReportsRequestParameters {

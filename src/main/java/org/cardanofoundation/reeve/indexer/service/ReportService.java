@@ -88,6 +88,7 @@ public class ReportService {
                             .map(cred -> LEIResponse.builder()
                                     .identityVerified(true)
                                     .lei(cred.getLei())
+                                    .credentialTxHash(cred.getTxHash())
                                     .txHash(r.getTxHash())
                                     .build()))
                     .filter(Optional::isPresent)
