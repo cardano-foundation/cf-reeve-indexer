@@ -19,7 +19,8 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query("SELECT t FROM TransactionEntity t " +
             "WHERE (:organisationId IS NULL OR t.organisationId = :organisationId) " +
             "AND (cast(:startDate as date) IS NULL OR t.date >= :startDate) " +
-            "AND (cast(:endDate as date) IS NULL OR t.date <= :endDate)")
+            "AND (cast(:endDate as date) IS NULL OR t.date <= :endDate) " +
+            "AND t.id NOT IN (SELECT e.transactionId FROM ExcludedTransactionEntity e)")
     Page<TransactionEntity> findByDateRangeAndOrganisationId(
             @Param("organisationId") String organisationId,
             @Param("startDate") LocalDate startDate,

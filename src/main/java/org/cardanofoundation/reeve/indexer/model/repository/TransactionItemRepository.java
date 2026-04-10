@@ -36,6 +36,7 @@ public interface TransactionItemRepository extends JpaRepository<TransactionItem
             AND (:projectCustCode IS NULL OR i.projectCustCode IN :projectCustCode)
             AND (:counterPartyType IS NULL OR i.counterPartyType IN :counterPartyType)
             AND (:counterPartyCustCode IS NULL OR i.counterPartyCustCode IN :counterPartyCustCode)
+            AND i.transaction.id NOT IN (SELECT e.transactionId FROM ExcludedTransactionEntity e)
             """)
     Page<TransactionItemEntity> searchItems(
             @Param("organisationId") String organisationId,
