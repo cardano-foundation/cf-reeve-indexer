@@ -44,6 +44,9 @@ server:
   port: 9000
 
 
+ipfs:
+  gateway: ${IPFS_GATEWAY:https://ipfs.io/ipfs/}
+
 keri:
   enabled: false
   metadata-label: 170

@@ -1,0 +1,1 @@
+ALTER TABLE reeve_transactions ADD COLUMN ipfs VARCHAR(255) NULL;
