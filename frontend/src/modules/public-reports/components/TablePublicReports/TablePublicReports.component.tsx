@@ -112,6 +112,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
                 isVerified={item.identityVerified}
                 lei={item.lei}
                 txHash={item.txHash}
+                credentialTxHash={item.credentialTxHash}
               />
             ))}
           </div>

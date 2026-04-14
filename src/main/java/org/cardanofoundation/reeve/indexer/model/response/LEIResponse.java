@@ -20,5 +20,6 @@ public class LEIResponse {
     private boolean identityVerified;
     private String lei;
     private String txHash;
+    private String credentialTxHash;
 
 }
