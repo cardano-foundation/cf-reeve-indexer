@@ -778,5 +778,9 @@
   "otp": "One-time code",
   "otpHelperText": "Use the authenticator app you set up for your account to get the code",
   "contactAdministrator": "Trouble setting OTP or need help? Contact admin using email below",
-  "logoutModalTitle": "Dialog logout confirmation"
+  "logoutModalTitle": "Dialog logout confirmation",
+  "reeveIndexer": "Reeve Indexer",
+  "welcome": "Welcome",
+  "selectOrganisationMessage": "Welcome to the Reeve Indexer. Please select an organization to view published data.",
+  "selectOrganisationHint": "Choose an organization from the sidebar to get started."
 }

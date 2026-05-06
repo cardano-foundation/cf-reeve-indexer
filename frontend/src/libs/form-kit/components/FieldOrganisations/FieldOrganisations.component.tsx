@@ -7,17 +7,19 @@ import { SelectOption } from 'libs/ui-kit/components/InputSelect/InputSelect.com
 interface FieldOrganisationsProps {
   items: SelectOption[]
   hasChevron?: boolean
+  onSelect?: (organisationId: string) => void
 }
 
-export const FieldOrganisations = ({ items, hasChevron }: FieldOrganisationsProps) => {
+export const FieldOrganisations = ({ items, hasChevron, onSelect }: FieldOrganisationsProps) => {
   const [field] = useField({ name: 'organisations' })
   const { setSelectedOrganisation } = useLayoutPublicContext()
 
   useEffect(() => {
     if (field.value) {
       setSelectedOrganisation(field.value)
+      onSelect?.(field.value)
     }
-  }, [field.value, setSelectedOrganisation])
+  }, [field.value, setSelectedOrganisation, onSelect])
 
   return <InputOrganisationsSelectField id={field.name} items={items} name={field.name} value={field.value} onChange={field.onChange} hasChevron={hasChevron} />
 }

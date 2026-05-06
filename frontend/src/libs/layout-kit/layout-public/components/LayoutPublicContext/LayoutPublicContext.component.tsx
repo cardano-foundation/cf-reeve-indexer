@@ -115,11 +115,7 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
     if (!availableOrganisations?.length) return
 
     setOrganisations(availableOrganisations)
-
-    if (!selectedOrganisation) {
-      setSelectedOrganisationState(String(availableOrganisations[0]?.id ?? ''))
-    }
-  }, [availableOrganisations, selectedOrganisation])
+  }, [availableOrganisations])
 
   useEffect(() => {
     setToggledSection(null)

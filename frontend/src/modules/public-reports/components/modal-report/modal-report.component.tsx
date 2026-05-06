@@ -48,7 +48,7 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
             </Grid>
           </Grid>
           <Divider flexItem />
-          <NestedGrid data={data} depth={0} safeT={safeT} reportHash={txHash} />
+          <NestedGrid data={data} depth={0} safeT={safeT} reportHash={txHash} reportType={subType} />
         </ContentStyled>
       </Modal.Content>
     </Modal>
@@ -60,9 +60,10 @@ interface NestedGridProps {
   depth?: number
   safeT: (id?: string, variables?: Record<string, any>, fallback?: string) => string
   reportHash?: string
+  reportType?: string
 }
 
-const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportHash }) => {
+const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportHash, reportType }) => {
   const indent = depth * 3
   const borderSX =
     depth > 0
@@ -85,6 +86,11 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
   // For known legacy income statement formats: apply explicit field ordering and
   // cumulative totals, where the grand-total section sums all previous sections.
   const legacyConfig = depth === 0 && reportHash != null ? getLegacyReportConfig(reportHash) : undefined
+
+  // Apply cumulative totals for IncomeStatement reports at top level
+  const isIncomeStatement = reportType === 'INCOME_STATEMENT'
+  const shouldApplyCumulativeTotals = depth === 0 && (legacyConfig?.cumulativeSections || legacyConfig?.grandTotalField || isIncomeStatement)
+
   const entries = legacyConfig
     ? Object.entries(data).sort(([a], [b]) => {
         const ai = legacyConfig.fieldOrder.indexOf(a)
@@ -96,7 +102,7 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
       })
     : Object.entries(data)
   const cumulativeTotals = new Map<string, number>()
-  if (legacyConfig?.cumulativeSections || legacyConfig?.grandTotalField) {
+  if (shouldApplyCumulativeTotals) {
     let running = 0
     entries.forEach(([key, value]) => {
       if (typeof value === 'object' && value !== null) {
@@ -129,7 +135,7 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
                 {label}
               </Typography>
 
-              <NestedGrid data={value as NestedMap} depth={depth + 1} safeT={safeT} reportHash={reportHash} />
+              <NestedGrid data={value as NestedMap} depth={depth + 1} safeT={safeT} reportHash={reportHash} reportType={reportType} />
 
               <Grid alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }} sx={{ fontWeight: 'bold', mt: 0.5 }}>
                 <Grid container size={{ xs: 12, sm: 'grow' }}>
