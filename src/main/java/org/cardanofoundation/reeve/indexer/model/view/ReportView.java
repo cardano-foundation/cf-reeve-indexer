@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.response.LEIResponse;
+import org.cardanofoundation.reeve.indexer.util.ReportFieldParser;
 
 @AllArgsConstructor
 @RequiredArgsConstructor
@@ -47,16 +48,19 @@ public class ReportView {
     private List<LEIResponse> identities;
 
     public static ReportView fromEntity(ReportEntity entity, OrganisationEntity organisationEntity, ObjectMapper objectMapper) throws JsonProcessingException {
+        Map<String, Object> fieldsMap = objectMapper.readValue(entity.getFields(), Map.class);
+        Map<String, Object> transformedData = ReportFieldParser.transformReportForDisplay(fieldsMap);
+
         return ReportView.builder()
                 .organisationId(entity.getOrganisationId())
                 .subType(entity.getSubType())
-                .intervalType(entity.getInterval().name()) // Assuming Interval is an Enum
+                .intervalType(entity.getInterval().name())
                 .year(entity.getYear())
                 .period(entity.getPeriod())
                 .ver(entity.getVer())
                 .currency(organisationEntity.getCurrencyId())
                 .txHash(entity.getTxHash())
-                .data(objectMapper.readValue(entity.getFields(), Map.class))
+                .data(transformedData)
                 .build();
     }
 }

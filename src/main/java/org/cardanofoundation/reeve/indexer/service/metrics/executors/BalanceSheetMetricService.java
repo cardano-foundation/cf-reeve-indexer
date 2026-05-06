@@ -24,6 +24,7 @@ import org.cardanofoundation.reeve.indexer.model.domain.MetricEnum;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.service.ReportService;
 import org.cardanofoundation.reeve.indexer.service.metrics.MetricExecutor;
+import org.cardanofoundation.reeve.indexer.util.ReportFieldParser;
 
 @Component
 @RequiredArgsConstructor
@@ -60,34 +61,35 @@ public class BalanceSheetMetricService extends MetricExecutor {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> fieldsMap = mapper.readValue(fieldsJson, Map.class);
 
-                Map<String, Object> liabilities = (Map<String, Object>) fieldsMap.get("liabilities");
+                Map<String, Object> liabilities = ReportFieldParser.getNestedSection(fieldsMap, "liabilities");
                 if (liabilities != null) {
-                    Map<String, Object> currentLiabilities = (Map<String, Object>) liabilities
-                            .get("current_liabilities");
+                    Map<String, Object> currentLiabilities = ReportFieldParser.getNestedSection(liabilities,
+                            "current_liabilities");
                     if (currentLiabilities != null) {
-                        Object tradeAccountsPayables = currentLiabilities.get("trade_accounts_payables");
+                        String tradeAccountsPayables = ReportFieldParser.getNestedFieldValue(currentLiabilities,
+                                "trade_accounts_payables");
                         if (tradeAccountsPayables != null) {
-                            totalLiabilities[0] = totalLiabilities[0]
-                                    .add(new BigDecimal(tradeAccountsPayables.toString()));
+                            totalLiabilities[0] = totalLiabilities[0].add(new BigDecimal(tradeAccountsPayables));
                         }
-                        Object otherShortTermLiabilities = currentLiabilities.get("other_short_term_liabilities");
+                        String otherShortTermLiabilities = ReportFieldParser.getNestedFieldValue(currentLiabilities,
+                                "other_short_term_liabilities");
                         if (otherShortTermLiabilities != null) {
-                            totalLiabilities[0] = totalLiabilities[0]
-                                    .add(new BigDecimal(otherShortTermLiabilities.toString()));
+                            totalLiabilities[0] = totalLiabilities[0].add(new BigDecimal(otherShortTermLiabilities));
                         }
-                        Object accrualsAndShortTermProvisions = currentLiabilities
-                                .get("accruals_and_short_term_provisions");
+                        String accrualsAndShortTermProvisions = ReportFieldParser.getNestedFieldValue(
+                                currentLiabilities, "accruals_and_short_term_provisions");
                         if (accrualsAndShortTermProvisions != null) {
                             totalLiabilities[0] = totalLiabilities[0]
-                                    .add(new BigDecimal(accrualsAndShortTermProvisions.toString()));
+                                    .add(new BigDecimal(accrualsAndShortTermProvisions));
                         }
                     }
-                    Map<String, Object> nonCurrentLiabilities = (Map<String, Object>) liabilities
-                            .get("non_current_liabilities");
+                    Map<String, Object> nonCurrentLiabilities = ReportFieldParser.getNestedSection(liabilities,
+                            "non_current_liabilities");
                     if (nonCurrentLiabilities != null) {
-                        Object provisions = nonCurrentLiabilities.get("provisions");
+                        String provisions = ReportFieldParser.getNestedFieldValue(nonCurrentLiabilities,
+                                "provisions");
                         if (provisions != null) {
-                            totalLiabilities[0] = totalLiabilities[0].add(new BigDecimal(provisions.toString()));
+                            totalLiabilities[0] = totalLiabilities[0].add(new BigDecimal(provisions));
                         }
                     }
                 }
@@ -113,44 +115,53 @@ public class BalanceSheetMetricService extends MetricExecutor {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> fieldsMap = mapper.readValue(fieldsJson, Map.class);
 
-                Map<String, Object> assets = (Map<String, Object>) fieldsMap.get("assets");
+                Map<String, Object> assets = ReportFieldParser.getNestedSection(fieldsMap, "assets");
                 if (assets != null) {
-                    Map<String, Object> currentAssets = (Map<String, Object>) assets.get("current_assets");
+                    Map<String, Object> currentAssets = ReportFieldParser.getNestedSection(assets,
+                            "current_assets");
                     if (currentAssets != null) {
-                        Object cryptoAssets = currentAssets.get("crypto_assets");
+                        String cryptoAssets = ReportFieldParser.getNestedFieldValue(currentAssets, "crypto_assets");
                         if (cryptoAssets != null) {
-                            totalAssets[0] = totalAssets[0].add(new BigDecimal(cryptoAssets.toString()));
+                            totalAssets[0] = totalAssets[0].add(new BigDecimal(cryptoAssets));
                         }
-                        Object cashAndCashEquivalents = currentAssets.get("cash_and_cash_equivalents");
+                        String cashAndCashEquivalents = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "cash_and_cash_equivalents");
                         if (cashAndCashEquivalents != null) {
-                            totalAssets[0] = totalAssets[0].add(new BigDecimal(cashAndCashEquivalents.toString()));
+                            totalAssets[0] = totalAssets[0].add(new BigDecimal(cashAndCashEquivalents));
                         }
-                        Object otherReceivables = currentAssets.get("other_receivables");
+                        String otherReceivables = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "other_receivables");
                         if (otherReceivables != null) {
-                            totalAssets[0] = totalAssets[0].add(new BigDecimal(otherReceivables.toString()));
+                            totalAssets[0] = totalAssets[0].add(new BigDecimal(otherReceivables));
                         }
-                        Object prepaymentsAndOtherShortTermAssets = currentAssets.get("prepayments_and_other_short_term_assets");
+                        String prepaymentsAndOtherShortTermAssets = ReportFieldParser.getNestedFieldValue(
+                                currentAssets, "prepayments_and_other_short_term_assets");
                         if (prepaymentsAndOtherShortTermAssets != null) {
-                            totalAssets[0] = totalAssets[0].add(new BigDecimal(prepaymentsAndOtherShortTermAssets.toString()));
+                            totalAssets[0] = totalAssets[0].add(new BigDecimal(prepaymentsAndOtherShortTermAssets));
                         }
                     }
-                    Map<String, Object> nonCurrentAssets = (Map<String, Object>) assets.get("non_current_assets");
+                    Map<String, Object> nonCurrentAssets = ReportFieldParser.getNestedSection(assets,
+                            "non_current_assets");
                     if (nonCurrentAssets != null) {
-                        Object financialAssets = nonCurrentAssets.get("financial_assets");
+                        String financialAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "financial_assets");
                         if (financialAssets != null) {
-                            totalAssets[0] = totalAssets[0].add(new BigDecimal(financialAssets.toString()));
+                            totalAssets[0] = totalAssets[0].add(new BigDecimal(financialAssets));
                         }
-                        Object intangibleAssets = nonCurrentAssets.get("intangible_assets");
+                        String intangibleAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "intangible_assets");
                         if (intangibleAssets != null) {
-                            totalAssets[0] = totalAssets[0].add(new BigDecimal(intangibleAssets.toString()));
+                            totalAssets[0] = totalAssets[0].add(new BigDecimal(intangibleAssets));
                         }
-                        Object tangibleAssets = nonCurrentAssets.get("tangible_assets");
+                        String tangibleAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "tangible_assets");
                         if (tangibleAssets != null) {
-                            totalAssets[0] = totalAssets[0].add(new BigDecimal(tangibleAssets.toString()));
+                            totalAssets[0] = totalAssets[0].add(new BigDecimal(tangibleAssets));
                         }
-                        Object investments = nonCurrentAssets.get("investments");
+                        String investments = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "investments");
                         if (investments != null) {
-                            totalAssets[0] = totalAssets[0].add(new BigDecimal(investments.toString()));
+                            totalAssets[0] = totalAssets[0].add(new BigDecimal(investments));
                         }
                     }
                 }
@@ -178,44 +189,61 @@ public class BalanceSheetMetricService extends MetricExecutor {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> fieldsMap = mapper.readValue(fieldsJson, Map.class);
 
-                Map<String, Object> assets = (Map<String, Object>) fieldsMap.get("assets");
+                Map<String, Object> assets = ReportFieldParser.getNestedSection(fieldsMap, "assets");
                 if (assets != null) {
-                    Map<String, Object> currentAssets = (Map<String, Object>) assets.get("current_assets");
+                    Map<String, Object> currentAssets = ReportFieldParser.getNestedSection(assets,
+                            "current_assets");
                     if (currentAssets != null) {
-                        Object cash = currentAssets.get("cash_and_cash_equivalents");
+                        String cash = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "cash_and_cash_equivalents");
                         if (cash != null) {
-                            assetCategories.merge(BalanceSheetCategories.CASH, new BigDecimal(cash.toString()), BigDecimal::add);
+                            assetCategories.merge(BalanceSheetCategories.CASH, new BigDecimal(cash), BigDecimal::add);
                         }
-                        Object cryptoAssets = currentAssets.get("crypto_assets");
+                        String cryptoAssets = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "crypto_assets");
                         if (cryptoAssets != null) {
-                            assetCategories.merge(BalanceSheetCategories.CRYPTO_ASSETS, new BigDecimal(cryptoAssets.toString()), BigDecimal::add);
+                            assetCategories.merge(BalanceSheetCategories.CRYPTO_ASSETS, new BigDecimal(cryptoAssets),
+                                    BigDecimal::add);
                         }
-                        Object otherReceivables = currentAssets.get("other_receivables");
+                        String otherReceivables = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "other_receivables");
                         if (otherReceivables != null) {
-                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(otherReceivables.toString()), BigDecimal::add);
+                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(otherReceivables),
+                                    BigDecimal::add);
                         }
-                        Object prepayments = currentAssets.get("prepayments_and_other_short_term_assets");
+                        String prepayments = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "prepayments_and_other_short_term_assets");
                         if (prepayments != null) {
-                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(prepayments.toString()), BigDecimal::add);
+                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(prepayments),
+                                    BigDecimal::add);
                         }
                     }
-                    Map<String, Object> nonCurrentAssets = (Map<String, Object>) assets.get("non_current_assets");
+                    Map<String, Object> nonCurrentAssets = ReportFieldParser.getNestedSection(assets,
+                            "non_current_assets");
                     if (nonCurrentAssets != null) {
-                        Object financialAssets = nonCurrentAssets.get("financial_assets");
+                        String financialAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "financial_assets");
                         if (financialAssets != null) {
-                            assetCategories.merge(BalanceSheetCategories.FINANCIAL_ASSETS, new BigDecimal(financialAssets.toString()), BigDecimal::add);
+                            assetCategories.merge(BalanceSheetCategories.FINANCIAL_ASSETS,
+                                    new BigDecimal(financialAssets), BigDecimal::add);
                         }
-                        Object intangibleAssets = nonCurrentAssets.get("intangible_assets");
+                        String intangibleAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "intangible_assets");
                         if (intangibleAssets != null) {
-                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(intangibleAssets.toString()), BigDecimal::add);
+                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(intangibleAssets),
+                                    BigDecimal::add);
                         }
-                        Object investments = nonCurrentAssets.get("investments");
+                        String investments = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "investments");
                         if (investments != null) {
-                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(investments.toString()), BigDecimal::add);
+                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(investments),
+                                    BigDecimal::add);
                         }
-                        Object tangibleAssets = nonCurrentAssets.get("tangible_assets");
+                        String tangibleAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "tangible_assets");
                         if (tangibleAssets != null) {
-                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(tangibleAssets.toString()), BigDecimal::add);
+                            assetCategories.merge(BalanceSheetCategories.OTHER, new BigDecimal(tangibleAssets),
+                                    BigDecimal::add);
                         }
                     }
                 }
@@ -245,44 +273,61 @@ public class BalanceSheetMetricService extends MetricExecutor {
 
                 // Assets
                 Map<BalanceSheetCategories, BigDecimal> assetMap = new HashMap<>();
-                Map<String, Object> assets = (Map<String, Object>) fieldsMap.get("assets");
+                Map<String, Object> assets = ReportFieldParser.getNestedSection(fieldsMap, "assets");
                 if (assets != null) {
-                    Map<String, Object> currentAssets = (Map<String, Object>) assets.get("current_assets");
+                    Map<String, Object> currentAssets = ReportFieldParser.getNestedSection(assets,
+                            "current_assets");
                     if (currentAssets != null) {
-                        Object cryptoAssets = currentAssets.get("crypto_assets");
+                        String cryptoAssets = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "crypto_assets");
                         if (cryptoAssets != null) {
-                            assetMap.merge(BalanceSheetCategories.CRYPTO_ASSETS, new BigDecimal(cryptoAssets.toString()), BigDecimal::add);
+                            assetMap.merge(BalanceSheetCategories.CRYPTO_ASSETS, new BigDecimal(cryptoAssets),
+                                    BigDecimal::add);
                         }
-                        Object cash = currentAssets.get("cash_and_cash_equivalents");
+                        String cash = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "cash_and_cash_equivalents");
                         if (cash != null) {
-                            assetMap.merge(BalanceSheetCategories.CASH, new BigDecimal(cash.toString()), BigDecimal::add);
+                            assetMap.merge(BalanceSheetCategories.CASH, new BigDecimal(cash), BigDecimal::add);
                         }
-                        Object otherReceivables = currentAssets.get("other_receivables");
+                        String otherReceivables = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "other_receivables");
                         if (otherReceivables != null) {
-                            assetMap.merge(BalanceSheetCategories.OTHER, new BigDecimal(otherReceivables.toString()), BigDecimal::add);
+                            assetMap.merge(BalanceSheetCategories.OTHER, new BigDecimal(otherReceivables),
+                                    BigDecimal::add);
                         }
-                        Object prepayments = currentAssets.get("prepayments_and_other_short_term_assets");
+                        String prepayments = ReportFieldParser.getNestedFieldValue(currentAssets,
+                                "prepayments_and_other_short_term_assets");
                         if (prepayments != null) {
-                            assetMap.merge(BalanceSheetCategories.PREPAYMENTS, new BigDecimal(prepayments.toString()), BigDecimal::add);
+                            assetMap.merge(BalanceSheetCategories.PREPAYMENTS, new BigDecimal(prepayments),
+                                    BigDecimal::add);
                         }
                     }
-                    Map<String, Object> nonCurrentAssets = (Map<String, Object>) assets.get("non_current_assets");
+                    Map<String, Object> nonCurrentAssets = ReportFieldParser.getNestedSection(assets,
+                            "non_current_assets");
                     if (nonCurrentAssets != null) {
-                        Object financialAssets = nonCurrentAssets.get("financial_assets");
+                        String financialAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "financial_assets");
                         if (financialAssets != null) {
-                            assetMap.merge(BalanceSheetCategories.FINANCIAL_ASSETS, new BigDecimal(financialAssets.toString()), BigDecimal::add);
+                            assetMap.merge(BalanceSheetCategories.FINANCIAL_ASSETS, new BigDecimal(financialAssets),
+                                    BigDecimal::add);
                         }
-                        Object intangibleAssets = nonCurrentAssets.get("intangible_assets");
+                        String intangibleAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "intangible_assets");
                         if (intangibleAssets != null) {
-                            assetMap.merge(BalanceSheetCategories.INTANGIBLE_ASSETS, new BigDecimal(intangibleAssets.toString()), BigDecimal::add);
+                            assetMap.merge(BalanceSheetCategories.INTANGIBLE_ASSETS, new BigDecimal(intangibleAssets),
+                                    BigDecimal::add);
                         }
-                        Object investments = nonCurrentAssets.get("investments");
+                        String investments = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "investments");
                         if (investments != null) {
-                            assetMap.merge(BalanceSheetCategories.INVESTMENTS, new BigDecimal(investments.toString()), BigDecimal::add);
+                            assetMap.merge(BalanceSheetCategories.INVESTMENTS, new BigDecimal(investments),
+                                    BigDecimal::add);
                         }
-                        Object tangibleAssets = nonCurrentAssets.get("tangible_assets");
+                        String tangibleAssets = ReportFieldParser.getNestedFieldValue(nonCurrentAssets,
+                                "tangible_assets");
                         if (tangibleAssets != null) {
-                            assetMap.merge(BalanceSheetCategories.PROPERTY_PLANT_EQUIPMENT, new BigDecimal(tangibleAssets.toString()), BigDecimal::add);
+                            assetMap.merge(BalanceSheetCategories.PROPERTY_PLANT_EQUIPMENT,
+                                    new BigDecimal(tangibleAssets), BigDecimal::add);
                         }
                     }
                 }
@@ -290,46 +335,61 @@ public class BalanceSheetMetricService extends MetricExecutor {
 
                 // Liabilities
                 Map<BalanceSheetCategories, BigDecimal> liabilityMap = new HashMap<>();
-                Map<String, Object> liabilities = (Map<String, Object>) fieldsMap.get("liabilities");
+                Map<String, Object> liabilities = ReportFieldParser.getNestedSection(fieldsMap, "liabilities");
                 if (liabilities != null) {
-                    Map<String, Object> currentLiabilities = (Map<String, Object>) liabilities.get("current_liabilities");
+                    Map<String, Object> currentLiabilities = ReportFieldParser.getNestedSection(liabilities,
+                            "current_liabilities");
                     if (currentLiabilities != null) {
-                        Object accruals = currentLiabilities.get("accruals_and_short_term_provisions");
+                        String accruals = ReportFieldParser.getNestedFieldValue(currentLiabilities,
+                                "accruals_and_short_term_provisions");
                         if (accruals != null) {
-                            liabilityMap.merge(BalanceSheetCategories.ACCRUSAL_AND_SHORT_TERM_PROVISIONS, new BigDecimal(accruals.toString()), BigDecimal::add);
+                            liabilityMap.merge(BalanceSheetCategories.ACCRUSAL_AND_SHORT_TERM_PROVISIONS,
+                                    new BigDecimal(accruals), BigDecimal::add);
                         }
-                        Object tradeAccountsPayables = currentLiabilities.get("trade_accounts_payables");
+                        String tradeAccountsPayables = ReportFieldParser.getNestedFieldValue(currentLiabilities,
+                                "trade_accounts_payables");
                         if (tradeAccountsPayables != null) {
-                            liabilityMap.merge(BalanceSheetCategories.TRADE_ACCOUNTS_PAYABLE, new BigDecimal(tradeAccountsPayables.toString()), BigDecimal::add);
+                            liabilityMap.merge(BalanceSheetCategories.TRADE_ACCOUNTS_PAYABLE,
+                                    new BigDecimal(tradeAccountsPayables), BigDecimal::add);
                         }
-                        Object otherCurrentLiabilities = currentLiabilities.get("other_short_term_liabilities");
+                        String otherCurrentLiabilities = ReportFieldParser.getNestedFieldValue(currentLiabilities,
+                                "other_short_term_liabilities");
                         if (otherCurrentLiabilities != null) {
-                            liabilityMap.merge(BalanceSheetCategories.OTHER, new BigDecimal(otherCurrentLiabilities.toString()), BigDecimal::add);
+                            liabilityMap.merge(BalanceSheetCategories.OTHER, new BigDecimal(otherCurrentLiabilities),
+                                    BigDecimal::add);
                         }
                     }
-                    Map<String, Object> nonCurrentLiabilities = (Map<String, Object>) liabilities.get("non_current_liabilities");
+                    Map<String, Object> nonCurrentLiabilities = ReportFieldParser.getNestedSection(liabilities,
+                            "non_current_liabilities");
                     if (nonCurrentLiabilities != null) {
-                        Object provisions = nonCurrentLiabilities.get("provisions");
+                        String provisions = ReportFieldParser.getNestedFieldValue(nonCurrentLiabilities,
+                                "provisions");
                         if (provisions != null) {
-                            liabilityMap.merge(BalanceSheetCategories.PROVISIONS, new BigDecimal(provisions.toString()), BigDecimal::add);
+                            liabilityMap.merge(BalanceSheetCategories.PROVISIONS, new BigDecimal(provisions),
+                                    BigDecimal::add);
                         }
                     }
                 }
 
                 // Capital
-                Map<String, Object> capital = (Map<String, Object>) fieldsMap.get("capital");
+                Map<String, Object> capital = ReportFieldParser.getNestedSection(fieldsMap, "capital");
                 if (capital != null) {
-                    Object capitalValue = capital.get("capital");
+                    String capitalValue = ReportFieldParser.getNestedFieldValue(capital, "capital");
                     if (capitalValue != null) {
-                        liabilityMap.merge(BalanceSheetCategories.CAPITAL, new BigDecimal(capitalValue.toString()), BigDecimal::add);
+                        liabilityMap.merge(BalanceSheetCategories.CAPITAL, new BigDecimal(capitalValue),
+                                BigDecimal::add);
                     }
-                    Object profitForTheYear = capital.get("profit_for_the_year");
+                    String profitForTheYear = ReportFieldParser.getNestedFieldValue(capital,
+                            "profit_for_the_year");
                     if (profitForTheYear != null) {
-                        liabilityMap.merge(BalanceSheetCategories.PROFIT_OF_THE_YEAR, new BigDecimal(profitForTheYear.toString()), BigDecimal::add);
+                        liabilityMap.merge(BalanceSheetCategories.PROFIT_OF_THE_YEAR, new BigDecimal(profitForTheYear),
+                                BigDecimal::add);
                     }
-                    Object resultsCarriedForward = capital.get("results_carried_forward");
+                    String resultsCarriedForward = ReportFieldParser.getNestedFieldValue(capital,
+                            "results_carried_forward");
                     if (resultsCarriedForward != null) {
-                        liabilityMap.merge(BalanceSheetCategories.RESULTS_CARRIED_FORWARD, new BigDecimal(resultsCarriedForward.toString()), BigDecimal::add);
+                        liabilityMap.merge(BalanceSheetCategories.RESULTS_CARRIED_FORWARD,
+                                new BigDecimal(resultsCarriedForward), BigDecimal::add);
                     }
                 }
                 balanceSheetOverview.put(BalanceSheetCategories.LIABILITIES, liabilityMap);

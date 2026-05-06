@@ -24,6 +24,7 @@ import org.cardanofoundation.reeve.indexer.model.domain.MetricEnum;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.service.ReportService;
 import org.cardanofoundation.reeve.indexer.service.metrics.MetricExecutor;
+import org.cardanofoundation.reeve.indexer.util.ReportFieldParser;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -61,8 +62,9 @@ public class IncomeStatementMetricService extends MetricExecutor {
                         e.printStackTrace();
                         return Optional.empty();
                     }
-                    String profitForTheYearString = (String)fieldsMap.get("profit_for_the_year");
-                    if(profitForTheYearString != null) {
+                    String profitForTheYearString = ReportFieldParser.getNestedFieldValue(fieldsMap,
+                            "profit_for_the_year");
+                    if (profitForTheYearString != null) {
                         return Optional.of(new BigDecimal(profitForTheYearString).doubleValue());
                     } else {
                         return Optional.of(0.0);
@@ -88,55 +90,72 @@ public class IncomeStatementMetricService extends MetricExecutor {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, Object> fieldsMap = objectMapper.readValue(fieldsJson, Map.class);
 
-                Map<String, Object> costOfGoodsAndServices = (Map<String, Object>) fieldsMap
-                        .get("cost_of_goods_and_services");
-                if (costOfGoodsAndServices != null && costOfGoodsAndServices.get("external_services") != null) {
-                    BigDecimal externalServices = new BigDecimal(
-                            (String) costOfGoodsAndServices.get("external_services"));
-                    totalExpenses.merge(IncomeStatemenCategories.COST_OF_SERVICE, externalServices.intValue(),
-                            Integer::sum);
+                Map<String, Object> costOfGoodsAndServices = ReportFieldParser.getNestedSection(fieldsMap,
+                        "cost_of_goods_and_services");
+                if (costOfGoodsAndServices != null) {
+                    String externalServices = ReportFieldParser.getNestedFieldValue(costOfGoodsAndServices,
+                            "external_services");
+                    if (externalServices != null) {
+                        BigDecimal externalServicesValue = new BigDecimal(externalServices);
+                        totalExpenses.merge(IncomeStatemenCategories.COST_OF_SERVICE, externalServicesValue.intValue(),
+                                Integer::sum);
+                    }
                 }
 
-                Map<String, Object> operatingExpenses = (Map<String, Object>) fieldsMap.get("operating_expenses");
+                Map<String, Object> operatingExpenses = ReportFieldParser.getNestedSection(fieldsMap,
+                        "operating_expenses");
                 if (operatingExpenses != null) {
-                    if (operatingExpenses.get("personnel_expenses") != null) {
-                        BigDecimal personnelExpenses = new BigDecimal(
-                                (String) operatingExpenses.get("personnel_expenses"));
-                        totalExpenses.merge(IncomeStatemenCategories.PERSONNEL_EXPENSES, personnelExpenses.intValue(),
+                    String personnelExpenses = ReportFieldParser.getNestedFieldValue(operatingExpenses,
+                            "personnel_expenses");
+                    if (personnelExpenses != null) {
+                        BigDecimal personnelExpensesValue = new BigDecimal(personnelExpenses);
+                        totalExpenses.merge(IncomeStatemenCategories.PERSONNEL_EXPENSES, personnelExpensesValue.intValue(),
                                 Integer::sum);
                     }
                     int financialExpenses = 0;
-                    if (operatingExpenses.get("general_and_administrative_expenses") != null) {
-                        financialExpenses += new BigDecimal(
-                                (String) operatingExpenses.get("general_and_administrative_expenses")).intValue();
+                    String generalAndAdministrative = ReportFieldParser.getNestedFieldValue(operatingExpenses,
+                            "general_and_administrative_expenses");
+                    if (generalAndAdministrative != null) {
+                        financialExpenses += new BigDecimal(generalAndAdministrative).intValue();
                     }
-                    if (operatingExpenses.get("amortization_on_intangible_assets") != null) {
-                        financialExpenses += new BigDecimal(
-                                (String) operatingExpenses.get("amortization_on_intangible_assets")).intValue();
+                    String amortizationIntangible = ReportFieldParser.getNestedFieldValue(operatingExpenses,
+                            "amortization_on_intangible_assets");
+                    if (amortizationIntangible != null) {
+                        financialExpenses += new BigDecimal(amortizationIntangible).intValue();
                     }
-                    if (operatingExpenses.get("depreciation_and_impairment_losses_on_tangible_assets") != null) {
-                        financialExpenses += new BigDecimal(
-                                (String) operatingExpenses.get("depreciation_and_impairment_losses_on_tangible_assets"))
-                                .intValue();
+                    String depreciation = ReportFieldParser.getNestedFieldValue(operatingExpenses,
+                            "depreciation_and_impairment_losses_on_tangible_assets");
+                    if (depreciation != null) {
+                        financialExpenses += new BigDecimal(depreciation).intValue();
                     }
-                    if (operatingExpenses.get("rent_expenses") != null) {
-                        financialExpenses += new BigDecimal((String) operatingExpenses.get("rent_expenses")).intValue();
+                    String rentExpenses = ReportFieldParser.getNestedFieldValue(operatingExpenses,
+                            "rent_expenses");
+                    if (rentExpenses != null) {
+                        financialExpenses += new BigDecimal(rentExpenses).intValue();
                     }
                     totalExpenses.merge(IncomeStatemenCategories.FINANCIAL_EXPENSES, financialExpenses, Integer::sum);
                 }
 
-                Map<String, Object> financialIncome = (Map<String, Object>) fieldsMap.get("financial_income");
-                if (financialIncome != null && financialIncome.get("financial_expenses") != null) {
-                    BigDecimal financialExpenses = new BigDecimal((String) financialIncome.get("financial_expenses"));
-                    totalExpenses.merge(IncomeStatemenCategories.TAX_EXPENSES, financialExpenses.intValue(),
-                            Integer::sum);
+                Map<String, Object> financialIncome = ReportFieldParser.getNestedSection(fieldsMap,
+                        "financial_income");
+                if (financialIncome != null) {
+                    String financialExpenses = ReportFieldParser.getNestedFieldValue(financialIncome,
+                            "financial_expenses");
+                    if (financialExpenses != null) {
+                        BigDecimal financialExpensesValue = new BigDecimal(financialExpenses);
+                        totalExpenses.merge(IncomeStatemenCategories.TAX_EXPENSES, financialExpensesValue.intValue(),
+                                Integer::sum);
+                    }
                 }
 
-                Map<String, Object> taxExpenses = (Map<String, Object>) fieldsMap.get("tax_expenses");
-                if (taxExpenses != null && taxExpenses.get("direct_taxes") != null) {
-                    BigDecimal directTaxes = new BigDecimal((String) taxExpenses.get("direct_taxes"));
-                    totalExpenses.merge(IncomeStatemenCategories.OTHER_OPERATING_EXPENSES, directTaxes.intValue(),
-                            Integer::sum);
+                Map<String, Object> taxExpenses = ReportFieldParser.getNestedSection(fieldsMap, "tax_expenses");
+                if (taxExpenses != null) {
+                    String directTaxes = ReportFieldParser.getNestedFieldValue(taxExpenses, "direct_taxes");
+                    if (directTaxes != null) {
+                        BigDecimal directTaxesValue = new BigDecimal(directTaxes);
+                        totalExpenses.merge(IncomeStatemenCategories.OTHER_OPERATING_EXPENSES, directTaxesValue.intValue(),
+                                Integer::sum);
+                    }
                 }
             } catch (Exception e) {
                 log.error("Error parsing income statement fields JSON", e);
@@ -161,45 +180,49 @@ public class IncomeStatementMetricService extends MetricExecutor {
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, Object> fieldsMap = objectMapper.readValue(fieldsJson, Map.class);
-                Map<String, Object> financialIncome = (Map<String, Object>) fieldsMap.get("financial_income");
+                Map<String, Object> financialIncome = ReportFieldParser.getNestedSection(fieldsMap,
+                        "financial_income");
                 if (financialIncome != null) {
-                    if (financialIncome.get("staking_rewards_income") != null) {
-                        BigDecimal stakingRewardsIncome = new BigDecimal(
-                                (String) financialIncome.get("staking_rewards_income"));
-                        incomeStream.put(IncomeStatemenCategories.STAKING_REWARDS, stakingRewardsIncome.doubleValue());
+                    String stakingRewardsIncome = ReportFieldParser.getNestedFieldValue(financialIncome,
+                            "staking_rewards_income");
+                    if (stakingRewardsIncome != null) {
+                        BigDecimal stakingRewardsIncomeValue = new BigDecimal(stakingRewardsIncome);
+                        incomeStream.put(IncomeStatemenCategories.STAKING_REWARDS, stakingRewardsIncomeValue.doubleValue());
                     }
-                    if (financialIncome.get("net_income_options_sale") != null) {
-                        BigDecimal netIncomeOptionsSale = new BigDecimal(
-                                (String) financialIncome.get("net_income_options_sale"));
-                        incomeStream.put(IncomeStatemenCategories.OTHER,
-                                netIncomeOptionsSale.doubleValue());
+                    String netIncomeOptionsSale = ReportFieldParser.getNestedFieldValue(financialIncome,
+                            "net_income_options_sale");
+                    if (netIncomeOptionsSale != null) {
+                        BigDecimal netIncomeOptionsSaleValue = new BigDecimal(netIncomeOptionsSale);
+                        incomeStream.put(IncomeStatemenCategories.OTHER, netIncomeOptionsSaleValue.doubleValue());
                     }
-                    if (financialIncome.get("financial_revenues") != null) {
-                        BigDecimal financialRevenues = new BigDecimal(
-                                (String) financialIncome.get("financial_revenues"));
-                        incomeStream.put(IncomeStatemenCategories.FINANCIAL_INCOME,
-                                financialRevenues.doubleValue());
+                    String financialRevenues = ReportFieldParser.getNestedFieldValue(financialIncome,
+                            "financial_revenues");
+                    if (financialRevenues != null) {
+                        BigDecimal financialRevenuesValue = new BigDecimal(financialRevenues);
+                        incomeStream.put(IncomeStatemenCategories.FINANCIAL_INCOME, financialRevenuesValue.doubleValue());
                     }
-                    if (financialIncome.get("realised_gains_on_sale_of_cryptocurrencies") != null) {
-                        BigDecimal realisedGains = new BigDecimal(
-                                (String) financialIncome.get("realised_gains_on_sale_of_cryptocurrencies"));
+                    String realisedGains = ReportFieldParser.getNestedFieldValue(financialIncome,
+                            "realised_gains_on_sale_of_cryptocurrencies");
+                    if (realisedGains != null) {
+                        BigDecimal realisedGainsValue = new BigDecimal(realisedGains);
                         incomeStream.put(IncomeStatemenCategories.GAINS_ON_SALES_OF_CRYPTO_CURRENCIES,
-                                realisedGains.doubleValue());
+                                realisedGainsValue.doubleValue());
                     }
                 }
-                Map<String, Object> revenues = (Map<String, Object>) fieldsMap.get("revenues");
+                Map<String, Object> revenues = ReportFieldParser.getNestedSection(fieldsMap, "revenues");
                 if (revenues != null) {
-                    if (revenues.get("build_of_long_term_provision") != null) {
-                        BigDecimal buildingOfLongTermProvisions = new BigDecimal(
-                                (String) revenues.get("build_of_long_term_provision"));
+                    String buildOfLongTermProvision = ReportFieldParser.getNestedFieldValue(revenues,
+                            "build_of_long_term_provision");
+                    if (buildOfLongTermProvision != null) {
+                        BigDecimal buildingOfLongTermProvisions = new BigDecimal(buildOfLongTermProvision);
                         incomeStream.put(IncomeStatemenCategories.BUILDING_OF_PROVISIONS,
                                 buildingOfLongTermProvisions.doubleValue());
                     }
-                    if (revenues.get("other_income") != null) {
-                        BigDecimal otherIncome = new BigDecimal(
-                                (String) revenues.get("other_income"));
-                        incomeStream.merge(IncomeStatemenCategories.OTHER,
-                                otherIncome.doubleValue(), Double::sum);
+                    String otherIncome = ReportFieldParser.getNestedFieldValue(revenues, "other_income");
+                    if (otherIncome != null) {
+                        BigDecimal otherIncomeValue = new BigDecimal(otherIncome);
+                        incomeStream.merge(IncomeStatemenCategories.OTHER, otherIncomeValue.doubleValue(),
+                                Double::sum);
                     }
                 }
             } catch (Exception e) {

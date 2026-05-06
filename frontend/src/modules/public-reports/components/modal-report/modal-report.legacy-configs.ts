@@ -2,6 +2,11 @@ export type LegacyReportConfig = {
   /** Explicit ordering for top-level sections. Sections not listed keep their original position. */
   fieldOrder: string[]
   /**
+   * Whether to apply cumulative totals across sections.
+   * When true, each section's total includes the sum of all previous sections.
+   */
+  cumulativeSections?: boolean
+  /**
    * The nested section whose displayed total should be overridden with the cumulative grand sum.
    * Only needed when that section is a nested object whose children don't already represent the full total.
    * Omit when the grand total is a plain leaf value already storing the correct pre-computed total.

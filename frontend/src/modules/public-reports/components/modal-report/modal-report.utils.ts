@@ -25,11 +25,13 @@ export const getTotalLabel = (key: string, label: string, t: any) => {
 }
 
 export const computeNestedSum = (data: NestedMap): number =>
-  Object.values(data).reduce((sum, val) => {
-    if (typeof val === 'object' && val !== null) {
-      return sum + computeNestedSum(val as NestedMap)
-    }
+  Object.entries(data)
+    .filter(([key]) => !key.toLowerCase().startsWith('total'))
+    .reduce((sum, [, val]) => {
+      if (typeof val === 'object' && val !== null) {
+        return sum + computeNestedSum(val as NestedMap)
+      }
 
-    const n = Number.parseFloat(val as string)
-    return sum + (isNaN(n) ? 0 : n)
-  }, 0)
+      const n = Number.parseFloat(val as string)
+      return sum + (isNaN(n) ? 0 : n)
+    }, 0)
