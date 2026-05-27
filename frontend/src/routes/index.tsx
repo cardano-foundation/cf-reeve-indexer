@@ -3,11 +3,13 @@ import { createBrowserRouter, createRoutesFromElements, Outlet, Route, Navigate 
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
 // import { ViewPublicDashboard } from 'modules/public-dashboard/view/ViewPublicDashboard.component'
+import { ViewPublicLanding } from 'modules/public-landing/view/ViewPublicLanding.component.tsx'
 import { ViewPublicResources } from 'modules/public-resources/view/ViewPublicResources.component.tsx'
 import { ViewPublicResourcesGlossary } from 'modules/public-resources-glossary/view/ViewPublicResourcesGlossary.component'
 import { ViewPublicResourcesUserGuide } from 'modules/public-resources-user-guide/view/ViewPublicResourcesUserGuide.component'
 import { ViewPublicTransactions } from 'modules/public-transactions/view/ViewPublicTransactions.component.tsx'
 import { ViewReportsPublic } from 'modules/public-reports/view/ViewReportsPublic.component.tsx'
+import { ProtectedRoute } from 'routes/ProtectedRoute.tsx'
 
 export const ROUTES = {
   ROOT: '/',
@@ -36,12 +38,12 @@ export const PATHS = {
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Outlet />} path={ROUTES.ROOT}>
-      <Route index element={<Navigate to={ROUTES.PUBLIC_REPORTS} replace />} />
       <Route element={<LayoutPublic />}>
+        <Route index element={<ViewPublicLanding />} />
         {/* NOTE: [LOB-2061] revoke dashboard route since it requires additional changes */}
         {/* <Route element={<ViewPublicDashboard />} path={ROUTES.PUBLIC_DASHBOARD} /> */}
-        <Route element={<ViewReportsPublic />} path={ROUTES.PUBLIC_REPORTS} />
-        <Route element={<ViewPublicTransactions />} path={ROUTES.PUBLIC_TRANSACTIONS} />
+        <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS} />
+        <Route element={<ProtectedRoute element={<ViewPublicTransactions />} />} path={ROUTES.PUBLIC_TRANSACTIONS} />
         <Route element={<Outlet />} path={ROUTES.PUBLIC_RESOURCES}>
           <Route element={<ViewPublicResources />} index />
           <Route element={<ViewPublicResourcesGlossary />} path={ROUTES.PUBLIC_RESOURCES_GLOSSARY} />

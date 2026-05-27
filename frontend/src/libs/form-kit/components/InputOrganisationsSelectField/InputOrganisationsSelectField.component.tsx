@@ -18,7 +18,11 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
     <Select
       name={name}
       value={value}
+      displayEmpty
       renderValue={(value) => {
+        if (!value) {
+          return 'Select organisation'
+        }
         const org = items.find((item) => item.value === value)
         return (
           <Box alignItems="center" display="flex" gap={1}>
@@ -69,15 +73,17 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
           background: theme.palette.background.default,
           borderRadius: '0.75rem',
           boxShadow: `inset 0 -1px 0 ${theme.palette.divider}`,
+          color: theme.palette.text.primary,
           '&:hover': {
             boxShadow: `0 4px 12px rgba(16,24,40,0.04)`
           }
         },
         '&& .MuiSelect-select': {
-          minHeight: 'unset',
+          minHeight: '2.5rem',
           padding: theme.spacing(1.25, 2),
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          color: theme.palette.text.primary
         },
         '&& .MuiSelect-icon': {
           width: hasChevron ? 18 : 0,
