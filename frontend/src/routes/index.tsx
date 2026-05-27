@@ -16,7 +16,9 @@ export const ROUTES = {
   // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
   // PUBLIC_DASHBOARD: 'dashboard',
   PUBLIC_REPORTS: 'reports',
+  PUBLIC_REPORTS_WITH_ORG: 'reports/:organisationId',
   PUBLIC_TRANSACTIONS: 'transactions',
+  PUBLIC_TRANSACTIONS_WITH_ORG: 'transactions/:organisationId',
   PUBLIC_RESOURCES: 'resources',
   PUBLIC_RESOURCES_GLOSSARY: 'glossary',
   PUBLIC_RESOURCES_USERGUIDE: 'user-guide'
@@ -35,6 +37,9 @@ export const PATHS = {
   PUBLIC_RESOURCES_USERGUIDE: createRoutePath([ROUTES.PUBLIC_RESOURCES, ROUTES.PUBLIC_RESOURCES_USERGUIDE]),
 } as const
 
+// Helper function to create paths with organisation ID
+export const getOrgPath = (path: 'reports' | 'transactions', organisationId: string) => `/${path}/${organisationId}`
+
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Outlet />} path={ROUTES.ROOT}>
@@ -43,7 +48,9 @@ export const router = createBrowserRouter(
         {/* NOTE: [LOB-2061] revoke dashboard route since it requires additional changes */}
         {/* <Route element={<ViewPublicDashboard />} path={ROUTES.PUBLIC_DASHBOARD} /> */}
         <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS} />
+        <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS_WITH_ORG} />
         <Route element={<ProtectedRoute element={<ViewPublicTransactions />} />} path={ROUTES.PUBLIC_TRANSACTIONS} />
+        <Route element={<ProtectedRoute element={<ViewPublicTransactions />} />} path={ROUTES.PUBLIC_TRANSACTIONS_WITH_ORG} />
         <Route element={<Outlet />} path={ROUTES.PUBLIC_RESOURCES}>
           <Route element={<ViewPublicResources />} index />
           <Route element={<ViewPublicResourcesGlossary />} path={ROUTES.PUBLIC_RESOURCES_GLOSSARY} />

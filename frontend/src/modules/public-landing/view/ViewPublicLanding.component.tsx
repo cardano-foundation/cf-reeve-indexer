@@ -40,7 +40,7 @@ export const ViewPublicLanding = () => {
   const { organisations, isFetching } = useGetOrganisationsModel()
 
   const handleOrgSelect = useCallback((orgId: string) => {
-    navigate(PATHS.PUBLIC_REPORTS)
+    navigate(`/reports/${orgId}`)
   }, [navigate])
 
   useEffect(() => {

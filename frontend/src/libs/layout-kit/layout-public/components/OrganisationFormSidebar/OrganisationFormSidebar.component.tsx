@@ -1,5 +1,5 @@
 import { Formik } from 'formik'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useCallback } from 'react'
 
 import { FieldOrganisations } from 'libs/form-kit/components/FieldOrganisations/FieldOrganisations.component.tsx'
@@ -9,7 +9,6 @@ import {
 } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.styles.tsx'
 import { OrganisationFormValues } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.types.ts'
 import { useGetOrganisationsModel } from 'libs/models/organisation-model/GetOrganisations/GetOrganisations.service'
-import { PATHS } from 'routes'
 
 interface OrganisationFormLayoutProps {
   isSidebarOpen: boolean
@@ -37,11 +36,23 @@ export const OrganisationFormSidebar = ({
   isSidebarOpen
 }: OrganisationFormSidebarProps) => {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { organisations, isFetching } = useGetOrganisationsModel()
 
-  const handleOrgSelect = useCallback(() => {
-    // No-op: sidebar should not force navigation, only update context
-  }, [])
+  const handleOrgSelect = useCallback((orgId: string) => {
+    // Determine current route type (reports or transactions)
+    const isReports = pathname.includes('/reports')
+    const isTransactions = pathname.includes('/transactions')
+
+    if (isReports) {
+      navigate(`/reports/${orgId}`)
+    } else if (isTransactions) {
+      navigate(`/transactions/${orgId}`)
+    } else {
+      // Default to reports if no specific route detected
+      navigate(`/reports/${orgId}`)
+    }
+  }, [pathname, navigate])
 
   if (isFetching || !organisations) return null
 

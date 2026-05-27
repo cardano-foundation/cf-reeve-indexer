@@ -79,6 +79,7 @@
     "lint-staged": "^15.0.0",
     "msw": "^2.0.0",
     "prettier": "^3.0.0",
+    "puppeteer": "^25.1.0",
     "sass": "^1.0.0",
     "ts-node": "^10.0.0",
     "typescript": "^5.0.0",
