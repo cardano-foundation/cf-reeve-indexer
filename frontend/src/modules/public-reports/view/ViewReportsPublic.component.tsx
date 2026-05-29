@@ -1,10 +1,13 @@
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import { FormikProvider } from 'formik'
+import { useEffect } from 'react'
+import { useParams, useSearchParams } from 'react-router-dom'
 
 import { publicReportsIllustration } from 'assets/images'
 import { ButtonPrimary, ButtonSecondary } from 'features/common'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
 import { ModalReport } from 'modules/public-reports/components'
@@ -15,8 +18,21 @@ import { usePublicReports } from 'modules/public-reports/hooks/usePublicReports.
 
 export const ViewReportsPublic = () => {
   const { t } = useTranslations()
+  const { organisationId: orgIdFromPath } = useParams<{ organisationId: string }>()
+  const [searchParams] = useSearchParams()
+  const { organisations, setSelectedOrganisation } = useLayoutPublicContext()
 
   const { data, drawer, filters, options, pagination, sorting, modal } = usePublicReports()
+
+  useEffect(() => {
+    const orgId = orgIdFromPath || searchParams.get('organisation_id')
+    if (orgId && organisations?.length > 0) {
+      const organisationExists = organisations.some((o: any) => o.id === orgId)
+      if (organisationExists) {
+        setSelectedOrganisation(orgId)
+      }
+    }
+  }, [orgIdFromPath, searchParams, organisations, setSelectedOrganisation])
 
   const { reports, hasEmptyPageState, isFetching } = data
 

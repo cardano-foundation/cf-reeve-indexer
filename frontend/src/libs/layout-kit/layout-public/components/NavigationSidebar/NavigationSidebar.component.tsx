@@ -1,28 +1,35 @@
 import { ArrowSwapHorizontal, Note1, Book1 } from 'iconsax-react'
 import { useLocationState } from 'hooks'
+import { useParams } from 'react-router-dom'
 import { ButtonNavItem } from 'libs/layout-kit/components/ButtonNavItem/ButtonNavItem.component.tsx'
 import { CollapseNavItem } from 'libs/layout-kit/components/CollapseNavItem/CollapseNavItem.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { useNavigationRoutes } from 'libs/layout-kit/layout-public/components/NavigationSidebar/NavigationSidebar.service'
 import { ListStyled, NavigationStyled } from 'libs/layout-kit/layout-public/components/NavigationSidebar/NavigationSidebar.styles.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
-import { PATHS } from 'routes'
+import { PATHS, getOrgPath } from 'routes'
 import { MenuCategory } from '../LayoutPublicContext/LayoutPublicContext.component'
 
 export const NavigationSidebar = () => {
   const { t } = useTranslations()
   const { pathname } = useLocationState()
+  const { organisationId } = useParams<{ organisationId: string }>()
   const { handleSectionMenuToggle, isSidebarOpen, isResourcesOpen } = useLayoutPublicContext()
 
-  const getCurrentPage = (route: string) => pathname === route
+  const isActiveRouteOrDescendant = (route: string) => pathname === route || pathname.startsWith(route)
   const { RESOURCES_ROUTES } = useNavigationRoutes()
+
+  const reportsRoute = organisationId ? getOrgPath('reports', organisationId) : PATHS.PUBLIC_REPORTS
+  const transactionsRoute = organisationId ? getOrgPath('transactions', organisationId) : PATHS.PUBLIC_TRANSACTIONS
 
   const menuItems = [
     // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
     // { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
-    { icon: Note1, label: t({ id: 'publicReports' }), route: PATHS.PUBLIC_REPORTS },
-    { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: PATHS.PUBLIC_TRANSACTIONS }
+    { icon: Note1, label: t({ id: 'publicReports' }), route: reportsRoute },
+    { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: transactionsRoute }
   ]
+
+  const getCurrentPage = (route: string) => isActiveRouteOrDescendant(route)
 
   return (
     <NavigationStyled>
