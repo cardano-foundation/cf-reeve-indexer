@@ -14,6 +14,8 @@ import { useGetOrganisationsModel } from 'libs/models/organisation-model/GetOrga
 import { OrganisationFormValues } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.types.ts'
 import { PATHS } from 'routes'
 
+import { publicLandingIllustration } from 'assets/images'
+
 const OrganisationFormLandingStyled = styled(Box)`
   && {
     display: flex;
@@ -21,7 +23,6 @@ const OrganisationFormLandingStyled = styled(Box)`
     padding: ${({ theme }) => theme.spacing(2, 0, 2, 0)};
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
   }
 `
 
@@ -98,6 +99,7 @@ export const ViewPublicLanding = () => {
           />
         </OrganisationFormLandingStyled>
         <EmptyStatePage
+          asset={<Box component="img" src={publicLandingIllustration} alt="" maxWidth="47.5rem" width="100%" />}
           message={t({ id: 'selectOrganisationMessage' })}
           hint={t({ id: 'selectOrganisationHint' })}
         />
