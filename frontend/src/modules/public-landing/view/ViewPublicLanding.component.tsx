@@ -5,6 +5,7 @@ import { styled } from 'styled-components'
 import { useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
+import { publicLandingIllustration } from 'assets/images'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
@@ -14,7 +15,6 @@ import { useGetOrganisationsModel } from 'libs/models/organisation-model/GetOrga
 import { OrganisationFormValues } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.types.ts'
 import { PATHS } from 'routes'
 
-import { publicLandingIllustration } from 'assets/images'
 
 const OrganisationFormLandingStyled = styled(Box)`
   && {
