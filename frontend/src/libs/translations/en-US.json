@@ -781,6 +781,6 @@
   "logoutModalTitle": "Dialog logout confirmation",
   "reeveIndexer": "Reeve Indexer",
   "welcome": "Welcome",
-  "selectOrganisationMessage": "Welcome to the Reeve Indexer. Please select an organization to view published data.",
-  "selectOrganisationHint": "Choose an organization from the sidebar to get started."
+  "selectOrganisationMessage": "Welcome to the Reeve Indexer.",
+  "selectOrganisationHint": "Please select an organization to view published data."
 }

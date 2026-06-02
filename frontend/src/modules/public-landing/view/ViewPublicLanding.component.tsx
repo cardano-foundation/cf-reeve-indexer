@@ -1,6 +1,7 @@
 import { Formik } from 'formik'
 import Box from '@mui/material/Box'
 import { Form } from 'formik'
+import Typography from '@mui/material/Typography'
 import { styled } from 'styled-components'
 import { useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -85,24 +86,39 @@ export const ViewPublicLanding = () => {
       <LayoutPublic.Header>
         <LayoutPublic.Header.Details description={t({ id: 'welcome' })} title={t({ id: 'reeveIndexer' })} />
       </LayoutPublic.Header>
-      <LayoutPublic.Main flexDirection="column" gap={6} isHeightRestricted>
-        <OrganisationFormLandingStyled>
-          <Formik<OrganisationFormValues>
-            enableReinitialize
-            initialValues={initialValues}
-            onSubmit={() => undefined}
-            component={() => (
-              <OrganisationFormStyled noValidate>
-                <FieldOrganisations items={organisationOptions} onSelect={handleOrgSelect} />
-              </OrganisationFormStyled>
-            )}
+      <LayoutPublic.Main flexDirection="column" isHeightRestricted>
+        <Box pt={2} display="flex" flexDirection="column" alignItems="center" gap={4}>
+          <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
+            <Typography color="text.primary" component="p" textAlign="center" variant="h2">
+              {t({ id: 'selectOrganisationMessage' })}
+            </Typography>
+            <Typography color="text.secondary" component="p" textAlign="center" variant="body1">
+              {t({ id: 'selectOrganisationHint' })}
+            </Typography>
+          </Box>
+          <OrganisationFormLandingStyled>
+            <Formik<OrganisationFormValues>
+              enableReinitialize
+              initialValues={initialValues}
+              onSubmit={() => undefined}
+              component={() => (
+                <OrganisationFormStyled noValidate>
+                  <FieldOrganisations items={organisationOptions} onSelect={handleOrgSelect} />
+                </OrganisationFormStyled>
+              )}
+            />
+          </OrganisationFormLandingStyled>
+        </Box>
+        <Box flexGrow={1} display="flex" alignItems="center" justifyContent="center" minHeight={0} py={4}>
+          <Box
+            component="img"
+            src={publicLandingIllustration}
+            alt=""
+            maxWidth="47.5rem"
+            width="100%"
+            sx={{ maxHeight: '100%', objectFit: 'contain', pt: 8 }}
           />
-        </OrganisationFormLandingStyled>
-        <EmptyStatePage
-          asset={<Box component="img" src={publicLandingIllustration} alt="" maxWidth="47.5rem" width="100%" />}
-          message={t({ id: 'selectOrganisationMessage' })}
-          hint={t({ id: 'selectOrganisationHint' })}
-        />
+        </Box>
       </LayoutPublic.Main>
     </>
   )
