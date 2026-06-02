@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.3.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.2.1...1.3.0) (2026-06-02)
+
+
+### Features
+
+* added credential tx hash in identity popup ([3502af3](https://github.com/cardano-foundation/cf-reeve-indexer/commit/3502af356d4f1f20b6af63866d23f403b0e1843f))
+* order fields on reports ([#65](https://github.com/cardano-foundation/cf-reeve-indexer/issues/65)) ([374253f](https://github.com/cardano-foundation/cf-reeve-indexer/commit/374253fe51c72d22cf36060eb14fe86c7e6eb708))
+* order fields on reports ([#66](https://github.com/cardano-foundation/cf-reeve-indexer/issues/66)) ([2c63d72](https://github.com/cardano-foundation/cf-reeve-indexer/commit/2c63d726ae949f7bc6bf67ce6637113c708ee3e7))
+
+
+### Bug Fixes
+
+* added a workaround to ensure the latest events are present ([cce5521](https://github.com/cardano-foundation/cf-reeve-indexer/commit/cce552102f50d785e075d6d923971a5af3430e96))
+* Changed the layout on the landing page. ([a66c170](https://github.com/cardano-foundation/cf-reeve-indexer/commit/a66c1707fc2be676d4fe85f4e10b3bcff197e0c5))
+* correct order for imports. ([337d78c](https://github.com/cardano-foundation/cf-reeve-indexer/commit/337d78c18765c3cd8487981920c2cedd57f62575))
+* LOB-2132 fixed the dropdown by switching from useEffect to dedicated method that triggers change on user input. Also added image on the landing page. ([2afcb26](https://github.com/cardano-foundation/cf-reeve-indexer/commit/2afcb2689d2091c59ca9eaa5940e36beafbbee1d))
+
 ## [1.2.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.2.0...1.2.1) (2026-03-31)
 
 
