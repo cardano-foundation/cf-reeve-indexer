@@ -40,17 +40,11 @@ export const OrganisationFormSidebar = ({
   const { organisations, isFetching } = useGetOrganisationsModel()
 
   const handleOrgSelect = useCallback((orgId: string) => {
-    // Determine current route type (reports or transactions)
-    const isReports = pathname.includes('/reports')
     const isTransactions = pathname.includes('/transactions')
+    const targetPath = isTransactions ? `/transactions/${orgId}` : `/reports/${orgId}`
 
-    if (isReports) {
-      navigate(`/reports/${orgId}`)
-    } else if (isTransactions) {
-      navigate(`/transactions/${orgId}`)
-    } else {
-      // Default to reports if no specific route detected
-      navigate(`/reports/${orgId}`)
+    if (pathname !== targetPath) {
+      navigate(targetPath)
     }
   }, [pathname, navigate])
 
@@ -71,15 +65,15 @@ export const OrganisationFormSidebar = ({
           ...initialValues,
           organisations: defaultOrganisation
         }}
-        onSubmit={onSubmit ?? (() => undefined)}
-        component={() => (
+        onSubmit={onSubmit ?? (() => undefined)}>
+        {() => (
           <OrganisationFormLayout
             isSidebarOpen={isSidebarOpen}
             items={organisationOptions}
             onOrgSelect={handleOrgSelect}
           />
         )}
-      />
+      </Formik>
     </OrganisationFormSidebarStyled>
   )
 }
