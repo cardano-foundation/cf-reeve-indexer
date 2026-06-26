@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.3.0...1.3.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* table view load on mobile ([68b3c92](https://github.com/cardano-foundation/cf-reeve-indexer/commit/68b3c92bfe3035142df23f6b0ad9a2fbbf672f52))
+* table view load on mobile ([433ba8d](https://github.com/cardano-foundation/cf-reeve-indexer/commit/433ba8d31e471155b0d7cacd289f583343ae13da))
+
 ## [1.3.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.2.1...1.3.0) (2026-06-02)
 
 
