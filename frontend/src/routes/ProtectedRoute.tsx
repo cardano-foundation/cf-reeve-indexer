@@ -24,8 +24,12 @@ export const ProtectedRoute = ({ element }: ProtectedRouteProps) => {
     }
   }, [orgIdParam, organisations, setSelectedOrganisation])
 
-  // Wait for organisations to load if an organisation_id param is present
-  if (orgIdParam && isOrganisationsFetching) {
+  // Wait only for the INITIAL organisations load (no data yet) when an organisation_id
+  // param is present. Gating on `isFetching` alone also matches background re-fetches,
+  // which unmounts the routed view mid-render and re-triggers its requests in an endless
+  // loop (the view's mount re-arms the organisations re-fetch). Once we have organisations
+  // data, background re-fetches must not unmount the view.
+  if (orgIdParam && isOrganisationsFetching && !organisations?.length) {
     return null // Show nothing while loading
   }
 
