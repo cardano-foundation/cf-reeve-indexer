@@ -47,6 +47,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.IdentityEventReposit
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
+import org.cardanofoundation.reeve.indexer.processor.ReeveTypeProcessorRegistry;
 import org.cardanofoundation.reeve.indexer.service.KeriService;
 import org.cardanofoundation.signify.cesr.Diger;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
@@ -73,12 +74,14 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
     private final KeriService keriService;
     private final IdentityEventRepository identityRepository;
     private final CredentialRepository credentialRepository;
+    private final ReeveTypeProcessorRegistry processorRegistry;
 
     public ReeveMetadataStorage(ObjectMapper objectMapper,
             TransactionRepository transactionRepository, ReportRepository reportRepository,
             TxMetadataLabelRepository metadataLabelRepository, MetadataMapper metadataMapper,
             OrganisationRepository organisationRepository, CurrencyRepository currencyRepository,
-            KeriService keriService, IdentityEventRepository identityRepository, CredentialRepository credentialRepository) {
+            KeriService keriService, IdentityEventRepository identityRepository, CredentialRepository credentialRepository,
+            ReeveTypeProcessorRegistry processorRegistry) {
         super(metadataLabelRepository, metadataMapper);
         this.objectMapper = objectMapper;
         this.transactionRepository = transactionRepository;
@@ -88,6 +91,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
         this.keriService = keriService;
         this.identityRepository = identityRepository;
         this.credentialRepository = credentialRepository;
+        this.processorRegistry = processorRegistry;
     }
 
     @Override
@@ -184,6 +188,11 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                     rawMetadata.getOrg().getCountryCode(), rawMetadata.getOrg().getTaxIdNumber(),
                     rawMetadata.getTxHash()
             );
+            // Dispatch to the registered processor for this type, if any. This is the extension
+            // point for new reeve metadata types (e.g. EVENT_BUNDLE) and keeps the legacy
+            // INDIVIDUAL_TRANSACTIONS / REPORT handling below untouched.
+            processorRegistry.find(rawMetadata.getType())
+                    .ifPresent(processor -> processor.process(rawMetadata));
             // verifiy identity
             boolean identityVerified = false;
             if (rawMetadata.getType() == ReeveTransactionType.INDIVIDUAL_TRANSACTIONS) {

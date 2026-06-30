@@ -1,13 +1,15 @@
-import { ArrowSwapHorizontal, Note1, Book1 } from 'iconsax-react'
-import { useLocationState } from 'hooks'
+import { ArrowSwapHorizontal, Note1, Book1, ReceiptText } from 'iconsax-react'
 import { useParams } from 'react-router-dom'
+
+import { useLocationState } from 'hooks'
 import { ButtonNavItem } from 'libs/layout-kit/components/ButtonNavItem/ButtonNavItem.component.tsx'
 import { CollapseNavItem } from 'libs/layout-kit/components/CollapseNavItem/CollapseNavItem.component.tsx'
-import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { useNavigationRoutes } from 'libs/layout-kit/layout-public/components/NavigationSidebar/NavigationSidebar.service'
 import { ListStyled, NavigationStyled } from 'libs/layout-kit/layout-public/components/NavigationSidebar/NavigationSidebar.styles.tsx'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { PATHS, getOrgPath } from 'routes'
+
 import { MenuCategory } from '../LayoutPublicContext/LayoutPublicContext.component'
 
 export const NavigationSidebar = () => {
@@ -21,12 +23,14 @@ export const NavigationSidebar = () => {
 
   const reportsRoute = organisationId ? getOrgPath('reports', organisationId) : PATHS.PUBLIC_REPORTS
   const transactionsRoute = organisationId ? getOrgPath('transactions', organisationId) : PATHS.PUBLIC_TRANSACTIONS
+  const eventsRoute = organisationId ? getOrgPath('events', organisationId) : PATHS.PUBLIC_EVENTS
 
   const menuItems = [
     // NOTE: [LOB-2061] revoke dashboard route since it requires additional changes
     // { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
     { icon: Note1, label: t({ id: 'publicReports' }), route: reportsRoute },
-    { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: transactionsRoute }
+    { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: transactionsRoute },
+    { icon: ReceiptText, label: t({ id: 'publicEvents' }), route: eventsRoute }
   ]
 
   const getCurrentPage = (route: string) => isActiveRouteOrDescendant(route)
