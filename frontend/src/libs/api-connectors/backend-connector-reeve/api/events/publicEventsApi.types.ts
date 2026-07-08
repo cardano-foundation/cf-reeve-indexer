@@ -1,27 +1,15 @@
 export interface EventMilestoneView {
   milestoneId: string
   milestoneTitle: string
-  amountRcy: number
+  allocatedAmount: number | null
 }
 
 export interface EventAllocationView {
   projectId: string
   projectTitle: string
+  subProjectId: string | null
   subProjectTitle: string | null
   milestones: EventMilestoneView[]
-}
-
-export interface EventItemView {
-  amountRcy: number
-  amountFcy: number | null
-  vendor: string | null
-  spendingCategory: string | null
-  fxRate: string | null
-  hash: string | null
-  notes: string | null
-  date: string | null
-  currencyId: string | null
-  currencyCustCode: string | null
 }
 
 export interface EventView {
@@ -34,12 +22,20 @@ export interface EventView {
   fundingTx: string | null
   fundingId: string | null
   fundingEntity: string | null
+  amountRcy: number | null
+  amountFcy: number | null
+  vendor: string | null
+  spendingCategory: string | null
+  fxRate: string | null
+  hash: string | null
+  notes: string | null
+  currencyId: string | null
+  currencyCustCode: string | null
   date: string | null
   version: string | null
   ipfsCid: string | null
   totalAmount: number | null
   allocations: EventAllocationView[]
-  items: EventItemView[]
   customData: Record<string, unknown> | null
 }
 
@@ -108,3 +104,61 @@ export interface GetEventProjectsRequest {
 }
 
 export type GetEventProjectsResponse200 = EventProjectEntity[]
+
+export interface MilestoneAuditView {
+  milestoneId: string | null
+  milestoneTitle: string | null
+  allocatedAmount: number
+  spentAmount: number
+}
+
+export interface ProjectAuditView {
+  projectId: string | null
+  projectTitle: string | null
+  allocatedAmount: number
+  spentAmount: number
+  remaining: number
+  milestones: MilestoneAuditView[]
+}
+
+export interface SpendingLineView {
+  eventId: string | null
+  date: string | null
+  vendor: string | null
+  spendingCategory: string | null
+  amount: number
+  projectId: string | null
+  projectTitle: string | null
+  milestoneTitle: string | null
+  fundingId: string | null
+  txHash: string | null
+}
+
+export interface AuditSummaryView {
+  organisationId: string
+  organisationName: string | null
+  currency: string | null
+  totalFunded: number
+  totalSpent: number
+  totalRefunded: number
+  netRemaining: number
+  fundingCount: number
+  spendingCount: number
+  refundCount: number
+  firstEventDate: string | null
+  lastEventDate: string | null
+  projects: ProjectAuditView[]
+  spending: SpendingLineView[]
+}
+
+export interface GetEventAuditRequestParameters {
+  organisationId: string
+  dateFrom?: string
+  dateTo?: string
+}
+
+export interface GetEventAuditRequest {
+  parameters: GetEventAuditRequestParameters
+}
+
+export type GetEventAuditResponse200 = AuditSummaryView

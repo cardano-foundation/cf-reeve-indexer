@@ -15,7 +15,7 @@ import org.cardanofoundation.reeve.indexer.model.domain.Metadata;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
 import org.cardanofoundation.reeve.indexer.model.domain.Transaction;
-import org.cardanofoundation.reeve.indexer.model.domain.event.EventBundleEvent;
+import org.cardanofoundation.reeve.indexer.model.domain.event.FundingEvent;
 import org.cardanofoundation.reeve.indexer.model.domain.event.IpfsEventManifest;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.ReeveMetadata;
 
@@ -65,11 +65,11 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
                     data = dataNode.toString();
                     break;
 
-                case EVENT_BUNDLE:
+                case FUNDING:
                     // 'data' is oneOf: an inline array of events, or an IPFS manifest object.
                     if (dataNode.isArray()) {
-                        EventBundleEvent[] events =
-                                codec.treeToValue(dataNode, EventBundleEvent[].class);
+                        FundingEvent[] events =
+                                codec.treeToValue(dataNode, FundingEvent[].class);
                         data = Arrays.asList(events);
                     } else {
                         data = codec.treeToValue(dataNode, IpfsEventManifest.class);

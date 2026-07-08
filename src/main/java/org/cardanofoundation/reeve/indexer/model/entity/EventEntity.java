@@ -26,9 +26,10 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 /**
- * A single {@code EVENT_BUNDLE} event. Top-level, queryable fields are stored as columns while the
- * nested allocations and line items live in dedicated child tables. Free-form custom-event fields
- * and the original event JSON are preserved as JSONB for forward compatibility.
+ * A single {@code FUNDING} bundle event. Top-level, queryable fields — including the inline spend
+ * record for SPENDING events — are stored as columns, while the nested allocations live in a
+ * dedicated child table. Free-form custom-event fields and the original event JSON are preserved as
+ * JSONB for forward compatibility.
  */
 @Entity
 @Table(name = "reeve_event", uniqueConstraints = @UniqueConstraint(name = "uq_reeve_event_tx_event",
@@ -71,6 +72,34 @@ public class EventEntity {
     @Column(name = "funding_entity")
     private String fundingEntity;
 
+    // Inline spend record (SPENDING events).
+    @Column(name = "amount_rcy")
+    private BigDecimal amountRcy;
+
+    @Column(name = "amount_fcy")
+    private BigDecimal amountFcy;
+
+    @Column(name = "vendor")
+    private String vendor;
+
+    @Column(name = "spending_category")
+    private String spendingCategory;
+
+    @Column(name = "fx_rate")
+    private String fxRate;
+
+    @Column(name = "hash")
+    private String hash;
+
+    @Column(name = "notes")
+    private String notes;
+
+    @Column(name = "currency_id")
+    private String currencyId;
+
+    @Column(name = "currency_cust_code")
+    private String currencyCustCode;
+
     @Column(name = "date")
     private LocalDate date;
 
@@ -104,17 +133,8 @@ public class EventEntity {
     @Builder.Default
     private List<EventAllocationEntity> allocations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "event", orphanRemoval = true, cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<EventItemEntity> items = new ArrayList<>();
-
     public void addAllocation(EventAllocationEntity allocation) {
         allocations.add(allocation);
         allocation.setEvent(this);
-    }
-
-    public void addItem(EventItemEntity item) {
-        items.add(item);
-        item.setEvent(this);
     }
 }

@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Search criteria for {@code EVENT_BUNDLE} events. All filters are optional and combined with AND;
+ * Search criteria for {@code FUNDING} events. All filters are optional and combined with AND;
  * a null/empty filter is ignored. Pagination and sorting are supplied via the standard
  * {@code Pageable} query parameters ({@code page}, {@code size}, {@code sort}).
  */

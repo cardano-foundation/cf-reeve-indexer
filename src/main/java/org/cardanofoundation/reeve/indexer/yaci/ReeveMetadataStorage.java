@@ -189,7 +189,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                     rawMetadata.getTxHash()
             );
             // Dispatch to the registered processor for this type, if any. This is the extension
-            // point for new reeve metadata types (e.g. EVENT_BUNDLE) and keeps the legacy
+            // point for new reeve metadata types (e.g. FUNDING) and keeps the legacy
             // INDIVIDUAL_TRANSACTIONS / REPORT handling below untouched.
             processorRegistry.find(rawMetadata.getType())
                     .ifPresent(processor -> processor.process(rawMetadata));

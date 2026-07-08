@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import org.cardanofoundation.reeve.indexer.model.entity.EventEntity;
 
 /**
- * Public, organisation-facing representation of a single {@code EVENT_BUNDLE} event, including its
- * allocations, line items and (for custom events) free-form fields.
+ * Public, organisation-facing representation of a single {@code FUNDING} bundle event, including its
+ * inline spend record (SPENDING events), allocations and (for custom events) free-form fields.
  */
 @Getter
 @Setter
@@ -44,6 +44,17 @@ public class EventView {
     private String fundingId;
     private String fundingEntity;
 
+    // Inline spend record (SPENDING events).
+    private BigDecimal amountRcy;
+    private BigDecimal amountFcy;
+    private String vendor;
+    private String spendingCategory;
+    private String fxRate;
+    private String hash;
+    private String notes;
+    private String currencyId;
+    private String currencyCustCode;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
 
@@ -51,7 +62,6 @@ public class EventView {
     private String ipfsCid;
     private BigDecimal totalAmount;
     private List<EventAllocationView> allocations;
-    private List<EventItemView> items;
     private JsonNode customData;
 
     public static EventView fromEntity(EventEntity entity, ObjectMapper objectMapper) {
@@ -74,15 +84,21 @@ public class EventView {
                 .fundingTx(entity.getFundingTx())
                 .fundingId(entity.getFundingId())
                 .fundingEntity(entity.getFundingEntity())
+                .amountRcy(entity.getAmountRcy())
+                .amountFcy(entity.getAmountFcy())
+                .vendor(entity.getVendor())
+                .spendingCategory(entity.getSpendingCategory())
+                .fxRate(entity.getFxRate())
+                .hash(entity.getHash())
+                .notes(entity.getNotes())
+                .currencyId(entity.getCurrencyId())
+                .currencyCustCode(entity.getCurrencyCustCode())
                 .date(entity.getDate())
                 .version(entity.getVersion())
                 .ipfsCid(entity.getIpfsCid())
                 .totalAmount(entity.getTotalAmount())
                 .allocations(entity.getAllocations().stream()
                         .map(EventAllocationView::fromEntity)
-                        .toList())
-                .items(entity.getItems().stream()
-                        .map(EventItemView::fromEntity)
                         .toList())
                 .customData(customData)
                 .build();

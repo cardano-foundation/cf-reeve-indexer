@@ -55,6 +55,15 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
     List<EventEntity> findByTxHashOrderByEventId(String txHash);
 
+    /**
+     * Loads all of an organisation's events for the audit roll-up, fetch-joining allocations so the
+     * per-project fold doesn't trigger a query per event. Milestones are batch-loaded (see
+     * {@code EventAllocationEntity#milestones}) rather than fetch-joined to avoid a second collection
+     * fetch (Hibernate {@code MultipleBagFetchException}).
+     */
+    @Query("SELECT DISTINCT e FROM EventEntity e LEFT JOIN FETCH e.allocations WHERE e.organisationId = :organisationId")
+    List<EventEntity> findByOrganisationId(@Param("organisationId") String organisationId);
+
     @Query("SELECT DISTINCT e.eventType FROM EventEntity e WHERE e.organisationId = :orgId ORDER BY e.eventType")
     List<String> findDistinctEventTypesByOrganisationId(@Param("orgId") String orgId);
 

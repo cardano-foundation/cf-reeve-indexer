@@ -51,6 +51,17 @@ export const EventDetail = ({ event }: EventDetailProps) => {
 
   const hasCustomData = Boolean(event.customData && Object.keys(event.customData).length > 0)
 
+  const hasSpendingDetails = Boolean(
+    typeof event.amountRcy === 'number' ||
+      typeof event.amountFcy === 'number' ||
+      event.vendor ||
+      event.spendingCategory ||
+      event.fxRate ||
+      event.hash ||
+      event.notes ||
+      event.currencyCustCode
+  )
+
   return (
     <Box display="flex" flexDirection="column" gap={4} width="100%">
       <Box display="flex" flexDirection="column" gap={2}>
@@ -132,7 +143,7 @@ export const EventDetail = ({ event }: EventDetailProps) => {
                         {milestone.milestoneTitle || milestone.milestoneId}
                       </Typography>
                       <Typography color={theme.palette.text.primary} variant="body2">
-                        {formatAmount(milestone.amountRcy)}
+                        {formatAmount(milestone.allocatedAmount)}
                       </Typography>
                     </Box>
                   ))}
@@ -147,52 +158,45 @@ export const EventDetail = ({ event }: EventDetailProps) => {
         )}
       </Box>
 
-      <Divider flexItem orientation="horizontal" />
+      {hasSpendingDetails && (
+        <>
+          <Divider flexItem orientation="horizontal" />
 
-      <Box display="flex" flexDirection="column" gap={2}>
-        <Typography variant="h3">{t({ id: 'lineItems' })}</Typography>
-        {event.items.length ? (
-          event.items.map((item, itemIndex) => (
-            <Box key={itemIndex} border={`1px solid ${theme.palette.divider}`} borderRadius={1} p={2}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h3">{t({ id: 'spendingDetails' })}</Typography>
+            <Box border={`1px solid ${theme.palette.divider}`} borderRadius={1} p={2}>
               <Grid container columnSpacing={3} rowSpacing={2}>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <DetailField label={t({ id: 'amountRcy' })}>{formatAmount(item.amountRcy)}</DetailField>
+                  <DetailField label={t({ id: 'amountRcy' })}>{formatAmount(event.amountRcy)}</DetailField>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <DetailField label={t({ id: 'amountFcy' })}>{formatAmount(item.amountFcy)}</DetailField>
+                  <DetailField label={t({ id: 'amountFcy' })}>{formatAmount(event.amountFcy)}</DetailField>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <DetailField label={t({ id: 'currency' })}>{item.currencyCustCode}</DetailField>
+                  <DetailField label={t({ id: 'currency' })}>{event.currencyCustCode}</DetailField>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <DetailField label={t({ id: 'exchangeRate' })}>{item.fxRate}</DetailField>
+                  <DetailField label={t({ id: 'exchangeRate' })}>{event.fxRate}</DetailField>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <DetailField label={t({ id: 'vendor' })}>{item.vendor}</DetailField>
+                  <DetailField label={t({ id: 'vendor' })}>{event.vendor}</DetailField>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <DetailField label={t({ id: 'spendingCategory' })}>{item.spendingCategory}</DetailField>
+                  <DetailField label={t({ id: 'spendingCategory' })}>{event.spendingCategory}</DetailField>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <DetailField label={t({ id: 'eventDate' })}>{formatDate(item.date)}</DetailField>
+                  <DetailField label={t({ id: 'documentHash' })}>{event.hash}</DetailField>
                 </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
-                  <DetailField label={t({ id: 'blockchainHash' })}>{item.hash}</DetailField>
-                </Grid>
-                {item.notes && (
+                {event.notes && (
                   <Grid size={12}>
-                    <DetailField label={t({ id: 'notes' })}>{item.notes}</DetailField>
+                    <DetailField label={t({ id: 'notes' })}>{event.notes}</DetailField>
                   </Grid>
                 )}
               </Grid>
             </Box>
-          ))
-        ) : (
-          <Typography color={theme.palette.text.secondary} variant="body2">
-            {t({ id: 'nothingHereMessage' })}
-          </Typography>
-        )}
-      </Box>
+          </Box>
+        </>
+      )}
 
       {hasCustomData && (
         <>

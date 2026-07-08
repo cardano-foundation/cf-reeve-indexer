@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 /**
- * A milestone targeted by an event allocation, with its amount in the organisation's
- * reporting currency.
+ * A milestone targeted by an event allocation, with the amount allocated to it in the
+ * organisation's reporting currency.
  */
 @Getter
 @Setter
@@ -27,5 +27,5 @@ public class Milestone {
 
     private String milestoneId;
     private String milestoneTitle;
-    private BigDecimal amountRcy;
+    private BigDecimal allocatedAmount;
 }

@@ -27,22 +27,22 @@ import org.cardanofoundation.reeve.indexer.model.domain.Currency;
 import org.cardanofoundation.reeve.indexer.model.domain.Metadata;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
-import org.cardanofoundation.reeve.indexer.model.domain.event.EventBundleEvent;
-import org.cardanofoundation.reeve.indexer.model.domain.event.EventItem;
+import org.cardanofoundation.reeve.indexer.model.domain.event.FundingEvent;
 import org.cardanofoundation.reeve.indexer.model.domain.event.IpfsEventManifest;
 import org.cardanofoundation.reeve.indexer.model.domain.event.Milestone;
 import org.cardanofoundation.reeve.indexer.model.domain.event.ProjectAllocation;
+import org.cardanofoundation.reeve.indexer.model.domain.event.SubProjectAllocation;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.ReeveMetadata;
 import org.cardanofoundation.reeve.indexer.model.entity.EventEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.EventRepository;
 
-class EventBundleProcessorTest {
+class FundingEventProcessorTest {
 
     private EventRepository eventRepository;
     private CurrencyRepository currencyRepository;
     private IpfsGatewayClient ipfsGatewayClient;
-    private EventBundleProcessor processor;
+    private FundingEventProcessor processor;
 
     @BeforeEach
     void setUp() {
@@ -51,37 +51,35 @@ class EventBundleProcessorTest {
         ipfsGatewayClient = mock(IpfsGatewayClient.class);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        processor = new EventBundleProcessor(eventRepository, currencyRepository, objectMapper,
+        processor = new FundingEventProcessor(eventRepository, currencyRepository, objectMapper,
                 ipfsGatewayClient);
         when(eventRepository.findByTxHashOrderByEventId(any())).thenReturn(List.of());
     }
 
     @Test
-    void supportsEventBundleType() {
-        assertEquals(ReeveTransactionType.EVENT_BUNDLE, processor.supportedType());
+    void supportsFundingType() {
+        assertEquals(ReeveTransactionType.FUNDING, processor.supportedType());
     }
 
     @Test
     void mapsInlineSpendingEventToEntityGraph() {
-        EventItem item = EventItem.builder()
-                .amountRcy(new BigDecimal("85"))
-                .amountFcy(new BigDecimal("100"))
-                .vendor("Vendor AB")
-                .spendingCategory("Personnel")
-                .fxRate("0.85")
-                .date(LocalDate.of(2025, 4, 3))
-                .currency(Currency.builder().id("ISO_4217:USD").custCode("USD").build())
-                .build();
         Milestone milestone = Milestone.builder()
-                .milestoneId("ms1").milestoneTitle("Milestone AB").amountRcy(new BigDecimal("100"))
+                .milestoneId("ms1").milestoneTitle("Milestone AB")
+                .allocatedAmount(new BigDecimal("85"))
                 .build();
         ProjectAllocation allocation = ProjectAllocation.builder()
-                .projectId("ProjectID1").projectTitle("ProjectTitle").subProjectTitle("Sub")
-                .milestones(List.of(milestone))
+                .projectId("ProjectID1").projectTitle("ProjectTitle")
+                .subProject(SubProjectAllocation.builder()
+                        .subProjectId("SubProjectID1").subProjectTitle("SubProjectTitle")
+                        .milestones(List.of(milestone)).build())
                 .build();
-        EventBundleEvent event = EventBundleEvent.builder()
+        FundingEvent event = FundingEvent.builder()
                 .id("event1").type("SPENDING").fundingTx("ftx1").fundingId("fund1")
-                .allocations(List.of(allocation)).items(List.of(item))
+                .amountRcy(new BigDecimal("85")).amountFcy(new BigDecimal("100"))
+                .vendor("Vendor AB").spendingCategory("Personnel").fxRate("0.85")
+                .date(LocalDate.of(2025, 4, 3))
+                .currency(Currency.builder().id("ISO_4217:USD").custCode("USD").build())
+                .allocations(List.of(allocation))
                 .build();
 
         processor.process(metadataWith(List.of(event)));
@@ -93,6 +91,11 @@ class EventBundleProcessorTest {
         assertEquals("SPENDING", saved.getEventType());
         assertEquals("GRANT", saved.getEventCategory());
         assertEquals("fund1", saved.getFundingId());
+        assertEquals("Vendor AB", saved.getVendor());
+        assertEquals("Personnel", saved.getSpendingCategory());
+        assertEquals(0, new BigDecimal("85").compareTo(saved.getAmountRcy()));
+        assertEquals(0, new BigDecimal("100").compareTo(saved.getAmountFcy()));
+        assertEquals("USD", saved.getCurrencyCustCode());
         assertEquals("1.0", saved.getVersion());
         assertEquals(123L, saved.getCreationSlot());
         assertEquals("metahash", saved.getMetadataHash());
@@ -100,9 +103,11 @@ class EventBundleProcessorTest {
         assertEquals(LocalDate.of(2025, 4, 3), saved.getDate());
         assertEquals(1, saved.getAllocations().size());
         assertEquals("ProjectID1", saved.getAllocations().get(0).getProjectId());
+        assertEquals("SubProjectID1", saved.getAllocations().get(0).getSubProjectId());
+        assertEquals("SubProjectTitle", saved.getAllocations().get(0).getSubProjectTitle());
         assertEquals(1, saved.getAllocations().get(0).getMilestones().size());
-        assertEquals(1, saved.getItems().size());
-        assertEquals("USD", saved.getItems().get(0).getCurrencyCustCode());
+        assertEquals(0, new BigDecimal("85").compareTo(
+                saved.getAllocations().get(0).getMilestones().get(0).getAllocatedAmount()));
         assertNull(saved.getCustomData());
         assertNotNull(saved.getRaw());
 
@@ -111,8 +116,30 @@ class EventBundleProcessorTest {
     }
 
     @Test
+    void mapsFundingEventTotalFromMilestones() {
+        Milestone milestone = Milestone.builder()
+                .milestoneId("ms1").milestoneTitle("Milestone AB")
+                .allocatedAmount(new BigDecimal("100")).build();
+        ProjectAllocation allocation = ProjectAllocation.builder()
+                .projectId("ProjectID1").projectTitle("ProjectTitle")
+                .milestones(List.of(milestone)).build();
+        FundingEvent event = FundingEvent.builder()
+                .id("event2").type("FUNDING").fundingId("fund1").fundingEntity("FundingEntity")
+                .allocations(List.of(allocation)).build();
+
+        processor.process(metadataWith(List.of(event)));
+
+        EventEntity saved = captureSavedSingle();
+        assertEquals("FUNDING", saved.getEventType());
+        assertEquals("FundingEntity", saved.getFundingEntity());
+        assertEquals(0, new BigDecimal("100").compareTo(saved.getTotalAmount()));
+        assertNull(saved.getAmountRcy());
+        assertNull(saved.getDate());
+    }
+
+    @Test
     void customEventStoresCustomDataJson() {
-        EventBundleEvent event = EventBundleEvent.builder()
+        FundingEvent event = FundingEvent.builder()
                 .id("c1").type("BOARD_MEETING").date(LocalDate.of(2025, 3, 15))
                 .build();
         event.putCustom("location", "Zug");
@@ -131,7 +158,7 @@ class EventBundleProcessorTest {
                 { "org_id": "org1", "currency_id": "ISO_4217:CHF", "version": "1.0", "date": "2025-06-01",
                   "events": [ { "id": "e1", "type": "REFUND", "funding_id": "fund1",
                     "allocation": [ { "project_id": "P1", "project_title": "T1",
-                      "milestones": [ { "milestone_id": "m1", "milestone_title": "M1", "amount_rcy": "50" } ] } ] } ] }
+                      "milestones": [ { "milestone_id": "m1", "milestone_title": "M1", "allocated_amount": "50" } ] } ] } ] }
                 """;
         when(ipfsGatewayClient.fetch(eq("cid123"))).thenReturn(Optional.of(offChainDoc));
 
@@ -148,7 +175,7 @@ class EventBundleProcessorTest {
     void replacesExistingEventsOnReindex() {
         when(eventRepository.findByTxHashOrderByEventId("tx1"))
                 .thenReturn(List.of(new EventEntity()));
-        EventBundleEvent event = EventBundleEvent.builder().id("e1").type("CUSTOM").build();
+        FundingEvent event = FundingEvent.builder().id("e1").type("CUSTOM").build();
 
         processor.process(metadataWith(List.of(event)));
 
@@ -158,10 +185,10 @@ class EventBundleProcessorTest {
 
     @Test
     void nullIdGetsFallbackAndDuplicatesAreSkipped() {
-        EventBundleEvent noId = EventBundleEvent.builder()
+        FundingEvent noId = FundingEvent.builder()
                 .type("BOARD_MEETING").date(LocalDate.of(2025, 1, 1)).build();
-        EventBundleEvent dupA = EventBundleEvent.builder().id("dup").type("CUSTOM").build();
-        EventBundleEvent dupB = EventBundleEvent.builder().id("dup").type("CUSTOM").build();
+        FundingEvent dupA = FundingEvent.builder().id("dup").type("CUSTOM").build();
+        FundingEvent dupB = FundingEvent.builder().id("dup").type("CUSTOM").build();
 
         processor.process(metadataWith(List.of(noId, dupA, dupB)));
 
@@ -176,7 +203,7 @@ class EventBundleProcessorTest {
         ReeveMetadata metadata = new ReeveMetadata();
         metadata.setTxHash("tx1");
         metadata.setMetadataHash("metahash");
-        metadata.setType(ReeveTransactionType.EVENT_BUNDLE);
+        metadata.setType(ReeveTransactionType.FUNDING);
         metadata.setOrg(Organisation.builder().id("org1").name("CF").build());
         metadata.setMetadata(Metadata.builder().version("1.0").creationSlot(123L)
                 .timestamp("2025-06-01T10:15:30Z").build());

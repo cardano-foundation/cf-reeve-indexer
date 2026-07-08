@@ -25,6 +25,7 @@ public class EventAllocationView {
 
     private String projectId;
     private String projectTitle;
+    private String subProjectId;
     private String subProjectTitle;
     private List<EventMilestoneView> milestones;
 
@@ -32,6 +33,7 @@ public class EventAllocationView {
         return EventAllocationView.builder()
                 .projectId(entity.getProjectId())
                 .projectTitle(entity.getProjectTitle())
+                .subProjectId(entity.getSubProjectId())
                 .subProjectTitle(entity.getSubProjectTitle())
                 .milestones(entity.getMilestones().stream()
                         .map(EventMilestoneView::fromEntity)

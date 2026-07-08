@@ -21,6 +21,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.BatchSize;
+
 /**
  * A project targeted by an {@link EventEntity}, owning the milestones the event applies to.
  */
@@ -46,6 +48,9 @@ public class EventAllocationEntity {
     @Column(name = "project_title")
     private String projectTitle;
 
+    @Column(name = "sub_project_id")
+    private String subProjectId;
+
     @Column(name = "sub_project_title")
     private String subProjectTitle;
 
@@ -54,6 +59,7 @@ public class EventAllocationEntity {
     private EventEntity event;
 
     @OneToMany(mappedBy = "allocation", orphanRemoval = true, cascade = CascadeType.ALL)
+    @BatchSize(size = 64)
     @Builder.Default
     private List<EventMilestoneEntity> milestones = new ArrayList<>();
 

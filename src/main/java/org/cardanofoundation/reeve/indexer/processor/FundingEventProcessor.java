@@ -17,27 +17,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Metadata;
 import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
-import org.cardanofoundation.reeve.indexer.model.domain.event.EventBundleEvent;
-import org.cardanofoundation.reeve.indexer.model.domain.event.EventItem;
+import org.cardanofoundation.reeve.indexer.model.domain.event.FundingEvent;
 import org.cardanofoundation.reeve.indexer.model.domain.event.IpfsEventManifest;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.ReeveMetadata;
 import org.cardanofoundation.reeve.indexer.model.entity.EventAllocationEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.EventEntity;
-import org.cardanofoundation.reeve.indexer.model.entity.EventItemEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.EventMilestoneEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.EventRepository;
 
 /**
- * Persists {@code EVENT_BUNDLE} transactions. The bundle {@code data} is either an inline array of
- * events or an IPFS manifest; in the latter case the off-chain document is resolved and its events
- * are stored exactly like inline ones (with the originating CID recorded). Processing is idempotent
- * per transaction so re-indexing/rollbacks do not create duplicates.
+ * Persists {@code FUNDING} transactions. The bundle {@code data} is either an inline array of events
+ * or an IPFS manifest; in the latter case the off-chain document is resolved and its events are
+ * stored exactly like inline ones (with the originating CID recorded). Processing is idempotent per
+ * transaction so re-indexing/rollbacks do not create duplicates.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class EventBundleProcessor implements ReeveTypeProcessor {
+public class FundingEventProcessor implements ReeveTypeProcessor {
 
     private final EventRepository eventRepository;
     private final CurrencyRepository currencyRepository;
@@ -46,7 +44,7 @@ public class EventBundleProcessor implements ReeveTypeProcessor {
 
     @Override
     public ReeveTransactionType supportedType() {
-        return ReeveTransactionType.EVENT_BUNDLE;
+        return ReeveTransactionType.FUNDING;
     }
 
     @Override
@@ -54,21 +52,21 @@ public class EventBundleProcessor implements ReeveTypeProcessor {
         String txHash = metadata.getTxHash();
         String organisationId = metadata.getOrg().getId();
 
-        List<EventBundleEvent> events = new ArrayList<>();
+        List<FundingEvent> events = new ArrayList<>();
         String ipfsCid = null;
 
         Object data = metadata.getData();
         if (data instanceof List<?> inline) {
-            inline.forEach(e -> events.add((EventBundleEvent) e));
+            inline.forEach(e -> events.add((FundingEvent) e));
         } else if (data instanceof IpfsEventManifest manifest) {
             ipfsCid = manifest.getIpfsCid();
             events.addAll(fetchManifestEvents(manifest, txHash));
         } else if (data != null) {
-            log.warn("Unexpected EVENT_BUNDLE data type {} for tx {}", data.getClass(), txHash);
+            log.warn("Unexpected FUNDING data type {} for tx {}", data.getClass(), txHash);
         }
 
         if (events.isEmpty()) {
-            log.warn("EVENT_BUNDLE tx {} contained no events", txHash);
+            log.warn("FUNDING tx {} contained no events", txHash);
             return;
         }
 
@@ -89,17 +87,17 @@ public class EventBundleProcessor implements ReeveTypeProcessor {
         List<EventEntity> entities = new ArrayList<>();
         Set<String> seenIds = new HashSet<>();
         int index = 0;
-        for (EventBundleEvent event : events) {
+        for (FundingEvent event : events) {
             String eventId = event.getId();
             if (eventId == null || eventId.isBlank()) {
                 // The schema requires an id; fall back to a stable positional id so a malformed
                 // event is still indexed instead of failing the entire batch.
                 eventId = "event-" + index;
-                log.warn("EVENT_BUNDLE tx {} event #{} has no id; using fallback id '{}'", txHash,
+                log.warn("FUNDING tx {} event #{} has no id; using fallback id '{}'", txHash,
                         index, eventId);
             }
             if (!seenIds.add(eventId)) {
-                log.warn("EVENT_BUNDLE tx {} has a duplicate event id '{}'; skipping the duplicate",
+                log.warn("FUNDING tx {} has a duplicate event id '{}'; skipping the duplicate",
                         txHash, eventId);
                 index++;
                 continue;
@@ -113,30 +111,37 @@ public class EventBundleProcessor implements ReeveTypeProcessor {
         }
     }
 
-    private List<EventBundleEvent> fetchManifestEvents(IpfsEventManifest manifest, String txHash) {
+    private List<FundingEvent> fetchManifestEvents(IpfsEventManifest manifest, String txHash) {
         return ipfsGatewayClient.fetch(manifest.getIpfsCid())
                 .map(body -> {
                     try {
                         JsonNode eventsNode = objectMapper.readTree(body).get("events");
                         if (eventsNode == null || eventsNode.isNull()) {
                             log.error("IPFS event document for tx {} has no 'events' array", txHash);
-                            return List.<EventBundleEvent>of();
+                            return List.<FundingEvent>of();
                         }
-                        EventBundleEvent[] arr =
-                                objectMapper.treeToValue(eventsNode, EventBundleEvent[].class);
+                        FundingEvent[] arr =
+                                objectMapper.treeToValue(eventsNode, FundingEvent[].class);
                         return Arrays.asList(arr);
                     } catch (Exception e) {
                         log.error("Failed to parse IPFS event document for tx {}: {}", txHash,
                                 e.getMessage());
-                        return List.<EventBundleEvent>of();
+                        return List.<FundingEvent>of();
                     }
                 })
                 .orElseGet(List::of);
     }
 
-    private EventEntity toEntity(EventBundleEvent event, ReeveMetadata metadata,
-            String organisationId, String ipfsCid, String version, Long creationSlot,
-            String timestamp, String eventId) {
+    private EventEntity toEntity(FundingEvent event, ReeveMetadata metadata, String organisationId,
+            String ipfsCid, String version, Long creationSlot, String timestamp, String eventId) {
+        String currencyId = Optional.ofNullable(event.getCurrency())
+                .map(c -> c.getId()).orElse(null);
+        String custCode = Optional.ofNullable(event.getCurrency())
+                .map(c -> c.getCustCode()).orElse(null);
+        if (currencyId != null) {
+            currencyRepository.saveIfNotExists(organisationId, currencyId, custCode);
+        }
+
         EventEntity entity = EventEntity.builder()
                 .txHash(metadata.getTxHash())
                 .organisationId(organisationId)
@@ -146,6 +151,15 @@ public class EventBundleProcessor implements ReeveTypeProcessor {
                 .fundingTx(event.getFundingTx())
                 .fundingId(event.getFundingId())
                 .fundingEntity(event.getFundingEntity())
+                .amountRcy(event.getAmountRcy())
+                .amountFcy(event.getAmountFcy())
+                .vendor(event.getVendor())
+                .spendingCategory(event.getSpendingCategory())
+                .fxRate(event.getFxRate())
+                .hash(event.getHash())
+                .notes(event.getNotes())
+                .currencyId(currencyId)
+                .currencyCustCode(custCode)
                 .date(event.getResolvedDate())
                 .version(version)
                 .creationSlot(creationSlot)
@@ -162,49 +176,22 @@ public class EventBundleProcessor implements ReeveTypeProcessor {
                 EventAllocationEntity allocationEntity = EventAllocationEntity.builder()
                         .projectId(allocation.getProjectId())
                         .projectTitle(allocation.getProjectTitle())
+                        .subProjectId(allocation.getSubProjectId())
                         .subProjectTitle(allocation.getSubProjectTitle())
                         .build();
-                if (allocation.getMilestones() != null) {
-                    allocation.getMilestones().forEach(milestone ->
+                if (allocation.getEffectiveMilestones() != null) {
+                    allocation.getEffectiveMilestones().forEach(milestone ->
                             allocationEntity.addMilestone(EventMilestoneEntity.builder()
                                     .milestoneId(milestone.getMilestoneId())
                                     .milestoneTitle(milestone.getMilestoneTitle())
-                                    .amountRcy(milestone.getAmountRcy())
+                                    .allocatedAmount(milestone.getAllocatedAmount())
                                     .build()));
                 }
                 entity.addAllocation(allocationEntity);
             });
         }
 
-        if (event.getItems() != null) {
-            event.getItems().forEach(item -> {
-                String currencyId = Optional.ofNullable(item.getCurrency())
-                        .map(c -> c.getId()).orElse(null);
-                String custCode = Optional.ofNullable(item.getCurrency())
-                        .map(c -> c.getCustCode()).orElse(null);
-                if (currencyId != null) {
-                    currencyRepository.saveIfNotExists(organisationId, currencyId, custCode);
-                }
-                entity.addItem(toItemEntity(item, currencyId, custCode));
-            });
-        }
-
         return entity;
-    }
-
-    private EventItemEntity toItemEntity(EventItem item, String currencyId, String custCode) {
-        return EventItemEntity.builder()
-                .amountRcy(item.getAmountRcy())
-                .amountFcy(item.getAmountFcy())
-                .vendor(item.getVendor())
-                .spendingCategory(item.getSpendingCategory())
-                .fxRate(item.getFxRate())
-                .hash(item.getHash())
-                .notes(item.getNotes())
-                .date(item.getDate())
-                .currencyId(currencyId)
-                .currencyCustCode(custCode)
-                .build();
     }
 
     private String writeJsonOrNull(Object value) {

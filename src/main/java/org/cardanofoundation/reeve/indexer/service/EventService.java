@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.EventRepository;
 import org.cardanofoundation.reeve.indexer.model.request.EventSearchRequest;
 import org.cardanofoundation.reeve.indexer.model.view.EventProjectView;
 import org.cardanofoundation.reeve.indexer.model.view.EventView;
+import org.cardanofoundation.reeve.indexer.model.view.audit.AuditSummaryView;
 
 @Service
 @RequiredArgsConstructor
@@ -83,6 +85,19 @@ public class EventService {
     @Transactional(readOnly = true)
     public List<EventProjectView> findDistinctProjects(String organisationId) {
         return eventRepository.findDistinctProjectsByOrganisationId(organisationId);
+    }
+
+    /**
+     * Aggregates the organisation's FUNDING/SPENDING/REFUND events into an auditor roll-up. The
+     * optional date range filters dated events (spending); undated funding/refund events are always
+     * included since they carry no date to filter on.
+     */
+    @Transactional(readOnly = true)
+    public AuditSummaryView auditSummary(String organisationId, String organisationName,
+            LocalDate dateFrom, LocalDate dateTo) {
+        List<EventEntity> events = eventRepository.findByOrganisationId(organisationId);
+        return AuditSummaryAssembler.assemble(organisationId, organisationName, events, dateFrom,
+                dateTo);
     }
 
     private Pageable remapSort(Pageable pageable) {

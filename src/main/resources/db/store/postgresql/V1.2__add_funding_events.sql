@@ -1,4 +1,5 @@
--- EVENT_BUNDLE storage: one row per event, with child tables for allocations, milestones and items.
+-- FUNDING storage: one row per event (with its inline spend record), plus child tables for
+-- allocations and their milestones.
 
 -- EventEntity
 CREATE SEQUENCE IF NOT EXISTS reeve_event_seq START 1 INCREMENT BY 50;
@@ -12,6 +13,15 @@ CREATE TABLE IF NOT EXISTS reeve_event (
     funding_tx VARCHAR(255),
     funding_id VARCHAR(255),
     funding_entity VARCHAR(255),
+    amount_rcy DECIMAL(38, 8),
+    amount_fcy DECIMAL(38, 8),
+    vendor VARCHAR(255),
+    spending_category VARCHAR(255),
+    fx_rate VARCHAR(255),
+    hash VARCHAR(255),
+    notes TEXT,
+    currency_id VARCHAR(255),
+    currency_cust_code VARCHAR(255),
     date DATE,
     version VARCHAR(50),
     creation_slot BIGINT,
@@ -37,6 +47,7 @@ CREATE TABLE IF NOT EXISTS reeve_event_allocation (
     event_ref_id BIGINT NOT NULL REFERENCES reeve_event (id) ON DELETE CASCADE,
     project_id VARCHAR(255),
     project_title VARCHAR(255),
+    sub_project_id VARCHAR(255),
     sub_project_title VARCHAR(255)
 );
 ALTER SEQUENCE reeve_event_allocation_seq OWNED BY reeve_event_allocation.id;
@@ -51,28 +62,8 @@ CREATE TABLE IF NOT EXISTS reeve_event_milestone (
     allocation_id BIGINT NOT NULL REFERENCES reeve_event_allocation (id) ON DELETE CASCADE,
     milestone_id VARCHAR(255),
     milestone_title VARCHAR(255),
-    amount_rcy DECIMAL(38, 8)
+    allocated_amount DECIMAL(38, 8)
 );
 ALTER SEQUENCE reeve_event_milestone_seq OWNED BY reeve_event_milestone.id;
 
 CREATE INDEX IF NOT EXISTS idx_reeve_event_milestone_allocation ON reeve_event_milestone (allocation_id);
-
--- EventItemEntity
-CREATE SEQUENCE IF NOT EXISTS reeve_event_item_seq START 1 INCREMENT BY 50;
-CREATE TABLE IF NOT EXISTS reeve_event_item (
-    id BIGINT PRIMARY KEY DEFAULT nextval('reeve_event_item_seq'),
-    event_ref_id BIGINT NOT NULL REFERENCES reeve_event (id) ON DELETE CASCADE,
-    amount_rcy DECIMAL(38, 8),
-    amount_fcy DECIMAL(38, 8),
-    vendor VARCHAR(255),
-    spending_category VARCHAR(255),
-    fx_rate VARCHAR(255),
-    hash VARCHAR(255),
-    notes TEXT,
-    date DATE,
-    currency_id VARCHAR(255),
-    currency_cust_code VARCHAR(255)
-);
-ALTER SEQUENCE reeve_event_item_seq OWNED BY reeve_event_item.id;
-
-CREATE INDEX IF NOT EXISTS idx_reeve_event_item_event ON reeve_event_item (event_ref_id);

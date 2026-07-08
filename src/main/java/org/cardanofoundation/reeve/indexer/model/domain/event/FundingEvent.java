@@ -20,11 +20,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import org.cardanofoundation.reeve.indexer.model.domain.Currency;
+
 /**
- * A single event inside an {@code EVENT_BUNDLE}. A bundle event is either a well-known
- * grant-lifecycle event ({@code FUNDING}/{@code SPENDING}/{@code REFUND}) carrying allocations and
- * line items, or an organisation-defined custom event whose extra fields are free-form. The known
- * fields below are mapped explicitly; any additional properties of a custom event are captured in
+ * A single event inside a {@code FUNDING} metadata bundle. An event is either a well-known
+ * grant-lifecycle event ({@code FUNDING}/{@code SPENDING}/{@code REFUND}) or an organisation-defined
+ * custom event whose extra fields are free-form. Grant events carry their allocations and, for
+ * {@code SPENDING}, a single inline spend record (amount/vendor/currency etc.). The known fields
+ * below are mapped explicitly; any additional properties of a custom event are captured in
  * {@link #custom} so nothing is lost.
  */
 @Getter
@@ -33,20 +36,27 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 @AllArgsConstructor
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class EventBundleEvent {
+public class FundingEvent {
 
     private String id;
     private String type;
     private String fundingTx;
     private String fundingId;
     private String fundingEntity;
+
+    // Inline spend record — present on SPENDING events (a single spend per event, per the schema).
+    private BigDecimal amountRcy;
+    private BigDecimal amountFcy;
+    private String vendor;
+    private String spendingCategory;
+    private String fxRate;
+    private String hash;
+    private String notes;
     private LocalDate date;
+    private Currency currency;
 
     @JsonProperty("allocation")
     private List<ProjectAllocation> allocations;
-
-    @JsonProperty("item")
-    private List<EventItem> items;
 
     /** Free-form additional fields carried by custom (organisation-defined) events. */
     @Builder.Default
@@ -72,44 +82,34 @@ public class EventBundleEvent {
     }
 
     /**
-     * Best-effort event date used for storage and date-range filtering: the explicit event date if
-     * present (custom events), otherwise the earliest line-item date (grant events), otherwise null.
+     * Best-effort event date used for storage and date-range filtering: the event {@code date}
+     * (the spend date for SPENDING, the declared date for custom events). FUNDING/REFUND events
+     * carry no date and resolve to null.
      */
     @JsonIgnore
     public LocalDate getResolvedDate() {
-        if (date != null) {
-            return date;
-        }
-        if (items != null) {
-            return items.stream()
-                    .map(EventItem::getDate)
-                    .filter(d -> d != null)
-                    .min(LocalDate::compareTo)
-                    .orElse(null);
-        }
-        return null;
+        return date;
     }
 
     /**
-     * Event total in the reporting currency, used for storage and amount filtering/sorting: the sum
-     * of line-item amounts when present (grant events), otherwise the sum of milestone amounts.
+     * Event total in the reporting currency, used for storage and amount filtering/sorting: the
+     * inline spend amount when present (SPENDING), otherwise the sum of allocated milestone amounts
+     * (FUNDING), otherwise null (custom events).
      */
     @JsonIgnore
     public BigDecimal getTotalAmount() {
-        if (items != null && !items.isEmpty()) {
-            return items.stream()
-                    .map(EventItem::getAmountRcy)
-                    .filter(a -> a != null)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (amountRcy != null) {
+            return amountRcy;
         }
         if (allocations != null && !allocations.isEmpty()) {
-            return allocations.stream()
-                    .map(ProjectAllocation::getMilestones)
+            BigDecimal sum = allocations.stream()
+                    .map(ProjectAllocation::getEffectiveMilestones)
                     .filter(ms -> ms != null)
                     .flatMap(List::stream)
-                    .map(Milestone::getAmountRcy)
+                    .map(Milestone::getAllocatedAmount)
                     .filter(a -> a != null)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
+            return sum.signum() == 0 ? null : sum;
         }
         return null;
     }

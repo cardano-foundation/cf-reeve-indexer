@@ -19,7 +19,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * A milestone of an {@link EventAllocationEntity}, with its amount in the reporting currency.
+ * A milestone of an {@link EventAllocationEntity}, with the amount allocated to it in the reporting
+ * currency.
  */
 @Entity
 @Table(name = "reeve_event_milestone")
@@ -43,8 +44,8 @@ public class EventMilestoneEntity {
     @Column(name = "milestone_title")
     private String milestoneTitle;
 
-    @Column(name = "amount_rcy")
-    private BigDecimal amountRcy;
+    @Column(name = "allocated_amount")
+    private BigDecimal allocatedAmount;
 
     @ManyToOne
     @JoinColumn(name = "allocation_id", referencedColumnName = "id", nullable = false)

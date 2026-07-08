@@ -1,4 +1,6 @@
 import {
+  GetEventAuditRequest,
+  GetEventAuditResponse200,
   GetEventProjectsRequest,
   GetEventProjectsResponse200,
   GetEventsByTxRequest,
@@ -65,10 +67,31 @@ export const eventsApi = (baseUrl: string) => {
     return get<GetEventProjectsResponse200>(`api/v1/events/projects/${organisationId}`, null, { Authorization: '' })
   }
 
+  const getEventAudit = (request: GetEventAuditRequest) => {
+    const {
+      parameters: { organisationId, dateFrom, dateTo }
+    } = request
+
+    const queryParams = []
+
+    if (dateFrom) {
+      queryParams.push(`dateFrom=${dateFrom}`)
+    }
+
+    if (dateTo) {
+      queryParams.push(`dateTo=${dateTo}`)
+    }
+
+    const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : ''
+
+    return get<GetEventAuditResponse200>(`api/v1/events/audit/${organisationId}${queryString}`, null, { Authorization: '' })
+  }
+
   return {
     getEvents,
     getEventsByTx,
     getEventTypes,
-    getEventProjects
+    getEventProjects,
+    getEventAudit
   }
 }

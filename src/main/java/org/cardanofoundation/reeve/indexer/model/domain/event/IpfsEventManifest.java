@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 /**
- * Off-chain manifest variant of an {@code EVENT_BUNDLE} {@code data} field. Instead of embedding
+ * Off-chain manifest variant of a {@code FUNDING} bundle's {@code data} field. Instead of embedding
  * the events inline, the bundle references an IPFS document holding the events.
  */
 @Getter
