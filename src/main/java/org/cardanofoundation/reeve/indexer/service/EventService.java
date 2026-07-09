@@ -61,6 +61,7 @@ public class EventService {
                 nullIfEmpty(request.getProjectIds()),
                 nullIfEmpty(request.getFundingIds()),
                 request.getBlockChainHash(),
+                likePattern(request.getSearch()),
                 request.getDateFrom(),
                 request.getDateTo(),
                 request.getMinAmount(),
@@ -89,15 +90,16 @@ public class EventService {
 
     /**
      * Aggregates the organisation's FUNDING/SPENDING/REFUND events into an auditor roll-up. The
-     * optional date range filters dated events (spending); undated funding/refund events are always
-     * included since they carry no date to filter on.
+     * optional date range filters events by their date; an event whose source omitted a date is
+     * always included since there is nothing to filter it on. The optional {@code projectIds}
+     * restricts the whole roll-up to events referencing one of the selected projects.
      */
     @Transactional(readOnly = true)
     public AuditSummaryView auditSummary(String organisationId, String organisationName,
-            LocalDate dateFrom, LocalDate dateTo) {
+            LocalDate dateFrom, LocalDate dateTo, Set<String> projectIds) {
         List<EventEntity> events = eventRepository.findByOrganisationId(organisationId);
         return AuditSummaryAssembler.assemble(organisationId, organisationName, events, dateFrom,
-                dateTo);
+                dateTo, nullIfEmpty(projectIds));
     }
 
     private Pageable remapSort(Pageable pageable) {
@@ -113,5 +115,18 @@ public class EventService {
 
     private static <T> Set<T> nullIfEmpty(Set<T> set) {
         return set == null || set.isEmpty() ? null : set;
+    }
+
+    /**
+     * Builds a case-insensitive {@code LIKE} pattern ({@code %term%}, lower-cased) for the free-text
+     * search, or null when blank. Lower-casing here (paired with {@code LOWER(column)} in the query)
+     * and binding the wildcards from Java keeps the parameter a plain string used directly in
+     * {@code LIKE :search}, avoiding Hibernate binding it as a binary type inside {@code CONCAT}.
+     */
+    private static String likePattern(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return "%" + value.trim().toLowerCase() + "%";
     }
 }

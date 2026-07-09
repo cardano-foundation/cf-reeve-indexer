@@ -50,5 +50,6 @@ public class AuditSummaryView {
     private LocalDate lastEventDate;
 
     private List<ProjectAuditView> projects;
-    private List<SpendingLineView> spending;
+    /** Every FUNDING/SPENDING/REFUND event, newest first — the filterable, drill-down ledger. */
+    private List<AuditEventLineView> events;
 }

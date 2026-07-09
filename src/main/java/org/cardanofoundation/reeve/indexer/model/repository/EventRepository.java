@@ -24,6 +24,15 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
             "AND (:projectIds IS NULL OR a.projectId IN :projectIds) " +
             "AND (:fundingIds IS NULL OR e.fundingId IN :fundingIds) " +
             "AND (:blockChainHash IS NULL OR e.txHash = :blockChainHash) " +
+            "AND (:search IS NULL " +
+            "OR LOWER(e.eventId) LIKE :search " +
+            "OR LOWER(e.fundingId) LIKE :search " +
+            "OR LOWER(e.fundingEntity) LIKE :search " +
+            "OR LOWER(e.vendor) LIKE :search " +
+            "OR LOWER(e.spendingCategory) LIKE :search " +
+            "OR LOWER(e.txHash) LIKE :search " +
+            "OR LOWER(a.projectId) LIKE :search " +
+            "OR LOWER(a.projectTitle) LIKE :search) " +
             "AND (cast(:startDate as date) IS NULL OR e.date >= :startDate) " +
             "AND (cast(:endDate as date) IS NULL OR e.date <= :endDate) " +
             "AND (:minAmount IS NULL OR e.totalAmount >= :minAmount) " +
@@ -36,6 +45,15 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
                     "AND (:projectIds IS NULL OR a.projectId IN :projectIds) " +
                     "AND (:fundingIds IS NULL OR e.fundingId IN :fundingIds) " +
                     "AND (:blockChainHash IS NULL OR e.txHash = :blockChainHash) " +
+                    "AND (:search IS NULL " +
+                    "OR LOWER(e.eventId) LIKE :search " +
+                    "OR LOWER(e.fundingId) LIKE :search " +
+                    "OR LOWER(e.fundingEntity) LIKE :search " +
+                    "OR LOWER(e.vendor) LIKE :search " +
+                    "OR LOWER(e.spendingCategory) LIKE :search " +
+                    "OR LOWER(e.txHash) LIKE :search " +
+                    "OR LOWER(a.projectId) LIKE :search " +
+                    "OR LOWER(a.projectTitle) LIKE :search) " +
                     "AND (cast(:startDate as date) IS NULL OR e.date >= :startDate) " +
                     "AND (cast(:endDate as date) IS NULL OR e.date <= :endDate) " +
                     "AND (:minAmount IS NULL OR e.totalAmount >= :minAmount) " +
@@ -47,6 +65,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
             @Param("projectIds") Set<String> projectIds,
             @Param("fundingIds") Set<String> fundingIds,
             @Param("blockChainHash") String blockChainHash,
+            @Param("search") String search,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("minAmount") BigDecimal minAmount,

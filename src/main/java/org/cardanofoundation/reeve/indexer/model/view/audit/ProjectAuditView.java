@@ -28,6 +28,9 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProjectAuditView {
 
+    /** Stable identifier the auditor UI uses to tie spend rows back to this project (id-, title- or
+     * unattributed-based), since {@code projectId} may be null for title-only projects. */
+    private String projectKey;
     private String projectId;
     private String projectTitle;
     private BigDecimal allocatedAmount;

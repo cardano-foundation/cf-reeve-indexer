@@ -6,12 +6,12 @@ import { useGetEventAuditModel } from 'libs/models/events-model/GetEventAudit/Ge
  * the layout's organisation selector. The date range (ISO yyyy-MM-dd) filters dated spending events;
  * undated funding/refund events are always included by the backend.
  */
-export const useFundingAudit = (organisationId: string, dateFrom?: string, dateTo?: string) => {
+export const useFundingAudit = (organisationId: string, dateFrom?: string, dateTo?: string, projectIds: string[] = []) => {
   const isEnabled = Boolean(organisationId)
 
   const { audit, isAuditFetching } = useGetEventAuditModel(
-    { parameters: { organisationId, dateFrom, dateTo } },
-    [organisationId, dateFrom ?? '', dateTo ?? ''],
+    { parameters: { organisationId, dateFrom, dateTo, projectIds } },
+    [organisationId, dateFrom ?? '', dateTo ?? '', projectIds.join(',')],
     isEnabled
   )
 

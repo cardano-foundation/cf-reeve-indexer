@@ -108,6 +108,22 @@ export const EventDetail = ({ event }: EventDetailProps) => {
               </Box>
             </DetailField>
           </Grid>
+          {event.fundingTx && (
+            <Grid size={12}>
+              <DetailField label={t({ id: 'fundingTransaction' })}>
+                <Box alignItems="center" display="flex" gap={1}>
+                  <Typography component="span" variant="body2" sx={{ wordBreak: 'break-all' }}>
+                    {event.fundingTx}
+                  </Typography>
+                  <Tooltip title={t({ id: 'openInExplorer' })}>
+                    <Link display="flex" href={`https://explorer.cardano.org/transaction/${event.fundingTx}`} rel="noreferrer" target="_blank">
+                      <ExportSquare color={theme.palette.action.active} size={20} variant="Outline" />
+                    </Link>
+                  </Tooltip>
+                </Box>
+              </DetailField>
+            </Grid>
+          )}
         </Grid>
       </Box>
 

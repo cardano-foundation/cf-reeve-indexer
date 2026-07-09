@@ -61,6 +61,7 @@ export interface PostPublicEventsRequestBody {
   projectIds?: string[]
   fundingIds?: string[]
   blockChainHash?: string
+  search?: string
   dateFrom?: string
   dateTo?: string
   minAmount?: number
@@ -113,6 +114,7 @@ export interface MilestoneAuditView {
 }
 
 export interface ProjectAuditView {
+  projectKey: string | null
   projectId: string | null
   projectTitle: string | null
   allocatedAmount: number
@@ -121,17 +123,22 @@ export interface ProjectAuditView {
   milestones: MilestoneAuditView[]
 }
 
-export interface SpendingLineView {
+export interface AuditEventLineView {
   eventId: string | null
+  txHash: string | null
+  fundingTx: string | null
+  eventType: string | null
+  eventCategory: string | null
   date: string | null
+  amount: number
+  currency: string | null
+  fundingId: string | null
+  fundingEntity: string | null
   vendor: string | null
   spendingCategory: string | null
-  amount: number
+  projectKey: string | null
   projectId: string | null
   projectTitle: string | null
-  milestoneTitle: string | null
-  fundingId: string | null
-  txHash: string | null
 }
 
 export interface AuditSummaryView {
@@ -148,13 +155,14 @@ export interface AuditSummaryView {
   firstEventDate: string | null
   lastEventDate: string | null
   projects: ProjectAuditView[]
-  spending: SpendingLineView[]
+  events: AuditEventLineView[]
 }
 
 export interface GetEventAuditRequestParameters {
   organisationId: string
   dateFrom?: string
   dateTo?: string
+  projectIds?: string[]
 }
 
 export interface GetEventAuditRequest {

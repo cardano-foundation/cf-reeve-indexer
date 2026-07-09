@@ -100,19 +100,21 @@ public class EventController {
     @GetMapping(value = "/audit/{organisationId}", produces = "application/json")
     @Operation(description = "Aggregated funding/spending/refund roll-up for auditors: headline "
             + "totals, per-project allocated-vs-spent breakdown and a spending ledger. Optional "
-            + "dateFrom/dateTo (ISO yyyy-MM-dd) filter dated spending events.", responses = {
+            + "dateFrom/dateTo (ISO yyyy-MM-dd) filter events by their date; optional projectIds "
+            + "restrict the whole roll-up to the selected projects.", responses = {
             @ApiResponse(content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = AuditSummaryView.class))})})
     public ResponseEntity<AuditSummaryView> getAuditSummary(
             @PathVariable String organisationId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            @RequestParam(required = false) List<String> projectIds) {
         Optional<OrganisationEntity> orgO = organisationService.findById(organisationId);
         if (orgO.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         AuditSummaryView summary = eventService.auditSummary(organisationId, orgO.get().getName(),
-                dateFrom, dateTo);
+                dateFrom, dateTo, projectIds == null ? null : new java.util.LinkedHashSet<>(projectIds));
         return ResponseEntity.ok().body(summary);
     }
 

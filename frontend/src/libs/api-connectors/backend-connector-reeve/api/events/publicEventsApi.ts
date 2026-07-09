@@ -69,7 +69,7 @@ export const eventsApi = (baseUrl: string) => {
 
   const getEventAudit = (request: GetEventAuditRequest) => {
     const {
-      parameters: { organisationId, dateFrom, dateTo }
+      parameters: { organisationId, dateFrom, dateTo, projectIds }
     } = request
 
     const queryParams = []
@@ -80,6 +80,10 @@ export const eventsApi = (baseUrl: string) => {
 
     if (dateTo) {
       queryParams.push(`dateTo=${dateTo}`)
+    }
+
+    if (projectIds?.length) {
+      projectIds.forEach((id) => queryParams.push(`projectIds=${encodeURIComponent(id)}`))
     }
 
     const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : ''

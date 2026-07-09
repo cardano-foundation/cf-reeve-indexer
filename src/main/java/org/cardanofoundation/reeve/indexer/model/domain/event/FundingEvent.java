@@ -82,9 +82,9 @@ public class FundingEvent {
     }
 
     /**
-     * Best-effort event date used for storage and date-range filtering: the event {@code date}
-     * (the spend date for SPENDING, the declared date for custom events). FUNDING/REFUND events
-     * carry no date and resolve to null.
+     * The event {@code date}, used for storage and date-range filtering. Every event type
+     * (FUNDING/SPENDING/REFUND and custom) now carries a date; it resolves to null only when the
+     * source omitted it.
      */
     @JsonIgnore
     public LocalDate getResolvedDate() {

@@ -2,21 +2,24 @@ import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Dayjs } from 'dayjs'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 
 import { publicTransactionsIllustration } from 'assets/images'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
+import { useGetEventProjectsModel } from 'libs/models/events-model/GetEventProjects/GetEventProjectsModel.service.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
 import { EmptyStateTable } from 'libs/ui-kit/components/EmptyStateTable/EmptyStateTable.component.tsx'
+import { AutocompleteMultipleOption } from 'libs/ui-kit/components/InputAutocompleteMultiple/InputAutocompleteMultiple.component.tsx'
 import { LoaderCentered } from 'libs/ui-kit/components/LoaderCentered/LoaderCentered.component.tsx'
 import { AuditAllocationChart } from 'modules/public-events-auditor/components/AuditAllocationChart/AuditAllocationChart.component.tsx'
+import { AuditEventDetailModal, SelectedEvent } from 'modules/public-events-auditor/components/AuditEventDetailModal/AuditEventDetailModal.component.tsx'
+import { AuditEventsLedger } from 'modules/public-events-auditor/components/AuditEventsLedger/AuditEventsLedger.component.tsx'
+import { AuditFilterBar } from 'modules/public-events-auditor/components/AuditFilterBar/AuditFilterBar.component.tsx'
 import { AuditKpiHeader } from 'modules/public-events-auditor/components/AuditKpiHeader/AuditKpiHeader.component.tsx'
-import { AuditPeriodFilter } from 'modules/public-events-auditor/components/AuditPeriodFilter/AuditPeriodFilter.component.tsx'
 import { AuditProjectTable } from 'modules/public-events-auditor/components/AuditProjectTable/AuditProjectTable.component.tsx'
-import { AuditSpendingLedger } from 'modules/public-events-auditor/components/AuditSpendingLedger/AuditSpendingLedger.component.tsx'
 import { useFundingAudit } from 'modules/public-events-auditor/hooks/useFundingAudit.ts'
 
 const Section = ({ title, description, children }: { title: string; description?: string; children: ReactNode }) => {
@@ -48,6 +51,10 @@ export const ViewFundingAudit = () => {
 
   const [dateFrom, setDateFrom] = useState<Dayjs | null>(null)
   const [dateTo, setDateTo] = useState<Dayjs | null>(null)
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([])
+  const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null)
+
+  const handleSelectEvent = (txHash: string, eventId: string) => setSelectedEvent({ txHash, eventId })
 
   useEffect(() => {
     const orgId = orgIdFromPath || searchParams.get('organisation_id')
@@ -63,11 +70,24 @@ export const ViewFundingAudit = () => {
 
   const toApiDate = (value: Dayjs | null) => (value ? value.format('YYYY-MM-DD') : undefined)
 
-  const { audit, isFetching, hasOrganisation } = useFundingAudit(effectiveOrganisation, toApiDate(dateFrom), toApiDate(dateTo))
+  const { audit, isFetching, hasOrganisation } = useFundingAudit(effectiveOrganisation, toApiDate(dateFrom), toApiDate(dateTo), selectedProjectIds)
 
-  const clearPeriod = () => {
+  const { projects: projectList } = useGetEventProjectsModel({ parameters: { organisationId: effectiveOrganisation } }, Boolean(effectiveOrganisation))
+
+  const projectOptions = useMemo<AutocompleteMultipleOption[]>(
+    () => (projectList ?? []).map((project) => ({ name: project.projectTitle || project.projectId, value: project.projectId })),
+    [projectList]
+  )
+
+  // A different organisation has its own projects, so drop any project selection when it changes.
+  useEffect(() => {
+    setSelectedProjectIds([])
+  }, [effectiveOrganisation])
+
+  const clearFilters = () => {
     setDateFrom(null)
     setDateTo(null)
+    setSelectedProjectIds([])
   }
 
   const isEmptyResult = Boolean(audit && audit.fundingCount === 0 && audit.spendingCount === 0 && audit.refundCount === 0)
@@ -108,7 +128,7 @@ export const ViewFundingAudit = () => {
 
         <Section description={t({ id: 'auditProjectBreakdownDescription' })} title={t({ id: 'auditProjectBreakdownTitle' })}>
           {audit.projects.length ? (
-            <AuditProjectTable currency={audit.currency} projects={audit.projects} />
+            <AuditProjectTable currency={audit.currency} events={audit.events} projects={audit.projects} onSelectEvent={handleSelectEvent} />
           ) : (
             <Typography color={theme.palette.text.secondary} variant="body2">
               {t({ id: 'nothingHereMessage' })}
@@ -116,14 +136,8 @@ export const ViewFundingAudit = () => {
           )}
         </Section>
 
-        <Section description={t({ id: 'auditSpendingLedgerDescription' })} title={t({ id: 'auditSpendingLedgerTitle' })}>
-          {audit.spending.length ? (
-            <AuditSpendingLedger currency={audit.currency} spending={audit.spending} />
-          ) : (
-            <Typography color={theme.palette.text.secondary} variant="body2">
-              {t({ id: 'nothingHereMessage' })}
-            </Typography>
-          )}
+        <Section description={t({ id: 'auditAllEventsDescription' })} title={t({ id: 'auditAllEventsTitle' })}>
+          <AuditEventsLedger dateFrom={toApiDate(dateFrom)} dateTo={toApiDate(dateTo)} organisationId={effectiveOrganisation} projectIds={selectedProjectIds} />
         </Section>
       </Box>
     )
@@ -136,10 +150,20 @@ export const ViewFundingAudit = () => {
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={4}>
         {hasOrganisation && audit && (
-          <AuditPeriodFilter dateFrom={dateFrom} dateTo={dateTo} onClear={clearPeriod} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
+          <AuditFilterBar
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            projectOptions={projectOptions}
+            selectedProjectIds={selectedProjectIds}
+            onClear={clearFilters}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+            onProjectsChange={setSelectedProjectIds}
+          />
         )}
         {renderBody()}
       </LayoutPublic.Main>
+      <AuditEventDetailModal selected={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </>
   )
 }

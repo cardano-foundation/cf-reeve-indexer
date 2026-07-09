@@ -11,15 +11,19 @@ import Typography from '@mui/material/Typography'
 import { ArrowDown2 } from 'iconsax-react'
 import { Fragment, useState } from 'react'
 
-import { ProjectAuditView } from 'libs/api-connectors/backend-connector-reeve/api/events/publicEventsApi.types'
+import { AuditEventLineView, ProjectAuditView } from 'libs/api-connectors/backend-connector-reeve/api/events/publicEventsApi.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { colors } from 'libs/ui-kit/theme/colors.ts'
-import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
+import { formatAuditAmount, formatAuditDate } from 'modules/public-events-auditor/utils/format.ts'
 
 interface AuditProjectTableProps {
   projects: ProjectAuditView[]
+  events: AuditEventLineView[]
   currency: string | null
+  onSelectEvent: (txHash: string, eventId: string) => void
 }
+
+const isSpend = (event: AuditEventLineView) => (event.eventType ?? '').toUpperCase() === 'SPENDING'
 
 const projectKey = (project: ProjectAuditView, index: number) => project.projectId ?? project.projectTitle ?? `project-${index}`
 
@@ -39,12 +43,15 @@ const RemainingCell = ({ value, currency }: { value: number; currency: string | 
   )
 }
 
-export const AuditProjectTable = ({ projects, currency }: AuditProjectTableProps) => {
+export const AuditProjectTable = ({ projects, events, currency, onSelectEvent }: AuditProjectTableProps) => {
   const { t } = useTranslations()
   const theme = useTheme()
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   const toggle = (key: string) => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
+
+  const spendsForProject = (project: ProjectAuditView) =>
+    events.filter((event) => isSpend(event) && event.projectKey === project.projectKey)
 
   return (
     <Box sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 2, overflowX: 'auto' }}>
@@ -64,18 +71,21 @@ export const AuditProjectTable = ({ projects, currency }: AuditProjectTableProps
             const key = projectKey(project, index)
             const isExpanded = Boolean(expanded[key])
             const hasMilestones = project.milestones.length > 0
+            const spends = spendsForProject(project)
+            const hasSpends = spends.length > 0
+            const expandable = hasMilestones || hasSpends
             const ratio = utilisation(project)
-            const overspent = ratio > 1
+            const overspent = project.spentAmount > project.allocatedAmount
             const barValue = Math.min(ratio, 1) * 100
 
             return (
               <Fragment key={key}>
                 <TableRow
-                  hover={hasMilestones}
-                  onClick={() => hasMilestones && toggle(key)}
-                  sx={{ cursor: hasMilestones ? 'pointer' : 'default', '& > *': { borderBottom: isExpanded ? 'unset' : undefined } }}>
+                  hover={expandable}
+                  onClick={() => expandable && toggle(key)}
+                  sx={{ cursor: expandable ? 'pointer' : 'default', '& > *': { borderBottom: isExpanded ? 'unset' : undefined } }}>
                   <TableCell>
-                    {hasMilestones && (
+                    {expandable && (
                       <ArrowDown2
                         color={theme.palette.action.active}
                         size={16}
@@ -125,17 +135,19 @@ export const AuditProjectTable = ({ projects, currency }: AuditProjectTableProps
                     <RemainingCell currency={currency} value={project.remaining} />
                   </TableCell>
                 </TableRow>
-                {hasMilestones && (
+                {expandable && (
                   <TableRow>
                     <TableCell colSpan={6} sx={{ py: 0, borderBottom: `1px solid ${theme.palette.divider}` }}>
                       <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                        <Box sx={{ backgroundColor: theme.palette.action.hover, borderRadius: 1, my: 1, px: 2, py: 1 }}>
-                          <Typography color={theme.palette.text.secondary} variant="caption" sx={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                            {t({ id: 'auditMilestones' })}
-                          </Typography>
-                          <Table size="small" sx={{ mt: 0.5 }}>
-                            <TableBody>
-                              {project.milestones.map((milestone, milestoneIndex) => (
+                        <Box display="flex" flexDirection="column" gap={1.5} sx={{ backgroundColor: theme.palette.action.hover, borderRadius: 1, my: 1, px: 2, py: 1.5 }}>
+                          {hasMilestones && (
+                            <Box>
+                              <Typography color={theme.palette.text.secondary} variant="caption" sx={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                {t({ id: 'auditMilestones' })}
+                              </Typography>
+                              <Table size="small" sx={{ mt: 0.5 }}>
+                                <TableBody>
+                                  {project.milestones.map((milestone, milestoneIndex) => (
                                 <TableRow key={milestone.milestoneId ?? milestone.milestoneTitle ?? `milestone-${milestoneIndex}`}>
                                   <TableCell sx={{ border: 0, pl: 0 }}>
                                     <Typography color={theme.palette.text.primary} variant="body2">
@@ -158,10 +170,46 @@ export const AuditProjectTable = ({ projects, currency }: AuditProjectTableProps
                                       {formatAuditAmount(milestone.spentAmount, currency)}
                                     </Typography>
                                   </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          )}
+                          {hasSpends && (
+                            <Box>
+                              <Typography color={theme.palette.text.secondary} variant="caption" sx={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                {t({ id: 'auditSpendingUnderProject' })}
+                              </Typography>
+                              <Table size="small" sx={{ mt: 0.5 }}>
+                                <TableBody>
+                                  {spends.map((spend, spendIndex) => (
+                                    <TableRow
+                                      key={spend.eventId ?? `${spend.txHash}-${spendIndex}`}
+                                      hover
+                                      onClick={() => spend.txHash && spend.eventId && onSelectEvent(spend.txHash, spend.eventId)}
+                                      sx={{ cursor: spend.txHash && spend.eventId ? 'pointer' : 'default' }}>
+                                      <TableCell sx={{ border: 0, pl: 0, minWidth: 100 }}>
+                                        <Typography color={theme.palette.text.primary} variant="body2">
+                                          {formatAuditDate(spend.date)}
+                                        </Typography>
+                                      </TableCell>
+                                      <TableCell sx={{ border: 0 }}>
+                                        <Typography color={theme.palette.text.primary} variant="body2">
+                                          {spend.vendor || spend.spendingCategory || '—'}
+                                        </Typography>
+                                      </TableCell>
+                                      <TableCell align="right" sx={{ border: 0, pr: 0 }}>
+                                        <Typography color={theme.palette.text.primary} variant="body2" sx={{ fontWeight: 600 }}>
+                                          {formatAuditAmount(spend.amount, currency)}
+                                        </Typography>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          )}
                         </Box>
                       </Collapse>
                     </TableCell>

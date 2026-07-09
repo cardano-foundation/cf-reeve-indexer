@@ -52,6 +52,10 @@ public class EventSearchRequest {
     @Schema(description = "Blockchain (transaction) hash to filter by")
     private String blockChainHash;
 
+    @Schema(description = "Free-text search matched (case-insensitive, partial) against event id, "
+            + "funding id, funding entity, vendor, spending category and transaction hash")
+    private String search;
+
     @Schema(example = "2025-01-01")
     private LocalDate dateFrom;
 
