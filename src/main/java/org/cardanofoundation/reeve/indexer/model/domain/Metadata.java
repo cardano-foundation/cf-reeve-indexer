@@ -14,4 +14,6 @@ import lombok.Setter;
 public class Metadata {
 
     private String version;
+    private Long creationSlot;
+    private String timestamp;
 }
