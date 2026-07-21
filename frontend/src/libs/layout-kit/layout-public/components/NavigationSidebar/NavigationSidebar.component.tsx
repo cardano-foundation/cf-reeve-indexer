@@ -1,4 +1,4 @@
-import { ArrowSwapHorizontal, Note1, Book1, Chart2, Icon, ReceiptText } from 'iconsax-react'
+import { ArrowSwapHorizontal, Note1, Book1, Chart2, DocumentText, Icon, ReceiptText } from 'iconsax-react'
 import { useParams } from 'react-router-dom'
 
 import { useLocationState } from 'hooks'
@@ -25,6 +25,7 @@ export const NavigationSidebar = () => {
   const transactionsRoute = organisationId ? getOrgPath('transactions', organisationId) : PATHS.PUBLIC_TRANSACTIONS
   const eventsRoute = organisationId ? getOrgPath('events', organisationId) : PATHS.PUBLIC_EVENTS
   const auditRoute = organisationId ? getOrgPath('events/audit', organisationId) : PATHS.PUBLIC_EVENTS_AUDIT
+  const documentsRoute = organisationId ? getOrgPath('documents', organisationId) : PATHS.PUBLIC_DOCUMENTS
 
   // The audit route (/events/audit) is a path-prefix child of the events route (/events); without an
   // explicit exclusion the events item would also light up on the audit page.
@@ -36,7 +37,8 @@ export const NavigationSidebar = () => {
     { icon: Note1, label: t({ id: 'publicReports' }), route: reportsRoute },
     { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: transactionsRoute },
     { icon: ReceiptText, label: t({ id: 'publicEvents' }), route: eventsRoute, isActive: isEventsActive },
-    { icon: Chart2, label: t({ id: 'publicFundingAudit' }), route: auditRoute }
+    { icon: Chart2, label: t({ id: 'publicFundingAudit' }), route: auditRoute },
+    { icon: DocumentText, label: t({ id: 'publicDocuments' }), route: documentsRoute }
   ]
 
   const getCurrentPage = (route: string) => isActiveRouteOrDescendant(route)

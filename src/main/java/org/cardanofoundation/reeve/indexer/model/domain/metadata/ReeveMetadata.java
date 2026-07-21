@@ -26,6 +26,7 @@ import org.cardanofoundation.reeve.indexer.util.ReeveMetadataDeserializer;
 public class ReeveMetadata {
 
     private String txHash;
+    private Long slot;
     private String metadataHash;
 
     private Organisation org;

@@ -76,6 +76,12 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
                     }
                     break;
 
+                case DOCUMENT:
+                    // Deliberately lenient: validation happens in DocumentProcessor so a malformed
+                    // manifest still indexes as a MALFORMED_MANIFEST row (§9.3) instead of vanishing here.
+                    data = dataNode;
+                    break;
+
                 default:
                     // Handle other types or throw an error if necessary
                     break;

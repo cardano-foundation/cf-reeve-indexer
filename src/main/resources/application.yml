@@ -47,6 +47,22 @@ server:
 ipfs:
   gateway: ${IPFS_GATEWAY:https://ipfs.io/ipfs/}
 
+indexer:
+  verification:
+    retry-interval-ms: ${VERIFICATION_RETRY_INTERVAL_MS:300000}
+    ipfs-fail-after-attempts: ${VERIFICATION_IPFS_FAIL_AFTER:3}
+    ipfs-max-attempts: ${VERIFICATION_IPFS_MAX_ATTEMPTS:12}
+    # Per-tick bound: at most this many eligible rows are loaded/verified per query per scheduler
+    # run, so a flood of forged manifests cannot make one tick do unbounded work (it drains over ticks).
+    max-batch-per-tick: ${VERIFICATION_MAX_BATCH_PER_TICK:200}
+  issuance:
+    # Card import is permissionless: the Indexer holds no issuer signing key and assembles
+    # UNSIGNED cards. This flag only toggles whether this deployment offers the assembly endpoint;
+    # the endpoint itself stays behind the operator HTTP Basic credentials below.
+    enabled: ${ISSUANCE_ENABLED:true}
+    username: ${ISSUANCE_USERNAME:}
+    password: ${ISSUANCE_PASSWORD:}
+
 keri:
   enabled: false
   metadata-label: 170

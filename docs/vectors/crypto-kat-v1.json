@@ -1,0 +1,36 @@
+{
+  "description": "Shared decrypt KAT for the contract §2.1 constants. Slot 0 is a decoy (different recipient); slot 1 opens with recipientPrivateKeyHex. All keys are RFC 7748 / fixed TEST values.",
+  "recipientPrivateKeyHex": "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a",
+  "recipientPublicKeyHex": "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a",
+  "strangerPrivateKeyHex": "0303030303030303030303030303030303030303030303030303030303030303",
+  "plaintextHex": "524545564520444f43554d454e54205641554c542043525950544f204b41542076310a",
+  "plaintextUtf8": "REEVE DOCUMENT VAULT CRYPTO KAT v1\n",
+  "envelope": {
+    "version": 1,
+    "type": "REEVE_ENCRYPTED_DOCUMENT",
+    "org_id": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "content_hash": "e4e459ee8f2177b02833dfe0dc6c08001a2fb45907fed818b524d1f449e32385",
+    "plaintext_hash": "cf38652d2e0bd4cbfac3818faf7dcccdbcd2dd5c132562986c24209181c97852",
+    "payload": {
+      "ciphertext": "FUeTTYDFhlTOFNrO/71YO8KDy2DQOA0laDOqpVYoVJJ3IaSLllrdOjfRCGRaGEvWIcPD",
+      "nonce": "000102030405060708090a0b"
+    },
+    "slots": [
+      {
+        "ephemeral_pub": "a4e09292b651c278b9772c569f5fa9bb13d906b46ab68c9df9dc2b4409f8a209",
+        "wrapped_dek": "c0ab180fc236772fc2152c8d8b842bb879b8b98d02798735f4eb584cd6579d9ad6b281d1d58e5b1d437a72d459faf04c"
+      },
+      {
+        "ephemeral_pub": "ce8d3ad1ccb633ec7b70c17814a5c76ecd029685050d344745ba05870e587d59",
+        "wrapped_dek": "97166311868d1779bae6e6921fdb1bb97953a34544e0b646a69663ec047192a5685e04c2fc28233b47324fdb3933f235"
+      }
+    ]
+  },
+  "passkeyKeypair": {
+    "description": "Permissionless card model: the holder's X25519 keypair is DERIVED from the passkey PRF output (never stored/wrapped). seed = HKDF-SHA-256(ikm=prfOutput, salt=empty, info=UTF-8(seedInfo), L=32); privateKey = seed; publicKey = X25519(seed). Domain-separated from passkeyKek.kekInfo so one PRF output yields an independent KEK and keypair. Shared with Reeve.",
+    "prfOutputHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "seedInfo": "reeve/document-vault/x25519-seed/v1",
+    "privateKeyHex": "4398fd525400229d632401e569ccd2626c9473130e77b50dc01df99c6aa11cad",
+    "publicKeyHex": "ddeb36b53097e609b74cd75db507f6de45eb22c617b08b962992f21f7c21dd53"
+  }
+}

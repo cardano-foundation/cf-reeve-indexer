@@ -34,6 +34,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("com.bloxbean.cardano:yaci-store-spring-boot-starter:0.1.4")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     // Jackson annotations are useful for the generated classes

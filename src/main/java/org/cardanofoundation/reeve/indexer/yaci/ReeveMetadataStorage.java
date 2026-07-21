@@ -104,6 +104,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         ReeveMetadata rawMetadata =
                                 objectMapper.readValue(metadata.getBody(), ReeveMetadata.class);
                         rawMetadata.setTxHash(metadata.getTxHash());
+                        rawMetadata.setSlot(metadata.getSlot());
                         Map metadataCborMap = (Map) CborSerializationUtil
                                 .deserialize(HexUtil.decodeHexString(metadata.getCbor()));
                         DataItem dataItem = metadataCborMap
@@ -181,18 +182,36 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
     private void handleReeveTxs(List<ReeveMetadata> reeveTxs) {
         reeveTxs.forEach(rawMetadata -> {
-            // Store organisation if not exists, handle race condition in parallel events
-            organisationRepository.saveIfNotExists(
-                    rawMetadata.getOrg().getId(),
-                    rawMetadata.getOrg().getName(), rawMetadata.getOrg().getCurrencyId(),
-                    rawMetadata.getOrg().getCountryCode(), rawMetadata.getOrg().getTaxIdNumber(),
-                    rawMetadata.getTxHash()
-            );
+            // Store organisation if not exists, handle race condition in parallel events.
+            // A hostile no-org tx must not NPE the whole block batch: guard with a null check,
+            // skip the org-scoped legacy branches below, but still let the processor run so it
+            // can record the malformed row.
+            boolean hasOrg = rawMetadata.getOrg() != null && rawMetadata.getOrg().getId() != null;
+            if (hasOrg) {
+                organisationRepository.saveIfNotExists(
+                        rawMetadata.getOrg().getId(),
+                        rawMetadata.getOrg().getName(), rawMetadata.getOrg().getCurrencyId(),
+                        rawMetadata.getOrg().getCountryCode(), rawMetadata.getOrg().getTaxIdNumber(),
+                        rawMetadata.getTxHash());
+            } else {
+                log.warn("Label-{} tx {} has no org section", reeveMetadataLabel, rawMetadata.getTxHash());
+            }
             // Dispatch to the registered processor for this type, if any. This is the extension
             // point for new reeve metadata types (e.g. FUNDING) and keeps the legacy
             // INDIVIDUAL_TRANSACTIONS / REPORT handling below untouched.
             processorRegistry.find(rawMetadata.getType())
-                    .ifPresent(processor -> processor.process(rawMetadata));
+                    .ifPresent(processor -> {
+                        try {
+                            processor.process(rawMetadata);
+                        } catch (Exception e) {
+                            // One hostile tx must never roll back the whole block batch.
+                            log.error("Processor for type {} failed on tx {}: {}",
+                                    rawMetadata.getType(), rawMetadata.getTxHash(), e.getMessage());
+                        }
+                    });
+            if (!hasOrg) {
+                return; // legacy inline branches below are org-scoped
+            }
             // verifiy identity
             boolean identityVerified = false;
             if (rawMetadata.getType() == ReeveTransactionType.INDIVIDUAL_TRANSACTIONS) {

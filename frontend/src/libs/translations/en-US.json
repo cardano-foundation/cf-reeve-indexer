@@ -225,6 +225,7 @@
   "publicTransactions": "Transactions",
   "publicEvents": "Events",
   "publicFundingAudit": "Funding Audit",
+  "publicDocuments": "Documents",
   "publicResources": "Resources",
   "publicUserGuide": "User guide",
   "poweredByLogoLabel": "Powered by",
