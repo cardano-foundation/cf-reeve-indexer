@@ -77,6 +77,18 @@ public class DocumentEntity {
     @Column(name = "raw")
     private String raw;
 
+    // Label-170 ATTEST verification (KeriService.verifyIdentityTx), mirroring ReportEntity:
+    // metadataHash is the blake3 digest of this tx's label-1447 datum (ReeveMetadataStorage.saveAll),
+    // set by DocumentProcessor at index time; identifier/identityVerified are populated once an
+    // ATTEST event's dataHash matches and the KEL+credential gate passes.
+    @Column(name = "metadata_hash")
+    private String metadataHash;
+    @Column(name = "identifier")
+    private String identifier;
+    @Builder.Default
+    @Column(name = "identity_verified", nullable = false)
+    private boolean identityVerified = false;
+
     @Builder.Default
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

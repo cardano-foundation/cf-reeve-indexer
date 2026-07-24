@@ -99,6 +99,10 @@ public class DocumentProcessor implements ReeveTypeProcessor {
                 .organisationId(organisationId)
                 .slot(metadata.getSlot())
                 .raw(data != null ? data.toString() : null)
+                // Same blake3 digest of the label-1447 datum that ReportEntity stores, computed
+                // once in ReeveMetadataStorage.saveAll before dispatch to this processor — used by
+                // KeriService.verifyIdentityTx to correlate a later label-170 ATTEST event.
+                .metadataHash(metadata.getMetadataHash())
                 .ipfsCheck(CheckStatus.PENDING)
                 .contentHashCheck(CheckStatus.PENDING)
                 .envelopeCheck(CheckStatus.PENDING);

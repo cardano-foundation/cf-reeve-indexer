@@ -1,6 +1,7 @@
 package org.cardanofoundation.reeve.indexer.model.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,10 @@ import org.cardanofoundation.reeve.indexer.model.domain.document.DocumentVerdict
 import org.cardanofoundation.reeve.indexer.model.entity.DocumentEntity;
 
 public interface DocumentRepository extends JpaRepository<DocumentEntity, String> {
+
+    // txHash is also the @Id, but a named method mirrors ReportRepository.findByTxHash so
+    // KeriService.verifyIdentityTx can correlate an ATTEST event across both entity types uniformly.
+    Optional<DocumentEntity> findByTxHash(String txHash);
 
     Page<DocumentEntity> findByOrganisationId(String organisationId, Pageable pageable);
 

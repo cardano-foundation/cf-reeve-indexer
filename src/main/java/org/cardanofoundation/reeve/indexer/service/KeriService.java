@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,8 +26,11 @@ import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
 import org.cardanofoundation.reeve.indexer.config.KeriProperties;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.IdentityMetadata;
 import org.cardanofoundation.reeve.indexer.model.entity.CredentialEntity;
+import org.cardanofoundation.reeve.indexer.model.entity.DocumentEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.IdentityEventEntity;
+import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
+import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operation;
@@ -46,6 +50,7 @@ public class KeriService {
     @Value("${keri.enabled:false}")
     private boolean keriEnabled;
     private final ReportRepository reportRepository;
+    private final DocumentRepository documentRepository;
     private final CredentialRepository credentialRepository;
 
     private void resolveOobis() {
@@ -127,27 +132,70 @@ public class KeriService {
         }
     }
 
+    /**
+     * Correlates a label-170 {@code ATTEST} event to whichever entity anchored the tx: a
+     * {@code ReportEntity} (legacy REPORT/REPORT_V2 path) or a {@code DocumentEntity} (DOCUMENT
+     * path, {@code DocumentProcessor}). Both get their {@code metadataHash} populated from the same
+     * blake3 digest of the label-1447 datum ({@code ReeveMetadataStorage.saveAll}), so either can be
+     * compared against the ATTEST's {@code dataHash} the same way. A tx is anchored by exactly one
+     * of the two (its label-1447 {@code type} determines which repository has the row), so the
+     * report lookup is tried first and the document lookup only on a report miss; if neither
+     * matches, this is a no-op (as before this generalization, for an unmatched report).
+     */
     public void verifyIdentityTx(IdentityEventEntity identityEntity) {
         if(!keriEnabled) {
             log.warn("KERI is not enabled. Skipping identity verification for txHash: {}", identityEntity.getTxHash());
             return;
         }
-        reportRepository.findByTxHash(identityEntity.getTxHash()).ifPresent(report -> {
-            try {
-                log.info("MetadataHash {} identiyEntityEventHash {}", report.getMetadataHash(), identityEntity.getDataHash());
-                if(report.getMetadataHash().equals(identityEntity.getDataHash())) {
-                    boolean verifyEvent = verifyEvent(identityEntity);
-                    Optional<CredentialEntity> credential = credentialRepository.findById(identityEntity.getIdentifier());
-                    if(verifyEvent && credential.isPresent() && Boolean.TRUE.equals(credential.get().getValid())) {
-                        report.setIdentifier(identityEntity.getIdentifier());
-                        report.setIdentityVerified(true);
-                    }
-                    reportRepository.save(report);
+        Optional<ReportEntity> report = reportRepository.findByTxHash(identityEntity.getTxHash());
+        if (report.isPresent()) {
+            verifyAndSaveReport(report.get(), identityEntity);
+            return;
+        }
+        documentRepository.findByTxHash(identityEntity.getTxHash())
+                .ifPresent(document -> verifyAndSaveDocument(document, identityEntity));
+    }
+
+    private void verifyAndSaveReport(ReportEntity report, IdentityEventEntity identityEntity) {
+        try {
+            log.info("MetadataHash {} identiyEntityEventHash {}", report.getMetadataHash(), identityEntity.getDataHash());
+            if (Objects.equals(report.getMetadataHash(), identityEntity.getDataHash())) {
+                if (attestationGatePassed(identityEntity)) {
+                    report.setIdentifier(identityEntity.getIdentifier());
+                    report.setIdentityVerified(true);
                 }
-            } catch (Exception e) {
-                log.error("Error verifying identity for txHash: {}", identityEntity.getTxHash(), e);
+                reportRepository.save(report);
             }
-        });
+        } catch (Exception e) {
+            log.error("Error verifying identity for txHash: {}", identityEntity.getTxHash(), e);
+        }
+    }
+
+    private void verifyAndSaveDocument(DocumentEntity document, IdentityEventEntity identityEntity) {
+        try {
+            log.info("MetadataHash {} identiyEntityEventHash {}", document.getMetadataHash(), identityEntity.getDataHash());
+            if (Objects.equals(document.getMetadataHash(), identityEntity.getDataHash())) {
+                if (attestationGatePassed(identityEntity)) {
+                    document.setIdentifier(identityEntity.getIdentifier());
+                    document.setIdentityVerified(true);
+                }
+                documentRepository.save(document);
+            }
+        } catch (Exception e) {
+            log.error("Error verifying identity for txHash: {}", identityEntity.getTxHash(), e);
+        }
+    }
+
+    /**
+     * Shared ATTEST gate (design §C), used by both the report and document correlation paths: the
+     * AID's KEL event at {@code seq} anchors the presented {@code dataHash} ({@link #verifyEvent})
+     * AND a credential for the identifier is present and {@code valid} (set by
+     * {@link #verifyCredentialEntity} on the prior AUTH_BEGIN).
+     */
+    private boolean attestationGatePassed(IdentityEventEntity identityEntity) throws Exception {
+        boolean verifyEvent = verifyEvent(identityEntity);
+        Optional<CredentialEntity> credential = credentialRepository.findById(identityEntity.getIdentifier());
+        return verifyEvent && credential.isPresent() && Boolean.TRUE.equals(credential.get().getValid());
     }
 
     /**
