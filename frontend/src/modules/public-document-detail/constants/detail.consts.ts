@@ -140,7 +140,17 @@ export const DECRYPT_DOWNLOAD_BUTTON_LABEL = 'Download decrypted file'
 export const DECRYPT_RESET_BUTTON_LABEL = 'Start over'
 
 // In-browser viewer copy. The preview renders the DECRYPTED bytes locally; nothing is uploaded.
-export const DECRYPT_VIEWER_TITLE = 'Preview'
+export const DECRYPT_VIEWER_TITLE = 'Decrypted document'
+
+// Kind chip labels, keyed by the magic-byte classification (utils/content.ts). There is no filename
+// to name the file (I10), so the chip states only the detected content KIND.
+export const DECRYPT_VIEWER_KIND_LABELS = {
+  image: 'Image',
+  text: 'Text',
+  json: 'JSON',
+  pdf: 'PDF',
+  binary: 'File'
+} as const
 
 export const DECRYPT_VIEWER_PDF_SHOW = 'Show PDF preview'
 

@@ -18,7 +18,6 @@ import {
   buildDownloadFilename,
   DECRYPT_BUTTON_LABEL,
   DECRYPT_DECRYPTING_LABEL,
-  DECRYPT_DOWNLOAD_BUTTON_LABEL,
   DECRYPT_MATCH_MESSAGE,
   DECRYPT_MISMATCH_MESSAGE,
   DECRYPT_PANEL_DESCRIPTION,
@@ -197,14 +196,8 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
           <Alert severity={outcome.plaintextHashMatches ? 'success' : 'error'}>
             {outcome.plaintextHashMatches ? DECRYPT_MATCH_MESSAGE : DECRYPT_MISMATCH_MESSAGE}
           </Alert>
-          <Typography color={theme.palette.text.secondary} variant="body2">
-            {outcome.plaintext.byteLength.toLocaleString()} bytes decrypted.
-          </Typography>
-          <DocumentViewer bytes={outcome.plaintext} plaintextHashMatches={outcome.plaintextHashMatches} />
-          <Box display="flex" gap={1}>
-            <Button variant="contained" onClick={handleDownload}>
-              {DECRYPT_DOWNLOAD_BUTTON_LABEL}
-            </Button>
+          <DocumentViewer bytes={outcome.plaintext} plaintextHashMatches={outcome.plaintextHashMatches} onDownload={handleDownload} />
+          <Box>
             <Button variant="text" onClick={handleReset}>
               {DECRYPT_RESET_BUTTON_LABEL}
             </Button>
