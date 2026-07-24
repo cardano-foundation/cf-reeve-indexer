@@ -26,6 +26,15 @@ import org.springframework.security.web.SecurityFilterChain;
  * ride to trigger an authenticated request. If any future feature links a browser navigation
  * directly at /api/v1/cards/** (e.g. a bookmarkable authenticated GET), revisit both CORS and
  * this reasoning — that would reintroduce the ambient-credential vehicle CSRF protects against.
+ *
+ * <p>The card-attestation ceremony endpoints under /api/v1/cards/**\/attestation/ceremonies/**
+ * (design doc Part A / A6, {@code CardAttestationController}) are carved out as PUBLIC, same as
+ * /status — deliberately NOT folded into the authenticated() rule above. That wizard is driven by
+ * the card-issuance frontend, which is itself unauthenticated and holds no operator credentials
+ * (see {@code ViewCardIssuance.component.tsx}'s own comment: card creation makes no network call
+ * at all today, let alone an authenticated one); gating the ceremony behind the same HTTP Basic as
+ * /issue would make it undrivable from that frontend. See {@code CardAttestationController}'s own
+ * javadoc for the full reasoning.
  */
 @Configuration
 @EnableWebSecurity
@@ -38,6 +47,8 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/cards/status").permitAll()
+                        .requestMatchers("/api/v1/cards/*/attestation/ceremonies").permitAll()
+                        .requestMatchers("/api/v1/cards/attestation/ceremonies/**").permitAll()
                         .requestMatchers("/api/v1/cards/**").authenticated()
                         .anyRequest().permitAll())
                 .httpBasic(Customizer.withDefaults());
