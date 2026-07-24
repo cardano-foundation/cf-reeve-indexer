@@ -236,6 +236,9 @@ public class CardIssuanceService {
             putIfPresent(attestation, "credentialSaid", e.getAttestationCredentialSaid());
             putIfPresent(attestation, "schemaSaid", e.getAttestationSchemaSaid());
             putIfPresent(attestation, "txHash", e.getAttestationTxHash());
+            // The full CESR credential chain, so the importer can re-validate the credential itself
+            // (it cannot fetch it via the OOBI alone). Omitted when absent, like the other fields.
+            putIfPresent(attestation, "credentialCesr", e.getAttestationCredentialCesr());
         }
         return card;
     }

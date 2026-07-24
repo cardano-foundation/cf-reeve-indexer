@@ -63,4 +63,12 @@ public class IssuedCardEntity {
     /** Cardano tx hash of the CIP-170 ATTEST anchoring this card. */
     @Column(name = "attestation_tx_hash")
     private String attestationTxHash;
+    /**
+     * The full CESR chain of the presented credential, captured at attestation time. Carried on the
+     * exported card so a consumer (the platform's B2 import verification) can re-validate the
+     * credential itself — it can only resolve the AID's OOBI, not fetch this credential, on its own.
+     * TEXT (a chain can be large); nullable like the other attestation_* columns.
+     */
+    @Column(name = "attestation_credential_cesr", columnDefinition = "text")
+    private String attestationCredentialCesr;
 }

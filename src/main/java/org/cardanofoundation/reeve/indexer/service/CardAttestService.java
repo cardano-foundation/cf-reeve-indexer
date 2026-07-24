@@ -506,12 +506,14 @@ public class CardAttestService {
      * ceremony row alone, with no data lost even if this save never runs at all.
      */
     private void bindCardAttestation(CardAttestationCeremonyEntity ceremony, IssuedCardEntity card, String txHash) {
+        String credentialCesr = fetchCredentialCesr(ceremony);
         try {
             card.setAttestationOobi(ceremony.getWalletOobiUrl());
             card.setAttestationAid(ceremony.getWalletAid());
             card.setAttestationCredentialSaid(ceremony.getCredentialSaid());
             card.setAttestationSchemaSaid(ceremony.getSchemaSaid());
             card.setAttestationTxHash(txHash);
+            card.setAttestationCredentialCesr(credentialCesr);
             issuedCardRepository.save(card);
             log.info("card {} bound to attestation (ceremony {}, tx {})", card.getCardId(), ceremony.getId(), txHash);
         } catch (RuntimeException e) {
@@ -519,6 +521,31 @@ public class CardAttestService {
                     + "column already durably holds {} — fully recoverable from there; the card row itself was "
                     + "not updated by this attempt): {}", card.getCardId(), ceremony.getId(), txHash,
                     e.getMessage());
+        }
+    }
+
+    /**
+     * Re-fetches the presented credential's full CESR chain from the agent store (still present
+     * post-admit), so {@code toCardJson} can carry it on the exported card for the platform's B2
+     * import verification — which can resolve the AID's OOBI but cannot fetch this credential itself.
+     * Best-effort: a fetch failure (or KERI disabled / no credentialSaid) leaves it {@code null}; the
+     * card still binds the rest of the attestation, and the CESR stays re-derivable from the ceremony's
+     * {@code credentialSaid} — it must never re-fail an already-successful ceremony (this class's
+     * isolation contract).
+     */
+    private String fetchCredentialCesr(CardAttestationCeremonyEntity ceremony) {
+        String credentialSaid = ceremony.getCredentialSaid();
+        if (credentialSaid == null || credentialSaid.isBlank() || client.isEmpty()) {
+            return null;
+        }
+        try {
+            return client.get().credentials().get(credentialSaid).orElse(null);
+        } catch (Exception e) {
+            interruptIfNeeded(e);
+            log.warn("Failed to fetch credential CESR {} for ceremony {} (card bound WITHOUT it — the importer "
+                    + "cannot re-validate the credential until it is re-derived from the ceremony's "
+                    + "credentialSaid): {}", credentialSaid, ceremony.getId(), e.getMessage());
+            return null;
         }
     }
 

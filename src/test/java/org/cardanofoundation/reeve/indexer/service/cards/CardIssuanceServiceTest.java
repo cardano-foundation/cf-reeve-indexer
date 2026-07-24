@@ -429,4 +429,41 @@ class CardIssuanceServiceTest {
         assertFalse(card.get().has("signature"));
         assertEquals("2026-01-01T00:00:00Z", card.get().at("/key/createdAt").asText());
     }
+
+    @Test
+    void exportedCardEmitsFullAttestationBlockIncludingCredentialCesr() {
+        // The producer contract the platform's B2 import verification consumes: an attested card's
+        // exported JSON carries every attestation field, INCLUDING the full CESR credential chain the
+        // importer needs to re-validate the credential itself (it cannot fetch it via the OOBI alone).
+        IssuedCardEntity attested = existingEntity();
+        attested.setAttestationOobi("https://wallet.example/oobi/EWalletAid/agent/EAgentEid");
+        attested.setAttestationAid("EWalletAid");
+        attested.setAttestationCredentialSaid("ECredentialSaid");
+        attested.setAttestationSchemaSaid("ESchemaSaid");
+        attested.setAttestationTxHash("deadbeef");
+        attested.setAttestationCredentialCesr("-CESR-credential-chain-");
+        when(repository.findById(attested.getCardId())).thenReturn(Optional.of(attested));
+
+        JsonNode card = service.exportCard(attested.getCardId()).orElseThrow();
+
+        assertEquals("https://wallet.example/oobi/EWalletAid/agent/EAgentEid",
+                card.at("/attestation/oobi").asText());
+        assertEquals("EWalletAid", card.at("/attestation/aid").asText());
+        assertEquals("ECredentialSaid", card.at("/attestation/credentialSaid").asText());
+        assertEquals("ESchemaSaid", card.at("/attestation/schemaSaid").asText());
+        assertEquals("deadbeef", card.at("/attestation/txHash").asText());
+        assertEquals("-CESR-credential-chain-", card.at("/attestation/credentialCesr").asText());
+    }
+
+    @Test
+    void unattestedCardOmitsTheAttestationBlockEntirely() {
+        // An issued-but-unattested card (all attestation_* null) must omit the block so its wire
+        // format stays byte-identical to a pre-ceremony card.
+        IssuedCardEntity unattested = existingEntity();
+        when(repository.findById(unattested.getCardId())).thenReturn(Optional.of(unattested));
+
+        JsonNode card = service.exportCard(unattested.getCardId()).orElseThrow();
+
+        assertFalse(card.has("attestation"));
+    }
 }
