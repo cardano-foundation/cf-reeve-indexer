@@ -167,7 +167,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                 keriService.verifyIdentityTx(identityEntity);
 
             } else if (rawMetadata.getT() == IdentityType.AUTH_BEGIN) {
-                CredentialEntity entity = CredentialMetadataMapper.toEntity(rawMetadata);
+                CredentialEntity entity = CredentialMetadataMapper.toEntity(rawMetadata, objectMapper);
                 try {
                     keriService.verifyCredentialEntity(entity);
                 } catch (Exception e) {
