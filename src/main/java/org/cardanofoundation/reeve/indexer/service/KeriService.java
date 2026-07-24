@@ -263,59 +263,10 @@ public class KeriService {
                 return;
             }
 
-            List<Map<String, Object>> allVcpEvents = new ArrayList<>();
-            List<String> allVcpAttachments = new ArrayList<>();
-            Map<String, Map<String, Object>> acdcBySaid = new LinkedHashMap<>();
-            Map<String, Map<String, Object>> issByCredentialSaid = new HashMap<>();
-            Set<String> revokedCredentialSaids = new HashSet<>();
+            ParsedCesrChain parsed = parseCesrChain(cesrData, entity.getPrefixId());
+            verifyRegistryEvents(parsed.vcpEvents(), parsed.vcpAttachments(), entity.getPrefixId());
 
-            for (Map<String, Object> eventData : cesrData) {
-                Map<String, Object> event = (Map<String, Object>) eventData.get("event");
-                if (event == null) {
-                    continue;
-                }
-                Object eventTypeObj = event.get("t");
-                if (eventTypeObj != null) {
-                    switch (eventTypeObj.toString()) {
-                        case "vcp" -> {
-                            allVcpEvents.add(event);
-                            allVcpAttachments.add((String) eventData.get("atc"));
-                        }
-                        case "iss" -> issByCredentialSaid.put((String) event.get("i"), event);
-                        // KERI TELs are append-only and revocation is terminal — presence
-                        // anywhere in the stream is sufficient, stream order need not be checked.
-                        case "rev" -> revokedCredentialSaids.add((String) event.get("i"));
-                        default -> {
-                            // icp/ixn/rot/... are irrelevant to credential-chain validation.
-                        }
-                    }
-                } else if (isAcdc(event)) {
-                    Object said = event.get("d");
-                    if (said instanceof String saidStr && !saidStr.isBlank()) {
-                        acdcBySaid.put(saidStr, event);
-                    } else {
-                        log.debug("Skipping ACDC-shaped event with missing/blank 'd' (SAID) in chain for prefixId: {}", entity.getPrefixId());
-                    }
-                }
-            }
-
-            for (int i = 0; i < allVcpEvents.size(); i++) {
-                Map<String, Object> vcpEvent = allVcpEvents.get(i);
-                String vcpAttachment = allVcpAttachments.get(i);
-                Serder vcpSerder = new Serder(vcpEvent);
-
-                RegistryVerifyOptions registryVerifyOptions = RegistryVerifyOptions.builder()
-                        .vcp(vcpSerder)
-                        .atc(vcpAttachment)
-                        .build();
-
-                Object registryVerifyOp = client.orElseThrow().registries().verify(registryVerifyOptions);
-
-                client.orElseThrow().operations().wait(Operation.fromObject(registryVerifyOp));
-                log.debug("VCP #{} verification completed successfully for prefixId: {}", i + 1, entity.getPrefixId());
-            }
-
-            if (acdcBySaid.isEmpty()) {
+            if (parsed.acdcBySaid().isEmpty()) {
                 log.warn("No ACDC credential body found in chain for prefixId: {}", entity.getPrefixId());
                 entity.setValid(false);
                 return;
@@ -327,7 +278,9 @@ public class KeriService {
             // the tx metadata `s` to a lenient schema (e.g. one with empty trustedIssuers) while
             // embedding an ACDC of a *different* schema with a matching issuee, bypassing the
             // per-schema trust policy entirely.
-            Map<String, Object> leaf = presentingAid != null ? findByIssuee(acdcBySaid, presentingAid, schema.said()) : null;
+            Map<String, Object> leaf = presentingAid != null
+                    ? findByIssuee(parsed.acdcBySaid(), presentingAid, schema.said())
+                    : null;
             if (leaf == null) {
                 log.warn("no leaf ACDC of schema {} issued to {} found in chain for prefixId: {}",
                         schema.said(), presentingAid, entity.getPrefixId());
@@ -336,8 +289,9 @@ public class KeriService {
             }
 
             boolean trustOk = schema.chained()
-                    ? verifyChainedTrust(leaf, acdcBySaid, schema, entity)
-                    : verifyStandaloneTrust(leaf, schema, issByCredentialSaid, revokedCredentialSaids, entity);
+                    ? verifyChainedTrust(leaf, parsed.acdcBySaid(), schema, entity.getPrefixId())
+                    : verifyStandaloneTrust(leaf, schema, parsed.issByCredentialSaid(), parsed.revokedCredentialSaids(),
+                            entity.getPrefixId());
 
             entity.setValid(trustOk);
         } catch (Exception e) {
@@ -346,9 +300,209 @@ public class KeriService {
         }
     }
 
-    /** Chained trust: the chain must terminate (walking {@code e} edges) at a trusted root AID. */
+    /** The event/ACDC data {@link #verifyCredentialEntity} and {@link #validatePresentedCredentialChain}
+     *  both need out of a parsed CESR chain — see {@link #parseCesrChain}. */
+    private record ParsedCesrChain(
+            List<Map<String, Object>> vcpEvents,
+            List<String> vcpAttachments,
+            Map<String, Map<String, Object>> acdcBySaid,
+            Map<String, Map<String, Object>> issByCredentialSaid,
+            Set<String> revokedCredentialSaids) {
+    }
+
+    /**
+     * One pass over an already-parsed CESR event stream ({@link CESRStreamUtil#parseCESRData}),
+     * bucketing every event by shape: {@code vcp} (registry inception, kept alongside its own
+     * attachment for {@link #verifyRegistryEvents}), {@code iss}/{@code rev} (TEL issuance/
+     * revocation, keyed by the credential SAID they govern), and ACDC-shaped events (keyed by their
+     * own SAID). Extracted from {@link #verifyCredentialEntity} verbatim (same bucketing, same
+     * per-event logging) so {@link #validatePresentedCredentialChain} (card-attestation ceremony,
+     * design doc Part A / A4) shares exactly the same parsing behavior rather than a second,
+     * potentially-diverging copy.
+     */
+    @SuppressWarnings("unchecked")
+    private ParsedCesrChain parseCesrChain(List<Map<String, Object>> cesrData, String logContext) {
+        List<Map<String, Object>> allVcpEvents = new ArrayList<>();
+        List<String> allVcpAttachments = new ArrayList<>();
+        Map<String, Map<String, Object>> acdcBySaid = new LinkedHashMap<>();
+        Map<String, Map<String, Object>> issByCredentialSaid = new HashMap<>();
+        Set<String> revokedCredentialSaids = new HashSet<>();
+
+        for (Map<String, Object> eventData : cesrData) {
+            Map<String, Object> event = (Map<String, Object>) eventData.get("event");
+            if (event == null) {
+                continue;
+            }
+            Object eventTypeObj = event.get("t");
+            if (eventTypeObj != null) {
+                switch (eventTypeObj.toString()) {
+                    case "vcp" -> {
+                        allVcpEvents.add(event);
+                        allVcpAttachments.add((String) eventData.get("atc"));
+                    }
+                    case "iss" -> issByCredentialSaid.put((String) event.get("i"), event);
+                    // KERI TELs are append-only and revocation is terminal — presence
+                    // anywhere in the stream is sufficient, stream order need not be checked.
+                    case "rev" -> revokedCredentialSaids.add((String) event.get("i"));
+                    default -> {
+                        // icp/ixn/rot/... are irrelevant to credential-chain validation.
+                    }
+                }
+            } else if (isAcdc(event)) {
+                Object said = event.get("d");
+                if (said instanceof String saidStr && !saidStr.isBlank()) {
+                    acdcBySaid.put(saidStr, event);
+                } else {
+                    log.debug("Skipping ACDC-shaped event with missing/blank 'd' (SAID) in chain for {}", logContext);
+                }
+            }
+        }
+        return new ParsedCesrChain(allVcpEvents, allVcpAttachments, acdcBySaid, issByCredentialSaid,
+                revokedCredentialSaids);
+    }
+
+    /** Structurally verifies every {@code vcp} (registry inception) event against the live agent —
+     *  extracted from {@link #verifyCredentialEntity} verbatim. Throws on any verification failure
+     *  (mirrors the original inline loop, which relied on the caller's own outer try/catch); {@link
+     *  #validatePresentedCredentialChain} wraps its own call in a try/catch instead, since it must
+     *  never throw past its own boundary. */
+    private void verifyRegistryEvents(List<Map<String, Object>> vcpEvents, List<String> vcpAttachments,
+            String logContext) throws Exception {
+        for (int i = 0; i < vcpEvents.size(); i++) {
+            Map<String, Object> vcpEvent = vcpEvents.get(i);
+            String vcpAttachment = vcpAttachments.get(i);
+            Serder vcpSerder = new Serder(vcpEvent);
+
+            RegistryVerifyOptions registryVerifyOptions = RegistryVerifyOptions.builder()
+                    .vcp(vcpSerder)
+                    .atc(vcpAttachment)
+                    .build();
+
+            Object registryVerifyOp = client.orElseThrow().registries().verify(registryVerifyOptions);
+
+            client.orElseThrow().operations().wait(Operation.fromObject(registryVerifyOp));
+            log.debug("VCP #{} verification completed successfully for {}", i + 1, logContext);
+        }
+    }
+
+    /** The validated leaf's own SAID and schema SAID — see {@link #validatePresentedCredentialChain}. */
+    public record ValidatedPresentedCredential(String credentialSaid, String schemaSaid) {
+    }
+
+    /**
+     * Schema-aware chained/standalone trust check against an ALREADY-PARSED CESR chain — the core
+     * logic shared between {@link #verifyCredentialEntity} (on-chain-observed AUTH_BEGIN credential
+     * presentations, where the expected schema SAID is already known from the tx metadata) and the
+     * card-attestation ceremony's {@code CardCredentialService} (design doc Part A / A4: a freshly
+     * IPEX-admitted credential fetched from {@code client.credentials().get(said)}, whose schema is
+     * NOT known in advance — a wallet may spontaneously present any schema this agent trusts, dual-
+     * path grant included).
+     *
+     * <p>Unlike {@link #verifyCredentialEntity}'s own inline gate (which rejects BEFORE touching the
+     * CESR at all, given a schema SAID already known from tx metadata), this method DISCOVERS the
+     * schema from the chain itself: it locates whichever credential in the parsed chain is issued to
+     * {@code presentingAid} (any schema — {@link #findByIssuee(Map, String)}, first match in chain
+     * order), then gates that credential's OWN schema against {@link CredentialSchemaRegistry#forSaid}
+     * — an unknown/unconfigured schema is a hard reject, exactly the same multi-schema gate {@code
+     * verifyCredentialEntity} enforces, never weakened. It then explicitly scans for a SECOND,
+     * DISTINCT credential also issued to {@code presentingAid} under that same schema ({@link
+     * #hasAmbiguousMatch}) — real ambiguity protection: {@code findByIssuee} itself only ever returns
+     * the FIRST chain-order match, so without this separate scan a submitter could smuggle a second,
+     * differently-trusted credential of the same schema/issuee into the chain undetected. Finally
+     * applies that schema's configured chained/standalone trust policy exactly as {@link
+     * #verifyChainedTrust}/{@link #verifyStandaloneTrust} already do.
+     *
+     * <p><b>Strengthening beyond {@code verifyCredentialEntity}'s own asymmetry:</b> {@code
+     * verifyCredentialEntity}'s chained branch ({@link #verifyChainedTrust}) does not check
+     * revocation of the leaf at all today (only the standalone branch does). A freshly IPEX-admitted
+     * credential has no other channel to have been screened for revocation before being accepted
+     * into a ceremony, so this method checks the leaf's own revocation state unconditionally, for
+     * BOTH chained and standalone schemas, before deferring to the schema's own trust check. This
+     * only ever makes acceptance stricter, never weaker.
+     *
+     * <p>Never throws: every failure (an unknown schema, a missing/ambiguous leaf, a revoked leaf, a
+     * failed structural {@code vcp} registry verification, an untrusted issuer/root, or any
+     * unexpected exception) is logged at WARN and reported as {@link Optional#empty()} — this method
+     * is called mid-ceremony, where a single bad presentation must fail that one ceremony step, not
+     * propagate an exception past it.
+     *
+     * @param cesrData already-parsed CESR data ({@link CESRStreamUtil#parseCESRData}) — the caller
+     *                 is responsible for parsing/decoding it into this shape from whatever raw or
+     *                 hex-encoded chain source it has.
+     * @return the validated leaf's own (credentialSaid, schemaSaid), or {@link Optional#empty()} on
+     *         any rejection.
+     */
+    public Optional<ValidatedPresentedCredential> validatePresentedCredentialChain(String presentingAid,
+            List<Map<String, Object>> cesrData, String logContext) {
+        try {
+            if (presentingAid == null) {
+                log.warn("No presenting AID given for {}", logContext);
+                return Optional.empty();
+            }
+            ParsedCesrChain parsed = parseCesrChain(cesrData, logContext);
+            if (parsed.acdcBySaid().isEmpty()) {
+                log.warn("No ACDC credential body found in presented chain for {}", logContext);
+                return Optional.empty();
+            }
+
+            try {
+                verifyRegistryEvents(parsed.vcpEvents(), parsed.vcpAttachments(), logContext);
+            } catch (Exception e) {
+                log.warn("Registry (vcp) verification failed for {}: {}", logContext, e.getMessage(), e);
+                return Optional.empty();
+            }
+
+            Map<String, Object> leaf = findByIssuee(parsed.acdcBySaid(), presentingAid);
+            if (leaf == null) {
+                log.warn("No credential issued to {} found in presented chain for {}", presentingAid, logContext);
+                return Optional.empty();
+            }
+            String leafSchemaSaid = (String) leaf.get("s");
+            Optional<CredentialSchema> schemaOpt = credentialSchemaRegistry.forSaid(leafSchemaSaid);
+            if (schemaOpt.isEmpty()) {
+                log.warn("Unknown/unconfigured schema SAID {} presented by {} for {}", leafSchemaSaid,
+                        presentingAid, logContext);
+                return Optional.empty();
+            }
+            CredentialSchema schema = schemaOpt.get();
+            String leafSaid = (String) leaf.get("d");
+
+            // Real ambiguity check (findByIssuee only ever returns the FIRST chain-order match, so a
+            // simple re-lookup can never itself detect a second candidate — see this method's javadoc):
+            // reject if the presented chain contains a SECOND, DISTINCT credential of the SAME schema
+            // also issued to presentingAid.
+            if (hasAmbiguousMatch(parsed.acdcBySaid(), presentingAid, schema.said(), leafSaid)) {
+                log.warn("Multiple distinct credentials of schema {} issued to {} found in presented chain for "
+                        + "{} — ambiguous, rejecting", schema.said(), presentingAid, logContext);
+                return Optional.empty();
+            }
+
+            if (parsed.revokedCredentialSaids().contains(leafSaid)) {
+                log.warn("Presented credential {} (schema {}) has been revoked, rejecting for {}", leafSaid,
+                        schema.said(), logContext);
+                return Optional.empty();
+            }
+
+            boolean trustOk = schema.chained()
+                    ? verifyChainedTrust(leaf, parsed.acdcBySaid(), schema, logContext)
+                    : verifyStandaloneTrust(leaf, schema, parsed.issByCredentialSaid(), parsed.revokedCredentialSaids(),
+                            logContext);
+            if (!trustOk) {
+                return Optional.empty();
+            }
+            return Optional.of(new ValidatedPresentedCredential(leafSaid, schema.said()));
+        } catch (Exception e) {
+            log.warn("Presented credential validation failed for {}: {}", logContext, e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    /** Chained trust: the chain must terminate (walking {@code e} edges) at a trusted root AID.
+     *  {@code logContext} is a free-form label for the WARN/DEBUG logging only (e.g. a credential's
+     *  {@code prefixId} from {@link #verifyCredentialEntity}, or a ceremony id from {@code
+     *  CardCredentialService}) — shared by both callers, see {@link #validatePresentedCredentialChain}. */
     private boolean verifyChainedTrust(Map<String, Object> leaf, Map<String, Map<String, Object>> acdcBySaid,
-            CredentialSchema schema, CredentialEntity entity) {
+            CredentialSchema schema, String logContext) {
         List<String> trustedRoots = blankFiltered(schema.trustedRoots());
         if (trustedRoots.isEmpty()) {
             log.warn("no trusted roots configured for schema {}, accepting on structure alone", schema.said());
@@ -357,16 +511,17 @@ public class KeriService {
         String rootIssuer = terminalIssuerAid(leaf, acdcBySaid);
         boolean trusted = rootIssuer != null && trustedRoots.contains(rootIssuer);
         if (!trusted) {
-            log.warn("Chained credential for schema {} did not terminate in a trusted root (resolved root issuer={}, prefixId={})",
-                    schema.said(), rootIssuer, entity.getPrefixId());
+            log.warn("Chained credential for schema {} did not terminate in a trusted root (resolved root issuer={}, context={})",
+                    schema.said(), rootIssuer, logContext);
         }
         return trusted;
     }
 
-    /** Standalone trust: the leaf's issuer AID must be a trusted issuer for this schema. */
+    /** Standalone trust: the leaf's issuer AID must be a trusted issuer for this schema. See {@link
+     *  #verifyChainedTrust}'s javadoc for {@code logContext}. */
     private boolean verifyStandaloneTrust(Map<String, Object> leaf, CredentialSchema schema,
             Map<String, Map<String, Object>> issByCredentialSaid, Set<String> revokedCredentialSaids,
-            CredentialEntity entity) {
+            String logContext) {
         List<String> trustedIssuers = blankFiltered(schema.trustedIssuers());
         String leafIssuer = (String) leaf.get("i");
         boolean trusted;
@@ -376,8 +531,8 @@ public class KeriService {
         } else {
             trusted = leafIssuer != null && trustedIssuers.contains(leafIssuer);
             if (!trusted) {
-                log.warn("Standalone credential for schema {} issuer {} is not a trusted issuer (prefixId={})",
-                        schema.said(), leafIssuer, entity.getPrefixId());
+                log.warn("Standalone credential for schema {} issuer {} is not a trusted issuer (context={})",
+                        schema.said(), leafIssuer, logContext);
             }
         }
         if (!trusted) {
@@ -393,8 +548,8 @@ public class KeriService {
         // coverage is confirmed end-to-end.
         String leafSaid = (String) leaf.get("d");
         if (revokedCredentialSaids.contains(leafSaid)) {
-            log.warn("Standalone credential {} for schema {} has been revoked (prefixId={})",
-                    leafSaid, schema.said(), entity.getPrefixId());
+            log.warn("Standalone credential {} for schema {} has been revoked (context={})",
+                    leafSaid, schema.said(), logContext);
             return false;
         }
         if (!issByCredentialSaid.containsKey(leafSaid)) {
@@ -465,6 +620,44 @@ public class KeriService {
             }
         }
         return null;
+    }
+
+    /** Any-schema variant of {@link #findByIssuee(Map, String, String)} — used by {@link
+     *  #validatePresentedCredentialChain} to DISCOVER which credential (of any schema) is issued to
+     *  the presenting AID, since that method does not know the schema in advance the way {@link
+     *  #verifyCredentialEntity} does. Only ever returns the FIRST chain-order match — it does NOT by
+     *  itself detect (or rule out) a second, distinct credential also issued to the same AID; callers
+     *  that need that guarantee must additionally check {@link #hasAmbiguousMatch}. */
+    private static Map<String, Object> findByIssuee(Map<String, Map<String, Object>> acdcBySaid,
+            String expectedIssueeAid) {
+        for (Map<String, Object> acdc : acdcBySaid.values()) {
+            if (expectedIssueeAid.equals(issuee(acdc))) {
+                return acdc;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Real ambiguity check for {@link #validatePresentedCredentialChain}: {@code true} if the parsed
+     * chain contains a credential OTHER than {@code excludeSaid} that is ALSO issued to {@code
+     * expectedIssueeAid} under {@code expectedSchemaSaid}. {@link #findByIssuee} alone cannot detect
+     * this — it only ever returns the first chain-order match — so this performs a separate,
+     * exhaustive scan of every ACDC in the chain rather than re-deriving the same (necessarily
+     * identical) first match a second time.
+     */
+    private static boolean hasAmbiguousMatch(Map<String, Map<String, Object>> acdcBySaid,
+            String expectedIssueeAid, String expectedSchemaSaid, String excludeSaid) {
+        for (Map.Entry<String, Map<String, Object>> entry : acdcBySaid.entrySet()) {
+            if (entry.getKey().equals(excludeSaid)) {
+                continue;
+            }
+            Map<String, Object> acdc = entry.getValue();
+            if (expectedIssueeAid.equals(issuee(acdc)) && expectedSchemaSaid.equals(acdc.get("s"))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String issuee(Map<String, Object> acdc) {
