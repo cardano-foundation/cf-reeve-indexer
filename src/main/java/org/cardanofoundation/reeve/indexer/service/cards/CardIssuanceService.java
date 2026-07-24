@@ -40,8 +40,11 @@ import org.cardanofoundation.reeve.indexer.model.repository.IssuedCardRepository
 @Service
 public class CardIssuanceService {
 
-    static final String CARD_TYPE = "REEVE_KEY_CARD";
-    static final int CARD_VERSION = 1;
+    // Public: also the single source of truth for CardAttestationDigestFactory's canonical card
+    // digest (design doc Part A / A5) — that formula must reproduce exactly what toCardJson emits
+    // (minus the attestation block), so it reads these constants rather than duplicating literals.
+    public static final String CARD_TYPE = "REEVE_KEY_CARD";
+    public static final int CARD_VERSION = 1;
 
     private static final Pattern PUBLIC_KEY_SHAPE = Pattern.compile("^[0-9a-f]{64}$");
     // The request is validated against a strict ALLOWLIST of exactly these fields (see

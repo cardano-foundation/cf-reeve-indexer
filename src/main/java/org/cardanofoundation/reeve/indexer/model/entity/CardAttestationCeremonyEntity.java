@@ -99,6 +99,26 @@ public class CardAttestationCeremonyEntity {
     @Column(name = "kel_event_said")
     private String kelEventSaid;
 
+    /** The card's canonical attestation digest ({@code CardAttestationDigestFactory#digestOf}) that
+     *  {@link #kelSequence}/{@link #kelEventSaid} anchor. Persisted ALONGSIDE the KEL coordinates, as
+     *  soon as the wallet's anchor is verified (design doc Part A / A5, state-integrity fix) — BEFORE
+     *  the on-chain ATTEST tx is ever submitted — so the exact digest that was anchored is durably
+     *  known even if tx submission fails, and a resumed attempt resubmits the SAME value rather than
+     *  recomputing it (defensive against the card row changing between attempts). */
+    @Column(name = "card_digest")
+    private String cardDigest;
+
+    /** Cardano tx hash of the on-chain CIP-170 {@code ATTEST} publish. Persisted the moment
+     *  submission succeeds — together with {@link #kelSequence}/{@link #kelEventSaid} in the same
+     *  {@code completeStep} mutator that advances the ceremony to {@code ATTEST_ANCHORED} — so the
+     *  ceremony row is the authoritative record of a real broadcast tx; {@code CardAttestService}
+     *  binds {@link IssuedCardEntity#getAttestationTxHash()} FROM this column rather than threading
+     *  the value through separately. {@code null} while the wallet anchor is verified but the tx has
+     *  not yet (successfully) been submitted — see {@link #kelSequence}'s "verified-but-unsubmitted"
+     *  resume path in {@code CardAttestService#attest}. */
+    @Column(name = "tx_hash")
+    private String txHash;
+
     /** SAID of the presented credential. */
     @Column(name = "credential_said")
     private String credentialSaid;
