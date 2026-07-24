@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/cards/status").permitAll()
-                        .requestMatchers("/api/v1/cards/*/attestation/ceremonies").permitAll()
+                        .requestMatchers("/api/v1/cards/attestation/ceremonies").permitAll()
                         .requestMatchers("/api/v1/cards/attestation/ceremonies/**").permitAll()
                         .requestMatchers("/api/v1/cards/**").authenticated()
                         .anyRequest().permitAll())

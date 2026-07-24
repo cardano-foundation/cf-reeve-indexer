@@ -83,7 +83,18 @@ public class CardIssuanceService {
         return issuanceEnabled;
     }
 
+    /** Assembles the card and returns its wire JSON (§9.4) — the operator {@code /issue} entry point. */
     public JsonNode issue(JsonNode request) {
+        return toCardJson(issueEntity(request));
+    }
+
+    /**
+     * The persistence core behind {@link #issue}: validates and stores the card, returning the stored
+     * ROW (so callers that need the {@code cardId} — the attestation ceremony's card-then-ceremony
+     * creation, {@link #issueEntityFromCard} — can get it, not just the wire JSON). Idempotent exactly
+     * as {@link #issue} is: a retry with the same identity key returns the existing row.
+     */
+    public IssuedCardEntity issueEntity(JsonNode request) {
         if (!issuanceEnabled) {
             throw new CardIssuanceException(503, "CARD_ISSUANCE_UNAVAILABLE",
                     "Card issuance is disabled on this deployment");
@@ -147,7 +158,7 @@ public class CardIssuanceService {
             Optional<IssuedCardEntity> existing = repository
                     .findBySubjectIdAndOrganisationIdAndPublicKey(subjectId, organisationId, publicKey);
             if (existing.isPresent()) {
-                return toCardJson(existing.get());
+                return existing.get();
             }
         } else if ("EXTERNAL".equals(subjectType)) {
             // An EXTERNAL holder has no stable id other than their (passkey-derived, deterministic)
@@ -157,7 +168,7 @@ public class CardIssuanceService {
             Optional<IssuedCardEntity> existing = repository
                     .findFirstBySubjectTypeAndOrganisationIdAndPublicKey("EXTERNAL", organisationId, publicKey);
             if (existing.isPresent()) {
-                return toCardJson(existing.get());
+                return existing.get();
             }
             subjectId = UUID.randomUUID().toString();
         } else {
@@ -190,11 +201,54 @@ public class CardIssuanceService {
                     : repository.findBySubjectIdAndOrganisationIdAndPublicKey(
                             subjectId, organisationId, publicKey);
             if (winner.isPresent()) {
-                return toCardJson(winner.get());
+                return winner.get();
             }
             throw race;
         }
-        return toCardJson(entity);
+        return entity;
+    }
+
+    /**
+     * Persists a full, client-built {@code REEVE_KEY_CARD} (the browser assembles the card entirely
+     * client-side — see {@code IssueCardForm} — so it has no server {@code cardId}), returning the
+     * stored row. This is the FIRST step of the attest-with-Veridian wizard (Option B): a ceremony
+     * needs a registry {@code cardId}, so the card is registered here before {@code
+     * CardCeremonyService#create} opens the ceremony against it.
+     *
+     * <p>Reuses {@link #issueEntity}'s full validation by projecting the card onto the {@code
+     * {subject, key}} issue-request shape: {@code v}/{@code type} are checked here (then dropped, as
+     * {@code issueEntity} neither expects nor accepts them), {@code key.createdAt} is dropped (the
+     * server mints its own), and everything else — including any smuggled private-key field — is
+     * passed through UNCHANGED so {@code issueEntity}'s allowlist/private-key rejection still fires.
+     * Idempotent exactly as {@link #issue}: registering the same holder key twice returns the same row
+     * (and the wizard simply opens a fresh ceremony on it).
+     */
+    public IssuedCardEntity issueEntityFromCard(JsonNode card) {
+        if (card == null || !card.isObject()) {
+            throw new CardIssuanceException(400, "INVALID_CARD", "Request must carry a card object");
+        }
+        if (card.path("v").asInt(-1) != CARD_VERSION) {
+            throw new CardIssuanceException(400, "INVALID_CARD",
+                    "Unsupported card version (expected " + CARD_VERSION + ")");
+        }
+        if (!CARD_TYPE.equals(card.path("type").asText())) {
+            throw new CardIssuanceException(400, "INVALID_CARD", "Card type must be " + CARD_TYPE);
+        }
+        JsonNode subject = card.get("subject");
+        JsonNode key = card.get("key");
+        if (subject == null || !subject.isObject() || key == null || !key.isObject()) {
+            throw new CardIssuanceException(400, "INVALID_CARD",
+                    "Card must carry object subject and key sections");
+        }
+        ObjectNode issueRequest = objectMapper.createObjectNode();
+        issueRequest.set("subject", subject.deepCopy());
+        ObjectNode keyCopy = (ObjectNode) key.deepCopy();
+        // issueEntity mints createdAt itself and rejects any unexpected key field, so drop the card's
+        // createdAt (legitimate on a card, not an accepted issue-request field). Every OTHER field is
+        // left intact so the allowlist / private-key rejection below still sees it.
+        keyCopy.remove("createdAt");
+        issueRequest.set("key", keyCopy);
+        return issueEntity(issueRequest);
     }
 
     public Page<IssuedCardEntity> registry(String orgId, String subjectId, int page, int size) {

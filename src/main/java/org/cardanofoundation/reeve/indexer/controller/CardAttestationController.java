@@ -10,11 +10,13 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.cardanofoundation.reeve.indexer.model.entity.CardAttestationCeremonyEntity;
-import org.cardanofoundation.reeve.indexer.model.repository.IssuedCardRepository;
+import org.cardanofoundation.reeve.indexer.model.entity.IssuedCardEntity;
+import org.cardanofoundation.reeve.indexer.model.request.CardCeremonyCreateRequest;
 import org.cardanofoundation.reeve.indexer.model.request.CardCeremonyPairRequest;
 import org.cardanofoundation.reeve.indexer.model.request.CardCeremonyStepRequest;
 import org.cardanofoundation.reeve.indexer.model.view.cards.CardCeremonyView;
@@ -23,12 +25,14 @@ import org.cardanofoundation.reeve.indexer.service.CardAttestationOobiService;
 import org.cardanofoundation.reeve.indexer.service.CardCeremonyNotFoundException;
 import org.cardanofoundation.reeve.indexer.service.CardCeremonyService;
 import org.cardanofoundation.reeve.indexer.service.CardCredentialService;
+import org.cardanofoundation.reeve.indexer.service.cards.CardIssuanceService;
 
 /**
- * REST surface for the card-attestation ceremony (design doc Part A / A6): create a ceremony for an
- * already-issued card, then drive it synchronously through pair -&gt; present-credential -&gt; attest,
- * one blocking POST per step, so a frontend wizard can await each response and render the next
- * screen. Mirrors the platform's ({@code cf-reeve-platform}) {@code keri_attestation} module's own
+ * REST surface for the card-attestation ceremony (design doc Part A / A6): register a client-built
+ * card and open a ceremony for it (Option B — the browser assembles the card entirely client-side,
+ * so there is no server {@code cardId} to reference), then drive it synchronously through pair -&gt;
+ * present-credential -&gt; attest, one blocking POST per step, so a frontend wizard can await each
+ * response and render the next screen. Mirrors the platform's ({@code cf-reeve-platform}) {@code keri_attestation} module's own
  * {@code KeriAttestationController} for THIS convention specifically (this app has no {@code vavr}/
  * {@code Either} plumbing though, see {@link CardAttestationExceptionHandler} for the equivalent as a
  * scoped {@code @RestControllerAdvice} instead of that module's per-call {@code Responses.respond}):
@@ -68,17 +72,25 @@ public class CardAttestationController {
     private final CardCredentialService credentialService;
     private final CardAttestService attestService;
     private final CardAttestationOobiService oobiService;
-    private final IssuedCardRepository issuedCardRepository;
+    private final CardIssuanceService cardIssuanceService;
 
-    @Operation(summary = "Create a new attestation ceremony for an issued card",
-            description = "404 if no card with this id has been issued. The response's agentOobi "
-                    + "lets the wizard render the pairing QR immediately.")
-    @PostMapping("/{cardId}/attestation/ceremonies")
-    public ResponseEntity<?> create(@PathVariable UUID cardId) {
-        if (!issuedCardRepository.existsById(cardId)) {
-            return cardNotFound(cardId);
+    @Operation(summary = "Register a card and open an attestation ceremony for it",
+            description = "Takes the full client-built REEVE_KEY_CARD (the browser assembles it "
+                    + "entirely client-side, so it has no server cardId yet): registers it in the "
+                    + "issued-card registry — same validation as the operator /issue path — then opens "
+                    + "a ceremony against the new cardId. 400 if the card is malformed or carries "
+                    + "private-key material. The response's agentOobi lets the wizard render the "
+                    + "pairing QR immediately.")
+    @PostMapping("/attestation/ceremonies")
+    public ResponseEntity<?> create(@RequestBody(required = false) CardCeremonyCreateRequest request) {
+        JsonNode card = request == null ? null : request.getCard();
+        IssuedCardEntity registered;
+        try {
+            registered = cardIssuanceService.issueEntityFromCard(card);
+        } catch (CardIssuanceService.CardIssuanceException e) {
+            return cardRejected(e);
         }
-        CardAttestationCeremonyEntity ceremony = ceremonyService.create(cardId);
+        CardAttestationCeremonyEntity ceremony = ceremonyService.create(registered.getCardId());
         return ResponseEntity.status(HttpStatus.CREATED).body(toView(ceremony));
     }
 
@@ -148,10 +160,12 @@ public class CardAttestationController {
         }
     }
 
-    private ResponseEntity<Object> cardNotFound(UUID cardId) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problem.setTitle("CARD_NOT_FOUND");
-        problem.setDetail("No issued card with id " + cardId);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    /** Maps a card-registration rejection (malformed card, smuggled private-key material, issuance
+     *  disabled) onto its ProblemDetail — same shape {@code CardController} uses for {@code /issue}. */
+    private ResponseEntity<Object> cardRejected(CardIssuanceService.CardIssuanceException e) {
+        ProblemDetail problem = ProblemDetail.forStatus(e.getStatus());
+        problem.setTitle(e.getTitle());
+        problem.setDetail(e.getMessage());
+        return ResponseEntity.status(e.getStatus()).body(problem);
     }
 }

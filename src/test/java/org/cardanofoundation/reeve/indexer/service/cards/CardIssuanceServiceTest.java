@@ -466,4 +466,87 @@ class CardIssuanceServiceTest {
 
         assertFalse(card.has("attestation"));
     }
+
+    // --- issueEntityFromCard: register a full client-built card so a ceremony can attest it (Option B) ---
+
+    @Test
+    void issueEntityFromCardRegistersAClientBuiltCardAndReturnsItsCardId() throws Exception {
+        // The attest wizard's first step: a card the browser built entirely client-side (no server
+        // cardId) is registered here so a ceremony can be opened against the row's cardId. The
+        // holder's public key must survive verbatim; createdAt is re-minted server-side.
+        JsonNode fullCard = objectMapper.readTree("""
+            {"v":1,"type":"REEVE_KEY_CARD",
+             "subject":{"subjectType":"EXTERNAL","subjectId":"client-minted-uuid","displayName":"Bob",
+                        "email":"bob@example.org","organisationId":"75f95560"},
+             "key":{"publicKey":"%s","label":"Bob's key","assurance":"PASSKEY",
+                    "createdAt":"2026-01-01T00:00:00Z"}}
+            """.formatted("8f".repeat(32)));
+
+        IssuedCardEntity entity = service.issueEntityFromCard(fullCard);
+
+        assertNotNull(entity.getCardId());
+        assertEquals("8f".repeat(32), entity.getPublicKey());
+        assertEquals("EXTERNAL", entity.getSubjectType());
+        assertEquals("PASSKEY", entity.getAssurance());
+        verify(repository).save(any(IssuedCardEntity.class));
+    }
+
+    @Test
+    void issueEntityFromCardRejectsSmuggledPrivateKeyMaterial() throws Exception {
+        // The card is validated through issueEntity's SAME allowlist/private-key rejection as /issue:
+        // dropping the (legitimate) createdAt must NOT open a hole for a smuggled `seed` beside it.
+        JsonNode fullCard = objectMapper.readTree("""
+            {"v":1,"type":"REEVE_KEY_CARD",
+             "subject":{"subjectType":"EXTERNAL","organisationId":"o"},
+             "key":{"publicKey":"%s","seed":"%s","createdAt":"2026-01-01T00:00:00Z"}}
+            """.formatted("8f".repeat(32), "11".repeat(32)));
+
+        CardIssuanceService.CardIssuanceException e =
+                assertThrows(CardIssuanceService.CardIssuanceException.class,
+                        () -> service.issueEntityFromCard(fullCard));
+        assertEquals("CARD_CONTAINS_PRIVATE_KEY", e.getTitle());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void issueEntityFromCardRejectsUnsupportedVersionOrType() throws Exception {
+        JsonNode badVersion = objectMapper.readTree("""
+            {"v":2,"type":"REEVE_KEY_CARD",
+             "subject":{"subjectType":"EXTERNAL","organisationId":"o"},"key":{"publicKey":"%s"}}
+            """.formatted("8f".repeat(32)));
+        JsonNode badType = objectMapper.readTree("""
+            {"v":1,"type":"SOMETHING_ELSE",
+             "subject":{"subjectType":"EXTERNAL","organisationId":"o"},"key":{"publicKey":"%s"}}
+            """.formatted("8f".repeat(32)));
+
+        assertEquals("INVALID_CARD", assertThrows(CardIssuanceService.CardIssuanceException.class,
+                () -> service.issueEntityFromCard(badVersion)).getTitle());
+        assertEquals("INVALID_CARD", assertThrows(CardIssuanceService.CardIssuanceException.class,
+                () -> service.issueEntityFromCard(badType)).getTitle());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void issueEntityFromCardIsIdempotentOnHolderKey() throws Exception {
+        // Registering the same holder key twice (e.g. opening a second ceremony) must return the SAME
+        // row, not mint a duplicate identity — idempotent exactly as /issue is.
+        IssuedCardEntity existing = IssuedCardEntity.builder()
+                .cardId(UUID.randomUUID()).subjectType("EXTERNAL")
+                .subjectId("existing-uuid").organisationId("75f95560")
+                .publicKey("8f".repeat(32)).assurance("PASSKEY")
+                .keyCreatedAt("2026-01-01T00:00:00Z").build();
+        when(repository.findFirstBySubjectTypeAndOrganisationIdAndPublicKey(
+                "EXTERNAL", "75f95560", "8f".repeat(32))).thenReturn(Optional.of(existing));
+
+        JsonNode fullCard = objectMapper.readTree("""
+            {"v":1,"type":"REEVE_KEY_CARD",
+             "subject":{"subjectType":"EXTERNAL","organisationId":"75f95560"},
+             "key":{"publicKey":"%s","createdAt":"2026-05-05T00:00:00Z"}}
+            """.formatted("8f".repeat(32)));
+
+        IssuedCardEntity entity = service.issueEntityFromCard(fullCard);
+
+        assertEquals(existing.getCardId(), entity.getCardId());
+        verify(repository, never()).save(any());
+    }
 }
