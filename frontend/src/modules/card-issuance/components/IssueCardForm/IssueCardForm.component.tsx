@@ -11,10 +11,15 @@ import { FormEvent, MouseEvent, useState } from 'react'
 import type { IssueSubject } from 'libs/document-vault-crypto/issue'
 import { downloadCardFile } from 'libs/document-vault-crypto/issue'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
+import { AttestCardWizard } from 'modules/card-issuance/components/AttestCardWizard/AttestCardWizard.component'
 import type { PasskeyMode } from 'modules/card-issuance/components/IssueCardForm/IssueCardForm.hooks'
 import { useIssueCardForm } from 'modules/card-issuance/components/IssueCardForm/IssueCardForm.hooks'
 import type { IssueCardFields } from 'modules/card-issuance/components/IssueCardForm/IssueCardForm.validation'
 import { validateFields } from 'modules/card-issuance/components/IssueCardForm/IssueCardForm.validation'
+import {
+  ATTEST_WIZARD_OPEN_LABEL,
+  ATTEST_WIZARD_OPEN_NOTE
+} from 'modules/card-issuance/constants/attestation.consts'
 import {
   buildContactCardFileName,
   CONTACT_CARD_DOWNLOAD_LABEL,
@@ -64,6 +69,7 @@ export const IssueCardForm = () => {
   const [fields, setFields] = useState<IssueCardFields>(initialFields)
   const [passkeyMode, setPasskeyMode] = useState<PasskeyMode>('create')
   const [publicKeyCopied, setPublicKeyCopied] = useState(false)
+  const [showAttestWizard, setShowAttestWizard] = useState(false)
 
   const isIssuing = status === 'issuing'
   const isIssued = status === 'issued'
@@ -110,6 +116,7 @@ export const IssueCardForm = () => {
     reset()
     setFields(initialFields)
     setPublicKeyCopied(false)
+    setShowAttestWizard(false)
   }
 
   return (
@@ -238,6 +245,22 @@ export const IssueCardForm = () => {
               {CONTACT_CARD_DOWNLOAD_NOTE}
             </Typography>
           </Box>
+
+          {/* Optional: anchor a Veridian attestation on-chain so an importer can verify the holder. */}
+          {!showAttestWizard && (
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              <Box display="flex" gap={1}>
+                <Button variant="outlined" onClick={() => setShowAttestWizard(true)}>
+                  {ATTEST_WIZARD_OPEN_LABEL}
+                </Button>
+              </Box>
+              <Typography color={theme.palette.text.secondary} variant="caption">
+                {ATTEST_WIZARD_OPEN_NOTE}
+              </Typography>
+            </Box>
+          )}
+
+          {showAttestWizard && <AttestCardWizard card={issuedCard} onClose={() => setShowAttestWizard(false)} />}
 
           <Box>
             <Button variant="text" onClick={handleIssueAnother}>
