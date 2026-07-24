@@ -222,6 +222,18 @@ public class CardIssuanceService {
         putIfPresent(keyNode, "label", e.getLabel());
         keyNode.put("assurance", e.getAssurance());
         keyNode.put("createdAt", e.getKeyCreatedAt());
+        // The attestation block is populated by the Veridian ceremony (a later task), not at issue
+        // time. "Attested" is treated as attestation_aid != null (the AID + tx are the core); an
+        // unattested card (all attestation_* columns null) omits the block entirely so its JSON stays
+        // byte-identical to today's.
+        if (e.getAttestationAid() != null) {
+            ObjectNode attestation = card.putObject("attestation");
+            putIfPresent(attestation, "oobi", e.getAttestationOobi());
+            attestation.put("aid", e.getAttestationAid());
+            putIfPresent(attestation, "credentialSaid", e.getAttestationCredentialSaid());
+            putIfPresent(attestation, "schemaSaid", e.getAttestationSchemaSaid());
+            putIfPresent(attestation, "txHash", e.getAttestationTxHash());
+        }
         return card;
     }
 

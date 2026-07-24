@@ -44,4 +44,23 @@ public class IssuedCardEntity {
     @Builder.Default
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Veridian attestation ceremony fields (populated later, by the ceremony — not at issue time).
+    // A card is issued first and attested later, so these are all nullable; "attested" is treated as
+    // attestation_aid != null (the AID + tx are the core of the attestation).
+    /** Wallet OOBI: how to resolve the attesting AID. */
+    @Column(name = "attestation_oobi")
+    private String attestationOobi;
+    /** The wallet AID that attested this card. */
+    @Column(name = "attestation_aid")
+    private String attestationAid;
+    /** SAID of the presented credential. */
+    @Column(name = "attestation_credential_said")
+    private String attestationCredentialSaid;
+    /** SAID of the presented credential's schema. */
+    @Column(name = "attestation_schema_said")
+    private String attestationSchemaSaid;
+    /** Cardano tx hash of the CIP-170 ATTEST anchoring this card. */
+    @Column(name = "attestation_tx_hash")
+    private String attestationTxHash;
 }
