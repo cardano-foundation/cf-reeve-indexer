@@ -1,5 +1,8 @@
 package org.cardanofoundation.reeve.indexer.config;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,11 +36,30 @@ public class KeriConfig {
             client.connect();
         }
         log.info("SignifyClient connected");
-        for (String oobi : keriProperties.getOobis()) {
+        for (String oobi : resolvableOobis()) {
             Object object = client.oobis().resolve(oobi, null);
             client.operations().wait(Operation.fromObject(object));
         }
         return client;
+    }
+
+    /**
+     * Union of every configured credential schema's OOBIs plus the legacy (deprecated)
+     * {@code keri.oobis} list, de-duplicated and order-preserving.
+     */
+    private Set<String> resolvableOobis() {
+        Set<String> oobis = new LinkedHashSet<>();
+        if (keriProperties.getCredentialSchemas() != null) {
+            keriProperties.getCredentialSchemas().forEach(schema -> {
+                if (schema != null && schema.oobis() != null) {
+                    oobis.addAll(schema.oobis());
+                }
+            });
+        }
+        if (keriProperties.getOobis() != null) {
+            oobis.addAll(keriProperties.getOobis());
+        }
+        return oobis;
     }
 
 }

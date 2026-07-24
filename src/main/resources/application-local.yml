@@ -54,5 +54,23 @@ keri:
   metadata-label: 170
   url: http://127.0.0.1:3901
   bootUrl: http://127.0.0.1:3903
-  oobis: 
-    - http://keria:3902/oobi/EJO54wp79Apo4pOyAloOVQw9BQlVohycPWV0FaurG8Br/agent/EOS8r7jbPS1rYKR7duLMfuSwQsNUuUPmuFq4b-ORm9ih  
+  # Deprecated: use credential-schemas[].oobis instead. Still honored for one release
+  # (unioned with every configured schema's oobis) at startup OOBI resolution.
+  oobis:
+    - http://keria:3902/oobi/EJO54wp79Apo4pOyAloOVQw9BQlVohycPWV0FaurG8Br/agent/EOS8r7jbPS1rYKR7duLMfuSwQsNUuUPmuFq4b-ORm9ih
+  # Exact SAIDs / trusted AIDs / OOBIs must be filled per deployment.
+  credential-schemas:
+    - said: ${KERI_VLEI_SCHEMA_SAID:}
+      name: "vLEI Legal Entity"
+      chained: true
+      trusted-roots:
+        - ${KERI_VLEI_GLEIF_ROOT_AID:}
+      trusted-issuers: []
+      oobis: ${KERI_VLEI_OOBIS:}
+    - said: "EL9oOWU_7zQn_rD--Xsgi3giCWnFDaNvFMUGTOZx1ARO"
+      name: "Foundation Employee"
+      chained: false
+      trusted-roots: []
+      trusted-issuers:
+        - ${KERI_DEMO_ISSUER_AID:}
+      oobis: ${KERI_DEMO_OOBIS:}
