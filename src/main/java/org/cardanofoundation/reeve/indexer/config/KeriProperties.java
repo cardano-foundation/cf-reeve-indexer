@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.config;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,4 +45,11 @@ public class KeriProperties {
 
     /** Per-schema KERI credential trust registry entries. See {@link CredentialSchema}. */
     private List<CredentialSchema> credentialSchemas = new ArrayList<>();
+
+    /**
+     * Poll interval for {@code KeriNotificationCorrelator}'s synchronous wait loop against the
+     * agent's notification queue (card-attestation ceremony, design doc Part A / A3). Default ported
+     * from the platform's {@code keri_attestation} module's {@code notification-poll-interval}.
+     */
+    private Duration notificationPollInterval = Duration.ofMillis(1500);
 }
