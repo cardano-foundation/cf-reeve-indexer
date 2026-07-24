@@ -29,7 +29,10 @@ interface GLEIFResponse {
   }
 }
 
-export const useGLEIFVerification = (lei?: string) => {
+// Cross-checks an LEI against the GLEIF public registry. Only meaningful for the vLEI schema -
+// callers should only invoke this with a truthy `lei` (i.e. skip entirely for other credential
+// schemas), which the `enabled` flag below also guards against.
+export const useGLEIFVerification = (lei?: string | null) => {
   return useQuery({
     queryKey: ['gleif-verification', lei],
     queryFn: async (): Promise<GLEIFLegalEntity | null> => {

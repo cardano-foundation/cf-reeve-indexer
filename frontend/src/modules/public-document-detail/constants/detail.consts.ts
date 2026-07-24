@@ -87,6 +87,11 @@ export const VERIFIED_CLAIM_SENTENCE =
 export const DUPLICATE_ANCHORS_WARNING =
   'Multiple on-chain anchors claim this document id. This is a substitution/forgery signal — review each anchor independently before trusting any of them.'
 
+// Label for the identity-attestation section - kept visually distinct from the VerdictSummary
+// above it, since the two are separate claims: who attested this document vs. whether its bytes
+// are intact.
+export const IDENTITY_ATTESTATION_LABEL = 'Identity attestation'
+
 export const DOCUMENT_DETAIL_PAGE_TITLE = 'Document detail'
 
 // Accessible name for the back affordance. The detail page is reachable by deep link, so the back

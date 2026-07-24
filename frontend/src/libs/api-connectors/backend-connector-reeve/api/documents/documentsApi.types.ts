@@ -1,3 +1,9 @@
+import type { IdentityAttestationView } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types.ts'
+
+// Re-exported so consumers of the documents API don't need to know the generic identity DTO's
+// definition lives alongside the reports API - it is shared by both (design spec §D).
+export type { IdentityAttestationView }
+
 export type CheckStatus = 'PASS' | 'FAIL' | 'PENDING'
 
 export type DocumentVerdict =
@@ -29,6 +35,10 @@ export type DocumentView = {
   checks: DocumentChecks
   verdict: DocumentVerdict
   created_at: string
+  // Identity attestation(s) verified against this anchor's on-chain KERI label-170 metadata - a
+  // separate claim from `verdict` (IPFS content integrity). A document has at most one, but this
+  // mirrors the reports API's shape (design spec §D).
+  identities?: IdentityAttestationView[]
 }
 
 export type DocumentListResponse = {

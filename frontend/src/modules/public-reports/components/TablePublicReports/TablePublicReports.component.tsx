@@ -6,18 +6,18 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ExportSquare } from 'iconsax-react'
 import { useMemo, useRef } from 'react'
 
-import { GetPublicReportsResponse200, ReportEntity, LEIResponse } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { GetPublicReportsResponse200, IdentityAttestationView, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
+import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
+import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
-import { IdentityVerificationStatus } from 'modules/public-reports/components/IdentityVerificationStatus/IdentityVerificationStatus.component.tsx'
-import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
 
 interface TableReportsPublicProps {
   data: GetPublicReportsResponse200 | null
@@ -106,10 +106,13 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       headerName: t({ id: 'identityVerified' }),
         renderCell: ({ row }) => (
           <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
-            {row.identities?.map((item: LEIResponse, index: number) => (
-              <IdentityVerificationStatus
+            {row.identities?.map((item: IdentityAttestationView, index: number) => (
+              <IdentityAttestationBadge
                 key={index}
                 isVerified={item.identityVerified}
+                schemaName={item.schemaName}
+                schemaSaid={item.schemaSaid}
+                claims={item.claims}
                 lei={item.lei}
                 txHash={item.txHash}
                 credentialTxHash={item.credentialTxHash}

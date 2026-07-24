@@ -25,7 +25,9 @@ export const DOCUMENTS_TABLE_COLUMNS = {
   blockTime: 'Block time',
   contentHash: 'Content hash',
   slotCount: 'Slots',
-  verdict: 'Verdict'
+  verdict: 'Verdict',
+  // Identity attestation - a separate claim from `verdict` (who attested vs. content integrity).
+  identity: 'Identity'
 } as const
 
 export const VERDICT_FILTER_ALL = 'ALL' as const

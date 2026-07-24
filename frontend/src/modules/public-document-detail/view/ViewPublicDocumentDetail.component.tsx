@@ -11,6 +11,7 @@ import type { DocumentView } from 'libs/api-connectors/backend-connector-reeve/a
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { useGetDocumentDetailModel } from 'libs/models/documents-model/GetDocumentDetail/GetDocumentDetail.service.ts'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
+import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
 import { ChecksList } from 'modules/public-document-detail/components/ChecksList/ChecksList.component'
 import { DecryptPanel } from 'modules/public-document-detail/components/DecryptPanel/DecryptPanel.component'
 import { VerdictSummary } from 'modules/public-document-detail/components/VerdictSummary/VerdictSummary.component'
@@ -21,7 +22,8 @@ import {
   DOCUMENT_DETAIL_NOT_FOUND_MESSAGE,
   DOCUMENT_DETAIL_PAGE_DESCRIPTION,
   DOCUMENT_DETAIL_PAGE_TITLE,
-  DUPLICATE_ANCHORS_WARNING
+  DUPLICATE_ANCHORS_WARNING,
+  IDENTITY_ATTESTATION_LABEL
 } from 'modules/public-document-detail/constants/detail.consts.ts'
 import { explorerTxUrl, ipfsCidUrl } from 'modules/public-document-detail/utils/links.ts'
 import { VerdictChip } from 'modules/public-documents/components/VerdictChip/VerdictChip.component'
@@ -75,6 +77,30 @@ const AnchorCard = ({
       <Box sx={{ mt: 1.5 }}>
         <VerdictSummary verdict={anchor.verdict} />
       </Box>
+
+      {/* Identity attestation is a separate claim from the content-integrity verdict above: who
+          attested this document (via an on-chain KERI credential) vs. whether its bytes are intact. */}
+      {anchor.identities && anchor.identities.length > 0 && (
+        <Box sx={{ mt: 1.5 }}>
+          <Typography color={theme.palette.text.secondary} variant="caption">
+            {IDENTITY_ATTESTATION_LABEL}
+          </Typography>
+          <Box alignItems="center" display="flex" flexWrap="wrap" gap={1} sx={{ mt: 0.5 }}>
+            {anchor.identities.map((identity, index) => (
+              <IdentityAttestationBadge
+                key={index}
+                isVerified={identity.identityVerified}
+                schemaName={identity.schemaName}
+                schemaSaid={identity.schemaSaid}
+                claims={identity.claims}
+                lei={identity.lei}
+                txHash={identity.txHash}
+                credentialTxHash={identity.credentialTxHash}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
 
       <Box display="flex" flexDirection="column" gap={0.5} sx={{ my: 1.5 }}>
         <FieldRow label="Content hash" value={anchor.content_hash} />

@@ -22,6 +22,7 @@ import { DocumentView } from 'libs/api-connectors/backend-connector-reeve/api/do
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
+import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { HonestLimits } from 'modules/public-documents/components/HonestLimits/HonestLimits.component'
 import { VerdictChip } from 'modules/public-documents/components/VerdictChip/VerdictChip.component'
@@ -102,6 +103,41 @@ const DocumentIdCell = ({ row }: { row: DocumentView }) => {
     <Typography color={theme.palette.text.primary} sx={{ fontFamily: 'monospace' }} variant="body2">
       {truncateHash(row.document_id)}
     </Typography>
+  )
+}
+
+/**
+ * Identity-attestation badge(s) for a document row - a separate claim from the content
+ * `VerdictChip`/`VerdictSummary` (who attested this document vs. whether its bytes are intact).
+ * Only rendered when the row actually carries identities.
+ */
+const IdentityCell = ({ row }: { row: DocumentView }) => {
+  const theme = useTheme()
+  const identities = row.identities ?? []
+
+  if (identities.length === 0) {
+    return (
+      <Typography color={theme.palette.text.secondary} variant="body2">
+        —
+      </Typography>
+    )
+  }
+
+  return (
+    <Box alignItems="center" display="flex" flexWrap="nowrap" gap={0.5}>
+      {identities.map((identity, index) => (
+        <IdentityAttestationBadge
+          key={index}
+          isVerified={identity.identityVerified}
+          schemaName={identity.schemaName}
+          schemaSaid={identity.schemaSaid}
+          claims={identity.claims}
+          lei={identity.lei}
+          txHash={identity.txHash}
+          credentialTxHash={identity.credentialTxHash}
+        />
+      ))}
+    </Box>
   )
 }
 
@@ -191,12 +227,13 @@ export const ViewPublicDocuments = () => {
                   <TableCell>{DOCUMENTS_TABLE_COLUMNS.contentHash}</TableCell>
                   <TableCell align="right">{DOCUMENTS_TABLE_COLUMNS.slotCount}</TableCell>
                   <TableCell>{DOCUMENTS_TABLE_COLUMNS.verdict}</TableCell>
+                  <TableCell>{DOCUMENTS_TABLE_COLUMNS.identity}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={7}>
                       <Typography color={theme.palette.text.secondary} sx={{ py: 2 }} textAlign="center" variant="body2">
                         {isFetching ? '' : verdict !== VERDICT_FILTER_ALL ? DOCUMENTS_NO_MATCHING_MESSAGE : DOCUMENTS_EMPTY_MESSAGE}
                       </Typography>
@@ -235,6 +272,9 @@ export const ViewPublicDocuments = () => {
                         </TableCell>
                         <TableCell>
                           <VerdictChip verdict={row.verdict} />
+                        </TableCell>
+                        <TableCell>
+                          <IdentityCell row={row} />
                         </TableCell>
                       </TableRow>
                     )
