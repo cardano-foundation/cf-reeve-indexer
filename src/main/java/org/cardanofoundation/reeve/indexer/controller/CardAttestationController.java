@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.cardanofoundation.reeve.indexer.model.domain.ceremony.CardCeremonyState;
 import org.cardanofoundation.reeve.indexer.model.entity.CardAttestationCeremonyEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.IssuedCardEntity;
 import org.cardanofoundation.reeve.indexer.model.request.CardCeremonyCreateRequest;
@@ -142,7 +143,27 @@ public class CardAttestationController {
     // --- internals ---
 
     private CardCeremonyView toView(CardAttestationCeremonyEntity ceremony) {
-        return CardCeremonyView.of(ceremony, resolveAgentOobiOrNull());
+        return CardCeremonyView.of(ceremony, resolveAgentOobiOrNull(), exportedCardIfAnchored(ceremony));
+    }
+
+    /**
+     * The now-attested card, so the public wizard (which has no operator credentials for the gated
+     * {@code /{cardId}/export}) can hand the holder the card to import into the platform — but ONLY
+     * once {@link CardCeremonyState#ATTEST_ANCHORED}, when the {@code attestation} block has been
+     * bound. {@code null} at every earlier state, and best-effort: a missing/failed export never turns
+     * an otherwise-successful ceremony response into a 500.
+     */
+    private JsonNode exportedCardIfAnchored(CardAttestationCeremonyEntity ceremony) {
+        if (ceremony.getState() != CardCeremonyState.ATTEST_ANCHORED) {
+            return null;
+        }
+        try {
+            return cardIssuanceService.exportCard(ceremony.getCardId()).orElse(null);
+        } catch (RuntimeException e) {
+            log.warn("Failed to export the attested card {} for ceremony {} (the wizard can re-poll): {}",
+                    ceremony.getCardId(), ceremony.getId(), e.getMessage());
+            return null;
+        }
     }
 
     /**
