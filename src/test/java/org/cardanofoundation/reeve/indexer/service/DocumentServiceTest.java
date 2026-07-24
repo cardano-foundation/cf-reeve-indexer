@@ -15,9 +15,13 @@ import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
 import org.cardanofoundation.reeve.indexer.model.domain.document.CheckStatus;
 import org.cardanofoundation.reeve.indexer.model.domain.document.DocumentVerdict;
 import org.cardanofoundation.reeve.indexer.model.entity.DocumentEntity;
+import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
 import org.cardanofoundation.reeve.indexer.model.view.document.DocumentDetailResponse;
 import org.cardanofoundation.reeve.indexer.model.view.document.DocumentListResponse;
@@ -27,13 +31,18 @@ class DocumentServiceTest {
 
     private DocumentRepository documentRepository;
     private IpfsGatewayClient ipfsGatewayClient;
+    private CredentialRepository credentialRepository;
+    private CredentialSchemaRegistry credentialSchemaRegistry;
     private DocumentService service;
 
     @BeforeEach
     void setUp() {
         documentRepository = mock(DocumentRepository.class);
         ipfsGatewayClient = mock(IpfsGatewayClient.class);
-        service = new DocumentService(documentRepository, ipfsGatewayClient);
+        credentialRepository = mock(CredentialRepository.class);
+        credentialSchemaRegistry = mock(CredentialSchemaRegistry.class);
+        service = new DocumentService(documentRepository, ipfsGatewayClient,
+                credentialRepository, credentialSchemaRegistry, new ObjectMapper());
     }
 
     private DocumentEntity entity(String txHash, String docId) {

@@ -11,9 +11,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
 import org.cardanofoundation.reeve.indexer.model.domain.document.DocumentVerdict;
 import org.cardanofoundation.reeve.indexer.model.entity.DocumentEntity;
+import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
+import org.cardanofoundation.reeve.indexer.model.response.IdentityAttestationView;
 import org.cardanofoundation.reeve.indexer.model.view.document.DocumentDetailResponse;
 import org.cardanofoundation.reeve.indexer.model.view.document.DocumentListResponse;
 import org.cardanofoundation.reeve.indexer.model.view.document.DocumentView;
@@ -28,6 +33,9 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final IpfsGatewayClient ipfsGatewayClient;
+    private final CredentialRepository credentialRepository;
+    private final CredentialSchemaRegistry credentialSchemaRegistry;
+    private final ObjectMapper objectMapper;
 
     // ACCEPTED TRADEOFF (documented): this public list uses Spring Data Page, whose getTotalElements()/
     // getTotalPages() below force an exact COUNT. With the publisher gate removed, reeve_document is
@@ -49,7 +57,8 @@ public class DocumentService {
         } else {
             result = documentRepository.findAll(pageRequest);
         }
-        return new DocumentListResponse(result.getContent().stream().map(DocumentView::from).toList(),
+        return new DocumentListResponse(result.getContent().stream()
+                .map(e -> DocumentView.from(e, resolveIdentities(e))).toList(),
                 result.getTotalElements(), result.getTotalPages(), result.getNumber(),
                 result.getSize());
     }
@@ -64,7 +73,25 @@ public class DocumentService {
         // cannot stop at the second row); the (document_id, slot) index bounds this LIMIT-100 read.
         boolean duplicateAnchors = anchors.size() > 1;
         return Optional.of(new DocumentDetailResponse(documentId,
-                anchors.stream().map(DocumentView::from).toList(), duplicateAnchors));
+                anchors.stream().map(e -> DocumentView.from(e, resolveIdentities(e))).toList(),
+                duplicateAnchors));
+    }
+
+    /**
+     * Assembled the same way {@code ReportService} builds {@code ReportView.identities}: load the
+     * verified identity's credential by identifier and project it via {@link IdentityAttestationView}.
+     * Unlike reports (grouped by a shared metadataHash, so several identities may apply), a document
+     * correlates 1:1 by its own identifier — at most one element.
+     */
+    private List<IdentityAttestationView> resolveIdentities(DocumentEntity entity) {
+        if (!entity.isIdentityVerified() || entity.getIdentifier() == null) {
+            return List.of();
+        }
+        return credentialRepository.findById(entity.getIdentifier())
+                .map(cred -> IdentityAttestationView.from(entity.getIdentifier(), entity.getTxHash(),
+                        cred, credentialSchemaRegistry, objectMapper))
+                .map(List::of)
+                .orElseGet(List::of);
     }
 
     /**
