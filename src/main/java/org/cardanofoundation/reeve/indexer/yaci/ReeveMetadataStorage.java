@@ -168,11 +168,9 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
             } else if (rawMetadata.getT() == IdentityType.AUTH_BEGIN) {
                 CredentialEntity entity = CredentialMetadataMapper.toEntity(rawMetadata, objectMapper);
-                try {
-                    keriService.verifyCredentialEntity(entity);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                // verifyCredentialEntity is self-isolating (catches internally, sets valid=false
+                // on any failure) so one bad AUTH_BEGIN never aborts the surrounding tx-metadata batch.
+                keriService.verifyCredentialEntity(entity, rawMetadata);
                 credentialRepository.saveAndFlush(entity);
             } else if(rawMetadata.getT() == IdentityType.AUTH_END) {
                 // TODO handle AUTH_END if needed
