@@ -31,8 +31,8 @@ import {
   IDENTITY_ATTESTATION_LABEL
 } from 'modules/public-document-detail/constants/detail.consts.ts'
 import { explorerTxUrl, ipfsCidUrl } from 'modules/public-document-detail/utils/links.ts'
-import { VerdictChip } from 'modules/public-documents/components/VerdictChip/VerdictChip.component'
-import { formatBlockTime } from 'modules/public-documents/utils/format.ts'
+import { VerdictChip } from 'libs/documents-kit/components/VerdictChip/VerdictChip.component'
+import { formatBlockTime } from 'libs/documents-kit/utils/format.ts'
 
 type AnchorCardProps = {
   anchor: DocumentView

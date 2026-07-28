@@ -6,7 +6,7 @@ import { Clock, CloseCircle, TickCircle } from 'iconsax-react'
 import type { CheckStatus, DocumentChecks, DocumentVerdict } from 'libs/api-connectors/backend-connector-reeve/api/documents/documentsApi.types'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
 import { CHECK_COPY, CHECKS_ORDER, CHECK_STATUS_LABEL, VERIFIED_CLAIM_SENTENCE } from 'modules/public-document-detail/constants/detail.consts.ts'
-import { HonestLimits } from 'modules/public-documents/components/HonestLimits/HonestLimits.component'
+import { HonestLimits } from 'libs/documents-kit/components/HonestLimits/HonestLimits.component'
 
 type ChecksListProps = {
   checks: DocumentChecks

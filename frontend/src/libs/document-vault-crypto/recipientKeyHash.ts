@@ -5,10 +5,11 @@ import { bytesToHex, hexToBytes } from './codecs'
  *
  *   recipient_key_hash = sha256( 32 raw bytes decoded from the lowercase-hex X25519 public key )
  *
- * rendered as 64 lowercase hex characters. This is a PUBLISHED wire format (cf-reeve-platform
- * docs/onChainFormat.md, "Recipient key hashes") reimplemented here from RecipientKeyHasher.java; the
- * golden vectors in the accompanying spec file are what keep the two in agreement. SHA-256 rather than
- * the SHA3-256 used for org ids, because WebCrypto implements no SHA-3 member.
+ * rendered as 64 lowercase hex characters. This value is published on chain, and the system that
+ * publishes it computes the same hash with its own independent implementation. The two must agree
+ * exactly or a recipient filter silently matches nothing, so the golden vectors in the accompanying
+ * spec file — not this code — are the contract. SHA-256 rather than the SHA3-256 used for org ids,
+ * because WebCrypto implements no SHA-3 member.
  *
  * Takes the PUBLIC key only. Filtering never needs, derives, or transmits a private scalar.
  */

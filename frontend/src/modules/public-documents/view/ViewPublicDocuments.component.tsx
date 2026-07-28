@@ -21,9 +21,9 @@ import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useL
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
 import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
-import { HonestLimits } from 'modules/public-documents/components/HonestLimits/HonestLimits.component'
+import { HonestLimits } from 'libs/documents-kit/components/HonestLimits/HonestLimits.component'
 import { MyDocumentsFilter } from 'modules/public-documents/components/MyDocumentsFilter/MyDocumentsFilter.component'
-import { VerdictChip } from 'modules/public-documents/components/VerdictChip/VerdictChip.component'
+import { VerdictChip } from 'libs/documents-kit/components/VerdictChip/VerdictChip.component'
 import {
   DOCUMENTS_EMPTY_MESSAGE,
   DOCUMENTS_ERROR_MESSAGE,
@@ -42,7 +42,7 @@ import {
   VerdictFilterValue
 } from 'modules/public-documents/constants/documents.consts.ts'
 import { usePublicDocuments } from 'modules/public-documents/hooks/usePublicDocuments.ts'
-import { formatBlockTime, truncateHash } from 'modules/public-documents/utils/format.ts'
+import { formatBlockTime, truncateHash } from 'libs/documents-kit/utils/format.ts'
 import { PATHS } from 'routes'
 
 const DocumentIdCell = ({ row }: { row: DocumentView }) => {
