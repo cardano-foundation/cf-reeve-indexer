@@ -27,7 +27,7 @@ import org.cardanofoundation.reeve.indexer.config.KeriProperties;
 import org.cardanofoundation.reeve.indexer.model.domain.ceremony.CardCeremonyState;
 import org.cardanofoundation.reeve.indexer.model.entity.CardAttestationCeremonyEntity;
 import org.cardanofoundation.reeve.indexer.service.KeriNotificationCorrelator.CorrelatedNotification;
-import org.cardanofoundation.reeve.indexer.service.KeriService.ValidatedPresentedCredential;
+import org.cardanofoundation.reeve.indexer.service.KeriService.PresentedCredential;
 import org.cardanofoundation.signify.app.Exchanging.ExchangeMessageResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operation;
@@ -41,8 +41,8 @@ import org.cardanofoundation.signify.core.States.HabState;
  * Drives the "pair" and "credential presentation" steps of the card-attestation ceremony (design doc
  * Part A / A4), SYNCHRONOUSLY, in the request thread: {@link #pair} resolves the wallet's OOBI and
  * binds its AID to the ceremony; {@link #presentCredential} then runs the full IPEX apply -&gt;
- * offer/grant (dual-path) -&gt; agree -&gt; admit exchange against that wallet, fetches + validates the
- * presented credential chain, and records {@code credentialSaid}/{@code schemaSaid} on the ceremony.
+ * offer/grant (dual-path) -&gt; agree -&gt; admit exchange against that wallet, fetches the presented
+ * credential chain, and records {@code credentialSaid}/{@code schemaSaid} on the ceremony.
  *
  * <p>Ported from the platform's {@code keri_attestation} module's {@code KeriCredentialService},
  * adapted to this app's single-agent, one-card-one-ceremony shape (no per-user identity link, no
@@ -56,13 +56,20 @@ import org.cardanofoundation.signify.core.States.HabState;
  * CardCeremonyService#get}/{@link CardCeremonyService#beginStep}) or KERI being disabled entirely
  * propagates as a thrown exception.
  *
- * <p><b>Credential validation:</b> reuses WS1's schema-aware chained/standalone trust-check logic via
- * a new shared method, {@link KeriService#validatePresentedCredentialChain}, extracted from {@code
- * KeriService#verifyCredentialEntity} specifically for this purpose — {@code verifyCredentialEntity}
- * itself is unchanged in behavior (same schema gate, same trust checks, same order), just refactored
- * to share its parsing/trust-check internals with this new entry point. See that method's own javadoc
- * for exactly what is shared vs. what differs (schema discovery instead of a pre-known schema SAID;
- * an additional unconditional leaf-revocation check).
+ * <p><b>The presented credential is NOT verified.</b> The indexer accepts whatever credential the
+ * paired wallet grants and records its identifiers ({@link KeriService#readPresentedCredential}) — no
+ * registry verification, no schema gate, no revocation check, no issuer/root trust check. This is
+ * deliberate: the indexer is a permissionless, public component, and verifying an attestation is the
+ * importer's job (the platform's B2 import verifier). The {@code credentialSaid}/{@code schemaSaid}
+ * this records are therefore CLAIMS about what was presented, not verified facts — see {@code
+ * CardAttestService}'s own note where they are written onto the card. {@code
+ * KeriService#verifyCredentialEntity} (the on-chain AUTH_BEGIN path) is unrelated and still verifies
+ * in full.
+ *
+ * <p>Because any schema is now accepted, a wallet may grant a credential whose schema this agent
+ * never resolved an OOBI for ({@link #ensureSchemasResolved} only resolves the CONFIGURED ones). The
+ * admit can still succeed, but a subsequent fetch failure for such a credential is an expected
+ * outcome rather than a defect.
  */
 @Service
 @RequiredArgsConstructor
@@ -167,8 +174,9 @@ public class CardCredentialService {
      * that already arrived on a previous attempt's apply -&gt; apply -&gt; wait, in-thread, for EITHER
      * an offer or a spontaneous grant (dual-path) -&gt; branch: a grant admits directly; an offer falls
      * through to the negotiated flow (agree -&gt; wait for the grant -&gt; admit) -&gt; fetch the full
-     * CESR chain -&gt; {@link KeriService#validatePresentedCredentialChain} -&gt; persist + complete the
-     * step, advancing {@code PAIRED -&gt; CREDENTIAL_RECEIVED}.
+     * CESR chain -&gt; {@link KeriService#readPresentedCredential} -&gt; persist + complete the step,
+     * advancing {@code PAIRED -&gt; CREDENTIAL_RECEIVED}. The read step does not verify the credential
+     * — see this class's javadoc.
      *
      * @throws CardCeremonyNotFoundException no ceremony exists with {@code ceremonyId}
      * @throws CardCeremonyExpiredException the ceremony's TTL has elapsed
@@ -180,7 +188,7 @@ public class CardCredentialService {
      * @throws IllegalStateException KERI is disabled ({@code keri.enabled=false})
      * @return the ceremony's current state: {@code CREDENTIAL_RECEIVED} on success, {@code FAILED}
      *         (with {@code errorTitle}/{@code errorDetail} set) on any step failure — this method never
-     *         throws for a step-level failure (a rejected/timed-out/malformed presentation), per this
+     *         throws for a step-level failure (a timed-out or unreadable presentation), per this
      *         class's isolation contract.
      */
     public CardAttestationCeremonyEntity presentCredential(UUID ceremonyId, boolean retry) {
@@ -197,8 +205,8 @@ public class CardCredentialService {
         // Carries the SAID of a claimed grant notification (set by doPresentCredential the moment one
         // is claimed, on EITHER dual-path branch) out to this method's own catch blocks below. The
         // agent's notification queue is shared across every ceremony/card: if a grant is claimed here
-        // but the step then fails for ANY reason (rejected/malformed credential, a fetch failure, the
-        // SAID-mismatch defense check, ...), the claim must still be undone — otherwise that
+        // but the step then fails for ANY reason (an unreadable credential, a fetch failure, ...),
+        // the claim must still be undone — otherwise that
         // notification sits unread forever and the NEXT presentCredential call for ANY ceremony
         // re-claims the very same stale grant off the shared queue (awaitByRoute uses no
         // exclude-snapshot for offer/grant waits, and nothing else ever sweeps it), re-admits it, and
@@ -351,20 +359,16 @@ public class CardCredentialService {
             deferredGrantNotificationId = grantNotification.notificationId();
         }
 
-        ValidatedPresentedCredential validated = fetchAndValidateCredential(credentialSaid, walletAid, ceremonyId);
+        // Accepted as presented — nothing here judges the credential; see this class's javadoc. The
+        // old SAID-match cross-check went with the validator: it compared the fetched SAID against a
+        // leaf located by an INDEPENDENT trust path, and with no such second opinion left it would
+        // only be comparing a value to itself.
+        PresentedCredential presented = fetchPresentedCredential(credentialSaid, walletAid, ceremonyId);
+        log.info("credential {} (schema {}) accepted as presented for ceremony {}", presented.credentialSaid(),
+                presented.schemaSaid(), ceremonyId);
 
-        // Defense-in-depth: the validator finds its leaf by issuee match, independently of the SAID
-        // fetched the stream for — they must agree (mirrors the reference).
-        if (!credentialSaid.equals(validated.credentialSaid())) {
-            throw new CardCredentialStepException("CREDENTIAL_REJECTED",
-                    "Validated leaf credential %s does not match the fetched credential %s."
-                            .formatted(validated.credentialSaid(), credentialSaid));
-        }
-        log.info("credential validated {} (schema {}) for ceremony {}", validated.credentialSaid(),
-                validated.schemaSaid(), ceremonyId);
-
-        String finalCredentialSaid = validated.credentialSaid();
-        String finalSchemaSaid = validated.schemaSaid();
+        String finalCredentialSaid = presented.credentialSaid();
+        String finalSchemaSaid = presented.schemaSaid();
         boolean completed = ceremonyService.completeStep(ceremonyId, generation, CardCeremonyState.PAIRED,
                 CardCeremonyState.CREDENTIAL_RECEIVED, c -> {
                     c.setCredentialSaid(finalCredentialSaid);
@@ -532,10 +536,11 @@ public class CardCredentialService {
         }
     }
 
-    /** Fetches the credential's full CESR chain from the agent's store (post-admit) and validates it
-     *  via {@link KeriService#validatePresentedCredentialChain} — see this class's own javadoc for how
-     *  that reuses WS1's schema-aware trust-check logic. */
-    private ValidatedPresentedCredential fetchAndValidateCredential(String credentialSaid, String walletAid,
+    /** Fetches the credential's full CESR chain from the agent's store (post-admit) and reads its
+     *  identifiers via {@link KeriService#readPresentedCredential} — which performs NO verification;
+     *  see this class's own javadoc. The only failure left is structural: an unreadable chain yields
+     *  no SAID to record, and the step must fail rather than invent one. */
+    private PresentedCredential fetchPresentedCredential(String credentialSaid, String walletAid,
             UUID ceremonyId) {
         String fullCesr;
         try {
@@ -553,9 +558,11 @@ public class CardCredentialService {
         }
 
         List<Map<String, Object>> cesrData = CESRStreamUtil.parseCESRData(fullCesr);
-        return keriService.validatePresentedCredentialChain(walletAid, cesrData, "card ceremony " + ceremonyId)
-                .orElseThrow(() -> new CardCredentialStepException("CREDENTIAL_REJECTED",
-                        "Presented credential %s failed schema/trust validation.".formatted(credentialSaid)));
+        return keriService.readPresentedCredential(walletAid, cesrData, "card ceremony " + ceremonyId)
+                .orElseThrow(() -> new CardCredentialStepException("CREDENTIAL_UNREADABLE",
+                        ("No credential issued to %s could be read from the chain presented for %s. The credential "
+                                + "is not rejected on trust grounds — it could not be parsed.")
+                                .formatted(walletAid, credentialSaid)));
     }
 
     // --- small helpers ---

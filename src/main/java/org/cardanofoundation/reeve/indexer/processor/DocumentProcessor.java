@@ -1,6 +1,8 @@
 package org.cardanofoundation.reeve.indexer.processor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -113,7 +115,8 @@ public class DocumentProcessor implements ReeveTypeProcessor {
                 && isText(data.get("content_hash"), HASH_64_HEX)
                 && isText(data.get("plaintext_hash"), HASH_64_HEX)
                 && isPositiveInt(data.get("envelope_version"))
-                && isPositiveInt(data.get("slot_count"));
+                && isPositiveInt(data.get("slot_count"))
+                && isValidRecipientKeyHashes(data.get("recipient_key_hashes"), data.get("slot_count"));
 
         if (data != null && data.isObject()) {
             builder.documentId(textOrNull(data.get("id")))
@@ -121,13 +124,51 @@ public class DocumentProcessor implements ReeveTypeProcessor {
                     .contentHash(matchesOrNull(data.get("content_hash"), HASH_64_HEX))
                     .plaintextHash(matchesOrNull(data.get("plaintext_hash"), HASH_64_HEX))
                     .envelopeVersion(intOrNull(data.get("envelope_version")))
-                    .slotCount(intOrNull(data.get("slot_count")));
+                    .slotCount(intOrNull(data.get("slot_count")))
+                    .recipientKeyHashes(recipientKeyHashesOrEmpty(data.get("recipient_key_hashes")));
         }
         builder.manifestCheck(valid ? CheckStatus.PASS : CheckStatus.FAIL);
 
         DocumentEntity entity = builder.build();
         entity.recomputeVerdict();
         return entity;
+    }
+
+    /**
+     * Absent is VALID: documents anchored before manifest version 1.1 carry no recipient_key_hashes,
+     * and a verifier that condemned them would mark most of the chain's history malformed. Present
+     * means it must be a well-formed array of lowercase 64-hex hashes whose length equals slot_count —
+     * without that equality, index alignment with the IPFS envelope's slots claims nothing.
+     */
+    private static boolean isValidRecipientKeyHashes(JsonNode node, JsonNode slotCount) {
+        if (node == null || node.isNull()) {
+            return true;
+        }
+        if (!node.isArray()) {
+            return false;
+        }
+        for (JsonNode entry : node) {
+            // HASH_64_HEX is lowercase-only, matching the on-chain format. An uppercase value would
+            // never match what the frontend computes, so it is malformed rather than merely unusual.
+            if (!isText(entry, HASH_64_HEX)) {
+                return false;
+            }
+        }
+        return isPositiveInt(slotCount) && node.size() == slotCount.asInt();
+    }
+
+    /** Order is preserved verbatim: entry i corresponds to the IPFS envelope's slots[i]. */
+    private static List<String> recipientKeyHashesOrEmpty(JsonNode node) {
+        if (node == null || !node.isArray()) {
+            return new ArrayList<>();
+        }
+        List<String> hashes = new ArrayList<>();
+        for (JsonNode entry : node) {
+            if (isText(entry, HASH_64_HEX)) {
+                hashes.add(entry.asText());
+            }
+        }
+        return hashes;
     }
 
     private static boolean isNonBlankText(JsonNode node) {

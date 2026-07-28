@@ -1,6 +1,7 @@
 package org.cardanofoundation.reeve.indexer.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -28,8 +29,17 @@ import org.cardanofoundation.reeve.indexer.processor.IpfsGatewayClient;
 @RequiredArgsConstructor
 public class DocumentService {
 
-    /** Sort fields are whitelisted — everything else silently falls back (no SQL surprises). */
-    private static final Set<String> SORTABLE = Set.of("slot", "blockTime", "createdAt");
+    /**
+     * Sort fields are whitelisted — everything else silently falls back (no SQL surprises). The VALUES
+     * are column names, not entity properties: {@code DocumentRepository.search} is a native query, so
+     * Spring appends this ORDER BY straight into raw SQL and "blockTime" would fail at runtime with
+     * "column does not exist". The KEYS stay the API's property names, so the public contract
+     * ({@code ?sort=blockTime,asc}) is unchanged.
+     */
+    private static final Map<String, String> SORTABLE_COLUMNS = Map.of(
+            "slot", "slot",
+            "blockTime", "block_time",
+            "createdAt", "created_at");
 
     private final DocumentRepository documentRepository;
     private final IpfsGatewayClient ipfsGatewayClient;
@@ -43,20 +53,14 @@ public class DocumentService {
     // flood — the same unbounded-COUNT shape that was removed from detail(). This is knowingly retained
     // as part of the "remove the publisher check, re-opening forged-anchor DoS" decision; hardening it
     // (count-free Slice pagination, or a capped count) is deferred. The page size itself is capped (200).
-    public DocumentListResponse list(String orgId, DocumentVerdict verdict, int page, int size,
-            String sort) {
+    public DocumentListResponse list(String orgId, DocumentVerdict verdict, String recipientKeyHash,
+            int page, int size, String sort) {
         PageRequest pageRequest = PageRequest.of(Math.max(0, page),
                 Math.min(Math.max(1, size), 200), parseSort(sort));
-        Page<DocumentEntity> result;
-        if (orgId != null && verdict != null) {
-            result = documentRepository.findByOrganisationIdAndVerdict(orgId, verdict, pageRequest);
-        } else if (orgId != null) {
-            result = documentRepository.findByOrganisationId(orgId, pageRequest);
-        } else if (verdict != null) {
-            result = documentRepository.findByVerdict(verdict, pageRequest);
-        } else {
-            result = documentRepository.findAll(pageRequest);
-        }
+        // One query with nullable parameters rather than a branch per filter combination: adding the
+        // recipient dimension would have taken the old orgId x verdict branching from four to eight.
+        Page<DocumentEntity> result = documentRepository.search(orgId,
+                verdict != null ? verdict.name() : null, recipientKeyHash, pageRequest);
         return new DocumentListResponse(result.getContent().stream()
                 .map(e -> DocumentView.from(e, resolveIdentities(e))).toList(),
                 result.getTotalElements(), result.getTotalPages(), result.getNumber(),
@@ -142,8 +146,9 @@ public class DocumentService {
             String requestedField = parts[0].trim();
             // An unwhitelisted field falls back to the default field AND direction together —
             // a caller-supplied direction paired with a rejected field must not leak through.
-            if (SORTABLE.contains(requestedField)) {
-                field = requestedField;
+            String column = SORTABLE_COLUMNS.get(requestedField);
+            if (column != null) {
+                field = column;
                 if (parts.length > 1 && "asc".equalsIgnoreCase(parts[1].trim())) {
                     direction = Sort.Direction.ASC;
                 }

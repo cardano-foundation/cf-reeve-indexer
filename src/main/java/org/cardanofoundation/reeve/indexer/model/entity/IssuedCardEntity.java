@@ -60,9 +60,36 @@ public class IssuedCardEntity {
     /** SAID of the presented credential's schema. */
     @Column(name = "attestation_schema_said")
     private String attestationSchemaSaid;
-    /** Cardano tx hash of the CIP-170 ATTEST anchoring this card. */
+    /** Cardano tx hash of the CIP-170 ATTEST anchoring this card. NULL when the deployment has no
+     *  organiser wallet configured — the on-chain publish is optional, the KEL anchor below is not. */
     @Column(name = "attestation_tx_hash")
     private String attestationTxHash;
+
+    // --- KEL anchor (V1.10): the wallet's own attestation of this card, independent of the chain ---
+    /** Sequence number of the wallet KEL interaction (ixn) event anchoring this card. */
+    @Column(name = "attestation_kel_sequence")
+    private String attestationKelSequence;
+    /** SAID of that KEL event, so a verifier can confirm it read the event it was pointed at. */
+    @Column(name = "attestation_kel_event_said")
+    private String attestationKelEventSaid;
+    /** The metadata label the anchored payload was built with, stored as the exact STRING fed into
+     *  the payload SAID — see the V1.10 migration for why a number would be ambiguous. */
+    @Column(name = "attestation_metadata_label")
+    private String attestationMetadataLabel;
+    /**
+     * INFORMATIONAL ONLY — the digest this indexer computed over the card body.
+     *
+     * <p>A verifier MUST recompute it from the card JSON minus the attestation block and compare;
+     * these are carried so a mismatch can be reported precisely, NOT so they can be trusted. The same
+     * party supplied both this claim and the anchor it would be checked against, so accepting it as
+     * given makes the verification vacuous.
+     */
+    @Column(name = "attestation_card_digest")
+    private String attestationCardDigest;
+    /** INFORMATIONAL ONLY, exactly as {@link #attestationCardDigest} — the payload SAID the wallet
+     *  anchored, which a verifier must re-derive from the recomputed digest. */
+    @Column(name = "attestation_payload_said")
+    private String attestationPayloadSaid;
     /**
      * The full CESR chain of the presented credential, captured at attestation time. Carried on the
      * exported card so a consumer (the platform's B2 import verification) can re-validate the

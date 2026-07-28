@@ -2,6 +2,8 @@ package org.cardanofoundation.reeve.indexer.controller;
 
 import java.util.Optional;
 
+import jakarta.validation.constraints.Pattern;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.CacheControl;
@@ -24,6 +26,12 @@ import org.cardanofoundation.reeve.indexer.service.DocumentService;
  * unauthenticated: a verifier you must log into is not a verifier. Rows are hash-identified
  * only — file names, descriptions and e-mails never reach L1/IPFS (I10), so they cannot
  * appear here.
+ *
+ * <p><b>Do NOT add {@code @Validated} to this class.</b> It looks like it would enable the
+ * {@code @Pattern} on {@code recipientKeyHash}, and it does the opposite: its presence makes Spring
+ * defer to the older AOP-proxy validation path and skip the built-in method validation that actually
+ * runs here, so every malformed value would sail through as 200 instead of 400. Verified both ways in
+ * {@code DocumentControllerValidationTest}.
  */
 @RestController
 @RequestMapping("/api/v1/documents")
@@ -38,10 +46,20 @@ public class DocumentController {
     public ResponseEntity<DocumentListResponse> list(
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) DocumentVerdict verdict,
+            // sha256 of a recipient's X25519 public key, lowercase hex (see cf-reeve-platform
+            // docs/onChainFormat.md "Recipient key hashes"). Lowercase-only on purpose: the on-chain
+            // values are lowercase, so silently accepting uppercase would return an empty page rather
+            // than telling the caller their input is wrong.
+            //
+            // Unauthenticated like the rest of this controller, and necessarily so - a hash is public
+            // data, and the external recipients this serves have no Reeve account to authenticate with.
+            @RequestParam(required = false) @Pattern(regexp = "^[0-9a-f]{64}$",
+                    message = "recipientKeyHash must be 64 lowercase hexadecimal characters")
+            String recipientKeyHash,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "slot,desc") String sort) {
-        return ResponseEntity.ok(documentService.list(orgId, verdict, page, size, sort));
+        return ResponseEntity.ok(documentService.list(orgId, verdict, recipientKeyHash, page, size, sort));
     }
 
     @Operation(summary = "Manifest + verdict detail for every anchor of a documentId")

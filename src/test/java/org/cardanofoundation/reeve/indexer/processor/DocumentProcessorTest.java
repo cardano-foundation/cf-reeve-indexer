@@ -3,6 +3,7 @@ package org.cardanofoundation.reeve.indexer.processor;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -229,5 +230,85 @@ class DocumentProcessorTest {
         metadata.setType(ReeveTransactionType.DOCUMENT);
         metadata.setTxHash("tx-garbage");
         assertDoesNotThrow(() -> processor.process(metadata));
+    }
+
+    // -----------------------------------------------------------------------------------------
+    // recipient_key_hashes (manifest version 1.1) — the anchor the recipient filter matches on.
+    // See cf-reeve-platform docs/onChainFormat.md "Recipient key hashes".
+    // -----------------------------------------------------------------------------------------
+
+    private static final String HASH_A = "300c9c9603b92a4b39ed3958bf9240114804db4fd373012c0ca47432d63425ae";
+    private static final String HASH_B = "f35e5616160a30bf3c6e79fa73c576d40205e8fc3ba4e1c6dcf93e6b98e857b4";
+
+    /** validData() with its slot_count rewritten and a recipient_key_hashes array spliced in. */
+    private static String dataWithHashes(int slotCount, String hashesJson) {
+        return validData()
+                .replace("\"slot_count\":3", "\"slot_count\":" + slotCount)
+                .trim()
+                .replaceFirst("}$", ",\"recipient_key_hashes\":" + hashesJson + "}");
+    }
+
+    private DocumentEntity processAndCapture(String dataJson) throws Exception {
+        processor.process(metadata(dataJson));
+        ArgumentCaptor<DocumentEntity> captor = ArgumentCaptor.forClass(DocumentEntity.class);
+        verify(documentRepository).save(captor.capture());
+        return captor.getValue();
+    }
+
+    @Test
+    void storesRecipientKeyHashesInManifestOrder() throws Exception {
+        DocumentEntity entity = processAndCapture(
+                dataWithHashes(2, "[\"" + HASH_A + "\",\"" + HASH_B + "\"]"));
+
+        assertEquals(CheckStatus.PASS, entity.getManifestCheck());
+        // Order preserved exactly — index i must line up with the envelope's slots[i], which is what
+        // lets a recipient address their own slot instead of trial-decrypting every one.
+        assertEquals(List.of(HASH_A, HASH_B), entity.getRecipientKeyHashes());
+    }
+
+    @Test
+    void treatsAnAbsentRecipientKeyHashesFieldAsAValidPre11Anchor() throws Exception {
+        // Documents anchored before metadata version 1.1 have no such field. They must keep indexing
+        // normally as PASS — an empty list simply never matches a recipient filter. Condemning them
+        // would mark most of the chain's history malformed.
+        DocumentEntity entity = processAndCapture(validData());
+
+        assertEquals(CheckStatus.PASS, entity.getManifestCheck());
+        assertTrue(entity.getRecipientKeyHashes().isEmpty());
+    }
+
+    @Test
+    void rejectsAMalformedRecipientKeyHash() throws Exception {
+        DocumentEntity entity = processAndCapture(
+                dataWithHashes(2, "[\"" + HASH_A + "\",\"NOT-A-HASH\"]"));
+
+        assertEquals(CheckStatus.FAIL, entity.getManifestCheck());
+        assertEquals(DocumentVerdict.MALFORMED_MANIFEST, entity.getVerdict());
+    }
+
+    @Test
+    void rejectsARecipientKeyHashListWhoseLengthDisagreesWithSlotCount() throws Exception {
+        // The two must agree, or index alignment with the envelope's slots claims nothing.
+        DocumentEntity entity = processAndCapture(
+                dataWithHashes(3, "[\"" + HASH_A + "\",\"" + HASH_B + "\"]"));
+
+        assertEquals(CheckStatus.FAIL, entity.getManifestCheck());
+    }
+
+    @Test
+    void rejectsARecipientKeyHashesValueThatIsNotAnArray() throws Exception {
+        DocumentEntity entity = processAndCapture(dataWithHashes(1, "\"" + HASH_A + "\""));
+
+        assertEquals(CheckStatus.FAIL, entity.getManifestCheck());
+    }
+
+    @Test
+    void rejectsAnUppercaseRecipientKeyHash() throws Exception {
+        // The on-chain format is lowercase hex. Storing an uppercase value would guarantee it never
+        // matches what the frontend computes, which reads as "the filter is broken".
+        DocumentEntity entity = processAndCapture(
+                dataWithHashes(1, "[\"" + HASH_A.toUpperCase() + "\"]"));
+
+        assertEquals(CheckStatus.FAIL, entity.getManifestCheck());
     }
 }

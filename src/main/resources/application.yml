@@ -75,12 +75,12 @@ keri:
   # is fine for a single local/dev instance but must be overridden (via KERI_BRAN) for any shared
   # or persistent deployment. Leaving this blank falls back to an EPHEMERAL random passcode with a
   # loud CONFIG/SECURITY warning at startup (see KeriConfig#resolveBran) rather than failing to boot.
-  bran: ${KERI_BRAN:D8gXbrxwDS80FV4G_wHVZ}
+  bran: ${KERI_BRAN:0A98gEaYge5XlagRM9okY}
   # Alias the indexer's own KERI agent AID is created/looked up under. Stable by design — changing
   # it makes KeriConfig create/look up a DIFFERENT agent AID under the same bran above, which is
   # just as pairing-breaking as an unstable bran. Must also be set (or left at this default)
   # consistently per deployment.
-  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-indexer-agent}
+  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-attestation}
   # Deprecated: use credential-schemas[].oobis instead. Still honored for one release
   # (unioned with every configured schema's oobis) at startup OOBI resolution.
   oobis: ${KERI_OOBIS:http://keria:3902/oobi/EJO54wp79Apo4pOyAloOVQw9BQlVohycPWV0FaurG8Br/agent/EOS8r7jbPS1rYKR7duLMfuSwQsNUuUPmuFq4b-ORm9ih}

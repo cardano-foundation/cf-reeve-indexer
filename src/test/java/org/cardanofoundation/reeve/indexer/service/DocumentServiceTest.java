@@ -62,16 +62,76 @@ class DocumentServiceTest {
 
     @Test
     void listMapsEntitiesToViews() {
-        when(documentRepository.findByOrganisationId(eq("f".repeat(64)), any()))
+        when(documentRepository.search(eq("f".repeat(64)), isNull(), isNull(), any()))
                 .thenReturn(new PageImpl<>(List.of(entity("tx1", "doc-1")),
                         PageRequest.of(0, 20), 1));
 
-        DocumentListResponse response = service.list("f".repeat(64), null, 0, 20, "slot,desc");
+        DocumentListResponse response = service.list("f".repeat(64), null, null, 0, 20, "slot,desc");
 
         assertEquals(1, response.total());
         assertEquals(1, response.content().size());
         assertEquals("tx1", response.content().get(0).txHash());
         assertEquals(DocumentVerdict.VERIFIED, response.content().get(0).verdict());
+    }
+
+    // -----------------------------------------------------------------------------------------
+    // Recipient key hash filter
+    // -----------------------------------------------------------------------------------------
+
+    private static final String HASH_A = "300c9c9603b92a4b39ed3958bf9240114804db4fd373012c0ca47432d63425ae";
+
+    @Test
+    void passesTheRecipientKeyHashStraightThroughToTheQuery() {
+        when(documentRepository.search(isNull(), isNull(), eq(HASH_A), any()))
+                .thenReturn(new PageImpl<>(List.of(entity("tx1", "doc-1")), PageRequest.of(0, 20), 1));
+
+        DocumentListResponse response = service.list(null, null, HASH_A, 0, 20, "slot,desc");
+
+        assertEquals(1, response.total());
+        verify(documentRepository).search(isNull(), isNull(), eq(HASH_A), any());
+    }
+
+    @Test
+    void combinesTheRecipientFilterWithOrgAndVerdict() {
+        // The verdict reaches the native query as its enum NAME, since the column is a varchar.
+        when(documentRepository.search(eq("org-1"), eq("VERIFIED"), eq(HASH_A), any()))
+                .thenReturn(new PageImpl<>(List.of(entity("tx1", "doc-1")), PageRequest.of(0, 20), 1));
+
+        DocumentListResponse response =
+                service.list("org-1", DocumentVerdict.VERIFIED, HASH_A, 0, 20, "slot,desc");
+
+        assertEquals(1, response.total());
+        verify(documentRepository).search(eq("org-1"), eq("VERIFIED"), eq(HASH_A), any());
+    }
+
+    @Test
+    void exposesRecipientKeyHashesOnTheView() {
+        DocumentEntity withHashes = entity("tx1", "doc-1");
+        withHashes.setRecipientKeyHashes(List.of(HASH_A));
+        when(documentRepository.search(isNull(), isNull(), isNull(), any()))
+                .thenReturn(new PageImpl<>(List.of(withHashes), PageRequest.of(0, 20), 1));
+
+        DocumentListResponse response = service.list(null, null, null, 0, 20, "slot,desc");
+
+        assertEquals(List.of(HASH_A), response.content().get(0).recipientKeyHashes());
+    }
+
+    /**
+     * search() is a NATIVE query, so Spring appends this Sort straight into raw SQL. If the whitelist
+     * ever emits the entity property name "blockTime" instead of the column "block_time", every sorted
+     * request fails at runtime with "column does not exist" — a failure no compile step would catch.
+     */
+    @Test
+    void sortFieldsAreTranslatedToColumnNamesForTheNativeQuery() {
+        ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
+        when(documentRepository.search(isNull(), isNull(), isNull(), captor.capture()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        service.list(null, null, null, 0, 20, "blockTime,asc");
+        assertEquals(Sort.by(Sort.Direction.ASC, "block_time"), captor.getValue().getSort());
+
+        service.list(null, null, null, 0, 20, "createdAt,desc");
+        assertEquals(Sort.by(Sort.Direction.DESC, "created_at"), captor.getValue().getSort());
     }
 
     @Test
@@ -224,20 +284,20 @@ class DocumentServiceTest {
 
     @Test
     void invalidSortFieldFallsBackToSlot() {
-        when(documentRepository.findByOrganisationId(eq("f".repeat(64)), any()))
+        when(documentRepository.search(eq("f".repeat(64)), isNull(), isNull(), any()))
                 .thenReturn(new PageImpl<>(List.of()));
-        assertDoesNotThrow(() -> service.list("f".repeat(64), null, 0, 20, "evil_column,desc"));
+        assertDoesNotThrow(() -> service.list("f".repeat(64), null, null, 0, 20, "evil_column,desc"));
     }
 
     @Test
     void invalidSortFieldFallsBackToSlotDescRegardlessOfRequestedDirection() {
         ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
-        when(documentRepository.findByOrganisationId(eq("f".repeat(64)),
+        when(documentRepository.search(eq("f".repeat(64)), isNull(), isNull(),
                 pageRequestCaptor.capture())).thenReturn(new PageImpl<>(List.of()));
 
         // an invalid field paired with an explicit "asc" must not leak the direction through:
         // both field and direction fall back to their defaults together.
-        service.list("f".repeat(64), null, 0, 20, "evil_column,asc");
+        service.list("f".repeat(64), null, null, 0, 20, "evil_column,asc");
 
         assertEquals(Sort.by(Sort.Direction.DESC, "slot"), pageRequestCaptor.getValue().getSort());
     }

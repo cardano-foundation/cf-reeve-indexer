@@ -1,13 +1,18 @@
 package org.cardanofoundation.reeve.indexer.model.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 
 import lombok.*;
 
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
+
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 
 import org.cardanofoundation.reeve.indexer.model.domain.document.CheckStatus;
 import org.cardanofoundation.reeve.indexer.model.domain.document.DocumentVerdict;
@@ -39,6 +44,19 @@ public class DocumentEntity {
     private Integer envelopeVersion;
     @Column(name = "slot_count")
     private Integer slotCount;
+
+    /**
+     * Recipient key hashes from the manifest, index-aligned with the IPFS envelope's slots. Empty for
+     * pre-1.1 anchors, which carry no hashes and so never match a recipient filter.
+     *
+     * <p>{@code @Builder.Default} is load-bearing: this class is {@code @Builder}, and without it
+     * Lombok drops the initialiser and the field arrives null on every built instance.
+     */
+    @Type(ListArrayType.class)
+    @Column(name = "recipient_key_hashes", columnDefinition = "text[]")
+    @Builder.Default
+    private List<String> recipientKeyHashes = new ArrayList<>();
+
     @Column(name = "slot")
     private Long slot;
     @Column(name = "block_time")

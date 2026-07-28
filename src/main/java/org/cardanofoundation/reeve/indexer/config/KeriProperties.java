@@ -33,7 +33,7 @@ public class KeriProperties {
      * makes {@link KeriConfig} create (or look up) a DIFFERENT agent AID under the same {@link
      * #bran}, which is just as pairing-breaking as an unstable bran.
      */
-    private String identifierName = "reeve-indexer-agent";
+    private String identifierName = "reeve-attestation";
 
     /**
      * @deprecated Use {@link #credentialSchemas}' {@code oobis} instead. Kept for one release

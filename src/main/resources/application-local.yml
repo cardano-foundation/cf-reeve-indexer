@@ -57,10 +57,10 @@ keri:
   # STABLE passcode for the indexer's OWN KERI agent AID (card-attestation ceremony, design doc
   # Part A / A2). Must be set per deployment for a stable identity — see application.yml's `bran`
   # comment for why (a rotating value breaks Veridian wallet pairings on every restart).
-  bran: ${KERI_BRAN:D8gXbrxwDS80FV4G_wHVZ}
+  bran: ${KERI_BRAN:0A98gEaYge5XlagRM9okY}
   # Alias the indexer's own KERI agent AID is created/looked up under. Must be set per deployment
   # for a stable identity — see application.yml's `identifier-name` comment.
-  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-indexer-agent}
+  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-attestation}
   # Deprecated: use credential-schemas[].oobis instead. Still honored for one release
   # (unioned with every configured schema's oobis) at startup OOBI resolution.
   oobis:

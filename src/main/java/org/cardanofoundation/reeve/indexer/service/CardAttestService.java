@@ -504,6 +504,14 @@ public class CardAttestService {
      * set in the very same {@code completeStep} mutator that advanced the ceremony here), so a manual
      * (or future automated) reconciliation can always re-derive the exact card update from the
      * ceremony row alone, with no data lost even if this save never runs at all.
+     *
+     * <p><b>The attestation fields written here are CLAIMS, not verified facts.</b> The indexer
+     * accepts whatever credential the paired wallet presents without checking its schema, issuer,
+     * trust chain or revocation state ({@code KeriService#readPresentedCredential}), so {@code
+     * attestationCredentialSaid}/{@code attestationSchemaSaid} record only what was presented. A
+     * consumer that needs them to MEAN something must verify the credential itself — that is the
+     * platform's B2 import verifier's job, and {@code attestationCredentialCesr} is carried on the
+     * card precisely so it can. Do not reintroduce an assumption of trustworthiness here.
      */
     private void bindCardAttestation(CardAttestationCeremonyEntity ceremony, IssuedCardEntity card, String txHash) {
         String credentialCesr = fetchCredentialCesr(ceremony);
