@@ -8,11 +8,10 @@ import jakarta.persistence.*;
 
 import lombok.*;
 
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
-
-import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 
 import org.cardanofoundation.reeve.indexer.model.domain.document.CheckStatus;
 import org.cardanofoundation.reeve.indexer.model.domain.document.DocumentVerdict;

@@ -3,7 +3,6 @@ package org.cardanofoundation.reeve.indexer.service.document;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 

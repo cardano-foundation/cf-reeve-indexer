@@ -8,13 +8,13 @@ import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Optional;
 
+import org.springframework.dao.OptimisticLockingFailureException;
+
 import com.bloxbean.cardano.client.util.HexUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import org.springframework.dao.OptimisticLockingFailureException;
 
 import org.cardanofoundation.reeve.indexer.model.domain.document.CheckStatus;
 import org.cardanofoundation.reeve.indexer.model.domain.document.DocumentVerdict;
