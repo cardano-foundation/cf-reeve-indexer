@@ -8,12 +8,13 @@ export const documentsApi = (baseUrl: string) => {
   const { get } = httpService(baseUrl)
 
   const getDocuments = (params: GetDocumentsParams) => {
-    const { orgId, verdict, page, size, sort } = params
+    const { orgId, verdict, recipientKeyHash, page, size, sort } = params
 
     const queryParams: string[] = []
 
     if (orgId) queryParams.push(`orgId=${encodeURIComponent(orgId)}`)
     if (verdict) queryParams.push(`verdict=${verdict}`)
+    if (recipientKeyHash) queryParams.push(`recipientKeyHash=${encodeURIComponent(recipientKeyHash)}`)
     queryParams.push(`page=${page ?? 0}`)
     queryParams.push(`size=${size ?? 20}`)
     if (sort) queryParams.push(`sort=${encodeURIComponent(sort)}`)

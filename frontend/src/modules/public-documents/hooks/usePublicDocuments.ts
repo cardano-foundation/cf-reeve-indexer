@@ -24,11 +24,22 @@ export const usePublicDocuments = () => {
     setVerdictValue(value)
   }
 
+  // In-memory only: no localStorage, no sessionStorage. A recipient key hash is public data, but
+  // persisting it would leave a durable, correlatable identifier on the machine — and the decrypt
+  // panel keeps nothing either. Re-presenting the key after a reload is the deliberate cost.
+  const [recipientKeyHash, setRecipientKeyHashValue] = useState<string | null>(null)
+
+  const setRecipientKeyHash = (value: string | null) => {
+    handlePagination(0, rowsPerPage)
+    setRecipientKeyHashValue(value)
+  }
+
   const { documents, isFetching, isError } = useGetDocumentsModel({
     orgId: selectedOrganisation || undefined,
     page,
     size: rowsPerPage,
-    ...(verdict !== VERDICT_FILTER_ALL ? { verdict: verdict as DocumentVerdict } : {})
+    ...(verdict !== VERDICT_FILTER_ALL ? { verdict: verdict as DocumentVerdict } : {}),
+    ...(recipientKeyHash ? { recipientKeyHash } : {})
   })
 
   return {
@@ -39,6 +50,8 @@ export const usePublicDocuments = () => {
     rowsPerPage,
     onPaginationChange: handlePagination,
     verdict,
-    onVerdictChange: setVerdict
+    onVerdictChange: setVerdict,
+    recipientKeyHash,
+    onRecipientKeyHashChange: setRecipientKeyHash
   }
 }

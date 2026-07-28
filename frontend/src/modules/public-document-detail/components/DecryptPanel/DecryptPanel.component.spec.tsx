@@ -17,6 +17,7 @@ const anchor: DocumentView = {
   plaintext_hash: 'b'.repeat(64),
   envelope_version: 1,
   slot_count: 2,
+  recipient_key_hashes: [],
   slot: 12345,
   block_time: 1_700_000_000,
   checks: { manifest: 'PASS', ipfs: 'PASS', content_hash: 'PASS', envelope: 'PASS' },

@@ -15,7 +15,7 @@ import { CARD_ISSUANCE_DISABLED_MESSAGE, CARD_ISSUANCE_PAGE_DESCRIPTION, CARD_IS
  * deployment can still hide the feature. Not wrapped in ProtectedRoute — no organisation gate.
  */
 export const ViewCardIssuance = () => {
-  const { issuanceEnabled, isFetching: isStatusFetching } = useGetCardStatusModel()
+  const { issuanceEnabled, isFetching: isStatusFetching, isPending: isStatusPending } = useGetCardStatusModel()
 
   return (
     <>
@@ -23,11 +23,19 @@ export const ViewCardIssuance = () => {
         <LayoutPublic.Header.Details description={CARD_ISSUANCE_PAGE_DESCRIPTION} title={CARD_ISSUANCE_PAGE_TITLE} />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={3} isHeightRestricted>
+        {/* Progress reflects ANY fetch (including background revalidation); what renders below must
+            not — see the isPending gates. */}
         <Box sx={{ height: 3 }}>{isStatusFetching && <LinearProgress />}</Box>
 
-        {!isStatusFetching && !issuanceEnabled && <Alert severity="info">{CARD_ISSUANCE_DISABLED_MESSAGE}</Alert>}
+        {!isStatusPending && !issuanceEnabled && <Alert severity="info">{CARD_ISSUANCE_DISABLED_MESSAGE}</Alert>}
 
-        {!isStatusFetching && issuanceEnabled && <IssueCardForm />}
+        {/* Gated on isPending (first load), NOT isFetching. IssueCardForm owns all the card-creation
+            state — typed fields, passkey mode, the issued card, the derived public key, and any open
+            attestation ceremony — none of which is persisted anywhere. Gating it on isFetching
+            unmounted the whole subtree on every background refetch, so returning to the tab (which
+            triggers a refetch on focus) silently wiped the operator's work. Once the status has
+            resolved once, issuanceEnabled is a settled cached value and the form stays mounted. */}
+        {!isStatusPending && issuanceEnabled && <IssueCardForm />}
       </LayoutPublic.Main>
     </>
   )

@@ -30,6 +30,9 @@ export type DocumentView = {
   plaintext_hash: string | null
   envelope_version: number | null
   slot_count: number | null
+  // sha256 of each recipient's X25519 public key, index-aligned with the envelope's slots.
+  // Empty for anchors published before metadata 1.1 - those can never match a recipient filter.
+  recipient_key_hashes: string[]
   slot: number | null
   block_time: number | null
   checks: DocumentChecks
@@ -58,6 +61,8 @@ export type DocumentDetailResponse = {
 export type GetDocumentsParams = {
   orgId?: string
   verdict?: DocumentVerdict
+  /** 64 lowercase hex chars; the backend rejects anything else with 400. */
+  recipientKeyHash?: string
   page?: number
   size?: number
   sort?: string

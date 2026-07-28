@@ -25,11 +25,13 @@ import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
 import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { HonestLimits } from 'modules/public-documents/components/HonestLimits/HonestLimits.component'
+import { MyDocumentsFilter } from 'modules/public-documents/components/MyDocumentsFilter/MyDocumentsFilter.component'
 import { VerdictChip } from 'modules/public-documents/components/VerdictChip/VerdictChip.component'
 import {
   DOCUMENTS_EMPTY_MESSAGE,
   DOCUMENTS_ERROR_MESSAGE,
   DOCUMENTS_NO_MATCHING_MESSAGE,
+  DOCUMENTS_NO_RECIPIENT_MATCH_MESSAGE,
   DOCUMENTS_PAGE_DESCRIPTION,
   DOCUMENTS_PAGE_TITLE,
   DOCUMENTS_ROWS_PER_PAGE_OPTIONS,
@@ -148,7 +150,18 @@ export const ViewPublicDocuments = () => {
   const [searchParams] = useSearchParams()
   const { organisations, selectedOrganisation, setSelectedOrganisation } = useLayoutPublicContext()
 
-  const { documents, isFetching, isError, page, rowsPerPage, onPaginationChange, verdict, onVerdictChange } = usePublicDocuments()
+  const {
+    documents,
+    isFetching,
+    isError,
+    page,
+    rowsPerPage,
+    onPaginationChange,
+    verdict,
+    onVerdictChange,
+    recipientKeyHash,
+    onRecipientKeyHashChange
+  } = usePublicDocuments()
 
   useEffect(() => {
     const orgId = orgIdFromPath || searchParams.get('organisation_id')
@@ -208,6 +221,8 @@ export const ViewPublicDocuments = () => {
             </FormControl>
           </Box>
 
+          <MyDocumentsFilter onRecipientKeyHashChange={onRecipientKeyHashChange} recipientKeyHash={recipientKeyHash} />
+
           {/* Rendered unconditionally: a key card is org-independent, so this must not depend on a
               selected organisation or on the documents list having loaded. */}
           <Button variant="contained" onClick={() => navigate(PATHS.CARD_ISSUANCE)}>
@@ -235,7 +250,13 @@ export const ViewPublicDocuments = () => {
                   <TableRow>
                     <TableCell colSpan={7}>
                       <Typography color={theme.palette.text.secondary} sx={{ py: 2 }} textAlign="center" variant="body2">
-                        {isFetching ? '' : verdict !== VERDICT_FILTER_ALL ? DOCUMENTS_NO_MATCHING_MESSAGE : DOCUMENTS_EMPTY_MESSAGE}
+                        {isFetching
+                          ? ''
+                          : recipientKeyHash
+                            ? DOCUMENTS_NO_RECIPIENT_MATCH_MESSAGE
+                            : verdict !== VERDICT_FILTER_ALL
+                              ? DOCUMENTS_NO_MATCHING_MESSAGE
+                              : DOCUMENTS_EMPTY_MESSAGE}
                       </Typography>
                     </TableCell>
                   </TableRow>

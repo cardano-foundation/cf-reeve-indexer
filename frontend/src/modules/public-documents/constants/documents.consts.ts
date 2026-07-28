@@ -58,3 +58,30 @@ export const DOCUMENTS_ERROR_MESSAGE = 'Documents could not be loaded. Please tr
 // valid), so this action is rendered unconditionally — it must never depend on an organisation being
 // selected, or on documents having loaded.
 export const ISSUE_KEY_CARD_BUTTON_LABEL = 'Issue key card'
+
+// "Filter for my documents": the holder presents a PUBLIC key, the browser hashes it to the same
+// recipient_key_hash the publisher anchored on-chain, and the list is filtered by that hash.
+// No private key is ever derived, requested or transmitted, and nothing is persisted - the hash
+// lives in React state only, matching DecryptPanel's stance that key material never outlives the page.
+export const MY_DOCUMENTS_FILTER_BUTTON_LABEL = 'Filter for my documents'
+export const MY_DOCUMENTS_FILTER_CANCEL_LABEL = 'Cancel'
+export const MY_DOCUMENTS_FILTER_CLEAR_LABEL = 'Clear filter'
+export const MY_DOCUMENTS_SOURCE_SELECTOR_LABEL = 'Key source'
+export const MY_DOCUMENTS_SOURCE_PASSKEY = 'Passkey'
+export const MY_DOCUMENTS_SOURCE_RAW = 'Paste public key'
+export const MY_DOCUMENTS_PASSKEY_DESCRIPTION =
+  'Unlock with the passkey your key was issued from. Only your public key is derived — the private key never leaves your device and is not needed to filter.'
+export const MY_DOCUMENTS_PASSKEY_UNLOCK_BUTTON_LABEL = 'Unlock with passkey'
+export const MY_DOCUMENTS_RAW_KEY_LABEL = 'X25519 public key (64 hex characters)'
+export const MY_DOCUMENTS_USE_KEY_BUTTON_LABEL = 'Apply'
+export const MY_DOCUMENTS_ACTIVE_PREFIX = 'Showing documents addressed to'
+export const MY_DOCUMENTS_INVALID_KEY_MESSAGE = 'An X25519 public key must be 64 hexadecimal characters.'
+export const MY_DOCUMENTS_PASSKEY_UNSUPPORTED_MESSAGE =
+  'This browser or device cannot use passkeys. Paste your public key instead.'
+export const MY_DOCUMENTS_PASSKEY_FAILED_MESSAGE =
+  'Could not read a key from that passkey. Paste your public key instead.'
+
+// Shown when a recipient filter is active and matched nothing. It must say why a CORRECT key can
+// still return nothing, or the honest answer reads as a bug.
+export const DOCUMENTS_NO_RECIPIENT_MATCH_MESSAGE =
+  'No published document is addressed to this key. Documents anchored before metadata version 1.1 carry no recipient hashes and can never match.'
