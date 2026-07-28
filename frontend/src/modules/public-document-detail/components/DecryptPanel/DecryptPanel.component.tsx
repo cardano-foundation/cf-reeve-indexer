@@ -40,9 +40,9 @@ type DecryptPanelProps = {
 type KeySource = 'passkey' | 'raw'
 
 /**
- * §2.6 in-browser decrypt panel. All crypto and the private key itself stay client-side
+ * In-browser decrypt panel. All crypto and the private key itself stay client-side
  * (`useDecryptPanel`); the only network call this component triggers is the envelope fetch (on the
- * user's explicit "Decrypt" click - never on mount, I3) via the public proxy.
+ * user's explicit "Decrypt" click - never on mount) via the public proxy.
  *
  * The key is supplied one of two ways, chosen with the source selector: re-derived from the
  * holder's passkey (the primary, permissionless path — no uploaded record), or a raw hex key
@@ -66,7 +66,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
 
   const handleSourceChange = (_event: React.MouseEvent<HTMLElement>, next: KeySource | null) => {
     if (!next || next === source) return
-    // Switching input methods discards any staged key material and errors (I1 hygiene): the hook's
+    // Switching input methods discards any staged key material and errors: the hook's
     // reset() clears the key ref and status back to idle.
     setSource(next)
     setRawKeyInput('')
@@ -76,7 +76,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
   const handleUnlockPasskey = async () => {
     // Guard against a double-click firing two overlapping navigator.credentials.get() assertions.
     // setUnlocking is synchronous, so the WebAuthn call inside unlockWithPasskey is still the first
-    // await in the user gesture (I3).
+    // await in the user gesture.
     if (unlocking) return
     setUnlocking(true)
     try {
@@ -88,7 +88,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
 
   const handleUseRawKey = () => {
     setRawKey(rawKeyInput)
-    // Clear the component-level copy the instant it's handed to the hook (I1 hygiene) — the hook's
+    // Clear the component-level copy the instant it's handed to the hook — the hook's
     // own privateKeysRef is the sole surviving copy from here on, cleared after every decrypt / unmount.
     setRawKeyInput('')
   }

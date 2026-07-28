@@ -8,11 +8,11 @@ import org.cardanofoundation.reeve.indexer.model.domain.ceremony.CardCeremonySta
 import org.cardanofoundation.reeve.indexer.model.entity.CardAttestationCeremonyEntity;
 
 /**
- * The card-attestation ceremony wizard's view of a single ceremony (design doc Part A / A6): its
- * identity, the card it attests, its current state-machine position, the indexer's own KERI agent
- * OOBI (so the wizard can render the pairing QR straight from whichever response it just got, with no
- * separate call), the fully-attested card once the ceremony completes, and — once the ceremony has
- * FAILED a step — the error the wizard should surface.
+ * The card-attestation ceremony wizard's view of a single ceremony: its identity, the card it
+ * attests, its current state-machine position, the indexer's own KERI agent OOBI (so the wizard
+ * can render the pairing QR straight from whichever response it just got, with no separate call),
+ * the fully-attested card once the ceremony completes, and — once the ceremony has FAILED a step
+ * — the error the wizard should surface.
  *
  * <p>{@code agentOobi} is populated by the controller, not the ceremony entity itself (the entity
  * carries no such field) — best-effort, so a transient KERI-agent hiccup while building a response

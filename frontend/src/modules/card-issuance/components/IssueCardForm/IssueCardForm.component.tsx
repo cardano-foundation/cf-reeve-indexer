@@ -54,7 +54,7 @@ const initialFields: IssueCardFields = {
 }
 
 /**
- * §9.4 card creation form — PERMISSIONLESS and fully client-side. The card is always for an EXTERNAL
+ * Card creation form — PERMISSIONLESS and fully client-side. The card is always for an EXTERNAL
  * holder whose subjectId is minted for them, so every field here is optional and only describes the
  * holder. A passkey is created/selected IN THIS BROWSER, the keypair is derived from it, and the
  * UNSIGNED card (public parts only) is assembled locally by `useIssueCardForm` — there is no login and
@@ -246,7 +246,8 @@ export const IssueCardForm = () => {
             </Typography>
           </Box>
 
-          {/* Optional: anchor a Veridian attestation on-chain so an importer can verify the holder. */}
+          {/* Optional: bind a Veridian attestation to the card so an importer can verify the holder.
+              The wallet signs it into its own key event log; nothing is published to Cardano. */}
           {!showAttestWizard && (
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Box display="flex" gap={1}>

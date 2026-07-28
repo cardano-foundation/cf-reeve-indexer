@@ -610,7 +610,9 @@ It extends `_backend-services/cf-reeve-ledger-follower-app`, which already does 
 
 ### 9.2 What it indexes
 
-Every label-1447 transaction of type `DOCUMENT` yields one index row: `documentId`, `organisationId`, `ipfsCid`, `contentHash`, `plaintextHash`, `envelopeVersion`, `slotCount`, `txHash`, absolute slot, timestamp.
+Every label-1447 transaction of type `DOCUMENT` yields one index row: `documentId`, `organisationId`, `ipfsCid`, `contentHash`, `plaintextHash`, `envelopeVersion`, `recipientCount`, `txHash`, absolute slot, block time.
+
+> **Naming note.** The on-chain manifest calls the recipient count `slot_count`, and the IPFS envelope calls the per-recipient entries `slots`. Both names are frozen — every document already published uses them. The indexer reads them under those names at the parse boundary and calls the concept `recipientCount` everywhere else, so that "slot" unambiguously means the Cardano slot.
 
 **Only published documents exist here.** Drafts live in Reeve's database and are invisible to the Indexer by construction — there is nothing on-chain to see. This is a feature (drafts are private), not a gap.
 
@@ -624,7 +626,7 @@ Every label-1447 transaction of type `DOCUMENT` yields one index row: `documentI
 | Publisher is known | the anchoring tx was signed by a publisher address in the Indexer's configured allowlist | `PUBLISHER_UNKNOWN` |
 | IPFS resolves | the CID fetches through the gateway | `IPFS_UNAVAILABLE` |
 | Chain ↔ IPFS integrity | `SHA-256(base64-decode(payload.ciphertext))` equals the on-chain `content_hash` | `CONTENT_HASH_MISMATCH` |
-| Envelope is well-formed | parses at its declared `envelopeVersion`; `slots.length` equals the on-chain `slot_count` | `MALFORMED_ENVELOPE` |
+| Envelope is well-formed | parses at its declared `envelopeVersion`; the envelope's `slots.length` equals the manifest's `slot_count` (both wire names for the recipient count) | `MALFORMED_ENVELOPE` |
 
 All five pass → `VERIFIED`. This is the strongest statement possible **without a key**: *the bytes on IPFS are exactly the bytes this organisation anchored on Cardano, at this slot, and nobody has swapped them since.*
 

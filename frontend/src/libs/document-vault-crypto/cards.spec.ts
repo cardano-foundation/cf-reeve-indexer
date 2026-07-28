@@ -19,7 +19,7 @@ describe('key cards', () => {
     expect('signature' in card).toBe(false)
   })
 
-  it('rejects unknown versions and wrong types instead of guessing (I7)', () => {
+  it('rejects unknown versions and wrong types instead of guessing', () => {
     expect(() => parseCard(JSON.stringify({ ...baseCard, v: 2 }))).toThrow()
     expect(() => parseCard(JSON.stringify({ ...baseCard, type: 'SOMETHING' }))).toThrow()
     expect(() => parseCard('not json')).toThrow()

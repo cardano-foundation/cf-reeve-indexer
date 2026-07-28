@@ -24,7 +24,7 @@ public class IpfsGatewayClient {
 
     /**
      * Hard cap on a single IPFS envelope fetch. Shared by the read proxy ({@link
-     * org.cardanofoundation.reeve.indexer.service.DocumentService}) and the verification scheduler
+     * org.cardanofoundation.reeve.indexer.service.document.DocumentService}) and the verification scheduler
      * ({@code DocumentEnvelopeVerifier}) so both agree on what is too large to process — a mismatch
      * would let one path accept an envelope the other cannot, and an uncapped fetch lets a hostile
      * anchor point {@code ipfs_cid} at arbitrarily large content to exhaust the verifier's heap.

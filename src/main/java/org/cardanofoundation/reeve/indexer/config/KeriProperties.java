@@ -48,17 +48,15 @@ public class KeriProperties {
 
     /**
      * Poll interval for {@code KeriNotificationCorrelator}'s synchronous wait loop against the
-     * agent's notification queue (card-attestation ceremony, design doc Part A / A3). Default ported
-     * from the platform's {@code keri_attestation} module's {@code notification-poll-interval}.
+     * agent's notification queue during the card-attestation ceremony.
      */
     private Duration notificationPollInterval = Duration.ofMillis(1500);
 
     /**
      * Bounded, in-thread wait for the wallet's IPEX offer/grant reply during credential presentation
-     * ({@code CardCredentialService#presentCredential}, design doc Part A / A4). Mirrors the
-     * platform's {@code keri_attestation} module's {@code remotesignTimeout}, reused here for the
-     * same purpose (the ceremony runs synchronously in the indexer's request thread, so this bounds
-     * how long a single HTTP call blocks before failing the step and letting a retry resume it).
+     * ({@code CardCredentialService#presentCredential}). The ceremony runs synchronously in the
+     * indexer's request thread, so this bounds how long a single HTTP call blocks before failing
+     * the step and letting a retry resume it.
      */
     private Duration walletResponseTimeout = Duration.ofMinutes(3);
 
@@ -67,12 +65,11 @@ public class KeriProperties {
      * https://cred-issuance.demo.idw-sandboxes.cf-deployments.org/oobi}, no trailing slash) — the
      * IPEX apply's top-level {@code oobiUrl} field (with a trailing slash appended), which is where
      * a Veridian-style wallet actually resolves the credential schema behind the apply's {@code s}
-     * SAID from ({@code CardCredentialService}, design doc Part A / A4). Mirrors the platform's
-     * {@code keri_attestation} module's {@code credential-policy.schema-base-url} — a proven-working
-     * wallet-contract requirement, not our own agent's OOBI. Distinct from {@link
-     * CredentialSchema#oobis()}: those are resolved by OUR OWN agent to learn the issuer/registry/
-     * root KEL and TEL data a schema's credentials need to verify; this is handed to the WALLET so
-     * it knows where to resolve the schema definition itself.
+     * SAID from ({@code CardCredentialService}). This is a wallet-contract requirement, not our
+     * own agent's OOBI. Distinct from {@link CredentialSchema#oobis()}: those are resolved by OUR
+     * OWN agent to learn the issuer/registry/root KEL and TEL data a schema's credentials need to
+     * verify; this is handed to the WALLET so it knows where to resolve the schema definition
+     * itself.
      */
     private String credentialSchemaOobiBaseUrl = "https://cred-issuance.demo.idw-sandboxes.cf-deployments.org/oobi";
 }

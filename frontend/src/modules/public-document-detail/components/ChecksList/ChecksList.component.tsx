@@ -24,7 +24,7 @@ const CheckStatusIcon = ({ status }: { status: CheckStatus }) => {
 /**
  * The four verification checks, in order, each with a status icon and a one-line explanation of
  * what it proves - closed by exactly ONE note: when verdict === 'VERIFIED', the integrity claim
- * sentence verbatim (§9.3); otherwise the honest-limit caveat. Once a document is fully verified the
+ * sentence verbatim; otherwise the honest-limit caveat. Once a document is fully verified the
  * green claim is the single closing statement — the caveat would only duplicate it (and read as an
  * error), so it is not shown here (the documents LIST still renders it on every row, untouched).
  */

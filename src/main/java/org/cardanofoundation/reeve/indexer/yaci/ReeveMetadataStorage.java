@@ -48,7 +48,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.OrganisationReposito
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
 import org.cardanofoundation.reeve.indexer.processor.ReeveTypeProcessorRegistry;
-import org.cardanofoundation.reeve.indexer.service.KeriService;
+import org.cardanofoundation.reeve.indexer.service.keri.KeriService;
 import org.cardanofoundation.signify.cesr.Diger;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
@@ -104,7 +104,12 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         ReeveMetadata rawMetadata =
                                 objectMapper.readValue(metadata.getBody(), ReeveMetadata.class);
                         rawMetadata.setTxHash(metadata.getTxHash());
+                        // Chain context, carried over before the payload is trusted for anything:
+                        // yaci-store resolved both from the block this tx was found in, so they are
+                        // the only trustworthy "when" a consumer gets. The payload's own
+                        // metadata.timestamp is publisher-supplied and may say anything.
                         rawMetadata.setSlot(metadata.getSlot());
+                        rawMetadata.setBlockTime(metadata.getBlockTime());
                         Map metadataCborMap = (Map) CborSerializationUtil
                                 .deserialize(HexUtil.decodeHexString(metadata.getCbor()));
                         DataItem dataItem = metadataCborMap

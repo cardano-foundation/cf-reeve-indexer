@@ -1,16 +1,20 @@
 /**
- * Copy and constants for the attest-with-Veridian wizard (design doc Part A / A7). After a card is
- * issued, its holder can OPTIONALLY anchor a Veridian credential attestation on-chain so that, when
- * the card is later imported into the platform, the platform can cryptographically verify who the
- * holder is (B2). The wizard drives the indexer's synchronous ceremony endpoints, one blocking step
- * at a time — pair the wallet, present the credential, attest — then hands back the attested card to
- * download. Everything here is PUBLIC (no login): the ceremony endpoints are unauthenticated, exactly
- * like the rest of this client-side issuance flow.
+ * Copy and constants for the attest-with-Veridian wizard. After a card is issued, its holder can
+ * OPTIONALLY bind a Veridian credential to it so that, when the card is later imported into the
+ * platform, the platform can cryptographically verify who the holder is. The wizard drives the
+ * indexer's synchronous ceremony endpoints, one blocking step at a time — pair the wallet, present
+ * the credential, attest — then hands back the attested card to download. Everything here is PUBLIC
+ * (no login): the ceremony endpoints are unauthenticated, exactly like the rest of this client-side
+ * issuance flow.
+ *
+ * NOTHING is published to Cardano. The attestation is the wallet's own signed KEL interaction event,
+ * carried on the card as a self-contained proof — so the copy below must not promise an on-chain
+ * record, a tx, or a wait for confirmation.
  */
 
 export const ATTEST_WIZARD_OPEN_LABEL = 'Attest with Veridian (optional)'
 export const ATTEST_WIZARD_OPEN_NOTE =
-  'Optionally bind a Veridian credential to this card and anchor it on-chain, so an importer can verify the holder’s identity. You’ll need the Veridian wallet that holds the credential.'
+  'Optionally bind a Veridian credential to this card, so an importer can verify the holder’s identity. You’ll need the Veridian wallet that holds the credential. Nothing is published — the attestation is signed by your wallet and travels with the card.'
 
 export const ATTEST_WIZARD_TITLE = 'Attest this card with Veridian'
 
@@ -36,18 +40,18 @@ export const ATTEST_PRESENT_BUTTON_LABEL = 'Present credential'
 export const ATTEST_PRESENTING_LABEL = 'Waiting for the wallet to present the credential…'
 
 // --- attestation (CREDENTIAL_RECEIVED) ---
-export const ATTEST_ANCHOR_TITLE = '3. Attest on-chain'
+export const ATTEST_ANCHOR_TITLE = '3. Sign the attestation'
 export const ATTEST_ANCHOR_GUIDANCE =
-  'Your wallet will prompt you to sign the attestation; the indexer then anchors it on Cardano. This can take a moment.'
-export const ATTEST_ANCHOR_BUTTON_LABEL = 'Attest & anchor'
-export const ATTEST_ANCHORING_LABEL = 'Anchoring the attestation on-chain…'
+  'Your wallet will prompt you to sign the attestation, which it records in its own key event log. The indexer verifies that signature and writes it onto the card. This can take a moment.'
+export const ATTEST_ANCHOR_BUTTON_LABEL = 'Attest card'
+export const ATTEST_ANCHORING_LABEL = 'Waiting for the wallet to sign…'
 
 // --- success (ATTEST_ANCHORED) ---
 export const ATTEST_DONE_TITLE = 'Card attested'
 export const ATTEST_DONE_NOTE =
   'This card now carries a verified Veridian attestation. Download it and import THIS file into the platform — the earlier (unattested) download will not verify.'
 export const ATTEST_DOWNLOAD_LABEL = 'Download attested card'
-export const ATTEST_TX_LABEL = 'On-chain attestation tx'
+export const ATTEST_ANCHOR_LABEL = 'Wallet key event log anchor'
 export const ATTEST_CLOSE_LABEL = 'Done'
 
 // --- failure / expiry / errors ---

@@ -42,12 +42,16 @@ public class DocumentEntity {
     private String plaintextHash;
     @Column(name = "envelope_version")
     private Integer envelopeVersion;
-    @Column(name = "slot_count")
-    private Integer slotCount;
+    /**
+     * How many recipients the IPFS envelope wraps the document key for — one entry per recipient.
+     * Distinct from {@link #slot}, which is the Cardano slot this anchor landed in.
+     */
+    @Column(name = "recipient_count")
+    private Integer recipientCount;
 
     /**
-     * Recipient key hashes from the manifest, index-aligned with the IPFS envelope's slots. Empty for
-     * pre-1.1 anchors, which carry no hashes and so never match a recipient filter.
+     * Recipient key hashes from the manifest, index-aligned with the envelope's recipient entries.
+     * Empty for pre-1.1 anchors, which carry no hashes and so never match a recipient filter.
      *
      * <p>{@code @Builder.Default} is load-bearing: this class is {@code @Builder}, and without it
      * Lombok drops the initialiser and the field arrives null on every built instance.
@@ -57,8 +61,10 @@ public class DocumentEntity {
     @Builder.Default
     private List<String> recipientKeyHashes = new ArrayList<>();
 
+    /** Cardano slot of the block this anchor was published in. */
     @Column(name = "slot")
     private Long slot;
+    /** POSIX seconds of that block. Chain-derived, unlike anything in the manifest payload. */
     @Column(name = "block_time")
     private Long blockTime;
 

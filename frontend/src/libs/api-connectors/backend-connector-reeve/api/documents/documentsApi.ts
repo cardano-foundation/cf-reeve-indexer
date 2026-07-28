@@ -28,7 +28,7 @@ export const documentsApi = (baseUrl: string) => {
     get<DocumentDetailResponse>(`api/v1/documents/${encodeURIComponent(documentId)}`, null, { Authorization: '' })
 
   // Returned as unknown: the wire payload is untrusted until decryptEnvelope validates
-  // its version/type (I7); callers cast to Envelope after that boundary.
+  // its version/type; callers cast to Envelope after that boundary.
   const getDocumentEnvelope = (documentId: string, txHash?: string): Promise<unknown> => {
     const queryString = txHash ? `?txHash=${encodeURIComponent(txHash)}` : ''
 

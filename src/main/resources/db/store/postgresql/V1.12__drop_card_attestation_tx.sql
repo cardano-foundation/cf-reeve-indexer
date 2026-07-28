@@ -1,0 +1,23 @@
+-- Card attestation stops publishing to Cardano (2026-07-28 design).
+--
+-- The indexer is a chain READER (yaci-store node sync). The card ceremony's on-chain CIP-170 ATTEST
+-- tx was the one exception, and it cost a deployment a funded organiser wallet plus a Blockfrost
+-- project id -- without which the attest step failed outright (ATTEST_SUBMITTER_UNAVAILABLE), making
+-- the whole ceremony unusable on default config. The tx was also redundant: it only re-published a
+-- fact the paired Veridian wallet had ALREADY signed into its own KEL, which CardAttestService
+-- verifies (KEL floor + ixn seal) before recording it. That KEL anchor (V1.10) is the attestation.
+--
+-- Both tx-hash columns therefore hold no meaning any more and are dropped:
+--   reeve_issued_card.attestation_tx_hash          -- the card's copy, exported as attestation.txHash
+--   reeve_card_attestation_ceremony.tx_hash        -- the ceremony's authoritative copy (V1.8)
+--
+-- V1.8's "verified-but-unsubmitted" resume path is gone with them: there is no separate publish step
+-- to fail, so verifying the wallet's anchor now completes the ceremony in a single transition, and
+-- card_digest lands in that same completeStep mutator alongside kel_sequence / kel_event_said.
+--
+-- Any historical value in these columns is dropped, not migrated: an ATTEST tx already on-chain stays
+-- on-chain and is still readable by the indexer's own label-170 read path (ReeveMetadataStorage /
+-- KeriService) -- what goes away is this app's claim to have published it, and the card wire format's
+-- attestation.txHash field. Previously-attested cards keep verifying via their KEL anchor.
+ALTER TABLE reeve_issued_card DROP COLUMN IF EXISTS attestation_tx_hash;
+ALTER TABLE reeve_card_attestation_ceremony DROP COLUMN IF EXISTS tx_hash;

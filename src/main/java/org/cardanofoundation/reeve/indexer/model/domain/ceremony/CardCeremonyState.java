@@ -1,13 +1,12 @@
 package org.cardanofoundation.reeve.indexer.model.domain.ceremony;
 
 /**
- * A card-attestation ceremony's progress (design doc Part A / A3): the indexer's own KERI agent
- * pairing with a Veridian wallet, that wallet presenting a credential, then anchoring a CIP-170
- * ATTEST for the card being attested.
+ * A card-attestation ceremony's progress: the indexer's own KERI agent pairing with a Veridian
+ * wallet, that wallet presenting a credential, then anchoring a CIP-170 ATTEST for the card being
+ * attested.
  *
- * <p>Deliberately simpler than the platform's {@code keri_attestation} module's {@code
- * CeremonyState}: there is no per-user identity link, no {@code AUTH_BEGIN} step, and no {@code
- * bindingVersion}/relink concept — one card, one ceremony, one wallet AID pairs, presents a
+ * <p>Deliberately simple: there is no per-user identity link, no {@code AUTH_BEGIN} step, and no
+ * {@code bindingVersion}/relink concept — one card, one ceremony, one wallet AID pairs, presents a
  * credential, and attests it directly.
  *
  * <pre>

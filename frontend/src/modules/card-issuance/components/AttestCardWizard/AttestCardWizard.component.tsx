@@ -37,7 +37,7 @@ import {
   ATTEST_PRESENT_TITLE,
   ATTEST_PRESENTING_LABEL,
   ATTEST_START_OVER_LABEL,
-  ATTEST_TX_LABEL,
+  ATTEST_ANCHOR_LABEL,
   ATTEST_WALLET_OOBI_GUIDANCE,
   ATTEST_WALLET_OOBI_LABEL,
   ATTEST_WIZARD_TITLE
@@ -52,9 +52,9 @@ const downloadAttestedCard = (card: AttestedKeyCard) =>
   downloadCardFile(card, `attested-key-card-${card.subject.subjectId}.json`)
 
 /**
- * The attest-with-Veridian wizard (design doc Part A / A7). Opens a ceremony for the just-issued card
- * (Option B — the full client-built card is registered on create), then walks the holder through the
- * synchronous ceremony one blocking step at a time, branching on the authoritative server STATE:
+ * The attest-with-Veridian wizard. Opens a ceremony for the just-issued card — the full client-built
+ * card is registered when the ceremony is created — then walks the holder through the synchronous
+ * ceremony one blocking step at a time, branching on the authoritative server STATE:
  * CREATED (pair) -> PAIRED (present) -> CREDENTIAL_RECEIVED (attest) -> ATTEST_ANCHORED (download).
  * A step failure comes back as state=FAILED with a reason; a caller-side error (bad card at create)
  * is surfaced from the request. Either way the honest recovery is "start over" — the ceremony state
@@ -205,7 +205,7 @@ export const AttestCardWizard = ({ card, onClose }: Props) => {
         </Box>
       )}
 
-      {/* CREDENTIAL_RECEIVED — attest on-chain. A plain attest() also resumes a tx-only retry. */}
+      {/* CREDENTIAL_RECEIVED — the wallet signs the attestation into its own KEL. Nothing is published. */}
       {state === 'CREDENTIAL_RECEIVED' && (
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="subtitle2">{ATTEST_ANCHOR_TITLE}</Typography>
@@ -236,13 +236,13 @@ export const AttestCardWizard = ({ card, onClose }: Props) => {
             {ATTEST_DONE_NOTE}
           </Typography>
 
-          {ceremony?.card?.attestation?.txHash && (
+          {ceremony?.card?.attestation?.kelEventSaid && (
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography color={theme.palette.text.secondary} variant="caption">
-                {ATTEST_TX_LABEL}
+                {ATTEST_ANCHOR_LABEL}
               </Typography>
               <Typography sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }} variant="body2">
-                {ceremony.card.attestation.txHash}
+                #{ceremony.card.attestation.kelSequence} · {ceremony.card.attestation.kelEventSaid}
               </Typography>
             </Box>
           )}

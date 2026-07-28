@@ -19,13 +19,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.reeve.indexer.model.domain.document.DocumentVerdict;
 import org.cardanofoundation.reeve.indexer.model.view.document.DocumentDetailResponse;
 import org.cardanofoundation.reeve.indexer.model.view.document.DocumentListResponse;
-import org.cardanofoundation.reeve.indexer.service.DocumentService;
+import org.cardanofoundation.reeve.indexer.service.document.DocumentService;
 
 /**
- * Public read API for indexed Document Vault anchors (contract §9.6). Deliberately
- * unauthenticated: a verifier you must log into is not a verifier. Rows are hash-identified
- * only — file names, descriptions and e-mails never reach L1/IPFS (I10), so they cannot
- * appear here.
+ * Public read API for indexed Document Vault anchors. Deliberately unauthenticated: a verifier
+ * you must log into is not a verifier. Rows are hash-identified only — file names, descriptions
+ * and e-mails never reach L1/IPFS, so they cannot appear here.
  *
  * <p><b>Do NOT add {@code @Validated} to this class.</b> It looks like it would enable the
  * {@code @Pattern} on {@code recipientKeyHash}, and it does the opposite: its presence makes Spring
@@ -46,10 +45,9 @@ public class DocumentController {
     public ResponseEntity<DocumentListResponse> list(
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) DocumentVerdict verdict,
-            // sha256 of a recipient's X25519 public key, lowercase hex (see cf-reeve-platform
-            // docs/onChainFormat.md "Recipient key hashes"). Lowercase-only on purpose: the on-chain
-            // values are lowercase, so silently accepting uppercase would return an empty page rather
-            // than telling the caller their input is wrong.
+            // sha256 of a recipient's X25519 public key, lowercase hex. Lowercase-only on purpose:
+            // the on-chain values are lowercase, so silently accepting uppercase would return an
+            // empty page rather than telling the caller their input is wrong.
             //
             // Unauthenticated like the rest of this controller, and necessarily so - a hash is public
             // data, and the external recipients this serves have no Reeve account to authenticate with.

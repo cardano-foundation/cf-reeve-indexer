@@ -21,15 +21,14 @@ import lombok.Setter;
 import org.cardanofoundation.reeve.indexer.model.domain.ceremony.CardCeremonyState;
 
 /**
- * A single card-attestation ceremony (design doc Part A / A3): the indexer's own KERI agent
- * pairing with a Veridian wallet, that wallet presenting a credential, then anchoring a CIP-170
- * ATTEST for {@link #cardId}.
+ * A single card-attestation ceremony: the indexer's own KERI agent pairing with a Veridian
+ * wallet, that wallet presenting a credential, then anchoring a CIP-170 ATTEST for {@link
+ * #cardId}.
  *
- * <p>Deliberately simpler than the platform's {@code keri_attestation} module's {@code
- * KeriAttestationCeremonyEntity}: there is no per-user identity link, no {@code AUTH_BEGIN} step,
- * and no {@code bindingVersion}/relink concept — one card, one ceremony, one wallet AID pairs,
- * presents, and attests it directly, so {@link #walletAid}/{@link #walletOobiUrl} live on the
- * ceremony row itself rather than on a separate identity-link entity.
+ * <p>Deliberately simple: there is no per-user identity link, no {@code AUTH_BEGIN} step, and no
+ * {@code bindingVersion}/relink concept — one card, one ceremony, one wallet AID pairs, presents,
+ * and attests it directly, so {@link #walletAid}/{@link #walletOobiUrl} live on the ceremony row
+ * itself rather than on a separate identity-link entity.
  *
  * <p>There is deliberately no {@code @Version} column — concurrent step completions CAS on
  * {@code (state, attemptGeneration)} explicitly at the service layer ({@code CardCeremonyService})
@@ -72,7 +71,7 @@ public class CardAttestationCeremonyEntity {
     @Column(name = "attempt_generation", nullable = false)
     private int attemptGeneration;
 
-    // --- waiting-step data, populated as the ceremony progresses (consumed by A4/A5) ---
+    // --- waiting-step data, populated as the ceremony progresses ---
 
     /** SAID of the last sent IPEX exchange (apply/offer/grant), used to correlate the matching
      *  wallet notification ({@code KeriNotificationCorrelator}) and to detect a late-arriving reply
@@ -100,24 +99,13 @@ public class CardAttestationCeremonyEntity {
     private String kelEventSaid;
 
     /** The card's canonical attestation digest ({@code CardAttestationDigestFactory#digestOf}) that
-     *  {@link #kelSequence}/{@link #kelEventSaid} anchor. Persisted ALONGSIDE the KEL coordinates, as
-     *  soon as the wallet's anchor is verified (design doc Part A / A5, state-integrity fix) — BEFORE
-     *  the on-chain ATTEST tx is ever submitted — so the exact digest that was anchored is durably
-     *  known even if tx submission fails, and a resumed attempt resubmits the SAME value rather than
-     *  recomputing it (defensive against the card row changing between attempts). */
+     *  {@link #kelSequence}/{@link #kelEventSaid} anchor. Persisted ALONGSIDE the KEL coordinates, in
+     *  the same {@code completeStep} mutator that advances the ceremony to {@code ATTEST_ANCHORED}, so
+     *  the ceremony row durably records the exact digest the wallet signed over — enough, together
+     *  with the KEL coordinates, to re-derive the card's whole attestation binding if {@code
+     *  CardAttestService#bindCardAttestation}'s best-effort card save never runs. */
     @Column(name = "card_digest")
     private String cardDigest;
-
-    /** Cardano tx hash of the on-chain CIP-170 {@code ATTEST} publish. Persisted the moment
-     *  submission succeeds — together with {@link #kelSequence}/{@link #kelEventSaid} in the same
-     *  {@code completeStep} mutator that advances the ceremony to {@code ATTEST_ANCHORED} — so the
-     *  ceremony row is the authoritative record of a real broadcast tx; {@code CardAttestService}
-     *  binds {@link IssuedCardEntity#getAttestationTxHash()} FROM this column rather than threading
-     *  the value through separately. {@code null} while the wallet anchor is verified but the tx has
-     *  not yet (successfully) been submitted — see {@link #kelSequence}'s "verified-but-unsubmitted"
-     *  resume path in {@code CardAttestService#attest}. */
-    @Column(name = "tx_hash")
-    private String txHash;
 
     /** SAID of the presented credential. */
     @Column(name = "credential_said")

@@ -1,5 +1,5 @@
 /**
- * Copy and constants for the card creation view (§9.4). Card creation is PERMISSIONLESS and fully
+ * Copy and constants for the card creation view. Card creation is PERMISSIONLESS and fully
  * CLIENT-SIDE: there is no login, the holder's keypair is DERIVED from a WebAuthn passkey created in
  * this browser, and the UNSIGNED card (no issuer, no signature) is assembled and downloaded here —
  * nothing is sent to the backend. Non-negotiable rules this module must uphold:

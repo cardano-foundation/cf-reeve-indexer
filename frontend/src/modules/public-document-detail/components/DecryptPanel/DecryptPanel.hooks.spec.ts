@@ -14,7 +14,7 @@ const anchor: DocumentView = {
   content_hash: 'a'.repeat(64),
   plaintext_hash: 'b'.repeat(64),
   envelope_version: 1,
-  slot_count: 2,
+  recipient_count: 2,
   recipient_key_hashes: [],
   slot: 12345,
   block_time: 1_700_000_000,
@@ -79,7 +79,7 @@ describe('useDecryptPanel', () => {
   it('decrypts with the passkey-derived key against the fetched envelope', async () => {
     const outcome: DecryptOutcome = {
       plaintext: new Uint8Array([9]),
-      slotIndex: 0,
+      recipientIndex: 0,
       plaintextHashHex: 'b'.repeat(64),
       plaintextHashMatches: true
     }
@@ -136,7 +136,7 @@ describe('useDecryptPanel', () => {
     expect(fetchEnvelope).toHaveBeenCalledWith({ documentId: 'doc-1', txHash: 'tx-1' })
   })
 
-  it('surfaces the thrown error message verbatim on decrypt failure (I7) instead of a generic message', async () => {
+  it('surfaces the thrown error message verbatim on decrypt failure instead of a generic message', async () => {
     const fetchEnvelope = vi.fn().mockResolvedValue(fakeEnvelope)
     const decrypt = vi.fn().mockRejectedValue(new Error('Unsupported envelope version: 2'))
     const { result } = renderHook(() => useDecryptPanel({ anchor, deps: { fetchEnvelope, decrypt } }))
@@ -154,7 +154,7 @@ describe('useDecryptPanel', () => {
   it('moves to success carrying the decrypt outcome, including plaintextHashMatches', async () => {
     const outcome: DecryptOutcome = {
       plaintext: new Uint8Array([1, 2, 3]),
-      slotIndex: 0,
+      recipientIndex: 0,
       plaintextHashHex: 'b'.repeat(64),
       plaintextHashMatches: true
     }
@@ -176,7 +176,7 @@ describe('useDecryptPanel', () => {
   it('clears the private key material after a decrypt attempt so a second click is a no-op', async () => {
     const outcome: DecryptOutcome = {
       plaintext: new Uint8Array([1]),
-      slotIndex: 0,
+      recipientIndex: 0,
       plaintextHashHex: 'b'.repeat(64),
       plaintextHashMatches: true
     }
@@ -197,7 +197,7 @@ describe('useDecryptPanel', () => {
     expect(decrypt).toHaveBeenCalledTimes(1)
   })
 
-  it('discards a previously-set raw key when re-deriving from a passkey (I1 hygiene)', async () => {
+  it('discards a previously-set raw key when re-deriving from a passkey', async () => {
     // unlockWithPasskey clears the staged raw key before deriving; if the passkey derive then fails,
     // no stale key remains for a decrypt() to use.
     const deriveKeypair = vi.fn().mockRejectedValue(new Error('Passkey assertion was cancelled.'))

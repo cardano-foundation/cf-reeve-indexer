@@ -100,17 +100,8 @@ keri:
       trusted-issuers:
         - ${KERI_DEMO_ISSUER_AID:}
       oobis: ${KERI_DEMO_OOBIS:}
-  attestation:
-    submitter:
-      # CIP-170 ATTEST tx submission (design doc Part A / A5). The indexer is otherwise a chain
-      # READER only (yaci-store node sync) — it has NO tx-submission capability without this.
-      # *** DEPLOYMENT ACTION REQUIRED to attest any card ***: set enabled=true, ATTEST_ORGANISER_MNEMONIC
-      # to a wallet mnemonic that is FUNDED on the target network, and ATTEST_BLOCKFROST_PROJECT_ID to a
-      # Blockfrost project id for that same network. Left disabled by default (attest step then fails
-      # every attempt with a clear, actionable "no submitter configured" error, without blocking startup
-      # or any other indexer feature).
-      enabled: ${ATTEST_SUBMITTER_ENABLED:false}
-      network: ${ATTEST_NETWORK:preprod}
-      organiser-mnemonic: ${ATTEST_ORGANISER_MNEMONIC:}
-      blockfrost-base-url: ${ATTEST_BLOCKFROST_BASE_URL:https://cardano-preprod.blockfrost.io/api/v0/}
-      blockfrost-project-id: ${ATTEST_BLOCKFROST_PROJECT_ID:}
+  # NOTE: the card-attestation ceremony has NO configuration of its own and needs no wallet, no
+  # mnemonic and no Blockfrost project id — it publishes nothing to Cardano. The attestation is the
+  # paired Veridian wallet's own KEL interaction event; the indexer only verifies that seal and
+  # records it on the card. The former keri.attestation.submitter.* block (and its ATTEST_* env vars)
+  # was removed with the submitter itself — the indexer is a chain READER, via yaci-store node sync.

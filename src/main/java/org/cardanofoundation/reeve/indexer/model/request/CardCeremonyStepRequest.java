@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 /**
- * Optional body of {@code POST .../present-credential} and {@code POST .../attest} (design doc Part
- * A / A6): {@code retry} defaults to {@code false} (a fresh attempt) when the body is omitted
- * entirely — the controller treats a {@code null} request the same as {@code retry=false}.
+ * Optional body of {@code POST .../present-credential} and {@code POST .../attest}: {@code retry}
+ * defaults to {@code false} (a fresh attempt) when the body is omitted entirely — the controller
+ * treats a {@code null} request the same as {@code retry=false}.
  */
 @Getter
 @Setter

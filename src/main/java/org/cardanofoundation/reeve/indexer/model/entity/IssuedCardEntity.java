@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 import lombok.*;
 
-/** Registry of issued key cards — PUBLIC parts only (§9.4). No private-key column exists, ever. */
+/** Registry of issued key cards — PUBLIC parts only. No private-key column exists, ever. */
 @Entity
 @Table(name = "reeve_issued_card")
 @Getter
@@ -47,7 +47,8 @@ public class IssuedCardEntity {
 
     // Veridian attestation ceremony fields (populated later, by the ceremony — not at issue time).
     // A card is issued first and attested later, so these are all nullable; "attested" is treated as
-    // attestation_aid != null (the AID + tx are the core of the attestation).
+    // attestation_aid != null (the AID + the KEL anchor below are the core of the attestation).
+    // NOTHING here is published to Cardano — see CardAttestService's javadoc.
     /** Wallet OOBI: how to resolve the attesting AID. */
     @Column(name = "attestation_oobi")
     private String attestationOobi;
@@ -60,12 +61,9 @@ public class IssuedCardEntity {
     /** SAID of the presented credential's schema. */
     @Column(name = "attestation_schema_said")
     private String attestationSchemaSaid;
-    /** Cardano tx hash of the CIP-170 ATTEST anchoring this card. NULL when the deployment has no
-     *  organiser wallet configured — the on-chain publish is optional, the KEL anchor below is not. */
-    @Column(name = "attestation_tx_hash")
-    private String attestationTxHash;
 
-    // --- KEL anchor (V1.10): the wallet's own attestation of this card, independent of the chain ---
+    // --- KEL anchor (V1.10): the wallet's own attestation of this card. THE proof (V1.12 removed the
+    // on-chain tx hash that used to sit alongside it), verifiable from the card file alone ---
     /** Sequence number of the wallet KEL interaction (ixn) event anchoring this card. */
     @Column(name = "attestation_kel_sequence")
     private String attestationKelSequence;
@@ -92,7 +90,7 @@ public class IssuedCardEntity {
     private String attestationPayloadSaid;
     /**
      * The full CESR chain of the presented credential, captured at attestation time. Carried on the
-     * exported card so a consumer (the platform's B2 import verification) can re-validate the
+     * exported card so a consumer (the platform's import verification) can re-validate the
      * credential itself — it can only resolve the AID's OOBI, not fetch this credential, on its own.
      * TEXT (a chain can be large); nullable like the other attestation_* columns.
      */

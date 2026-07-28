@@ -13,17 +13,14 @@ import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
-import { Copy } from 'iconsax-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import { IconButton } from 'features/mui/base'
 import { DocumentView } from 'libs/api-connectors/backend-connector-reeve/api/documents/documentsApi.types'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
 import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
-import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { HonestLimits } from 'modules/public-documents/components/HonestLimits/HonestLimits.component'
 import { MyDocumentsFilter } from 'modules/public-documents/components/MyDocumentsFilter/MyDocumentsFilter.component'
 import { VerdictChip } from 'modules/public-documents/components/VerdictChip/VerdictChip.component'
@@ -35,6 +32,7 @@ import {
   DOCUMENTS_PAGE_DESCRIPTION,
   DOCUMENTS_PAGE_TITLE,
   DOCUMENTS_ROWS_PER_PAGE_OPTIONS,
+  DOCUMENTS_SLOT_PREFIX,
   DOCUMENTS_TABLE_COLUMNS,
   ISSUE_KEY_CARD_BUTTON_LABEL,
   MALFORMED_ANCHOR_LABEL,
@@ -46,49 +44,6 @@ import {
 import { usePublicDocuments } from 'modules/public-documents/hooks/usePublicDocuments.ts'
 import { formatBlockTime, truncateHash } from 'modules/public-documents/utils/format.ts'
 import { PATHS } from 'routes'
-
-const COPY_RESET_DELAY_MS = 1500
-
-/** Truncated hash with a copy-to-clipboard action. Used for the content hash column. */
-const HashCell = ({ value }: { value: string | null }) => {
-  const theme = useTheme()
-  const [hasCopied, setHasCopied] = useState(false)
-
-  if (!value) {
-    return (
-      <Typography color={theme.palette.text.secondary} variant="body2">
-        —
-      </Typography>
-    )
-  }
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(value)
-    setHasCopied(true)
-    setTimeout(() => setHasCopied(false), COPY_RESET_DELAY_MS)
-  }
-
-  return (
-    <Box alignItems="center" display="flex" gap={0.5}>
-      <Tooltip title={value}>
-        <Typography component="span" sx={{ fontFamily: 'monospace' }} variant="body2">
-          {truncateHash(value)}
-        </Typography>
-      </Tooltip>
-      <Tooltip title={hasCopied ? 'Copied' : 'Copy to clipboard'}>
-        <IconButton
-          aria-label="Copy to clipboard"
-          size="small"
-          onClick={(event) => {
-            event.stopPropagation()
-            void handleCopy()
-          }}>
-          <Copy size={16} variant="Outline" />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  )
-}
 
 const DocumentIdCell = ({ row }: { row: DocumentView }) => {
   const theme = useTheme()
@@ -233,14 +188,12 @@ export const ViewPublicDocuments = () => {
         <Box sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 2, overflow: 'hidden' }}>
           <Box sx={{ height: 3 }}>{isFetching && <LinearProgress />}</Box>
           <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small" sx={{ minWidth: 960 }}>
+            <Table size="small" sx={{ minWidth: 720 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>{DOCUMENTS_TABLE_COLUMNS.documentId}</TableCell>
-                  <TableCell>{DOCUMENTS_TABLE_COLUMNS.slot}</TableCell>
-                  <TableCell>{DOCUMENTS_TABLE_COLUMNS.blockTime}</TableCell>
-                  <TableCell>{DOCUMENTS_TABLE_COLUMNS.contentHash}</TableCell>
-                  <TableCell align="right">{DOCUMENTS_TABLE_COLUMNS.slotCount}</TableCell>
+                  <TableCell>{DOCUMENTS_TABLE_COLUMNS.anchored}</TableCell>
+                  <TableCell align="right">{DOCUMENTS_TABLE_COLUMNS.recipientCount}</TableCell>
                   <TableCell>{DOCUMENTS_TABLE_COLUMNS.verdict}</TableCell>
                   <TableCell>{DOCUMENTS_TABLE_COLUMNS.identity}</TableCell>
                 </TableRow>
@@ -248,7 +201,7 @@ export const ViewPublicDocuments = () => {
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={5}>
                       <Typography color={theme.palette.text.secondary} sx={{ py: 2 }} textAlign="center" variant="body2">
                         {isFetching
                           ? ''
@@ -275,20 +228,15 @@ export const ViewPublicDocuments = () => {
                         </TableCell>
                         <TableCell>
                           <Typography color={theme.palette.text.primary} variant="body2">
-                            {row.slot ?? '—'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography color={theme.palette.text.primary} variant="body2">
                             {formatBlockTime(row.block_time)}
                           </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <HashCell value={row.content_hash} />
+                          <Typography color={theme.palette.text.secondary} variant="caption">
+                            {DOCUMENTS_SLOT_PREFIX} {row.slot ?? '—'}
+                          </Typography>
                         </TableCell>
                         <TableCell align="right">
                           <Typography color={theme.palette.text.primary} variant="body2">
-                            {row.slot_count ?? '—'}
+                            {row.recipient_count ?? '—'}
                           </Typography>
                         </TableCell>
                         <TableCell>

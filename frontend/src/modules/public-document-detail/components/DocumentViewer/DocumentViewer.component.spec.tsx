@@ -1,23 +1,29 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   DECRYPT_VIEWER_BINARY_MESSAGE,
   DECRYPT_VIEWER_IMAGE_ALT,
-  DECRYPT_VIEWER_PDF_SHOW,
+  DECRYPT_VIEWER_PDF_UNREADABLE_MESSAGE,
   DECRYPT_VIEWER_UNVERIFIED_MESSAGE
 } from 'modules/public-document-detail/constants/detail.consts.ts'
 
 import { DocumentViewer } from './DocumentViewer.component'
+
+// pdf.js needs a worker and a real canvas, neither of which jsdom provides, so the parse boundary is
+// mocked. What is under test here is how the viewer REACTS to a parse succeeding or failing.
+const loadPdf = vi.hoisted(() => vi.fn())
+vi.mock('modules/public-document-detail/utils/pdf.ts', () => ({ loadPdf }))
 
 const utf8 = (s: string) => new TextEncoder().encode(s)
 const PDF = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37])
 
 describe('DocumentViewer', () => {
   beforeEach(() => {
-    // jsdom has no blob-URL support; the image/pdf branches need it. Stub it.
+    // jsdom has no blob-URL support; the image branch needs it. Stub it.
     URL.createObjectURL = vi.fn(() => 'blob:mock-url')
     URL.revokeObjectURL = vi.fn()
+    loadPdf.mockReset()
   })
 
   afterEach(() => {
@@ -47,23 +53,33 @@ describe('DocumentViewer', () => {
     expect(screen.getByText(DECRYPT_VIEWER_BINARY_MESSAGE)).toBeInTheDocument()
   })
 
-  it('renders the PDF in a fully locked-down sandboxed iframe (no allow-scripts / allow-same-origin)', () => {
+  it('renders a parsed PDF onto a canvas with no iframe involved', async () => {
+    const renderPage = vi.fn().mockResolvedValue(undefined)
+    loadPdf.mockResolvedValue({ pageCount: 3, renderPage, destroy: vi.fn() })
+
     const { container } = render(<DocumentViewer bytes={PDF} plaintextHashMatches />)
-    // The PDF is gated behind an explicit click.
-    fireEvent.click(screen.getByRole('button', { name: DECRYPT_VIEWER_PDF_SHOW }))
-    const iframe = container.querySelector('iframe')
-    expect(iframe).not.toBeNull()
-    expect(iframe).toHaveAttribute('sandbox', '')
-    // An empty sandbox attribute grants NO tokens: no scripts, opaque origin.
-    expect(iframe!.getAttribute('sandbox')).not.toContain('allow-scripts')
-    expect(iframe!.getAttribute('sandbox')).not.toContain('allow-same-origin')
+
+    await waitFor(() => expect(renderPage).toHaveBeenCalled())
+    expect(container.querySelector('canvas')).not.toBeNull()
+    // The PDF is decoded in-process and painted as pixels; it is never handed to a browser plugin
+    // or a nested browsing context that could execute anything.
+    expect(container.querySelector('iframe')).toBeNull()
+    expect(screen.getByText(/3 pages/)).toBeInTheDocument()
+  })
+
+  it('offers download only when the bytes claim to be a PDF but will not parse', async () => {
+    loadPdf.mockResolvedValue(null)
+
+    render(<DocumentViewer bytes={PDF} plaintextHashMatches />)
+
+    expect(await screen.findByText(DECRYPT_VIEWER_PDF_UNREADABLE_MESSAGE)).toBeInTheDocument()
   })
 
   it('suppresses the preview entirely when the plaintext hash does NOT match (never renders unverified bytes)', () => {
     render(<DocumentViewer bytes={PDF} plaintextHashMatches={false} />)
     expect(screen.getByText(DECRYPT_VIEWER_UNVERIFIED_MESSAGE)).toBeInTheDocument()
-    // No preview affordance at all — not even the PDF "show" button — and no blob URL created.
-    expect(screen.queryByRole('button', { name: DECRYPT_VIEWER_PDF_SHOW })).toBeNull()
+    // Unverified bytes never reach a parser or a blob URL at all.
+    expect(loadPdf).not.toHaveBeenCalled()
     expect(URL.createObjectURL).not.toHaveBeenCalled()
   })
 })

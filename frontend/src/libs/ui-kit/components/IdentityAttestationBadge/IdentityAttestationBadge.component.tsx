@@ -28,11 +28,11 @@ const formatClaimValue = (value: unknown): string => {
 }
 
 /**
- * Generic, schema-aware verified-identity badge (design spec §D). Reused for both reports and
- * documents: the primary label is the credential's schema name (falling back to its SAID, then a
- * generic label), never a hardcoded "LEI". The GLEIF cross-check only runs, and only renders,
- * when a `lei` is present - i.e. the vLEI schema. Any other schema's attributes surface via the
- * generic `claims` map instead.
+ * Generic, schema-aware verified-identity badge. Reused for both reports and documents: the
+ * primary label is the credential's schema name (falling back to its SAID, then a generic label),
+ * never a hardcoded "LEI". The GLEIF cross-check only runs, and only renders, when a `lei` is
+ * present - i.e. the vLEI schema. Any other schema's attributes surface via the generic `claims`
+ * map instead.
  */
 export const IdentityAttestationBadge = ({
   isVerified,

@@ -16,7 +16,7 @@ const anchor: DocumentView = {
   content_hash: 'a'.repeat(64),
   plaintext_hash: 'b'.repeat(64),
   envelope_version: 1,
-  slot_count: 2,
+  recipient_count: 2,
   recipient_key_hashes: [],
   slot: 12345,
   block_time: 1_700_000_000,
@@ -25,7 +25,7 @@ const anchor: DocumentView = {
   created_at: '2026-07-14T00:00:00Z'
 }
 
-// useDecryptPanel's real fetchEnvelope default is only reached on a "Decrypt" click (I3); the
+// useDecryptPanel's real fetchEnvelope default is only reached on a "Decrypt" click; the
 // component still consumes useGetDocumentEnvelopeModel (a useMutation), hence QueryClientProvider.
 const renderPanel = () => {
   const queryClient = new QueryClient()
@@ -37,7 +37,7 @@ const renderPanel = () => {
 }
 
 describe('DecryptPanel', () => {
-  it('masks the raw-key field and clears it the instant the key is handed off (I1 hygiene)', async () => {
+  it('masks the raw-key field and clears it the instant the key is handed off', async () => {
     const user = userEvent.setup()
     renderPanel()
 

@@ -26,7 +26,14 @@ import org.cardanofoundation.reeve.indexer.util.ReeveMetadataDeserializer;
 public class ReeveMetadata {
 
     private String txHash;
+    /** Cardano slot of the block this metadata was found in. Chain-derived, not payload-supplied. */
     private Long slot;
+    /**
+     * POSIX seconds of the block this metadata was found in. Chain-derived, and therefore distinct
+     * from {@link Metadata#getTimestamp()}, which is whatever the publisher wrote into the payload
+     * and is not trustworthy.
+     */
+    private Long blockTime;
     private String metadataHash;
 
     private Organisation org;

@@ -45,14 +45,14 @@ const defaultFetchEnvelope: FetchEnvelopeFn = async ({ documentId, txHash }) => 
 const defaultDeriveKeypair: DeriveKeypairFn = async () => (await deriveKeypairWithPasskey()).privateKeyHex
 
 /**
- * §2.6 in-browser decrypt flow as a state machine: idle -> keyReady -> decrypting -> success | failure.
+ * In-browser decrypt flow as a state machine: idle -> keyReady -> decrypting -> success | failure.
  *
  * The private key comes from one of two client-side sources: the holder's passkey (re-derived
  * in-browser — the permissionless model's primary path) or a raw hex key (a fallback). Whatever the
- * source, the key never lives in React state (I1): it sits in a ref, populated only by
+ * source, the key never lives in React state: it sits in a ref, populated only by
  * `setRawKey`/`unlockWithPasskey`, and is cleared (`clearKeyMaterial`) after every decrypt attempt
  * and on unmount. `decrypt()` is the only network-triggering action and only ever runs on an
- * explicit caller invocation (I3) — never on mount or as a side-effect of loading a key.
+ * explicit caller invocation — never on mount or as a side-effect of loading a key.
  */
 export const useDecryptPanel = ({ anchor, deps }: UseDecryptPanelArgs) => {
   const fetchEnvelope = deps?.fetchEnvelope ?? defaultFetchEnvelope
@@ -63,7 +63,7 @@ export const useDecryptPanel = ({ anchor, deps }: UseDecryptPanelArgs) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [outcome, setOutcome] = useState<DecryptOutcome | null>(null)
 
-  // The private key (hex). Never in state (I1).
+  // The private key (hex). Never in state.
   const privateKeysRef = useRef<string[]>([])
 
   const clearKeyMaterial = () => {
@@ -93,13 +93,13 @@ export const useDecryptPanel = ({ anchor, deps }: UseDecryptPanelArgs) => {
   }
 
   const unlockWithPasskey = async () => {
-    // Re-deriving from a passkey discards any staged raw key AND its keyReady status first (I1
-    // hygiene): if the derive then fails, no stale key or ready-state survives for a later decrypt().
+    // Re-deriving from a passkey discards any staged raw key AND its keyReady status first: if the
+    // derive then fails, no stale key or ready-state survives for a later decrypt().
     clearKeyMaterial()
     setStatus('idle')
     setErrorMessage(null)
     try {
-      // I3: deriveKeypairFn runs the WebAuthn assertion first, inside the caller's click gesture.
+      // deriveKeypairFn runs the WebAuthn assertion first, inside the caller's click gesture.
       const privateKeyHex = await deriveKeypairFn()
       privateKeysRef.current = [privateKeyHex.toLowerCase()]
       setStatus('keyReady')
@@ -125,7 +125,7 @@ export const useDecryptPanel = ({ anchor, deps }: UseDecryptPanelArgs) => {
 
     try {
       const envelope = await fetchEnvelope({ documentId: anchor.document_id, txHash: anchor.tx_hash })
-      // Trial-decrypt with each staged key against the single fetched envelope; first success wins (I6).
+      // Trial-decrypt with each staged key against the single fetched envelope; first success wins.
       let result: DecryptOutcome | null = null
       for (const key of keys) {
         result = await decryptFn(key, envelope, anchor.plaintext_hash)
@@ -139,7 +139,7 @@ export const useDecryptPanel = ({ anchor, deps }: UseDecryptPanelArgs) => {
       setOutcome(result)
       setStatus('success')
     } catch (err) {
-      // I7: decryptEnvelope throws on an unknown envelope version/type - surface that message
+      // decryptEnvelope throws on an unknown envelope version/type - surface that message
       // verbatim, never swallow it into a generic "decryption failed" string.
       setStatus('failure')
       setErrorMessage(err instanceof Error ? err.message : 'Decryption failed.')

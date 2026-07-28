@@ -4,7 +4,8 @@ import type { KeyCard } from 'libs/document-vault-crypto/cards'
  * Cards are created client-side (permissionless, no login), so the only always-on card contract is
  * the public status flag. The attest-with-Veridian ceremony endpoints (below) are ALSO public — the
  * wizard has no operator credentials — and drive an already-built card through pairing, credential
- * presentation, and on-chain attestation.
+ * presentation, and attestation. NOTHING is published to Cardano: the attestation is the wallet's own
+ * KEL interaction event, which the indexer verifies and records on the card.
  */
 export type CardStatusResponse = { issuance_enabled: boolean }
 
@@ -14,7 +15,12 @@ export type CardCeremonyState = 'CREATED' | 'PAIRED' | 'CREDENTIAL_RECEIVED' | '
 
 /**
  * The now-attested card carries an extra `attestation` block on top of the base KeyCard — this is
- * what the holder imports into the platform (where B2 verifies the credential + on-chain attestation).
+ * what the holder imports into the platform, which verifies the credential and the KEL anchor.
+ *
+ * The KEL anchor is the whole proof: `kelSequence`/`kelEventSaid` name the wallet interaction event
+ * that signed this card, and `metadataLabel` is the exact STRING fed into the anchored payload SAID.
+ * `cardDigest`/`payloadSaid` are INFORMATIONAL ONLY — a verifier recomputes both from the card body
+ * and compares, since the indexer supplied both the claim and the value it would be checked against.
  */
 export type AttestedKeyCard = KeyCard & {
   attestation?: {
@@ -22,7 +28,11 @@ export type AttestedKeyCard = KeyCard & {
     aid: string
     credentialSaid?: string
     schemaSaid?: string
-    txHash?: string
+    kelSequence?: string
+    kelEventSaid?: string
+    metadataLabel?: string
+    cardDigest?: string
+    payloadSaid?: string
     credentialCesr?: string
   }
 }

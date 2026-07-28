@@ -23,10 +23,11 @@ import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
 import org.cardanofoundation.reeve.indexer.processor.IpfsGatewayClient;
 
 /**
- * §9.3 checks 3-5. Check 4 (content hash) runs only when the ciphertext actually decodes —
- * an undecodable envelope is MALFORMED_ENVELOPE, never a fake CONTENT_HASH_MISMATCH.
- * IPFS failures are transient by nature: the verdict turns IPFS_UNAVAILABLE after
- * {@code failAfterAttempts}, but retries continue and a later success recovers the row.
+ * Verifies a document's IPFS envelope: fetches it, then checks content-hash and structural
+ * well-formedness. The content-hash check runs only when the ciphertext actually decodes — an
+ * undecodable envelope is MALFORMED_ENVELOPE, never a fake CONTENT_HASH_MISMATCH. IPFS failures
+ * are transient by nature: the verdict turns IPFS_UNAVAILABLE after {@code failAfterAttempts},
+ * but retries continue and a later success recovers the row.
  */
 @Service
 @Slf4j
@@ -136,8 +137,8 @@ public class DocumentEnvelopeVerifier {
         }
         JsonNode version = envelope.get("version");
         // isIntegralNumber() first: canConvertToInt()+asInt() would truncate a fractional 1.9 to 1
-        // and wrongly accept it as v1 (I7 — an envelope that is not exactly version 1 must fail
-        // visibly, matching the frontend's strict `version !== 1` check), so reject non-integers.
+        // and wrongly accept it as v1 — an envelope that is not exactly version 1 must fail
+        // visibly, matching the frontend's strict `version !== 1` check, so reject non-integers.
         if (version == null || !version.isIntegralNumber() || !version.canConvertToInt()
                 || version.asInt() != SUPPORTED_ENVELOPE_VERSION
                 || entity.getEnvelopeVersion() == null
@@ -158,14 +159,17 @@ public class DocumentEnvelopeVerifier {
         if (nonce == null || !HEX_24.matcher(nonce).matches()) {
             return false;
         }
-        JsonNode slots = envelope.get("slots");
-        if (slots == null || !slots.isArray() || entity.getSlotCount() == null
-                || slots.size() != entity.getSlotCount()) {
+        // "slots"/"ephemeral_pub"/"wrapped_dek" are the published envelope's key names for what this
+        // codebase calls recipient entries. They are frozen by every envelope already on IPFS, so
+        // they are read under the old spelling here and never travel further under it.
+        JsonNode recipients = envelope.get("slots");
+        if (recipients == null || !recipients.isArray() || entity.getRecipientCount() == null
+                || recipients.size() != entity.getRecipientCount()) {
             return false;
         }
-        for (JsonNode slot : slots) {
-            String ephemeralPub = text(slot, "ephemeral_pub");
-            String wrappedDek = text(slot, "wrapped_dek");
+        for (JsonNode recipient : recipients) {
+            String ephemeralPub = text(recipient, "ephemeral_pub");
+            String wrappedDek = text(recipient, "wrapped_dek");
             if (ephemeralPub == null || !HEX_64.matcher(ephemeralPub).matches()
                     || wrappedDek == null || !HEX_96.matcher(wrappedDek).matches()) {
                 return false;

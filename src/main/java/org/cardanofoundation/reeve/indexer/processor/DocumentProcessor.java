@@ -21,10 +21,10 @@ import org.cardanofoundation.reeve.indexer.model.entity.DocumentEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
 
 /**
- * Indexes {@code type: DOCUMENT} manifests (contract §9.2). One row per anchoring tx; a manifest
- * that fails validation is still indexed, as MALFORMED_MANIFEST (§9.3 check 1) — a verifier that
- * silently drops bad input hides exactly what it exists to surface. Never throws: one hostile tx
- * must not roll back the yaci block batch.
+ * Indexes {@code type: DOCUMENT} manifests. One row per anchoring tx; a manifest that fails
+ * validation is still indexed, as MALFORMED_MANIFEST — a verifier that silently drops bad input
+ * hides exactly what it exists to surface. Never throws: one hostile tx must not roll back the
+ * yaci block batch.
  */
 @Component
 @RequiredArgsConstructor
@@ -66,14 +66,17 @@ public class DocumentProcessor implements ReeveTypeProcessor {
      * Blindly rebuilding the entity in that case would reset a completed VERIFIED row's checks
      * back to PENDING, letting a mere reprocess un-verify an audit row. When the freshly parsed
      * manifest fields match the stored row exactly, keep the existing row (and its check
-     * states/verdict/ipfs bookkeeping) and only refresh the slot and updatedAt from the new
-     * parse. Otherwise — genuinely new data, or no prior row — index the fresh rebuild as today.
+     * states/verdict/ipfs bookkeeping) and only refresh the chain coordinates and updatedAt from
+     * the new parse. Otherwise — genuinely new data, or no prior row — index the fresh rebuild.
      */
     private DocumentEntity mergeWithExisting(DocumentEntity fresh) {
         Optional<DocumentEntity> existing = documentRepository.findById(fresh.getTxHash());
         if (existing.isPresent() && manifestFieldsMatch(existing.get(), fresh)) {
             DocumentEntity preserved = existing.get();
+            // Refreshed rather than preserved: a reorg replay can legitimately land the same tx in a
+            // different block, so the newer parse is authoritative for where/when it now sits.
             preserved.setSlot(fresh.getSlot());
+            preserved.setBlockTime(fresh.getBlockTime());
             preserved.setUpdatedAt(LocalDateTime.now());
             return preserved;
         }
@@ -87,7 +90,7 @@ public class DocumentProcessor implements ReeveTypeProcessor {
                 && Objects.equals(existing.getContentHash(), fresh.getContentHash())
                 && Objects.equals(existing.getPlaintextHash(), fresh.getPlaintextHash())
                 && Objects.equals(existing.getEnvelopeVersion(), fresh.getEnvelopeVersion())
-                && Objects.equals(existing.getSlotCount(), fresh.getSlotCount())
+                && Objects.equals(existing.getRecipientCount(), fresh.getRecipientCount())
                 && existing.getManifestCheck() == fresh.getManifestCheck();
     }
 
@@ -100,6 +103,7 @@ public class DocumentProcessor implements ReeveTypeProcessor {
                 .txHash(metadata.getTxHash())
                 .organisationId(organisationId)
                 .slot(metadata.getSlot())
+                .blockTime(metadata.getBlockTime())
                 .raw(data != null ? data.toString() : null)
                 // Same blake3 digest of the label-1447 datum that ReportEntity stores, computed
                 // once in ReeveMetadataStorage.saveAll before dispatch to this processor — used by
@@ -115,6 +119,9 @@ public class DocumentProcessor implements ReeveTypeProcessor {
                 && isText(data.get("content_hash"), HASH_64_HEX)
                 && isText(data.get("plaintext_hash"), HASH_64_HEX)
                 && isPositiveInt(data.get("envelope_version"))
+                // "slot_count" is the published manifest's key for what this codebase calls the
+                // recipient count. The name is frozen by every manifest already on chain, so it is
+                // read under the old spelling here and never travels further under it.
                 && isPositiveInt(data.get("slot_count"))
                 && isValidRecipientKeyHashes(data.get("recipient_key_hashes"), data.get("slot_count"));
 
@@ -124,7 +131,7 @@ public class DocumentProcessor implements ReeveTypeProcessor {
                     .contentHash(matchesOrNull(data.get("content_hash"), HASH_64_HEX))
                     .plaintextHash(matchesOrNull(data.get("plaintext_hash"), HASH_64_HEX))
                     .envelopeVersion(intOrNull(data.get("envelope_version")))
-                    .slotCount(intOrNull(data.get("slot_count")))
+                    .recipientCount(intOrNull(data.get("slot_count")))
                     .recipientKeyHashes(recipientKeyHashesOrEmpty(data.get("recipient_key_hashes")));
         }
         builder.manifestCheck(valid ? CheckStatus.PASS : CheckStatus.FAIL);
@@ -137,10 +144,10 @@ public class DocumentProcessor implements ReeveTypeProcessor {
     /**
      * Absent is VALID: documents anchored before manifest version 1.1 carry no recipient_key_hashes,
      * and a verifier that condemned them would mark most of the chain's history malformed. Present
-     * means it must be a well-formed array of lowercase 64-hex hashes whose length equals slot_count —
-     * without that equality, index alignment with the IPFS envelope's slots claims nothing.
+     * means it must be a well-formed array of lowercase 64-hex hashes whose length equals the
+     * recipient count — without that equality, index alignment with the envelope claims nothing.
      */
-    private static boolean isValidRecipientKeyHashes(JsonNode node, JsonNode slotCount) {
+    private static boolean isValidRecipientKeyHashes(JsonNode node, JsonNode recipientCount) {
         if (node == null || node.isNull()) {
             return true;
         }
@@ -154,10 +161,10 @@ public class DocumentProcessor implements ReeveTypeProcessor {
                 return false;
             }
         }
-        return isPositiveInt(slotCount) && node.size() == slotCount.asInt();
+        return isPositiveInt(recipientCount) && node.size() == recipientCount.asInt();
     }
 
-    /** Order is preserved verbatim: entry i corresponds to the IPFS envelope's slots[i]. */
+    /** Order is preserved verbatim: entry i belongs to the envelope's i-th recipient. */
     private static List<String> recipientKeyHashesOrEmpty(JsonNode node) {
         if (node == null || !node.isArray()) {
             return new ArrayList<>();

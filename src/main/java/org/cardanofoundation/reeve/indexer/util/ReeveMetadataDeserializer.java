@@ -78,7 +78,7 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
 
                 case DOCUMENT:
                     // Deliberately lenient: validation happens in DocumentProcessor so a malformed
-                    // manifest still indexes as a MALFORMED_MANIFEST row (§9.3) instead of vanishing here.
+                    // manifest still indexes as a MALFORMED_MANIFEST row instead of vanishing here.
                     data = dataNode;
                     break;
 

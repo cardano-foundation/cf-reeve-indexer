@@ -4,12 +4,12 @@ import { base64urlToBytes, bytesToBase64url, bytesToHex } from './codecs'
 import { PRF_SALT, X25519_SEED_INFO } from './constants'
 
 /**
- * §2.1–2.5 passkey-gated key derivation, for the Indexer's independent, permissionless decrypt flow.
+ * Passkey-gated key derivation, used by the indexer's independent, permissionless decrypt flow.
  *
  * The holder's X25519 keypair is DERIVED from a WebAuthn passkey PRF output — it is never stored,
  * wrapped, or uploaded. Issuance derives it once to obtain the publicKey for the card; decryption
  * re-derives the SAME private key from the same passkey. Nothing here contacts a backend, and the
- * private key exists only for the lifetime of a derive call and is zeroed on every path (I1).
+ * private key exists only for the lifetime of a derive call and is zeroed on every path.
  */
 
 export type PrfResult = { credentialId: string; prfOutput: Uint8Array }
@@ -28,11 +28,11 @@ export const isPasskeySupported = (): boolean =>
 type PrfExtensionResults = { prf?: { results?: { first?: ArrayBuffer } } }
 
 /**
- * §2.2/§2.3: run a WebAuthn assertion with the PRF extension and return the PRF output. When a
+ * Run a WebAuthn assertion with the PRF extension and return the PRF output. When a
  * `credentialId` is known, scope the assertion to it; otherwise leave allowCredentials empty so the
  * OS picker lists the user's passkeys for this site.
  *
- * I3: this is the WebAuthn step and must run first inside the user gesture — callers invoke it
+ * This is the WebAuthn step and must run first inside the user gesture — callers invoke it
  * directly from the click handler before any other async work.
  */
 export const evaluatePrf = async (
@@ -69,7 +69,7 @@ export const evaluatePrf = async (
 /**
  * seed = HKDF-SHA-256(ikm = prfOutput, salt = empty, info = UTF-8(X25519_SEED_INFO), L = 32). The
  * seed IS the X25519 private scalar (RFC 7748, clamped at use by @noble). Returned as a Uint8Array
- * the caller MUST zero after use (I1); domain-separated by the info string.
+ * the caller MUST zero after use; domain-separated by the info string.
  */
 const deriveSeedFromPrf = async (prfOutput: Uint8Array): Promise<Uint8Array> => {
   const ikmCopy = new Uint8Array(prfOutput)
@@ -82,21 +82,21 @@ const deriveSeedFromPrf = async (prfOutput: Uint8Array): Promise<Uint8Array> => 
     )
     return new Uint8Array(seedBits)
   } finally {
-    ikmCopy.fill(0) // I1: zero the PRF-derived IKM copy once the seed has been derived
+    ikmCopy.fill(0) // Zero the PRF-derived IKM copy once the seed has been derived
   }
 }
 
 /**
  * ISSUANCE derivation: return ONLY the public key. The private scalar is computed as an ephemeral
  * Uint8Array and zeroed here — it is NEVER materialised as an (un-zeroable, GC-lingering) hex string,
- * because issuance needs nothing but the public half (I1).
+ * because issuance needs nothing but the public half.
  */
 export const deriveX25519PublicKeyFromPrf = async (prfOutput: Uint8Array): Promise<string> => {
   const seed = await deriveSeedFromPrf(prfOutput)
   try {
     return bytesToHex(x25519.getPublicKey(seed))
   } finally {
-    seed.fill(0) // I1: zero the raw seed once the public key has been derived
+    seed.fill(0) // Zero the raw seed once the public key has been derived
   }
 }
 
@@ -111,7 +111,7 @@ export const deriveX25519FromPrf = async (
   try {
     return { privateKeyHex: bytesToHex(seed), publicKeyHex: bytesToHex(x25519.getPublicKey(seed)) }
   } finally {
-    seed.fill(0) // I1: zero the raw seed once both hex copies have been taken
+    seed.fill(0) // Zero the raw seed once both hex copies have been taken
   }
 }
 
@@ -165,10 +165,10 @@ export const createPasskeyCredential = async (
 }
 
 /**
- * Issuance path: create a passkey (I3 — WebAuthn first in the gesture) and derive ONLY the holder's
+ * Issuance path: create a passkey (WebAuthn first in the gesture) and derive ONLY the holder's
  * X25519 PUBLIC key from its PRF output, plus the credential id (stored on the card so the holder can
  * re-scope the assertion later). The private scalar is never returned or materialised as a string —
- * issuance needs only the public half (I1); the holder re-derives the private key from the passkey
+ * issuance needs only the public half; the holder re-derives the private key from the passkey
  * at decrypt time.
  */
 export const createPasskeyAndDeriveKeypair = async (
@@ -182,7 +182,7 @@ export const createPasskeyAndDeriveKeypair = async (
     const publicKeyHex = await deriveX25519PublicKeyFromPrf(prf)
     return { publicKeyHex, credentialId }
   } finally {
-    prf.fill(0) // I1: zero the PRF output once the public key has been derived
+    prf.fill(0) // Zero the PRF output once the public key has been derived
   }
 }
 
@@ -190,7 +190,7 @@ export const createPasskeyAndDeriveKeypair = async (
  * Issuance path for an EXISTING passkey: the holder selects a passkey they already registered (OS
  * picker — no new credential is created), its PRF output is evaluated, and ONLY the X25519 PUBLIC key
  * is derived from it. Like createPasskeyAndDeriveKeypair, the private scalar is never returned or
- * materialised as a string (I1); the returned credential id is the one the OS picker resolved to, so
+ * materialised as a string; the returned credential id is the one the OS picker resolved to, so
  * the card records exactly which passkey re-derives the key at decrypt time.
  */
 export const deriveCardKeyFromExistingPasskey = async (
@@ -201,7 +201,7 @@ export const deriveCardKeyFromExistingPasskey = async (
     const publicKeyHex = await deriveX25519PublicKeyFromPrf(prfOutput)
     return { publicKeyHex, credentialId }
   } finally {
-    prfOutput.fill(0) // I1: zero the PRF output once the public key has been derived
+    prfOutput.fill(0) // Zero the PRF output once the public key has been derived
   }
 }
 
@@ -219,6 +219,6 @@ export const deriveKeypairWithPasskey = async (
     const keypair = await deriveX25519FromPrf(prfOutput)
     return { ...keypair, credentialId: id }
   } finally {
-    prfOutput.fill(0) // I1: zero the PRF output once the keypair has been derived
+    prfOutput.fill(0) // Zero the PRF output once the keypair has been derived
   }
 }

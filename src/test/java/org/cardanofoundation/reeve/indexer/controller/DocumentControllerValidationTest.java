@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.cardanofoundation.reeve.indexer.model.view.document.DocumentListResponse;
-import org.cardanofoundation.reeve.indexer.service.DocumentService;
+import org.cardanofoundation.reeve.indexer.service.document.DocumentService;
 
 /**
  * The recipientKeyHash parameter is validated through the real MVC handler adapter, not by calling the

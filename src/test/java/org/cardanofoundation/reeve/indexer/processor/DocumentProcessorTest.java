@@ -38,6 +38,7 @@ class DocumentProcessorTest {
         metadata.setType(ReeveTransactionType.DOCUMENT);
         metadata.setTxHash("tx-doc-1");
         metadata.setSlot(4567L);
+        metadata.setBlockTime(1735689600L);
         Organisation org = new Organisation();
         org.setId("f".repeat(64));
         metadata.setOrg(org);
@@ -73,8 +74,11 @@ class DocumentProcessorTest {
         assertEquals("a".repeat(64), entity.getContentHash());
         assertEquals("b".repeat(64), entity.getPlaintextHash());
         assertEquals(1, entity.getEnvelopeVersion());
-        assertEquals(3, entity.getSlotCount());
+        assertEquals(3, entity.getRecipientCount());
         assertEquals(4567L, entity.getSlot());
+        // Both chain coordinates must survive the hop from ReeveMetadata; block time in particular
+        // was silently dropped here for a long time, leaving every indexed document with a null date.
+        assertEquals(1735689600L, entity.getBlockTime());
         assertEquals(CheckStatus.PASS, entity.getManifestCheck());
         assertEquals(CheckStatus.PENDING, entity.getIpfsCheck());
         assertEquals(DocumentVerdict.PENDING, entity.getVerdict());
@@ -105,7 +109,7 @@ class DocumentProcessorTest {
         assertEquals("bafybeigdyrzt5examplecid", entity.getIpfsCid());
         assertEquals("b".repeat(64), entity.getPlaintextHash());
         assertEquals(1, entity.getEnvelopeVersion());
-        assertEquals(3, entity.getSlotCount());
+        assertEquals(3, entity.getRecipientCount());
         assertNull(entity.getContentHash());
     }
 
@@ -166,8 +170,9 @@ class DocumentProcessorTest {
                 .contentHash("a".repeat(64))
                 .plaintextHash("b".repeat(64))
                 .envelopeVersion(1)
-                .slotCount(3)
-                .slot(100L) // stale slot from an earlier parse
+                .recipientCount(3)
+                // Stale chain coordinates from an earlier parse, both superseded below.
+                .slot(100L)
                 .blockTime(999L)
                 .manifestCheck(CheckStatus.PASS)
                 .ipfsCheck(CheckStatus.PASS)
@@ -188,9 +193,13 @@ class DocumentProcessorTest {
         assertEquals(CheckStatus.PASS, saved.getIpfsCheck());
         assertEquals(CheckStatus.PASS, saved.getContentHashCheck());
         assertEquals(CheckStatus.PASS, saved.getEnvelopeCheck());
-        assertEquals(5, saved.getIpfsAttempts()); // bookkeeping preserved
-        assertEquals(999L, saved.getBlockTime()); // bookkeeping preserved
-        assertEquals(4567L, saved.getSlot()); // only slot is refreshed from the fresh parse
+        assertEquals(5, saved.getIpfsAttempts()); // verification bookkeeping preserved
+
+        // Slot and block time move together: they describe the SAME block, so a reorg replay that
+        // lands this tx elsewhere must update both. Refreshing one while keeping the other would
+        // leave the row pointing at a block that never existed.
+        assertEquals(4567L, saved.getSlot());
+        assertEquals(1735689600L, saved.getBlockTime());
     }
 
     @Test
@@ -202,7 +211,7 @@ class DocumentProcessorTest {
                 .contentHash("c".repeat(64)) // differs from the fresh parse's "a"*64
                 .plaintextHash("b".repeat(64))
                 .envelopeVersion(1)
-                .slotCount(3)
+                .recipientCount(3)
                 .manifestCheck(CheckStatus.PASS)
                 .ipfsCheck(CheckStatus.PASS)
                 .contentHashCheck(CheckStatus.PASS)
@@ -234,16 +243,16 @@ class DocumentProcessorTest {
 
     // -----------------------------------------------------------------------------------------
     // recipient_key_hashes (manifest version 1.1) — the anchor the recipient filter matches on.
-    // See cf-reeve-platform docs/onChainFormat.md "Recipient key hashes".
     // -----------------------------------------------------------------------------------------
 
     private static final String HASH_A = "300c9c9603b92a4b39ed3958bf9240114804db4fd373012c0ca47432d63425ae";
     private static final String HASH_B = "f35e5616160a30bf3c6e79fa73c576d40205e8fc3ba4e1c6dcf93e6b98e857b4";
 
-    /** validData() with its slot_count rewritten and a recipient_key_hashes array spliced in. */
-    private static String dataWithHashes(int slotCount, String hashesJson) {
+    /** validData() with its recipient count rewritten and a recipient_key_hashes array spliced in.
+     *  "slot_count" is the manifest's own frozen key name for that count. */
+    private static String dataWithHashes(int recipientCount, String hashesJson) {
         return validData()
-                .replace("\"slot_count\":3", "\"slot_count\":" + slotCount)
+                .replace("\"slot_count\":3", "\"slot_count\":" + recipientCount)
                 .trim()
                 .replaceFirst("}$", ",\"recipient_key_hashes\":" + hashesJson + "}");
     }
@@ -287,7 +296,7 @@ class DocumentProcessorTest {
     }
 
     @Test
-    void rejectsARecipientKeyHashListWhoseLengthDisagreesWithSlotCount() throws Exception {
+    void rejectsARecipientKeyHashListWhoseLengthDisagreesWithRecipientCount() throws Exception {
         // The two must agree, or index alignment with the envelope's slots claims nothing.
         DocumentEntity entity = processAndCapture(
                 dataWithHashes(3, "[\"" + HASH_A + "\",\"" + HASH_B + "\"]"));

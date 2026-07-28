@@ -8,7 +8,7 @@ import { IssueCardForm } from 'modules/card-issuance/components/IssueCardForm/Is
 import { CARD_ISSUANCE_DISABLED_MESSAGE, CARD_ISSUANCE_PAGE_DESCRIPTION, CARD_ISSUANCE_PAGE_TITLE } from 'modules/card-issuance/constants/issuance.consts'
 
 /**
- * Card creation view (§9.4) — PERMISSIONLESS and fully client-side. The keypair is derived from a
+ * Card creation view — PERMISSIONLESS and fully client-side. The keypair is derived from a
  * passkey IN THE BROWSER (`IssueCardForm`) and the UNSIGNED card (public parts only) is assembled and
  * downloaded locally: there is no login and no network call to create a card. `issuance_enabled ===
  * false` (a public, unauthenticated status flag) collapses the whole view to one message so a

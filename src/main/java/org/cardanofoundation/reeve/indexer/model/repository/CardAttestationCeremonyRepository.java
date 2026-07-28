@@ -17,9 +17,7 @@ public interface CardAttestationCeremonyRepository extends JpaRepository<CardAtt
     /**
      * Row-level {@code SELECT ... FOR UPDATE}. Every step transition CASes on {@code (state,
      * attemptGeneration)} ({@code CardCeremonyService}) — this lock serializes a retry bumping the
-     * generation against a concurrent completion/failure reading and applying the pre-bump state,
-     * ported from the platform's {@code keri_attestation} module's {@code
-     * KeriAttestationCeremonyRepository#findByIdForUpdate}.
+     * generation against a concurrent completion/failure reading and applying the pre-bump state.
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from CardAttestationCeremonyEntity c where c.id = :id")

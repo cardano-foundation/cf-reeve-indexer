@@ -68,8 +68,7 @@ public class KeriConfig {
      * keystore and AID are deterministically derived from it). An empty bran falls back to an
      * EPHEMERAL {@link Coring#randomPasscode()} — a brand-new agent AID on every restart, which
      * breaks every existing Veridian wallet pairing so inbound IPEX notifications stop arriving.
-     * That fallback is loudly warned so the misconfiguration is never silent (ported from the
-     * platform's {@code keri_attestation} module's {@code SignifyClientConfig#resolveBran}).
+     * That fallback is loudly warned so the misconfiguration is never silent.
      */
     static String resolveBran(String configuredBran) {
         if (configuredBran == null || configuredBran.isBlank()) {
@@ -113,9 +112,8 @@ public class KeriConfig {
         // mailbox that any counterparty's KERIA can post to and poll — which is what lets a wallet
         // on a DIFFERENT KERIA deliver an IPEX offer/grant back to this AID so it surfaces in
         // notifications().list(). A witness-less AID's only inbound endpoint is this backend's own
-        // KERIA agent, which a separate wallet-side KERIA deployment cannot necessarily deliver to
-        // (ported from the platform's {@code keri_attestation} module, which observed live that a
-        // witness-less agent received no grants at all).
+        // KERIA agent, which a separate wallet-side KERIA deployment cannot necessarily deliver to:
+        // in practice, a witness-less agent received no grants at all.
         AvailableWitnesses availableWitnesses = getAvailableWitnesses(client);
         List<String> witnessIds = availableWitnesses.witnesses().stream()
                 .map(WitnessInfo::eid)
@@ -175,7 +173,7 @@ public class KeriConfig {
         Map<String, WitnessInfo> witnessMap = new LinkedHashMap<>();
         for (String oobi : iurls) {
             try {
-                // Parse-only, to skip malformed entries the same way the legacy idiom does.
+                // Parse-only, to skip malformed entries without failing startup.
                 new URI(oobi).toURL();
                 String[] parts = oobi.split("/oobi/");
                 if (parts.length > 1) {

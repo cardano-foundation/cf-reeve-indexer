@@ -47,11 +47,9 @@ dependencies {
 
     // Yaci store
     implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")
-    // CIP-170 ATTEST tx submission (design doc Part A / A5): the indexer is otherwise a chain
-    // READER only (yaci-store node sync) with no tx-submission infra of its own. cardano-client-lib/
-    // -quicktx/-common/-core (Account, QuickTxBuilder, BackendService) already ride in transitively
-    // via yaci-store above at 0.6.6; only the concrete Blockfrost BackendService impl is missing.
-    implementation("com.bloxbean.cardano:cardano-client-backend-blockfrost:0.6.6")
+    // NOTE: no tx-submission backend here on purpose. The indexer is a chain READER (yaci-store node
+    // sync) and submits nothing — cardano-client-backend-blockfrost was added solely for the card
+    // attestation's on-chain publish and was removed with it (2026-07-28 design).
     implementation("com.bloxbean.cardano:yaci-store-metadata-spring-boot-starter:0.1.6")
     implementation("com.bloxbean.cardano:yaci-store-utxo-spring-boot-starter:0.1.6")
     implementation("com.bloxbean.cardano:yaci-store-script-spring-boot-starter:0.1.6")

@@ -21,22 +21,21 @@ import org.cardanofoundation.reeve.indexer.model.request.CardCeremonyCreateReque
 import org.cardanofoundation.reeve.indexer.model.request.CardCeremonyPairRequest;
 import org.cardanofoundation.reeve.indexer.model.request.CardCeremonyStepRequest;
 import org.cardanofoundation.reeve.indexer.model.view.cards.CardCeremonyView;
-import org.cardanofoundation.reeve.indexer.service.CardAttestService;
-import org.cardanofoundation.reeve.indexer.service.CardAttestationOobiService;
-import org.cardanofoundation.reeve.indexer.service.CardCeremonyNotFoundException;
-import org.cardanofoundation.reeve.indexer.service.CardCeremonyService;
-import org.cardanofoundation.reeve.indexer.service.CardCredentialService;
-import org.cardanofoundation.reeve.indexer.service.cards.CardIssuanceService;
+import org.cardanofoundation.reeve.indexer.service.card.attestation.CardAttestService;
+import org.cardanofoundation.reeve.indexer.service.card.attestation.CardAttestationOobiService;
+import org.cardanofoundation.reeve.indexer.service.card.attestation.CardCeremonyNotFoundException;
+import org.cardanofoundation.reeve.indexer.service.card.attestation.CardCeremonyService;
+import org.cardanofoundation.reeve.indexer.service.card.attestation.CardCredentialService;
+import org.cardanofoundation.reeve.indexer.service.card.issuance.CardIssuanceService;
 
 /**
- * REST surface for the card-attestation ceremony (design doc Part A / A6): register a client-built
- * card and open a ceremony for it (Option B — the browser assembles the card entirely client-side,
- * so there is no server {@code cardId} to reference), then drive it synchronously through pair -&gt;
- * present-credential -&gt; attest, one blocking POST per step, so a frontend wizard can await each
- * response and render the next screen. Mirrors the platform's ({@code cf-reeve-platform}) {@code keri_attestation} module's own
- * {@code KeriAttestationController} for THIS convention specifically (this app has no {@code vavr}/
- * {@code Either} plumbing though, see {@link CardAttestationExceptionHandler} for the equivalent as a
- * scoped {@code @RestControllerAdvice} instead of that module's per-call {@code Responses.respond}):
+ * REST surface for the card-attestation ceremony: register a client-built card and open a
+ * ceremony for it (the browser assembles the card entirely client-side, so there is no server
+ * {@code cardId} to reference), then drive it synchronously through pair -&gt; present-credential
+ * -&gt; attest, one blocking POST per step, so a frontend wizard can await each response and render
+ * the next screen. This app has no {@code vavr}/{@code Either} plumbing for per-call error
+ * handling, so {@link CardAttestationExceptionHandler} maps exceptions via a scoped {@code
+ * @RestControllerAdvice} instead:
  *
  * <p><b>A "failed step" is a 200, not an HTTP error.</b> {@link CardCredentialService#pair}, {@link
  * CardCredentialService#presentCredential}, and {@link CardAttestService#attest} all fold a
@@ -117,11 +116,11 @@ public class CardAttestationController {
         return ResponseEntity.ok(toView(ceremony));
     }
 
-    @Operation(summary = "Attest (or retry attesting) the card, anchoring it on-chain",
-            description = "Blocks synchronously on the wallet's remotesign reply and the on-chain "
-                    + "submission. An attest failure comes back as 200 with state=FAILED (or, if only "
-                    + "the tx submission failed, state stays CREDENTIAL_RECEIVED so a retry resumes "
-                    + "just the submission) — never an HTTP error.")
+    @Operation(summary = "Attest (or retry attesting) the card against the paired wallet's KEL",
+            description = "Blocks synchronously on the wallet's remotesign reply, then verifies the "
+                    + "interaction event it anchored. NOTHING is published to Cardano — that KEL anchor "
+                    + "IS the attestation, and is carried on the returned card. An attest failure comes "
+                    + "back as 200 with state=FAILED — never an HTTP error.")
     @PostMapping("/attestation/ceremonies/{id}/attest")
     public ResponseEntity<CardCeremonyView> attest(@PathVariable UUID id,
             @RequestBody(required = false) CardCeremonyStepRequest request) {

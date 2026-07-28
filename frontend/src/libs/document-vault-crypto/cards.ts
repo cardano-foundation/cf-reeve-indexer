@@ -1,7 +1,7 @@
 /**
- * The REEVE_KEY_CARD is UNSIGNED (permissionless import model, §9.4): it carries the holder's
- * PUBLIC key only — no issuer object, no signature, and never any private key material. Identity
- * binding is out-of-band; the importing org verifies the public key through a separate channel.
+ * The REEVE_KEY_CARD is UNSIGNED: it carries the holder's PUBLIC key only — no issuer object, no
+ * signature, and never any private key material. Identity binding is out-of-band; the importing
+ * org verifies the public key through a separate channel.
  */
 export type KeyCard = {
   v: number
@@ -12,7 +12,7 @@ export type KeyCard = {
 
 export const parseCard = (raw: string): KeyCard => {
   const card = JSON.parse(raw) as KeyCard
-  // I7: readers that meet an unknown version MUST fail visibly rather than guess.
+  // Readers that meet an unknown version MUST fail visibly rather than guess.
   if (card.v !== 1) throw new Error(`Unsupported card version: ${card.v}`)
   if (card.type !== 'REEVE_KEY_CARD') throw new Error('Not a REEVE_KEY_CARD')
   if (!card.subject || !card.key) throw new Error('Malformed card')
@@ -40,7 +40,7 @@ export type BuildCardInput = {
 const isPresent = (value?: string): value is string => Boolean(value && value.trim() !== '')
 
 /**
- * The inverse of parseCard: assemble an UNSIGNED REEVE_KEY_CARD entirely client-side (§9.4). Public
+ * The inverse of parseCard: assemble an UNSIGNED REEVE_KEY_CARD entirely client-side. Public
  * key only — no issuer, no signature, no private material by construction. Blank optional fields are
  * omitted and organisationId defaults to '' so the result matches the wire shape parseCard accepts.
  */

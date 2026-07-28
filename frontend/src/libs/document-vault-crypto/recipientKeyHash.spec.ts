@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { PUBLIC_KEY_HEX_REGEX, hashPublicKey } from './recipientKeyHash'
 
 /**
- * These vectors are the RFC 7748 §6.1 X25519 public keys. They are asserted identically in
- * cf-reeve-platform's RecipientKeyHasherTest.java and published in docs/onChainFormat.md. The whole
- * feature rests on the two implementations agreeing — if this file and that one ever disagree, the
- * filter silently matches nothing, which looks like "I have no documents" rather than a bug.
+ * These vectors are RFC 7748 X25519 public keys, also used as golden vectors in the backend's
+ * matching hash implementation. The whole feature rests on the two implementations agreeing — if
+ * they ever disagree, the filter silently matches nothing, which looks like "I have no documents"
+ * rather than a bug.
  */
 const ALICE_PUB = '8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a'
 const ALICE_HASH = '300c9c9603b92a4b39ed3958bf9240114804db4fd373012c0ca47432d63425ae'

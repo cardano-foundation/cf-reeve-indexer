@@ -15,11 +15,11 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Verification is public — a verifier you must log into is not a verifier (§9.4). Only card
- * assembly is authenticated: cards are UNSIGNED (import is permissionless), but the operator
- * endpoint that writes to the registry stays gated so it cannot be flooded anonymously. Single
- * operator principal from env config; HTTP Basic over TLS, stateless. CSRF is disabled because
- * its threat model doesn't apply here:
+ * Verification is public — a verifier you must log into is not a verifier. Only card assembly
+ * is authenticated: cards are UNSIGNED (import is permissionless), but the operator endpoint
+ * that writes to the registry stays gated so it cannot be flooded anonymously. Single operator
+ * principal from env config; HTTP Basic over TLS, stateless. CSRF is disabled because its threat
+ * model doesn't apply here:
  * Basic credentials are attached to every /api/v1/cards/** request programmatically by the SPA
  * (see backendReeveApi's Basic-auth header construction), never typed into a browser auth
  * dialog and never browser-cached, so there is no ambient credential a third-party page could
@@ -28,13 +28,13 @@ import org.springframework.security.web.SecurityFilterChain;
  * this reasoning — that would reintroduce the ambient-credential vehicle CSRF protects against.
  *
  * <p>The card-attestation ceremony endpoints under /api/v1/cards/**\/attestation/ceremonies/**
- * (design doc Part A / A6, {@code CardAttestationController}) are carved out as PUBLIC, same as
- * /status — deliberately NOT folded into the authenticated() rule above. That wizard is driven by
- * the card-issuance frontend, which is itself unauthenticated and holds no operator credentials
- * (see {@code ViewCardIssuance.component.tsx}'s own comment: card creation makes no network call
- * at all today, let alone an authenticated one); gating the ceremony behind the same HTTP Basic as
- * /issue would make it undrivable from that frontend. See {@code CardAttestationController}'s own
- * javadoc for the full reasoning.
+ * ({@code CardAttestationController}) are carved out as PUBLIC, same as /status — deliberately
+ * NOT folded into the authenticated() rule above. That wizard is driven by the card-issuance
+ * frontend, which is itself unauthenticated and holds no operator credentials (see {@code
+ * ViewCardIssuance.component.tsx}'s own comment: card creation makes no network call at all
+ * today, let alone an authenticated one); gating the ceremony behind the same HTTP Basic as
+ * /issue would make it undrivable from that frontend. See {@code CardAttestationController}'s
+ * own javadoc for the full reasoning.
  */
 @Configuration
 @EnableWebSecurity

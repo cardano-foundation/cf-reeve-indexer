@@ -1,9 +1,10 @@
 package org.cardanofoundation.reeve.indexer.model.domain.document;
 
 /**
- * Overall verdict per §9.3: first failing check in contract order wins; PENDING while unresolved.
- * The publisher check was removed by design — VERIFIED asserts only that the bytes on IPFS match
- * what was anchored on Cardano L1 at this slot, making no claim about WHO anchored it.
+ * Overall verdict: the first failing check, evaluated in the order below, wins; PENDING while
+ * unresolved. The publisher check was removed by design — VERIFIED asserts only that the bytes
+ * on IPFS match what was anchored on Cardano L1 at this slot, making no claim about WHO anchored
+ * it.
  */
 public enum DocumentVerdict {
     VERIFIED, MALFORMED_MANIFEST, IPFS_UNAVAILABLE,

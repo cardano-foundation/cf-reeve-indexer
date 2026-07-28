@@ -56,11 +56,11 @@ class DocumentEnvelopeVerifierTest {
         return HexUtil.encodeHexString(MessageDigest.getInstance("SHA-256").digest(bytes));
     }
 
-    private DocumentEntity doc(String contentHash, int slotCount) {
+    private DocumentEntity doc(String contentHash, int recipientCount) {
         return DocumentEntity.builder()
                 .txHash("tx1").ipfsCid("bafyexamplecid1")
                 .contentHash(contentHash).plaintextHash("b".repeat(64))
-                .envelopeVersion(1).slotCount(slotCount)
+                .envelopeVersion(1).recipientCount(recipientCount)
                 .organisationId("f".repeat(64))
                 .manifestCheck(CheckStatus.PASS)
                 .ipfsCheck(CheckStatus.PENDING).contentHashCheck(CheckStatus.PENDING)
@@ -68,11 +68,13 @@ class DocumentEnvelopeVerifierTest {
                 .build();
     }
 
-    private String envelope(String contentHash, int slots) {
-        StringBuilder slotJson = new StringBuilder();
-        for (int i = 0; i < slots; i++) {
-            if (i > 0) slotJson.append(',');
-            slotJson.append("{\"ephemeral_pub\":\"").append("c".repeat(64))
+    // Builds the published envelope shape verbatim, including its frozen "slots"/"ephemeral_pub"/
+    // "wrapped_dek" key names — the verifier has to keep reading exactly these.
+    private String envelope(String contentHash, int recipientCount) {
+        StringBuilder recipientJson = new StringBuilder();
+        for (int i = 0; i < recipientCount; i++) {
+            if (i > 0) recipientJson.append(',');
+            recipientJson.append("{\"ephemeral_pub\":\"").append("c".repeat(64))
                     .append("\",\"wrapped_dek\":\"").append("d".repeat(96)).append("\"}");
         }
         return """
@@ -81,7 +83,7 @@ class DocumentEnvelopeVerifierTest {
              "payload":{"ciphertext":"%s","nonce":"%s"},
              "slots":[%s]}
             """.formatted("f".repeat(64), contentHash, "b".repeat(64),
-                Base64.getEncoder().encodeToString(CIPHERTEXT), "0".repeat(24), slotJson);
+                Base64.getEncoder().encodeToString(CIPHERTEXT), "0".repeat(24), recipientJson);
     }
 
     @Test
@@ -139,9 +141,9 @@ class DocumentEnvelopeVerifierTest {
     }
 
     @Test
-    void slotCountMismatchIsMalformedEnvelope() throws Exception {
+    void recipientCountMismatchIsMalformedEnvelope() throws Exception {
         String hash = sha256Hex(CIPHERTEXT);
-        DocumentEntity entity = doc(hash, 5); // manifest says 5 slots, envelope has 2
+        DocumentEntity entity = doc(hash, 5); // manifest claims 5 recipients, envelope carries 2
         stubEnvelopeBytes(envelope(hash, 2));
 
         verifier.verify(entity);
@@ -173,12 +175,12 @@ class DocumentEnvelopeVerifierTest {
 
         verifier.verify(entity);
 
-        assertEquals(CheckStatus.FAIL, entity.getEnvelopeCheck()); // I7: never guess at unknown versions
+        assertEquals(CheckStatus.FAIL, entity.getEnvelopeCheck()); // never guess at unknown versions
     }
 
     @Test
     void fractionalEnvelopeVersionIsMalformedNotTruncatedToOne() throws Exception {
-        // I7: "version": 1.9 must not be truncated to 1 and accepted. canConvertToInt()/asInt()
+        // "version": 1.9 must not be truncated to 1 and accepted. canConvertToInt()/asInt()
         // alone would round it down; isIntegralNumber() rejects the fractional value outright,
         // matching the frontend's strict `version !== 1`.
         String hash = sha256Hex(CIPHERTEXT);
@@ -194,8 +196,8 @@ class DocumentEnvelopeVerifierTest {
 
     @Test
     void mutuallyConsistentButUnsupportedVersionIsStillMalformed() throws Exception {
-        // Isolates I7 from mere manifest/envelope self-consistency: envelope version and
-        // manifest envelope_version agree with EACH OTHER (both 2), but 2 is not the one
+        // Checks version support separately from mere manifest/envelope self-consistency: envelope
+        // version and manifest envelope_version agree with EACH OTHER (both 2), but 2 is not the one
         // supported version — this must still FAIL, distinguishing it from
         // unknownEnvelopeVersionIsMalformed() above where the two disagree.
         String hash = sha256Hex(CIPHERTEXT);

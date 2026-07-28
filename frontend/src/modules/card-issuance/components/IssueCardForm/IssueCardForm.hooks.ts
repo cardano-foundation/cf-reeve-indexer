@@ -10,11 +10,11 @@ export type IssueCardFormStatus = 'idle' | 'issuing' | 'issued' | 'error'
 
 // How the holder's passkey is obtained: 'create' registers a NEW passkey on this device; 'existing'
 // asks the OS to pick a passkey the holder already registered. Either way only the PUBLIC key is
-// derived from its PRF output — the private scalar is never materialised here (I1/I5).
+// derived from its PRF output — the private scalar is never materialised here.
 export type PasskeyMode = 'create' | 'existing'
 
 // The card build needs ONLY the public key + credential id. The private key is derived inside the
-// passkey helper, used to compute the public key, and never surfaced here (I1/I5) — it is
+// passkey helper, used to compute the public key, and never surfaced here — it is
 // re-derivable from the holder's passkey at decrypt time, so nothing needs to retain it.
 export type DeriveKeypairFn = (args: {
   mode: PasskeyMode
@@ -32,7 +32,7 @@ export type UseIssueCardFormArgs = {
 // Real default: for 'create', register a passkey in this browser and derive the holder's X25519
 // public key from it; for 'existing', let the holder pick a passkey they already have and derive the
 // public key from that. Only the public half and the credential id are returned — the private key is
-// never materialised (I1/I5).
+// never materialised.
 const defaultDeriveKeypair: DeriveKeypairFn = async ({ mode, user }) =>
   mode === 'existing' ? deriveCardKeyFromExistingPasskey() : createPasskeyAndDeriveKeypair(user)
 
@@ -42,7 +42,7 @@ const defaultDeriveKeypair: DeriveKeypairFn = async ({ mode, user }) =>
 const EXTERNAL_SUBJECT_TYPE = 'EXTERNAL' as const
 
 /**
- * The card creation state machine (§9.4): idle -> issuing -> issued | error.
+ * The card creation state machine: idle -> issuing -> issued | error.
  *
  * PERMISSIONLESS and fully client-side: the keypair is DERIVED from a passkey created IN THE BROWSER,
  * only the public half is handed to `buildCard`, and the UNSIGNED card is assembled and returned
@@ -70,7 +70,7 @@ export const useIssueCardForm = ({ deps }: UseIssueCardFormArgs = {}) => {
     setIssuedCard(null)
 
     try {
-      // I3: on the FIRST attempt the passkey step (WebAuthn create/get) runs straight from the click
+      // On the FIRST attempt the passkey step (WebAuthn create/get) runs straight from the click
       // gesture. On a retry, reuse the already-derived public key (no second WebAuthn prompt).
       if (!derivedRef.current) {
         derivedRef.current = await deriveKeypairFn({
