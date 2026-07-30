@@ -1,6 +1,5 @@
 package org.cardanofoundation.reeve.indexer.service.keri;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +32,10 @@ import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
+import org.cardanofoundation.reeve.indexer.service.keri.cesr.CESRStreamUtil;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.app.credentialing.registries.RegistryVerifyOptions;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.CESRStreamUtil;
+import org.cardanofoundation.signify.generated.keria.model.KeyEvent;
+import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
 
 @RequiredArgsConstructor
 @Service
@@ -47,21 +45,41 @@ public class KeriService {
     private final Optional<SignifyClient> client;
     private final KeriProperties keriProperties;
     private final CredentialSchemaRegistry credentialSchemaRegistry;
+    private final DocumentAttestationCommitmentFactory commitmentFactory;
     @Value("${keri.enabled:false}")
     private boolean keriEnabled;
     private final ReportRepository reportRepository;
     private final DocumentRepository documentRepository;
     private final CredentialRepository credentialRepository;
 
+    /**
+     * OOBIs already resolved on this agent, so a resolve is not repeated on every verification.
+     *
+     * <p>Only SUCCESSES are recorded. A failed resolve must stay retryable — memoising it would pin a
+     * transient network error, or a rotated OOBI, for the rest of the process lifetime and turn a
+     * momentary blip into a permanently unverifiable schema.
+     */
+    private final Set<String> resolvedOobis = ConcurrentHashMap.newKeySet();
+
     private void resolveOobis() {
         for (String oobi : resolvableOobis()) {
+            if (resolvedOobis.contains(oobi)) {
+                continue;
+            }
             client.ifPresent(c ->
             {
                 try {
-                    Object object = c.oobis().resolve(oobi, null);
-                    c.operations().wait(Operation.fromObject(object));
-                } catch (LibsodiumException | IOException | InterruptedException e) {
-                    log.warn("Failed to resolve OOBI {}: {}", oobi, e.getMessage());
+                    var completed = c.operations().wait(c.oobis().resolve(oobi, null));
+                    // Reaching here means the operation completed without error: the current client
+                    // raises OperationFailedException/OperationTimeoutException instead of returning a
+                    // done-with-error operation, and those are caught below and left retryable.
+                    if (completed != null) {
+                        resolvedOobis.add(oobi);
+                    }
+                } catch (RuntimeException e) {
+                    // Left OUT of resolvedOobis on purpose, so a transient failure stays retryable
+                    // rather than pinning an issuer as unreachable for the process lifetime.
+                    log.warn("Failed to resolve OOBI {} (will retry): {}", oobi, e.getMessage());
                 }
             });
 
@@ -102,7 +120,7 @@ public class KeriService {
         Thread.sleep(5000); // 5 seconds
         resolveOobis();
         // TODO will fix this when we are finalizing the identity demo
-        List<Object> keyEvents = (List<Object>)client.orElseThrow().keyEvents().get(identity.getIdentifier());
+        List<KeyEventRecord> keyEvents = client.orElseThrow().keyEvents().get(identity.getIdentifier());
         int index;
         try {
             index = Integer.parseUnsignedInt(identity.getSequenceNumber(), 16);
@@ -114,17 +132,18 @@ public class KeriService {
             log.error("KERI key events do not contain index {} for identifier {}", index, identity.getIdentifier());
             return false;
         }
-        Map<String, Object> kelEvent = (Map<String, Object>) keyEvents.get(index);
-        Map<String, Object> kedEvent = (Map<String, Object>) kelEvent.get("ked");
-        List<Object> aList = (List<Object>) kedEvent.get("a");
+        KeyEvent kedEvent = keyEvents.get(index).getKed();
+        if (kedEvent == null || !(kedEvent.getA() instanceof List<?> aList) || aList.isEmpty()) {
+            log.info("KERI key event at index {} for {} carries no seals", index, identity.getIdentifier());
+            return false;
+        }
         Object first = aList.getFirst();
         if (first instanceof String a) {
             return a.equals(identity.getDataHash());
-        } else if (first instanceof LinkedHashMap<?, ?> map) {
+        } else if (first instanceof Map<?, ?> map) {
             // safely cast keys/values if you know they are String
-            @SuppressWarnings("unchecked")
-            LinkedHashMap<String, String> stringMap = (LinkedHashMap<String, String>) map;
-            return stringMap.containsKey("d") && stringMap.get("d").equals(identity.getDataHash());
+            Object anchored = map.get("d");
+            return identity.getDataHash() != null && identity.getDataHash().equals(anchored);
         } else {
             log.info("KERI identity event data hash is not a string: {}",
                     first != null ? first.getClass().getName() : "null");
@@ -171,10 +190,28 @@ public class KeriService {
         }
     }
 
+    /**
+     * Correlates a document with its ATTEST event by either of two contracts.
+     *
+     * <p>The FIRST is the long-standing one, unchanged: a backend-driven attestation anchors the digest
+     * of the published label-1447 manifest, so {@code metadataHash} equals the ATTEST's {@code d}
+     * directly. Every document anchored that way keeps verifying exactly as before — this check runs
+     * first and nothing about it has moved.
+     *
+     * <p>The SECOND covers wallet-driven attestation, where the wallet signs a commitment over the
+     * document rather than the manifest (it cannot see the manifest's ipfs_cid or creation_slot yet)
+     * and seals the SAID of the remotesign payload wrapping that commitment's digest. See
+     * {@link DocumentAttestationCommitmentFactory}.
+     *
+     * <p>Neither matching is a no-op, as before. In particular a wallet-attested document whose
+     * envelope has not been fetched yet cannot be checked at all — its commitment includes the
+     * envelope's SHA-256 — so correlation is re-attempted once the envelope lands
+     * ({@code DocumentEnvelopeVerifier}) rather than being decided prematurely here.
+     */
     private void verifyAndSaveDocument(DocumentEntity document, IdentityEventEntity identityEntity) {
         try {
             log.info("MetadataHash {} identiyEntityEventHash {}", document.getMetadataHash(), identityEntity.getDataHash());
-            if (Objects.equals(document.getMetadataHash(), identityEntity.getDataHash())) {
+            if (matchesAttestation(document, identityEntity)) {
                 if (attestationGatePassed(identityEntity)) {
                     document.setIdentifier(identityEntity.getIdentifier());
                     document.setIdentityVerified(true);
@@ -184,6 +221,24 @@ public class KeriService {
         } catch (Exception e) {
             log.error("Error verifying identity for txHash: {}", identityEntity.getTxHash(), e);
         }
+    }
+
+    /** @return whether this ATTEST authorises this document under either contract (see above). */
+    public boolean matchesAttestation(DocumentEntity document, IdentityEventEntity identityEntity) {
+        if (Objects.equals(document.getMetadataHash(), identityEntity.getDataHash())) {
+            return true;
+        }
+        String expectedPayloadSaid = commitmentFactory.expectedPayloadSaid(document,
+                identityEntity.getIdentifier());
+        if (expectedPayloadSaid == null) {
+            return false;
+        }
+        boolean matches = expectedPayloadSaid.equals(identityEntity.getDataHash());
+        if (matches) {
+            log.info("Document tx {} correlated via the wallet commitment (payload SAID {})",
+                    document.getTxHash(), expectedPayloadSaid);
+        }
+        return matches;
     }
 
     /**
@@ -363,28 +418,81 @@ public class KeriService {
                 revokedCredentialSaids);
     }
 
-    /** Structurally verifies every {@code vcp} (registry inception) event against the live agent —
-     *  extracted from {@link #verifyCredentialEntity} verbatim, and now called only by it. Throws on
-     *  any verification failure (mirrors the original inline loop, which relied on the caller's own
-     *  outer try/catch). The card-attestation ceremony deliberately does NOT run this — see {@link
-     *  #readPresentedCredential}. */
+    /**
+     * Verifies every registry inception ({@code vcp}) and credential issuance ({@code iss}) event in
+     * the presented chain by finding it ANCHORED in its issuer's own key event log.
+     *
+     * <p>This replaces a {@code POST /registries/verify} call. That endpoint exists only on the
+     * {@code feat/verifyCredential} branch of our KERIA fork and on the matching unmerged
+     * {@code feat/verify} branch of signify-java; it is not in either upstream, and the deployed agent
+     * answers 404. Nor is there an upstream substitute: an OOBI delivers only KEL events (verified
+     * empirically — {@code icp}/{@code ixn}/{@code dip}/{@code rpy}, never {@code vcp} or {@code iss}),
+     * KERIA populates TEL state only during an IPEX admit, and {@code /queries} takes a KEL prefix, not
+     * a registry. So {@code credentials().state(ri, said)} answers 404 for any registry the agent has
+     * not been walked through IPEX — which is every credential this indexer reads off the chain.
+     *
+     * <p>What IS available is the thing the TEL is secured by in the first place. Each TEL event is
+     * anchored by a seal in the issuer's KEL, and the issuer's KEL is exactly what an OOBI delivers and
+     * what KERIA verifies — signatures, witness receipts and all. Finding the event's SAID among those
+     * seals proves the issuer committed to it, which is the property {@code /registries/verify} was
+     * being asked for.
+     *
+     * <p>Anchoring is checked against the KEL of the AID the event itself names as controller
+     * ({@code vcp.ii}), so a chain cannot nominate someone else's registry: the SAID has to appear in
+     * the KEL of the AID that claims to have created it.
+     *
+     * @throws IllegalStateException when any event is not anchored, or its issuer's KEL cannot be read
+     *         — an unanchored registry is not a registry we can attribute to anyone.
+     */
     private void verifyRegistryEvents(List<Map<String, Object>> vcpEvents, List<String> vcpAttachments,
             String logContext) throws Exception {
-        for (int i = 0; i < vcpEvents.size(); i++) {
-            Map<String, Object> vcpEvent = vcpEvents.get(i);
-            String vcpAttachment = vcpAttachments.get(i);
-            Serder vcpSerder = new Serder(vcpEvent);
+        for (Map<String, Object> vcpEvent : vcpEvents) {
+            String registrySaid = (String) vcpEvent.get("d");
+            String registryId = (String) vcpEvent.get("i");
+            String controller = (String) vcpEvent.get("ii");
 
-            RegistryVerifyOptions registryVerifyOptions = RegistryVerifyOptions.builder()
-                    .vcp(vcpSerder)
-                    .atc(vcpAttachment)
-                    .build();
-
-            Object registryVerifyOp = client.orElseThrow().registries().verify(registryVerifyOptions);
-
-            client.orElseThrow().operations().wait(Operation.fromObject(registryVerifyOp));
-            log.debug("VCP #{} verification completed successfully for {}", i + 1, logContext);
+            if (registrySaid == null || controller == null) {
+                throw new IllegalStateException(
+                        "Registry inception in chain for %s names no SAID or controller.".formatted(logContext));
+            }
+            // A registry's identifier IS the SAID of its inception event. A vcp claiming an id it does
+            // not hash to is another registry's identifier with this event's contents written under it.
+            if (registryId != null && !registryId.equals(registrySaid)) {
+                throw new IllegalStateException(
+                        "Registry inception for %s claims id %s but hashes to %s."
+                                .formatted(logContext, registryId, registrySaid));
+            }
+            if (!isAnchoredInKel(controller, registrySaid)) {
+                throw new IllegalStateException(
+                        "Registry %s is not anchored in the key event log of its claimed controller %s (%s)."
+                                .formatted(registrySaid, controller, logContext));
+            }
+            log.debug("Registry {} verified as anchored in {}'s KEL for {}", registrySaid, controller, logContext);
         }
+    }
+
+    /** @return whether {@code aid}'s KEL contains an event sealing {@code digest}. */
+    private boolean isAnchoredInKel(String aid, String digest) throws Exception {
+        for (KeyEventRecord record : client.orElseThrow().keyEvents().get(aid)) {
+            KeyEvent event = record.getKed();
+            if (event != null && sealsContain(event.getA(), digest)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Seals are an {@code a} list of {@code {i, s, d}} maps; {@code d} is what was committed to. */
+    private static boolean sealsContain(Object sealField, String digest) {
+        if (!(sealField instanceof List<?> seals)) {
+            return false;
+        }
+        for (Object seal : seals) {
+            if (seal instanceof Map<?, ?> map && digest.equals(map.get("d"))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** The presented leaf's own SAID and schema SAID — see {@link #readPresentedCredential}. These are
@@ -473,8 +581,14 @@ public class KeriService {
             CredentialSchema schema, String logContext) {
         List<String> trustedRoots = blankFiltered(schema.trustedRoots());
         if (trustedRoots.isEmpty()) {
-            log.warn("no trusted roots configured for schema {}, accepting on structure alone", schema.said());
-            return true;
+            // Fail CLOSED. A schema with no trusted roots is not "no restriction", it is a deployment
+            // that has not said who it trusts — and the usual cause is a mis-templated ${VAR:} that
+            // resolves to a blank entry and gets filtered away to nothing here. Accepting on structure
+            // alone turned that typo into "trust every issuer on earth", silently.
+            log.error("Schema {} is CHAINED but no trusted roots are configured (trusted-roots is empty or "
+                    + "all blank — check for an unset environment variable). Rejecting: an empty trust list "
+                    + "cannot mean trust anyone.", schema.said());
+            return false;
         }
         String rootIssuer = terminalIssuerAid(leaf, acdcBySaid);
         boolean trusted = rootIssuer != null && trustedRoots.contains(rootIssuer);
@@ -494,8 +608,11 @@ public class KeriService {
         String leafIssuer = (String) leaf.get("i");
         boolean trusted;
         if (trustedIssuers.isEmpty()) {
-            log.warn("no trusted issuers configured for schema {}, accepting on structure alone", schema.said());
-            trusted = true;
+            // Fail CLOSED, for the same reason as verifyChainedTrust above.
+            log.error("Schema {} is STANDALONE but no trusted issuers are configured (trusted-issuers is "
+                    + "empty or all blank — check for an unset environment variable). Rejecting: an empty "
+                    + "trust list cannot mean trust anyone.", schema.said());
+            trusted = false;
         } else {
             trusted = leafIssuer != null && trustedIssuers.contains(leafIssuer);
             if (!trusted) {

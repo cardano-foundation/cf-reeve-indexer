@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.reeve.indexer.model.domain.document.CheckStatus;
 import org.cardanofoundation.reeve.indexer.model.entity.DocumentEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
+import org.cardanofoundation.reeve.indexer.model.repository.IdentityEventRepository;
 import org.cardanofoundation.reeve.indexer.processor.IpfsGatewayClient;
+import org.cardanofoundation.reeve.indexer.service.keri.KeriService;
 
 /**
  * Verifies a document's IPFS envelope: fetches it, then checks content-hash and structural
@@ -44,16 +46,21 @@ public class DocumentEnvelopeVerifier {
     private final ObjectMapper objectMapper;
     private final int failAfterAttempts;
     private final int maxAttempts;
+    private final IdentityEventRepository identityEventRepository;
+    private final KeriService keriService;
 
     public DocumentEnvelopeVerifier(IpfsGatewayClient ipfsGatewayClient,
             DocumentRepository documentRepository, ObjectMapper objectMapper,
             @Value("${indexer.verification.ipfs-fail-after-attempts:3}") int failAfterAttempts,
-            @Value("${indexer.verification.ipfs-max-attempts:12}") int maxAttempts) {
+            @Value("${indexer.verification.ipfs-max-attempts:12}") int maxAttempts,
+            IdentityEventRepository identityEventRepository, KeriService keriService) {
         this.ipfsGatewayClient = ipfsGatewayClient;
         this.documentRepository = documentRepository;
         this.objectMapper = objectMapper;
         this.failAfterAttempts = failAfterAttempts;
         this.maxAttempts = maxAttempts;
+        this.identityEventRepository = identityEventRepository;
+        this.keriService = keriService;
     }
 
     public void verify(DocumentEntity entity) {
@@ -82,9 +89,16 @@ public class DocumentEnvelopeVerifier {
                 return;
             }
             entity.setIpfsCheck(CheckStatus.PASS);
+            // The SHA-256 of the envelope EXACTLY as fetched. This is the one wallet-commitment input
+            // that is not on chain, so it is recorded here — the only point at which the bytes exist.
+            entity.setEnvelopeSha256(sha256Hex(body.get()));
             evaluateEnvelope(entity, new String(body.get(), StandardCharsets.UTF_8));
             entity.recomputeVerdict();
             documentRepository.save(entity);
+            // A wallet-attested document could not be correlated before now: its commitment covers the
+            // envelope hash, which was unknown while the ATTEST event was being processed. Re-attempt
+            // it here rather than leave the document permanently unverified for want of ordering.
+            retryWalletAttestationCorrelation(entity);
         } catch (OptimisticLockingFailureException e) {
             // Lost the race against a concurrent writer on the same row (e.g. DocumentProcessor
             // re-indexing the same tx). Do not rethrow and do not retry inline here - the
@@ -94,6 +108,28 @@ public class DocumentEnvelopeVerifier {
         } catch (Exception e) {
             log.error("Envelope verification failed for tx {}: {}", entity.getTxHash(),
                     e.getMessage());
+        }
+    }
+
+    /**
+     * Re-runs identity correlation now that the envelope hash is known.
+     *
+     * <p>Only ever promotes: a document already verified is left alone, and a document that still does
+     * not match is left exactly as it was. Nothing here can un-verify anything, which is what keeps the
+     * legacy backend-attested path unaffected by this addition.
+     */
+    private void retryWalletAttestationCorrelation(DocumentEntity entity) {
+        if (entity.isIdentityVerified() || entity.getEnvelopeSha256() == null) {
+            return;
+        }
+        try {
+            identityEventRepository.findById(entity.getTxHash())
+                    .ifPresent(identityEvent -> keriService.verifyIdentityTx(identityEvent));
+        } catch (Exception e) {
+            // Correlation is a best-effort enrichment; failing it must never fail envelope verification,
+            // which has already been saved above.
+            log.warn("Could not re-attempt attestation correlation for tx {}: {}",
+                    entity.getTxHash(), e.getMessage());
         }
     }
 

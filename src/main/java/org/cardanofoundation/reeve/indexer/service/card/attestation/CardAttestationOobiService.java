@@ -3,7 +3,6 @@ package org.cardanofoundation.reeve.indexer.service.card.attestation;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -22,9 +21,11 @@ import org.cardanofoundation.reeve.indexer.config.KeriAgentIdentity;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriAgentUnavailableException;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriOobiValidationException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.exception.UnexpectedResponseStatusException;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.coring.Operations;
+import org.cardanofoundation.signify.exception.OperationTimeoutException;
+import org.cardanofoundation.signify.exception.SignifyAgentException;
+import org.cardanofoundation.signify.exception.SignifyTransportException;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 
 /**
  * The "pair" foundation for the card-attestation ceremony: exposes the indexer's own KERI agent OOBI
@@ -48,9 +49,6 @@ public class CardAttestationOobiService {
     static final int MAX_OOBI_URL_LENGTH = 2048;
     private static final long RESOLVE_TIMEOUT_MILLIS = 15_000L;
     private static final Pattern OOBI_AID_PATTERN = Pattern.compile("/oobi/([^/]+)");
-    // Matches the HTTP status code SignifyClient#fetch embeds in UnexpectedResponseStatusException's
-    // message: String.format("HTTP %s %s - %d - %s", method, path, statusCode, body).
-    private static final Pattern HTTP_STATUS_PATTERN = Pattern.compile("-\\s*(\\d{3})\\s*-");
 
     private final Optional<SignifyClient> client;
     private final Optional<KeriAgentIdentity> agentIdentity;
@@ -131,22 +129,22 @@ public class CardAttestationOobiService {
     }
 
     /**
-     * {@code client.oobis().get(name, "agent")} returns a {@code LinkedHashMap} whose {@code
-     * "oobis"} entry is a list of OOBI URLs for the agent's end role. Indexes the first entry
+     * {@code client.oobis().get(name, "agent")} returns an {@code OOBI} whose {@code oobis} list holds
+     * the URLs for the agent's end role. Indexes the first entry
      * directly rather than stringifying the whole list (a legacy idiom elsewhere in this ecosystem
      * silently concatenates every entry when there's more than one witness-visible OOBI) — this is
      * well-defined for both the common single-entry case and the multi-entry one.
      */
     private String fetchAgentOobi(KeriAgentIdentity identity) throws Exception {
-        Object oobi = client.orElseThrow().oobis().get(identity.name(), AGENT_ROLE)
+        OOBI oobi = client.orElseThrow().oobis().get(identity.name(), AGENT_ROLE)
                 .orElseThrow(() -> new IllegalStateException(
                         "No OOBI available for KERI agent identifier " + identity.name()));
-        Object oobisValue = ((LinkedHashMap<?, ?>) oobi).get("oobis");
-        if (!(oobisValue instanceof List<?> oobisList) || oobisList.isEmpty()) {
+        List<String> oobis = oobi.getOobis();
+        if (oobis == null || oobis.isEmpty()) {
             throw new IllegalStateException(
                     "KERI agent OOBI response contained no oobis for identifier " + identity.name());
         }
-        return oobisList.get(0).toString();
+        return oobis.get(0);
     }
 
     // --- validation: runs before any client call, so an invalid URL never touches the KERI agent ---
@@ -180,13 +178,13 @@ public class CardAttestationOobiService {
 
     private void resolveAndVerify(String oobiUrl, String aid) {
         try {
-            Object resolveResult = client.orElseThrow().oobis().resolve(oobiUrl, aid);
+            var resolveResult = client.orElseThrow().oobis().resolve(oobiUrl, aid);
             Operations.WaitOptions waitOptions = Operations.WaitOptions.builder()
                     .abortSignal(Operations.AbortSignal.builder().timeout(RESOLVE_TIMEOUT_MILLIS).build())
                     .build();
-            client.orElseThrow().operations().wait(Operation.fromObject(resolveResult), waitOptions);
+            client.orElseThrow().operations().wait(resolveResult, waitOptions);
 
-            Optional<Object> contact = client.orElseThrow().contacts().get(aid);
+            var contact = client.orElseThrow().contacts().get(aid);
             if (contact.isEmpty()) {
                 throw new KeriOobiValidationException(
                         "AID %s could not be verified via contacts after resolving the OOBI.".formatted(aid));
@@ -212,26 +210,36 @@ public class CardAttestationOobiService {
      *   <li>any {@link IOException} — connection-refused, connect/request timeouts, and every other
      *       network-level transport failure the JDK {@code HttpClient} used under {@code
      *       SignifyClient#fetch} can raise;</li>
-     *   <li>an {@link InterruptedException} whose message contains "timeout" — {@code
-     *       Operations.AbortSignal#throwIfAborted} throws exactly this when the resolve wait's own
-     *       abort signal (bounded by {@link #RESOLVE_TIMEOUT_MILLIS}) fires: the agent accepted the
-     *       resolve request but the long-running operation never completed in time;</li>
-     *   <li>{@link UnexpectedResponseStatusException} whose embedded HTTP status is 5xx — the agent
-     *       responded but with a server-side error, not a rejection of the request.</li>
+     *   <li>{@link SignifyTransportException} — the client's own wrapper for the same transport
+     *       failures, which it now raises unchecked;</li>
+     *   <li>{@link OperationTimeoutException} — the resolve wait's abort signal (bounded by
+     *       {@link #RESOLVE_TIMEOUT_MILLIS}) fired: the agent accepted the request but the
+     *       long-running operation never completed in time;</li>
+     *   <li>an {@link InterruptedException} whose message contains "timeout", which is how the same
+     *       condition surfaced before the client raised a dedicated type;</li>
+     *   <li>{@link SignifyAgentException} carrying a 5xx status — the agent responded, but with a
+     *       server-side error rather than a rejection of the request.</li>
      * </ul>
      * Everything else (a plain non-timeout {@code InterruptedException}, a 4xx status, and the
      * empty-contact case handled separately above) stays {@link KeriOobiValidationException}: the
      * agent was reachable and the resolution completed, it just didn't produce a usable AID.
+     *
+     * <p>The 5xx test now reads {@link SignifyAgentException#getStatusCode()} instead of regex-ing the
+     * status back out of the exception's message. The message format was never a contract, and a
+     * client-side rewording of it would have silently turned every agent outage into "your OOBI URL is
+     * invalid".
      */
     private static boolean isTransientAgentFailure(Throwable e) {
-        if (e instanceof IOException) {
+        if (e instanceof IOException || e instanceof SignifyTransportException
+                || e instanceof OperationTimeoutException) {
             return true;
         }
         if (e instanceof InterruptedException) {
             return containsIgnoreCase(e.getMessage(), "timeout");
         }
-        if (e instanceof UnexpectedResponseStatusException) {
-            return isServerErrorStatus(e.getMessage());
+        if (e instanceof SignifyAgentException agentError) {
+            int status = agentError.getStatusCode();
+            return status >= 500 && status < 600;
         }
         return false;
     }
@@ -240,15 +248,4 @@ public class CardAttestationOobiService {
         return message != null && message.toLowerCase(Locale.ROOT).contains(needle);
     }
 
-    private static boolean isServerErrorStatus(String message) {
-        if (message == null) {
-            return false;
-        }
-        Matcher statusMatcher = HTTP_STATUS_PATTERN.matcher(message);
-        if (!statusMatcher.find()) {
-            return false;
-        }
-        int status = Integer.parseInt(statusMatcher.group(1));
-        return status >= 500 && status < 600;
-    }
 }

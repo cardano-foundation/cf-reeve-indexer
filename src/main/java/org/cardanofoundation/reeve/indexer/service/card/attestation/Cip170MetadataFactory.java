@@ -1,6 +1,5 @@
 package org.cardanofoundation.reeve.indexer.service.card.attestation;
 
-import java.security.DigestException;
 
 import org.springframework.stereotype.Service;
 
@@ -43,8 +42,8 @@ public class Cip170MetadataFactory {
             return new Diger(new RawArgs(), cbor).getQb64();
         } catch (CborException e) {
             throw new IllegalStateException("Failed to CBOR-serialize a metadata map for digesting.", e);
-        } catch (DigestException e) {
-            throw new IllegalStateException("Failed to compute the Blake3-256 digest of a metadata map.", e);
         }
+        // Digest failures raise unchecked now and are left to propagate: a Blake3 failure here is not
+        // a condition a caller can do anything about.
     }
 }

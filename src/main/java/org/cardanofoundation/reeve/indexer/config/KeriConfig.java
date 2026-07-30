@@ -21,12 +21,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 @Configuration
 @ConditionalOnProperty(name = "keri.enabled", havingValue = "true", matchIfMissing = false)
@@ -47,7 +46,7 @@ public class KeriConfig {
     public SignifyClient signifyClient() throws Exception {
         log.info("Creating SignifyClient with URL: {}, Boot URL: {}", keriProperties.getUrl(), keriProperties.getBootUrl());
         String bran = resolveBran(keriProperties.getBran());
-        SignifyClient client = new SignifyClient(keriProperties.getUrl(), bran, Salter.Tier.low, keriProperties.getBootUrl(), null);
+        SignifyClient client = new SignifyClient(keriProperties.getUrl(), bran, Tier.LOW, keriProperties.getBootUrl(), null);
         try {
             client.connect();
         } catch (Exception e) {
@@ -56,8 +55,7 @@ public class KeriConfig {
         }
         log.info("SignifyClient connected");
         for (String oobi : resolvableOobis()) {
-            Object object = client.oobis().resolve(oobi, null);
-            client.operations().wait(Operation.fromObject(object));
+            client.operations().wait(client.oobis().resolve(oobi, null));
         }
         return client;
     }
@@ -92,7 +90,7 @@ public class KeriConfig {
         String identifierName = keriProperties.getIdentifierName();
         String prefix;
 
-        Optional<States.HabState> habState = signifyClient.identifiers().get(identifierName);
+        Optional<HabState> habState = signifyClient.identifiers().get(identifierName);
         if (habState.isPresent()) {
             prefix = habState.get().getPrefix();
         } else {
@@ -123,15 +121,18 @@ public class KeriConfig {
         kArgs.setToad(availableWitnesses.toad());
         kArgs.setWits(witnessIds);
 
-        Optional<States.HabState> optionalIdentifier = client.identifiers().get(name);
+        Optional<HabState> optionalIdentifier = client.identifiers().get(name);
         if (optionalIdentifier.isPresent()) {
             id = optionalIdentifier.get().getPrefix();
         } else {
-            EventResult result = client.identifiers().create(name, kArgs);
-            Operation<Object> op = client.operations().wait(Operation.fromObject(result.op()));
-            @SuppressWarnings("unchecked")
-            LinkedHashMap<String, Object> resp = (LinkedHashMap<String, Object>) op.getResponse();
-            id = resp.get("i");
+            client.operations().wait(client.identifiers().create(name, kArgs).op());
+            // Read the prefix back off the identifier rather than out of the operation: the operation
+            // types are now marker interfaces carrying only a name, and this is the same lookup the
+            // already-exists branch above uses.
+            id = client.identifiers().get(name)
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Agent AID %s was created but cannot be read back.".formatted(name)))
+                    .getPrefix();
 
             if (client.getAgent() != null && client.getAgent().getPre() != null) {
                 eid = client.getAgent().getPre();
@@ -139,16 +140,15 @@ public class KeriConfig {
                 throw new IllegalStateException("Agent or pre is null");
             }
             if (!hasEndRole(client, name, "agent", eid)) {
-                EventResult roleResult = client.identifiers().addEndRole(name, "agent", eid, null);
-                client.operations().wait(Operation.fromObject(roleResult.op()));
+                client.operations().wait(client.identifiers().addEndRole(name, "agent", eid, null).op());
             }
 
             // Diagnostic: log the freshly-created AID's actual witness set / toad so a live run can
             // confirm the witnesses were assigned (and see which ones), which is what the wallet's
             // KERIA must be able to reach to deliver a reply back.
-            Optional<States.HabState> freshHab = client.identifiers().get(name);
+            Optional<HabState> freshHab = client.identifiers().get(name);
             if (freshHab.isPresent()) {
-                States.State freshState = freshHab.get().getState();
+                KeyStateRecord freshState = freshHab.get().getState();
                 List<String> witnesses = freshState != null ? freshState.getB() : null;
                 String toad = freshState != null ? freshState.getBt() : null;
                 log.info("created agent AID {}: witnesses={} toad={}", id, witnesses, toad);

@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.service.card.attestation;
 
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -31,14 +32,13 @@ import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelat
 import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelator.CorrelatedNotification;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriService;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriService.PresentedCredential;
+import org.cardanofoundation.reeve.indexer.service.keri.cesr.CESRStreamUtil;
 import org.cardanofoundation.signify.app.Exchanging.ExchangeMessageResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAgreeArgs;
-import org.cardanofoundation.signify.cesr.util.CESRStreamUtil;
-import org.cardanofoundation.signify.core.States.HabState;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 /**
  * Drives the "pair" and "credential presentation" steps of the card-attestation ceremony,
@@ -433,11 +433,11 @@ public class CardCredentialService {
                         continue;
                     }
                     try {
-                        Object resolveResult = client.orElseThrow().oobis().resolve(oobi, null);
+                        var resolveResult = client.orElseThrow().oobis().resolve(oobi, null);
                         Operations.WaitOptions waitOptions = Operations.WaitOptions.builder()
                                 .abortSignal(Operations.AbortSignal.builder().timeout(SCHEMA_RESOLVE_TIMEOUT_MILLIS).build())
                                 .build();
-                        client.orElseThrow().operations().wait(Operation.fromObject(resolveResult), waitOptions);
+                        client.orElseThrow().operations().wait(resolveResult, waitOptions);
                     } catch (Exception e) {
                         interruptIfNeeded(e);
                         throw new KeriAgentUnavailableException(
@@ -486,9 +486,9 @@ public class CardCredentialService {
                         "Ceremony %s is no longer waiting to present a credential.".formatted(ceremonyId));
             }
 
-            Object applyOp = client.orElseThrow().ipex().submitApply(agentName, applyResult.exn(), applyResult.sigs(),
+            var applyOp = client.orElseThrow().ipex().submitApply(agentName, applyResult.exn(), applyResult.sigs(),
                     List.of(walletAid));
-            client.orElseThrow().operations().wait(Operation.fromObject(applyOp));
+            client.orElseThrow().operations().wait(applyOp);
             log.info("IPEX apply sent to {} for ceremony {} (schema {})", walletAid, ceremonyId, schemaSaid);
         } catch (CardCredentialStepException e) {
             throw e;
@@ -504,9 +504,9 @@ public class CardCredentialService {
             ExchangeMessageResult agreeResult = client.orElseThrow().ipex().agree(IpexAgreeArgs.builder()
                     .senderName(agentName).recipient(walletAid).message("")
                     .offerSaid(offerSaid).datetime(nowKeriTimestamp()).build());
-            Object agreeOp = client.orElseThrow().ipex().submitAgree(agentName, agreeResult.exn(), agreeResult.sigs(),
+            var agreeOp = client.orElseThrow().ipex().submitAgree(agentName, agreeResult.exn(), agreeResult.sigs(),
                     List.of(walletAid));
-            client.orElseThrow().operations().wait(Operation.fromObject(agreeOp));
+            client.orElseThrow().operations().wait(agreeOp);
             log.info("agree sent for grant to {}", walletAid);
             return agreeResult;
         } catch (Exception e) {
@@ -524,9 +524,9 @@ public class CardCredentialService {
                     .senderName(agentName).recipient(walletAid).message("")
                     .grantSaid(grantSaid).datetime(nowKeriTimestamp()).build());
             String atc = borrowedAtc != null ? borrowedAtc : admitResult.atc();
-            Object admitOp = client.orElseThrow().ipex().submitAdmit(agentName, admitResult.exn(), admitResult.sigs(),
+            var admitOp = client.orElseThrow().ipex().submitAdmit(agentName, admitResult.exn(), admitResult.sigs(),
                     atc, List.of(walletAid));
-            client.orElseThrow().operations().wait(Operation.fromObject(admitOp));
+            client.orElseThrow().operations().wait(admitOp);
             log.info("admit sent for grant {} to {}", grantSaid, walletAid);
         } catch (Exception e) {
             interruptIfNeeded(e);
@@ -544,9 +544,16 @@ public class CardCredentialService {
         String fullCesr;
         try {
             log.info("fetching credential CESR chain for {} (ceremony {})", credentialSaid, ceremonyId);
-            fullCesr = client.orElseThrow().credentials().get(credentialSaid)
-                    .orElseThrow(() -> new CardCredentialStepException("CREDENTIAL_PRESENTATION_FAILED",
-                            "Credential %s was not found in the store after admit.".formatted(credentialSaid)));
+            // The raw CESR, not the structured Credential: this is the stream an importer re-parses
+            // and re-verifies, so it has to be exactly what KERIA served rather than something
+            // reassembled from parts.
+            HttpResponse<String> cesrResponse = client.orElseThrow().fetch("/credentials/" + credentialSaid,
+                    "GET", null, Map.of("Accept", "application/json+cesr"));
+            if (cesrResponse.statusCode() != 200) {
+                throw new CardCredentialStepException("CREDENTIAL_PRESENTATION_FAILED",
+                        "Credential %s was not found in the store after admit.".formatted(credentialSaid));
+            }
+            fullCesr = cesrResponse.body();
             log.info("credential CESR chain fetched ({} chars) for ceremony {}", fullCesr.length(), ceremonyId);
         } catch (CardCredentialStepException e) {
             throw e;

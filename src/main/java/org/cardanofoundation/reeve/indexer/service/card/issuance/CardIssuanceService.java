@@ -334,7 +334,7 @@ public class CardIssuanceService {
             if (!allowed.contains(field)) {
                 throw new CardIssuanceException(400, "CARD_CONTAINS_PRIVATE_KEY",
                         "The issuance request may carry only the whitelisted public fields; "
-                                + "unexpected field '" + field + "' is refused (I5)");
+                                + "unexpected field '" + field + "' is refused.");
             }
         }
     }
@@ -348,7 +348,7 @@ public class CardIssuanceService {
                 String field = it.next();
                 if (isForbiddenKeyField(field)) {
                     throw new CardIssuanceException(400, "CARD_CONTAINS_PRIVATE_KEY",
-                            "The issuance request must never carry private key material (I5)");
+                            "The issuance request must never carry private key material.");
                 }
                 rejectPrivateKeyMaterial(node.get(field));
             }

@@ -104,6 +104,12 @@ public class DocumentEntity {
     // metadataHash is the blake3 digest of this tx's label-1447 datum (ReeveMetadataStorage.saveAll),
     // set by DocumentProcessor at index time; identifier/identityVerified are populated once an
     // ATTEST event's dataHash matches and the KEL+credential gate passes.
+    /** SHA-256 (lowercase hex) of the envelope JSON as fetched from IPFS. NULL until the envelope is
+     *  retrieved. The one wallet-commitment input that is not on chain — see
+     *  {@code DocumentAttestationCommitmentFactory}. */
+    @Column(name = "envelope_sha256", length = 64)
+    private String envelopeSha256;
+
     @Column(name = "metadata_hash")
     private String metadataHash;
     @Column(name = "identifier")

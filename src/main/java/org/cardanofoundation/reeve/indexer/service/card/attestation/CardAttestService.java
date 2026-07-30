@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.service.card.attestation;
 
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -17,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.cardanofoundation.reeve.indexer.config.KeriAgentIdentity;
 import org.cardanofoundation.reeve.indexer.config.KeriProperties;
 import org.cardanofoundation.reeve.indexer.model.domain.ceremony.CardCeremonyState;
@@ -27,9 +31,10 @@ import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelat
 import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelator.CorrelatedNotification;
 import org.cardanofoundation.signify.app.Exchanging.ExchangeMessageResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.coring.Operations;
-import org.cardanofoundation.signify.core.States.HabState;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
 /**
  * Drives the final "ATTEST" step of the card-attestation ceremony, SYNCHRONOUSLY, in the request
@@ -64,6 +69,9 @@ import org.cardanofoundation.signify.core.States.HabState;
 @RequiredArgsConstructor
 @Slf4j
 public class CardAttestService {
+
+    /** Only ever used to project typed key events into the generic maps the seal locators read. */
+    private static final ObjectMapper KEL_MAPPER = new ObjectMapper();
 
     private static final List<String> REMOTESIGN_REF_ROUTES =
             List.of("/remotesign/ixn/ref", "/exn/remotesign/ixn/ref");
@@ -479,7 +487,13 @@ public class CardAttestService {
             return null;
         }
         try {
-            return client.get().credentials().get(credentialSaid).orElse(null);
+            // Straight to the endpoint rather than credentials().get(): that returns a structured
+            // Credential now, and rebuilding a CESR stream out of its parts would risk handing the
+            // importer bytes that differ from what KERIA actually served. This is the same request the
+            // typed client makes, asking for the CESR representation.
+            HttpResponse<String> response = client.get().fetch("/credentials/" + credentialSaid, "GET", null,
+                    Map.of("Accept", "application/json+cesr"));
+            return response.statusCode() == 200 ? response.body() : null;
         } catch (Exception e) {
             interruptIfNeeded(e);
             log.warn("Failed to fetch credential CESR {} for ceremony {} (card bound WITHOUT it — the importer "
@@ -519,15 +533,11 @@ public class CardAttestService {
         Duration delay = KEY_STATE_RETRY_INITIAL_DELAY;
         for (int attempt = 1; attempt <= KEY_STATE_QUERY_ATTEMPTS; attempt++) {
             try {
-                Object raw = client.orElseThrow().keyStates().query(aid, null);
-                Operation<Object> op = client.orElseThrow().operations().wait(Operation.fromObject(raw),
-                        boundedKeyStateWait());
-                Object response = op.getResponse();
-                if (response instanceof Map<?, ?> map) {
-                    Object sn = map.get("s");
-                    if (sn != null) {
-                        return Optional.of(String.valueOf(sn));
-                    }
+                // keyStates().get() answers directly now — there is no long-running query operation to
+                // wait on, so the retry loop around it is what remains of the old wait.
+                Optional<KeyStateRecord> state = client.orElseThrow().keyStates().get(aid);
+                if (state.isPresent() && state.get().getS() != null) {
+                    return Optional.of(state.get().getS());
                 }
             } catch (Exception e) {
                 log.warn("Key-state query attempt {}/{} for AID {} failed: {}", attempt, KEY_STATE_QUERY_ATTEMPTS,
@@ -552,38 +562,29 @@ public class CardAttestService {
                 .build();
     }
 
-    // --- KEL fetch + anchoring-event location, over the pinned jar's raw Object shapes ---
+    // --- KEL fetch + anchoring-event location ---
 
+    /**
+     * Fetches {@code aid}'s KEL as generic maps.
+     *
+     * <p>The client returns typed {@code KeyEventRecord}s now, but the seal-matching below reads events
+     * generically ({@code d}, {@code s}, {@code t}, {@code a}), so the typed events are projected back
+     * to maps here rather than retyping every locator around a shape they each use one or two fields of.
+     *
+     * <p>This previously walked raw {@code Object}s and tested {@code instanceof Map}. Against the typed
+     * return that test simply never matches: the KEL would have come back EMPTY and every attestation
+     * would have failed with a seal mismatch, while looking for all the world like the wallet had not
+     * signed. Compile-clean, silently wrong — which is why it is typed at the boundary now.
+     */
     private List<Map<String, Object>> fetchKel(String aid) throws Exception {
-        Object raw = client.orElseThrow().keyEvents().get(aid);
-        if (!(raw instanceof List<?> rawList)) {
-            return List.of();
-        }
         List<Map<String, Object>> events = new ArrayList<>();
-        for (Object item : rawList) {
-            Map<String, Object> ked = extractKed(item);
-            if (ked != null) {
-                events.add(ked);
+        for (KeyEventRecord record : client.orElseThrow().keyEvents().get(aid)) {
+            if (record.getKed() != null) {
+                events.add(KEL_MAPPER.convertValue(record.getKed(), new TypeReference<Map<String, Object>>() {
+                }));
             }
         }
         return events;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> extractKed(Object item) {
-        if (!(item instanceof Map<?, ?> map)) {
-            return null;
-        }
-        Object ked = map.get("ked");
-        if (ked instanceof Map<?, ?>) {
-            return (Map<String, Object>) ked;
-        }
-        // Defensive fallback: some KERIA responses may not wrap events under "ked" — if this item
-        // already looks like a key event itself (has a type and sequence), use it directly.
-        if (map.containsKey("t") && map.containsKey("s")) {
-            return (Map<String, Object>) map;
-        }
-        return null;
     }
 
     /** Locates the {@code ixn} event an explicit ref-derived {@code candidate} names — by SAID first,

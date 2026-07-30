@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.security.DigestException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -122,10 +121,6 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         return rawMetadata;
                     } catch (JsonProcessingException e) {
                         log.error("Can't parse metadata of transaction: {}, error: {}",
-                                metadata.getTxHash(), e.getMessage());
-                        return null;
-                    } catch (DigestException e) {
-                        log.error("Can't calculate metadata hash of transaction: {}, error: {}",
                                 metadata.getTxHash(), e.getMessage());
                         return null;
                     } catch (CborException e) {

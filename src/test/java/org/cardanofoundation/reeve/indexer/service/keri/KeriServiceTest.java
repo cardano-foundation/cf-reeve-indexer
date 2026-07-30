@@ -24,6 +24,8 @@ import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
+import org.cardanofoundation.signify.generated.keria.model.KeyEvent;
+import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
 
 /**
  * Covers the parts of {@link KeriService} that don't require fabricating a real CESR/KEL stream:
@@ -48,6 +50,7 @@ class KeriServiceTest {
     private CredentialSchemaRegistry credentialSchemaRegistry;
     private KeriProperties keriProperties;
     private SignifyClient signifyClient;
+    private DocumentAttestationCommitmentFactory commitmentFactory;
 
     @BeforeEach
     void setUp() {
@@ -57,21 +60,25 @@ class KeriServiceTest {
         credentialSchemaRegistry = mock(CredentialSchemaRegistry.class);
         keriProperties = new KeriProperties();
         signifyClient = mock(SignifyClient.class);
+        // Wallet-commitment correlation is exercised in its own test; these cover the legacy path.
+        commitmentFactory = mock(DocumentAttestationCommitmentFactory.class);
     }
 
     private KeriService service(Optional<SignifyClient> client, boolean keriEnabled) {
         KeriService keriService = new KeriService(client, keriProperties, credentialSchemaRegistry,
-                reportRepository, documentRepository, credentialRepository);
+                commitmentFactory, reportRepository, documentRepository, credentialRepository);
         ReflectionTestUtils.setField(keriService, "keriEnabled", keriEnabled);
         return keriService;
     }
 
     /** A KEL whose event at index 0 anchors {@code dataHash} in its {@code a[0]} seal (the plain
      *  string-seal shape {@code verifyEvent} checks first). */
-    private static List<Object> kelAnchoring(String dataHash) {
-        Map<String, Object> ked = Map.of("a", List.of(dataHash));
-        Map<String, Object> kelEvent = Map.of("ked", ked);
-        return List.of(kelEvent);
+    private static List<KeyEventRecord> kelAnchoring(String dataHash) {
+        KeyEvent ked = new KeyEvent();
+        ked.setA(List.of(dataHash));
+        KeyEventRecord record = new KeyEventRecord();
+        record.setKed(ked);
+        return List.of(record);
     }
 
     // ------------------------------------------------------------------
@@ -386,7 +393,8 @@ class KeriServiceTest {
 
     /** {@code Coring.KeyEvents#get} is declared {@code throws Exception}, which forces the mocked
      *  stub setup into a checked-exception-safe helper. */
-    private static void mockKeyEventsGet(Coring.KeyEvents keyEvents, String identifier, Object result) {
+    private static void mockKeyEventsGet(Coring.KeyEvents keyEvents, String identifier,
+            List<KeyEventRecord> result) {
         try {
             when(keyEvents.get(identifier)).thenReturn(result);
         } catch (Exception e) {

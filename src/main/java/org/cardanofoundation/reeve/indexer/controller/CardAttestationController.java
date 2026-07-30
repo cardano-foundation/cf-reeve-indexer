@@ -64,8 +64,8 @@ import org.cardanofoundation.reeve.indexer.service.card.issuance.CardIssuanceSer
 @Slf4j
 @Tag(name = "Card attestation ceremony",
         description = "Pair a Veridian wallet, present a credential, and attest an already-issued "
-                + "card, synchronously (design doc Part A / A6). Public — no operator auth, matching "
-                + "the card-issuance frontend's own unauthenticated posture.")
+                + "card, synchronously. Public — no operator auth, matching the card-issuance "
+                + "frontend's own unauthenticated posture.")
 public class CardAttestationController {
 
     private final CardCeremonyService ceremonyService;
