@@ -13,10 +13,10 @@ services:
       - SPRING_PROFILES_ACTIVE=docker-devkit
       - REEVE_SCRIPT_PATH=/app/plutus.json
       - STORE_CARDANO_HOST=${STORE_CARDANO_HOST:-host.docker.internal}
-      - KERI_ENABLED=${KERI_ENABLED:-false}
-      - KERI_OOBIS=${KERI_OOBIS:-}
-      - KERI_URL=${KERI_URL:-http://host.docker.internal:3901}
-      - KERI_BOOT_URL=${KERI_BOOT_URL:-http://host.docker.internal:3903}
+      - KERI_ENABLED=${KERI_ENABLED:-true}
+      - KERI_OOBIS=${KERI_OOBIS:-https://keria-ext.dev.idw-sandboxes.cf-deployments.org/oobi/EBZp6edrImtyoDK5meMtvWLyxqN69Ls0FNqkmUM11R6r/agent/EM1ckXW6YliQy_t8q4jVAYg9ignJN4tuFFNr3wROPpLd}
+      - KERI_URL=${KERI_URL:-https://keria.dev.idw-sandboxes.cf-deployments.org}
+      - KERI_BOOT_URL=${KERI_BOOT_URL:-https://keria-boot.dev.idw-sandboxes.cf-deployments.org}
     depends_on:
       - postgres
     networks:
@@ -36,9 +36,9 @@ services:
     build:
       context: frontend
     ports:
-      - "3003:80"
+      - "3002:80"
     environment:
-      PORT: "3003"
+      PORT: "3002"
       VITE_API_URL: ${API_URL:-http://localhost:9002}
     networks:
       - lob

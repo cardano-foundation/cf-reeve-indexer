@@ -1,0 +1,15 @@
+-- "slot" meant two unrelated things on reeve_document, right next to each other:
+--   slot        -- the Cardano slot of the anchoring block
+--   slot_count  -- how many recipients the IPFS envelope wraps the document key for
+-- The second has nothing to do with Cardano slots, and the collision made every reader of this
+-- table (and of the API built on it) stop and work out which was meant.
+--
+-- Renamed to say what it counts. The Cardano `slot` column keeps its name -- it is the one that
+-- genuinely is a slot.
+--
+-- Only this column is renamed. The name stays "slot_count" in the published on-chain manifest and
+-- "slots" in the IPFS envelope, because both are immutable once anchored: every document already
+-- published carries the old spelling, and rewriting it here would orphan them. DocumentProcessor
+-- and DocumentEnvelopeVerifier read those wire names and map to recipient_count immediately, so
+-- the old spelling exists at the parse boundary and nowhere else.
+ALTER TABLE reeve_document RENAME COLUMN slot_count TO recipient_count;

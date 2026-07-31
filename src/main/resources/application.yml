@@ -47,9 +47,63 @@ server:
 ipfs:
   gateway: ${IPFS_GATEWAY:https://ipfs.io/ipfs/}
 
+indexer:
+  verification:
+    retry-interval-ms: ${VERIFICATION_RETRY_INTERVAL_MS:300000}
+    ipfs-fail-after-attempts: ${VERIFICATION_IPFS_FAIL_AFTER:3}
+    ipfs-max-attempts: ${VERIFICATION_IPFS_MAX_ATTEMPTS:12}
+    # Per-tick bound: at most this many eligible rows are loaded/verified per query per scheduler
+    # run, so a flood of forged manifests cannot make one tick do unbounded work (it drains over ticks).
+    max-batch-per-tick: ${VERIFICATION_MAX_BATCH_PER_TICK:200}
+  issuance:
+    # Card import is permissionless: the Indexer holds no issuer signing key and assembles
+    # UNSIGNED cards. This flag only toggles whether this deployment offers the assembly endpoint;
+    # the endpoint itself stays behind the operator HTTP Basic credentials below.
+    enabled: ${ISSUANCE_ENABLED:true}
+    username: ${ISSUANCE_USERNAME:}
+    password: ${ISSUANCE_PASSWORD:}
+
 keri:
   enabled: false
   metadata-label: 170
   url: ${KERI_URL:http://127.0.0.1:1901}
   bootUrl: ${KERI_BOOT_URL:http://127.0.0.1:1903}
+  # STABLE passcode for the indexer's OWN KERI agent AID (card-attestation ceremony, design doc
+  # Part A / A2). MUST be set to a fixed value per deployment — the agent's keystore/AID are
+  # deterministically derived from it, so a rotating value creates a brand-new agent identity on
+  # every restart and breaks every existing Veridian wallet pairing. The placeholder default below
+  # is fine for a single local/dev instance but must be overridden (via KERI_BRAN) for any shared
+  # or persistent deployment. Leaving this blank falls back to an EPHEMERAL random passcode with a
+  # loud CONFIG/SECURITY warning at startup (see KeriConfig#resolveBran) rather than failing to boot.
+  bran: ${KERI_BRAN:0A98gEaYge5XlagRM9okY}
+  # Alias the indexer's own KERI agent AID is created/looked up under. Stable by design — changing
+  # it makes KeriConfig create/look up a DIFFERENT agent AID under the same bran above, which is
+  # just as pairing-breaking as an unstable bran. Must also be set (or left at this default)
+  # consistently per deployment.
+  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-attestation-2}
+  # Deprecated: use credential-schemas[].oobis instead. Still honored for one release
+  # (unioned with every configured schema's oobis) at startup OOBI resolution.
   oobis: ${KERI_OOBIS:http://keria:3902/oobi/EJO54wp79Apo4pOyAloOVQw9BQlVohycPWV0FaurG8Br/agent/EOS8r7jbPS1rYKR7duLMfuSwQsNUuUPmuFq4b-ORm9ih}
+  # Exact SAIDs / trusted AIDs / OOBIs must be filled per deployment.
+  credential-schemas:
+    - said: ${KERI_VLEI_SCHEMA_SAID:}
+      name: "vLEI Legal Entity"
+      chained: true
+      trusted-roots:
+        - ${KERI_VLEI_GLEIF_ROOT_AID:}
+      trusted-issuers: []
+      oobis: ${KERI_VLEI_OOBIS:}
+    - said: "EL9oOWU_7zQn_rD--Xsgi3giCWnFDaNvFMUGTOZx1ARO"
+      name: "Foundation Employee"
+      chained: false
+      trusted-roots: []
+      trusted-issuers:
+        - ${KERI_DEMO_ISSUER_AID:EEYYK6bKLenwD0ZvydD9q5FDY85IKFJtOdmEcdx2izl1}
+      # The OOBI is what lets this agent reach the issuer. Trust checks now FAIL CLOSED when a schema
+      # names no issuers, so both of these have to be real for Foundation credentials to verify.
+      oobis: ${KERI_DEMO_OOBIS:https://keria-ext.dev.idw-sandboxes.cf-deployments.org/oobi/EEYYK6bKLenwD0ZvydD9q5FDY85IKFJtOdmEcdx2izl1/agent/EFjYeBVmKSZ0eJXkNZqLAlPPiDaRds3V2iH_COkxIs4x}
+  # NOTE: the card-attestation ceremony has NO configuration of its own and needs no wallet, no
+  # mnemonic and no Blockfrost project id — it publishes nothing to Cardano. The attestation is the
+  # paired Veridian wallet's own KEL interaction event; the indexer only verifies that seal and
+  # records it on the card. The former keri.attestation.submitter.* block (and its ATTEST_* env vars)
+  # was removed with the submitter itself — the indexer is a chain READER, via yaci-store node sync.

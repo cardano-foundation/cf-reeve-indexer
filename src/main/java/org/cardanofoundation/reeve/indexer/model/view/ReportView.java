@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
-import org.cardanofoundation.reeve.indexer.model.response.LEIResponse;
+import org.cardanofoundation.reeve.indexer.model.response.IdentityAttestationView;
 import org.cardanofoundation.reeve.indexer.util.ReportFieldParser;
 
 @AllArgsConstructor
@@ -45,7 +45,7 @@ public class ReportView {
 
     private Map<String, Object> data; // Assuming fields is a JSON string, adjust as necessary
 
-    private List<LEIResponse> identities;
+    private List<IdentityAttestationView> identities;
 
     public static ReportView fromEntity(ReportEntity entity, OrganisationEntity organisationEntity, ObjectMapper objectMapper) throws JsonProcessingException {
         Map<String, Object> fieldsMap = objectMapper.readValue(entity.getFields(), Map.class);

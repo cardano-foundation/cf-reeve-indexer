@@ -1,15 +1,16 @@
 package org.cardanofoundation.reeve.indexer.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.ReeveMetadata;
 
 public class ReeveMetadataDeserializerTest {
@@ -86,5 +87,37 @@ public class ReeveMetadataDeserializerTest {
         ReeveMetadata metadata = objectMapper.readValue(jsonWithReportV2Type, ReeveMetadata.class);
 
         assertTrue(metadata != null);
+    }
+
+    @Test
+    void documentTypeKeepsRawDataNode() throws Exception {
+        String json = """
+            {"type":"DOCUMENT","org":{"id":"aabb"},
+             "metadata":{"version":"1.0"},
+             "data":{"id":"doc-1","ipfs_cid":"bafy123","content_hash":"%s",
+                     "plaintext_hash":"%s","envelope_version":1,"slot_count":2}}
+            """.formatted("a".repeat(64), "b".repeat(64));
+        ReeveMetadata metadata = new ObjectMapper().readValue(json, ReeveMetadata.class);
+        assertEquals(ReeveTransactionType.DOCUMENT, metadata.getType());
+        assertInstanceOf(JsonNode.class, metadata.getData());
+        JsonNode data = (JsonNode) metadata.getData();
+        assertEquals("doc-1", data.get("id").asText());
+        assertEquals(2, data.get("slot_count").asInt());
+    }
+
+    @Test
+    void documentTypeWithGarbageDataStillDeserialises() throws Exception {
+        String json = "{\"type\":\"DOCUMENT\",\"data\":\"not-an-object\"}";
+        ReeveMetadata metadata = new ObjectMapper().readValue(json, ReeveMetadata.class);
+        assertEquals(ReeveTransactionType.DOCUMENT, metadata.getType());
+        assertNotNull(metadata.getData()); // raw node preserved for the processor to judge
+    }
+
+    @Test
+    void documentTypeWithMissingDataDeserialises() throws Exception {
+        String json = "{\"type\":\"DOCUMENT\",\"org\":{\"id\":\"aabb\"}}";
+        ReeveMetadata metadata = new ObjectMapper().readValue(json, ReeveMetadata.class);
+        assertEquals(ReeveTransactionType.DOCUMENT, metadata.getType());
+        assertNull(metadata.getData());
     }
 }

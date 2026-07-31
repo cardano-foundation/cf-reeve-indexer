@@ -1,0 +1,23 @@
+-- The issuer AID and attribute claims of the credential a wallet presented during a card-attestation
+-- ceremony.
+--
+-- DISPLAY ONLY. The indexer is permissionless and deliberately does not verify what a wallet presents
+-- (see KeriService#readPresentedCredential): it records the presentation and leaves judgement to the
+-- importer. These two columns are therefore CLAIMS, exactly like the credential_said/schema_said
+-- columns beside them — they exist so the wizard can show a person what was handed over (a Foundation
+-- Employee's name, a vLEI's LEI, whatever the schema carries) rather than an opaque SAID. Nothing may
+-- gate on them.
+--
+-- credential_issuer_aid is the ACDC's own top-level 'i' — who the credential SAYS issued it. A
+-- self-issued credential names its own holder here.
+--
+-- credential_claims is the attribute block 'a' as JSON text, minus its structural keys ('d', the
+-- block's own SAID, 'i', the issuee, which is already the ceremony's wallet_aid, and 'u', the privacy
+-- salt). Stored as text rather than jsonb only because it is never queried into — just read back whole
+-- and handed to the wizard. It is a re-serialisation of the parsed attributes, NOT the original bytes,
+-- so it is unusable for anything byte-exact; the card carries the full CESR chain for that.
+--
+-- Both nullable: they stay NULL for every ceremony that has not yet reached CREDENTIAL_RECEIVED, and
+-- for every ceremony that completed before this migration. The wizard omits the panel when they are.
+ALTER TABLE reeve_card_attestation_ceremony ADD COLUMN IF NOT EXISTS credential_issuer_aid VARCHAR(255);
+ALTER TABLE reeve_card_attestation_ceremony ADD COLUMN IF NOT EXISTS credential_claims TEXT;

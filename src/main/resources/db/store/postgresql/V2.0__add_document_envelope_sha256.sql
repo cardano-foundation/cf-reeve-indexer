@@ -1,0 +1,11 @@
+-- The SHA-256 of the exact envelope JSON fetched from IPFS.
+--
+-- Needed to correlate a wallet-attested document with its CIP-170 ATTEST event. A wallet attests a
+-- COMMITMENT over the document (see DocumentAttestationCommitmentFactory), not the published label-1447
+-- manifest, because the attesting tier has no IPFS pin or chain tip yet and therefore cannot know the
+-- manifest's ipfs_cid or creation_slot. envelope_sha256 is the one commitment field that is not on
+-- chain: it can only be recomputed once the envelope has actually been fetched.
+--
+-- Nullable: it stays NULL until the envelope is retrieved, and for any document whose IPFS fetch never
+-- succeeds. The legacy correlation path does not use it and is unaffected either way.
+ALTER TABLE reeve_document ADD COLUMN IF NOT EXISTS envelope_sha256 VARCHAR(64);

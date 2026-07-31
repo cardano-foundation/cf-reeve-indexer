@@ -34,6 +34,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("com.bloxbean.cardano:yaci-store-spring-boot-starter:0.1.4")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     // Jackson annotations are useful for the generated classes
@@ -42,10 +43,13 @@ dependencies {
     implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
 
     // Keri
-    implementation("org.cardanofoundation:signify:0.1.2-PR62-d6aea58")
+    implementation("org.cardanofoundation:signify:0.1.2-5eb55c9-SNAPSHOT")
 
     // Yaci store
     implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")
+    // NOTE: no tx-submission backend here on purpose. The indexer is a chain READER (yaci-store node
+    // sync) and submits nothing — cardano-client-backend-blockfrost was added solely for the card
+    // attestation's on-chain publish and was removed with it (2026-07-28 design).
     implementation("com.bloxbean.cardano:yaci-store-metadata-spring-boot-starter:0.1.6")
     implementation("com.bloxbean.cardano:yaci-store-utxo-spring-boot-starter:0.1.6")
     implementation("com.bloxbean.cardano:yaci-store-script-spring-boot-starter:0.1.6")
@@ -92,3 +96,4 @@ spotless {
 tasks.bootJar {
     archiveClassifier = "all"
 }
+

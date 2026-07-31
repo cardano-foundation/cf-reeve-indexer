@@ -44,15 +44,25 @@ export type ReportEntity = {
   period: number
   ver: number
   blockChainHash: string
-  identities: LEIResponse[]
+  identities: IdentityAttestationView[]
   data: NestedMap
 }
 
-export interface LEIResponse {
-    identityVerified: boolean
-    lei: string
-    txHash?: string
-    credentialTxHash?: string
+/**
+ * Generic verified-identity attestation for a credential presented alongside a report or
+ * document. Schema-aware successor to the old LEI-hardcoded `LEIResponse`: GLEIF cross-checking
+ * only applies when `lei` is present (the vLEI schema); other schemas carry their attributes in
+ * `claims`. Shared with the documents API - see documentsApi.types.ts.
+ */
+export interface IdentityAttestationView {
+  identityVerified: boolean
+  aid: string
+  schemaSaid: string
+  schemaName: string
+  claims: Record<string, unknown> | null
+  lei: string | null
+  txHash?: string
+  credentialTxHash?: string
 }
 
 export interface GetPublicReportsRequestParameters {

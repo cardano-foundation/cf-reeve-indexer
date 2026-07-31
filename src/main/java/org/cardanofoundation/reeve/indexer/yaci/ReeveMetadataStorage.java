@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.security.DigestException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +47,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.OrganisationReposito
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
 import org.cardanofoundation.reeve.indexer.processor.ReeveTypeProcessorRegistry;
-import org.cardanofoundation.reeve.indexer.service.KeriService;
+import org.cardanofoundation.reeve.indexer.service.keri.KeriService;
 import org.cardanofoundation.signify.cesr.Diger;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
@@ -104,6 +103,12 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         ReeveMetadata rawMetadata =
                                 objectMapper.readValue(metadata.getBody(), ReeveMetadata.class);
                         rawMetadata.setTxHash(metadata.getTxHash());
+                        // Chain context, carried over before the payload is trusted for anything:
+                        // yaci-store resolved both from the block this tx was found in, so they are
+                        // the only trustworthy "when" a consumer gets. The payload's own
+                        // metadata.timestamp is publisher-supplied and may say anything.
+                        rawMetadata.setSlot(metadata.getSlot());
+                        rawMetadata.setBlockTime(metadata.getBlockTime());
                         Map metadataCborMap = (Map) CborSerializationUtil
                                 .deserialize(HexUtil.decodeHexString(metadata.getCbor()));
                         DataItem dataItem = metadataCborMap
@@ -116,10 +121,6 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         return rawMetadata;
                     } catch (JsonProcessingException e) {
                         log.error("Can't parse metadata of transaction: {}, error: {}",
-                                metadata.getTxHash(), e.getMessage());
-                        return null;
-                    } catch (DigestException e) {
-                        log.error("Can't calculate metadata hash of transaction: {}, error: {}",
                                 metadata.getTxHash(), e.getMessage());
                         return null;
                     } catch (CborException e) {
@@ -166,12 +167,10 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                 keriService.verifyIdentityTx(identityEntity);
 
             } else if (rawMetadata.getT() == IdentityType.AUTH_BEGIN) {
-                CredentialEntity entity = CredentialMetadataMapper.toEntity(rawMetadata);
-                try {
-                    keriService.verifyCredentialEntity(entity);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                CredentialEntity entity = CredentialMetadataMapper.toEntity(rawMetadata, objectMapper);
+                // verifyCredentialEntity is self-isolating (catches internally, sets valid=false
+                // on any failure) so one bad AUTH_BEGIN never aborts the surrounding tx-metadata batch.
+                keriService.verifyCredentialEntity(entity, rawMetadata);
                 credentialRepository.saveAndFlush(entity);
             } else if(rawMetadata.getT() == IdentityType.AUTH_END) {
                 // TODO handle AUTH_END if needed
@@ -181,18 +180,36 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
     private void handleReeveTxs(List<ReeveMetadata> reeveTxs) {
         reeveTxs.forEach(rawMetadata -> {
-            // Store organisation if not exists, handle race condition in parallel events
-            organisationRepository.saveIfNotExists(
-                    rawMetadata.getOrg().getId(),
-                    rawMetadata.getOrg().getName(), rawMetadata.getOrg().getCurrencyId(),
-                    rawMetadata.getOrg().getCountryCode(), rawMetadata.getOrg().getTaxIdNumber(),
-                    rawMetadata.getTxHash()
-            );
+            // Store organisation if not exists, handle race condition in parallel events.
+            // A hostile no-org tx must not NPE the whole block batch: guard with a null check,
+            // skip the org-scoped legacy branches below, but still let the processor run so it
+            // can record the malformed row.
+            boolean hasOrg = rawMetadata.getOrg() != null && rawMetadata.getOrg().getId() != null;
+            if (hasOrg) {
+                organisationRepository.saveIfNotExists(
+                        rawMetadata.getOrg().getId(),
+                        rawMetadata.getOrg().getName(), rawMetadata.getOrg().getCurrencyId(),
+                        rawMetadata.getOrg().getCountryCode(), rawMetadata.getOrg().getTaxIdNumber(),
+                        rawMetadata.getTxHash());
+            } else {
+                log.warn("Label-{} tx {} has no org section", reeveMetadataLabel, rawMetadata.getTxHash());
+            }
             // Dispatch to the registered processor for this type, if any. This is the extension
             // point for new reeve metadata types (e.g. FUNDING) and keeps the legacy
             // INDIVIDUAL_TRANSACTIONS / REPORT handling below untouched.
             processorRegistry.find(rawMetadata.getType())
-                    .ifPresent(processor -> processor.process(rawMetadata));
+                    .ifPresent(processor -> {
+                        try {
+                            processor.process(rawMetadata);
+                        } catch (Exception e) {
+                            // One hostile tx must never roll back the whole block batch.
+                            log.error("Processor for type {} failed on tx {}: {}",
+                                    rawMetadata.getType(), rawMetadata.getTxHash(), e.getMessage());
+                        }
+                    });
+            if (!hasOrg) {
+                return; // legacy inline branches below are org-scoped
+            }
             // verifiy identity
             boolean identityVerified = false;
             if (rawMetadata.getType() == ReeveTransactionType.INDIVIDUAL_TRANSACTIONS) {

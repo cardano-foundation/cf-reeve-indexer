@@ -1,0 +1,13 @@
+-- Drops envelope_sha256 again (added in V2.0), together with the correlation workaround it existed for.
+--
+-- It was the one input to a wallet's attestation that was not on chain: the wallet attested a
+-- COMMITMENT over the document rather than the published manifest, because the manifest carried
+-- creation_slot, timestamp and ipfs_cid, none of which the attesting tier could know. envelope_sha256
+-- stood in for ipfs_cid, and since it could only be recovered by fetching the envelope from IPFS,
+-- correlation had to be deferred until after that fetch.
+--
+-- All three are now derivable at attesting time: creation_slot and timestamp were dropped from the
+-- DOCUMENT manifest, and the CID is obtained from IPFS without pinning (only-hash) before the wallet
+-- signs. So the wallet attests the real manifest, the indexer derives the expected payload SAID from
+-- the on-chain metadata hash alone, and nothing here needs the envelope bytes.
+ALTER TABLE reeve_document DROP COLUMN IF EXISTS envelope_sha256;
