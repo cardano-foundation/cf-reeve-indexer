@@ -60,7 +60,7 @@ keri:
   bran: ${KERI_BRAN:0A98gEaYge5XlagRM9okY}
   # Alias the indexer's own KERI agent AID is created/looked up under. Must be set per deployment
   # for a stable identity — see application.yml's `identifier-name` comment.
-  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-attestation}
+  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-attestation-2}
   # Deprecated: use credential-schemas[].oobis instead. Still honored for one release
   # (unioned with every configured schema's oobis) at startup OOBI resolution.
   oobis:

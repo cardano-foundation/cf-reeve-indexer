@@ -80,7 +80,7 @@ keri:
   # it makes KeriConfig create/look up a DIFFERENT agent AID under the same bran above, which is
   # just as pairing-breaking as an unstable bran. Must also be set (or left at this default)
   # consistently per deployment.
-  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-attestation}
+  identifier-name: ${KERI_IDENTIFIER_NAME:reeve-attestation-2}
   # Deprecated: use credential-schemas[].oobis instead. Still honored for one release
   # (unioned with every configured schema's oobis) at startup OOBI resolution.
   oobis: ${KERI_OOBIS:http://keria:3902/oobi/EJO54wp79Apo4pOyAloOVQw9BQlVohycPWV0FaurG8Br/agent/EOS8r7jbPS1rYKR7duLMfuSwQsNUuUPmuFq4b-ORm9ih}

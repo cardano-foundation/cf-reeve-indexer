@@ -2,6 +2,7 @@ package org.cardanofoundation.reeve.indexer.service.keri;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +45,12 @@ import org.cardanofoundation.signify.generated.keria.model.Notification;
 @RequiredArgsConstructor
 @Slf4j
 public class KeriNotificationCorrelator {
+
+    /** KERIA's own page size for {@code Range: notes=start-end}. */
+    private static final int NOTIFICATION_PAGE_SIZE = 25;
+
+    /** Hard ceiling on one poll's scan, so a pathological queue cannot make it unbounded. */
+    private static final int MAX_NOTIFICATIONS = 500;
 
     /** Only ever used to project a typed exn back into the generic map form callers expect. */
     private static final ObjectMapper EXN_MAPPER = new ObjectMapper();
@@ -195,22 +202,54 @@ public class KeriNotificationCorrelator {
 
     // --- one polling round ---
 
-    /** Lists + parses the agent's notifications; empty list on any transport/parse failure (logged). */
+    /**
+     * Lists + parses the agent's notifications; empty list on any transport/parse failure (logged).
+     *
+     * <p>PAGES. The no-argument {@code list()} returns only KERIA's first page, and notifications are
+     * deleted only when a step SUCCEEDS — so an agent accumulates unread debris from every abandoned or
+     * failed ceremony. Once that debris fills the first page, a genuine reply sits beyond it and is
+     * never claimed: the wallet shows the credential as presented, and this side simply never sees it.
+     * The symptom is indistinguishable from "the wallet never answered", and it gets worse over time
+     * rather than failing outright, which is what makes reading one page so easy to get away with at
+     * first.
+     *
+     * <p>Bounded by {@link #MAX_NOTIFICATIONS} so a pathological queue cannot make a single poll
+     * unbounded; hitting that bound is logged loudly, because past it a reply really can be hidden.
+     */
     private List<Notification> listNotifications() {
-        Notifying.Notifications.NotificationListResponse response;
-        try {
-            response = client.orElseThrow().notifications().list();
-        } catch (SignifyInterruptedException e) {
-            Thread.currentThread().interrupt();
-            return List.of();
-        } catch (Exception e) {
-            log.warn("Failed to list KERI notifications, will retry: {}", e.getMessage());
-            return List.of();
+        List<Notification> all = new ArrayList<>();
+        int start = 0;
+        while (start < MAX_NOTIFICATIONS) {
+            Notifying.Notifications.NotificationListResponse response;
+            try {
+                response = client.orElseThrow().notifications().list(start, start + NOTIFICATION_PAGE_SIZE - 1);
+            } catch (SignifyInterruptedException e) {
+                Thread.currentThread().interrupt();
+                return all;
+            } catch (Exception e) {
+                log.warn("Failed to list KERI notifications from index {}, will retry: {}", start, e.getMessage());
+                return all;
+            }
+
+            // notes() is already a typed list; the client parses it. The local mirror of this shape that
+            // used to be re-parsed from JSON here is gone with it.
+            List<Notification> page = response.notes();
+            if (page == null || page.isEmpty()) {
+                return all;
+            }
+            all.addAll(page);
+
+            if (all.size() >= response.total()) {
+                return all;
+            }
+            start += NOTIFICATION_PAGE_SIZE;
         }
-        // notes() is already a typed list; the client parses it. The local mirror of this shape that
-        // used to be re-parsed from JSON here is gone with it.
-        List<Notification> notes = response.notes();
-        return notes != null ? notes : List.of();
+
+        log.warn("Stopped listing KERI notifications at {} entries: the agent's queue is larger than this "
+                + "scan and unread debris may be hiding a reply. Prune it (notifications are only deleted "
+                + "on a successful step).", MAX_NOTIFICATIONS);
+
+        return all;
     }
 
     private Optional<CorrelatedNotification> pollOnceByRoute(List<String> routes, Set<String> excludeNoteIds)
