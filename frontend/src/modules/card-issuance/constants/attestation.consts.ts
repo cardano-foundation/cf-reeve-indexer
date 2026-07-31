@@ -60,3 +60,33 @@ export const ATTEST_EXPIRED_MESSAGE = 'This ceremony expired before it finished.
 export const ATTEST_START_OVER_LABEL = 'Start over'
 export const ATTEST_CANCEL_LABEL = 'Cancel'
 export const ATTEST_FALLBACK_ERROR = 'Something went wrong driving the attestation. Please try again.'
+
+// --- progress stepper ---
+// The ceremony's four steps, in state-machine order. The wizard maps the authoritative server state
+// onto an index here rather than tracking its own, so a resumed or reloaded ceremony lands on the
+// right step without any client-side bookkeeping to get out of sync.
+export const ATTEST_STEPS = ['Pair wallet', 'Present credential', 'Sign attestation', 'Download'] as const
+
+// --- waiting on the wallet ---
+// Every step after pairing BLOCKS on a human picking up their phone and approving a prompt in
+// Veridian, which can take tens of seconds. A 16px spinner inside a disabled button reads as "the page
+// is stuck"; these say what is being waited on, and that waiting is expected.
+export const ATTEST_WAITING_TITLE = 'Waiting for your Veridian wallet'
+export const ATTEST_WAITING_PRESENT_DETAIL =
+  'Open Veridian and approve the credential request. This screen updates by itself once the wallet responds — keep it open.'
+export const ATTEST_WAITING_ANCHOR_DETAIL =
+  'Open Veridian and approve the signing request. This screen updates by itself once the wallet responds — keep it open.'
+export const ATTEST_WAITING_PAIR_DETAIL = 'Resolving your wallet OOBI with the indexer’s KERI agent.'
+
+// --- presented credential (CREDENTIAL_RECEIVED onward) ---
+// Deliberately "presented", never "verified". The indexer is permissionless and does not check the
+// credential's schema, issuer, trust chain or revocation state — the platform's import verifier does.
+// Copy that implied otherwise here would be a security claim this component cannot back.
+export const ATTEST_PRESENTED_CREDENTIAL_TITLE = 'Credential presented'
+export const ATTEST_PRESENTED_CREDENTIAL_NOTE =
+  'Shown as presented by your wallet. The indexer does not verify it — the platform checks the issuer and trust chain when you import the card.'
+export const ATTEST_PRESENTED_SCHEMA_LABEL = 'Credential type'
+export const ATTEST_PRESENTED_UNKNOWN_SCHEMA = 'Unrecognised credential type'
+export const ATTEST_PRESENTED_ISSUER_LABEL = 'Issued by (claimed)'
+export const ATTEST_PRESENTED_CLAIMS_LABEL = 'Details'
+export const ATTEST_PRESENTED_NO_CLAIMS = 'This credential carries no additional details.'

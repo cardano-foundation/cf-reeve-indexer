@@ -115,6 +115,17 @@ public class CardAttestationCeremonyEntity {
     @Column(name = "schema_said")
     private String schemaSaid;
 
+    /** The presented credential's own top-level {@code i} — who it SAYS issued it. Display only:
+     *  nothing here has been verified, and a self-issued credential names its own holder. */
+    @Column(name = "credential_issuer_aid")
+    private String credentialIssuerAid;
+
+    /** The presented credential's attribute block as JSON text, minus its structural keys — see
+     *  {@code KeriService.PresentedCredential}. Display only, for the wizard to show a person what
+     *  was handed over instead of an opaque SAID. Never gate on it. */
+    @Column(name = "credential_claims")
+    private String credentialClaims;
+
     @Column(name = "error_title")
     private String errorTitle;
 

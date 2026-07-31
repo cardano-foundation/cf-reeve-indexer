@@ -50,7 +50,7 @@ class KeriServiceTest {
     private CredentialSchemaRegistry credentialSchemaRegistry;
     private KeriProperties keriProperties;
     private SignifyClient signifyClient;
-    private DocumentAttestationCommitmentFactory commitmentFactory;
+    private AttestationPayloadSaidFactory payloadSaidFactory;
 
     @BeforeEach
     void setUp() {
@@ -60,13 +60,14 @@ class KeriServiceTest {
         credentialSchemaRegistry = mock(CredentialSchemaRegistry.class);
         keriProperties = new KeriProperties();
         signifyClient = mock(SignifyClient.class);
-        // Wallet-commitment correlation is exercised in its own test; these cover the legacy path.
-        commitmentFactory = mock(DocumentAttestationCommitmentFactory.class);
+        // The wallet-anchored path has its own test below; unstubbed, this returns null, which these
+        // legacy-path tests read as "no wallet SAID to compare".
+        payloadSaidFactory = mock(AttestationPayloadSaidFactory.class);
     }
 
     private KeriService service(Optional<SignifyClient> client, boolean keriEnabled) {
         KeriService keriService = new KeriService(client, keriProperties, credentialSchemaRegistry,
-                commitmentFactory, reportRepository, documentRepository, credentialRepository);
+                payloadSaidFactory, reportRepository, documentRepository, credentialRepository);
         ReflectionTestUtils.setField(keriService, "keriEnabled", keriEnabled);
         return keriService;
     }
@@ -230,6 +231,53 @@ class KeriServiceTest {
     }
 
     @Test
+    void verifyIdentityTxCorrelatesAWalletAttestationByTheWrappedPayloadSaid() {
+        // The wallet seals the SAID of the payload WRAPPING the manifest digest, not the digest itself,
+        // so the raw equality above cannot match it. This second contract is what covers that, and it
+        // needs nothing but the on-chain metadata hash — no envelope fetch, no deferred retry.
+        Coring.KeyEvents keyEvents = mock(Coring.KeyEvents.class);
+        when(signifyClient.keyEvents()).thenReturn(keyEvents);
+        mockKeyEventsGet(keyEvents, "EAID1", kelAnchoring("wallet-payload-said"));
+
+        KeriService keriService = service(Optional.of(signifyClient), true);
+        when(reportRepository.findByTxHash("tx1")).thenReturn(Optional.empty());
+        DocumentEntity document = DocumentEntity.builder().txHash("tx1")
+                .metadataHash("hash-abc").documentId("doc-1").organisationId("org-1").build();
+        when(documentRepository.findByTxHash("tx1")).thenReturn(Optional.of(document));
+        when(credentialRepository.findById("EAID1"))
+                .thenReturn(Optional.of(CredentialEntity.builder().prefixId("EAID1").valid(true).build()));
+        when(payloadSaidFactory.expectedPayloadSaid("hash-abc", "EAID1")).thenReturn("wallet-payload-said");
+
+        IdentityEventEntity identityEntity = IdentityEventEntity.builder()
+                .txHash("tx1").sequenceNumber("0").dataHash("wallet-payload-said").identifier("EAID1")
+                .type("ATTEST").build();
+
+        keriService.verifyIdentityTx(identityEntity);
+
+        assertTrue(document.isIdentityVerified());
+        assertEquals("EAID1", document.getIdentifier());
+    }
+
+    @Test
+    void verifyIdentityTxLeavesADocumentUnverifiedWhenNeitherContractMatches() {
+        KeriService keriService = service(Optional.of(signifyClient), true);
+        when(reportRepository.findByTxHash("tx1")).thenReturn(Optional.empty());
+        DocumentEntity document = DocumentEntity.builder().txHash("tx1")
+                .metadataHash("hash-abc").documentId("doc-1").organisationId("org-1").build();
+        when(documentRepository.findByTxHash("tx1")).thenReturn(Optional.of(document));
+        when(payloadSaidFactory.expectedPayloadSaid("hash-abc", "EAID1")).thenReturn("some-other-said");
+
+        IdentityEventEntity identityEntity = IdentityEventEntity.builder()
+                .txHash("tx1").sequenceNumber("0").dataHash("unrelated-hash").identifier("EAID1")
+                .type("ATTEST").build();
+
+        keriService.verifyIdentityTx(identityEntity);
+
+        assertFalse(document.isIdentityVerified());
+        verify(documentRepository, never()).save(document);
+    }
+
+    @Test
     void verifyIdentityTxGateFailsAndDoesNotVerifyWhenCredentialIsMissing() {
         Coring.KeyEvents keyEvents = mock(Coring.KeyEvents.class);
         when(signifyClient.keyEvents()).thenReturn(keyEvents);
@@ -288,8 +336,68 @@ class KeriServiceTest {
         return Map.of("d", said, "s", schemaSaid, "i", issuerAid, "a", Map.of("i", issueeAid));
     }
 
+    /** An ACDC carrying schema attributes beside the structural {@code a.i}, as a real credential does. */
+    private static Map<String, Object> acdcWithClaims(String said, String schemaSaid, String issuerAid,
+            String issueeAid, Map<String, Object> attributes) {
+        Map<String, Object> a = new java.util.LinkedHashMap<>();
+        a.put("i", issueeAid);
+        a.put("d", "EATTRIBUTEBLOCKSAID");
+        a.putAll(attributes);
+        return Map.of("d", said, "s", schemaSaid, "i", issuerAid, "a", a);
+    }
+
     private static Map<String, Object> streamEntry(Map<String, Object> event) {
         return Map.of("event", event);
+    }
+
+    @Test
+    void readPresentedCredentialReadsTheIssuerAidAndSchemaAttributesForDisplay() {
+        // The wizard shows a person what was handed over -- a Foundation Employee's name and role, a
+        // vLEI's LEI -- instead of an opaque SAID. This is the extraction that makes that possible; it
+        // is still not a verification of anything.
+        KeriService keriService = service(Optional.of(signifyClient), true);
+
+        List<Map<String, Object>> cesrData = List.of(streamEntry(acdcWithClaims("ECRED1", "ESCHEMA1", "EISSUER1",
+                WALLET_AID, Map.of("firstName", "Ada", "role", "Engineer"))));
+
+        Optional<KeriService.PresentedCredential> result =
+                keriService.readPresentedCredential(WALLET_AID, cesrData, "test");
+
+        assertTrue(result.isPresent());
+        assertEquals("EISSUER1", result.get().issuerAid());
+        assertEquals(Map.of("firstName", "Ada", "role", "Engineer"), result.get().claims());
+    }
+
+    @Test
+    void readPresentedCredentialStripsTheStructuralKeysFromTheClaims() {
+        // 'i' is the issuee (the presenting AID the caller already has) and 'd' is the attribute
+        // block's own SAID. Neither is a claim the schema makes, and showing them to a person as one
+        // would be noise indistinguishable from a real attribute.
+        KeriService keriService = service(Optional.of(signifyClient), true);
+
+        List<Map<String, Object>> cesrData = List.of(streamEntry(
+                acdcWithClaims("ECRED1", "ESCHEMA1", "EISSUER1", WALLET_AID, Map.of("LEI", "5493001KJTIIGC8Y1R12"))));
+
+        Map<String, Object> claims =
+                keriService.readPresentedCredential(WALLET_AID, cesrData, "test").orElseThrow().claims();
+
+        assertEquals(Map.of("LEI", "5493001KJTIIGC8Y1R12"), claims);
+        assertFalse(claims.containsKey("i"));
+        assertFalse(claims.containsKey("d"));
+    }
+
+    @Test
+    void readPresentedCredentialReportsNoClaimsWhenTheAttributeBlockCarriesOnlyStructuralKeys() {
+        KeriService keriService = service(Optional.of(signifyClient), true);
+
+        List<Map<String, Object>> cesrData = List.of(
+                streamEntry(acdc("ECRED1", "ESCHEMA1", "EISSUER1", WALLET_AID)));
+
+        KeriService.PresentedCredential presented =
+                keriService.readPresentedCredential(WALLET_AID, cesrData, "test").orElseThrow();
+
+        assertEquals("EISSUER1", presented.issuerAid());
+        assertTrue(presented.claims().isEmpty());
     }
 
     @Test

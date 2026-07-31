@@ -37,6 +37,26 @@ export type AttestedKeyCard = KeyCard & {
   }
 }
 
+/**
+ * What the paired wallet PRESENTED, for display only.
+ *
+ * NOTHING here is verified. The indexer is permissionless and accepts whatever credential a wallet
+ * hands it — unknown schema, untrusted issuer, revoked, self-issued. The platform's import verifier is
+ * the gate that matters. Render this as "presented", never as "verified".
+ *
+ * `schema_name` is a label for a schema the indexer happens to have configured, and is null for one it
+ * does not recognise — a legitimate presentation, not an error, so fall back to `schema_said`.
+ * `claims` is the credential's attribute block as presented, rendered generically so a new schema
+ * needs no frontend change.
+ */
+export type PresentedCredential = {
+  credential_said: string
+  schema_said: string | null
+  schema_name: string | null
+  issuer_aid: string | null
+  claims: Record<string, unknown>
+}
+
 /** snake_case on the wire (backend CardCeremonyView). A step failure is a 200 with state=FAILED plus
  *  error_title/error_detail — NOT an HTTP error; only a usage error (bad id, malformed card) rejects. */
 export type CardCeremonyResponse = {
@@ -46,6 +66,8 @@ export type CardCeremonyResponse = {
   agent_oobi: string | null
   // Present ONLY at ATTEST_ANCHORED: the exported, fully-attested card to download and import.
   card: AttestedKeyCard | null
+  // Populated from CREDENTIAL_RECEIVED onward, null before that. Presented, not verified.
+  presented_credential: PresentedCredential | null
   error_title: string | null
   error_detail: string | null
 }

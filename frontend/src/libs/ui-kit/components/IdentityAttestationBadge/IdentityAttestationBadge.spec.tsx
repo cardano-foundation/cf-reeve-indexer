@@ -138,18 +138,37 @@ describe('IdentityAttestationBadge', () => {
     const { container } = renderBadge({
       isVerified: true,
       schemaName: 'Foundation Employee',
-      claims: { role: 'Engineer', department: 'R&D' }
+      claims: { engagementContextRole: 'Engineer', department: 'R&D', firstName: 'Ada', lastName: 'Lovelace' }
     })
 
     await user.hover(getTrigger(container, 'Foundation Employee'))
 
     expect(mockUseGLEIFVerification).toHaveBeenCalledWith(undefined)
     expect(await screen.findByText('claims')).toBeInTheDocument()
-    expect(screen.getByText('role:')).toBeInTheDocument()
+    // Labelled, not raw keys: a person reads "Role", not "engagementContextRole".
+    expect(screen.getByText('Role:')).toBeInTheDocument()
     expect(screen.getByText('Engineer')).toBeInTheDocument()
-    expect(screen.getByText('department:')).toBeInTheDocument()
+    expect(screen.getByText('First name:')).toBeInTheDocument()
+    expect(screen.getByText('Ada')).toBeInTheDocument()
+    // An unknown key still renders, humanised rather than dropped.
+    expect(screen.getByText('Department:')).toBeInTheDocument()
     expect(screen.getByText('R&D')).toBeInTheDocument()
     expect(screen.queryByText('LEI:')).not.toBeInTheDocument()
+  })
+
+  it('orders a Foundation Employee credential by what a person reads first, not by serialisation order', async () => {
+    const user = userEvent.setup()
+    const { container } = renderBadge({
+      isVerified: true,
+      schemaName: 'Foundation Employee',
+      // deliberately the least useful field first, as an issuer might well serialise it
+      claims: { department: 'R&D', engagementContextRole: 'Engineer', firstName: 'Ada' }
+    })
+
+    await user.hover(getTrigger(container, 'Foundation Employee'))
+
+    const labels = (await screen.findAllByText(/^(First name|Role|Department):$/)).map((node) => node.textContent)
+    expect(labels).toEqual(['First name:', 'Role:', 'Department:'])
   })
 
   it('shows the no-additional-claims copy when lei is absent and claims is empty', async () => {

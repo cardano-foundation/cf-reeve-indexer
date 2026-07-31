@@ -32,6 +32,7 @@ import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelat
 import org.cardanofoundation.signify.app.Exchanging.ExchangeMessageResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operations;
+import org.cardanofoundation.signify.exception.SignifyInterruptedException;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
@@ -228,7 +229,7 @@ public class CardAttestService {
         // request is sent. Any accepted anchoring event must be strictly after this floor — without it,
         // an old KEL event that happens to carry the same digest (e.g. left over from a prior attestation
         // of identical card content) could satisfy a fresh request the wallet never actually acted on.
-        Optional<String> floorSequenceOpt = queryLatestSequenceWithRetries(walletAid);
+        Optional<String> floorSequenceOpt = refreshAndReadLatestSequence(walletAid);
         if (floorSequenceOpt.isEmpty()) {
             throw new CardAttestStepException("ATTEST_FAILED",
                     "Failed to query the wallet's current KEL sequence to establish an anchor floor.");
@@ -348,6 +349,13 @@ public class CardAttestService {
     private Optional<Map<String, Object>> locateAnchoringEvent(String walletAid, String payloadSaid,
             String floorSequence, CorrelatedNotification ref) throws Exception {
         AnchorCandidate candidate = extractCandidate(ref.exn());
+        // Ask the wallet's witnesses for its CURRENT key state before reading the KEL, and for both
+        // branches. keyStates().get() and keyEvents().get() both read only what this agent already
+        // holds; the wallet signed its interaction event moments ago on a different KERIA, so without
+        // an explicit query that event is simply not here yet and every attestation fails
+        // ATTEST_SEAL_MISMATCH even though the wallet did sign.
+        Optional<String> currentSequence = refreshAndReadLatestSequence(walletAid);
+
         List<Map<String, Object>> kel = fetchKel(walletAid);
         List<Map<String, Object>> ixnEvents = kel.stream().filter(ke -> "ixn".equals(ke.get("t"))).toList();
         if (!candidate.isEmpty()) {
@@ -355,8 +363,7 @@ public class CardAttestService {
             return event != null && satisfiesFloorAndDigest(event, floorSequence, payloadSaid)
                     ? Optional.of(event) : Optional.empty();
         }
-        return queryLatestSequenceWithRetries(walletAid)
-                .map(cs -> scanForSealMatch(ixnEvents, floorSequence, cs, payloadSaid));
+        return currentSequence.map(cs -> scanForSealMatch(ixnEvents, floorSequence, cs, payloadSaid));
     }
 
     /**
@@ -529,12 +536,19 @@ public class CardAttestService {
 
     // --- key-state fallback: bounded retries confirming KEL availability ---
 
-    private Optional<String> queryLatestSequenceWithRetries(String aid) {
+    /**
+     * Queries {@code aid}'s key state over the network, then reads the refreshed result.
+     *
+     * <p>The query is the point of this method. {@code keyStates().get} answers from the agent's local
+     * store, so on its own it can never observe an event the wallet has only just signed; {@code query}
+     * is what makes the agent go and ask. Retried because witness propagation is not instant.
+     */
+    private Optional<String> refreshAndReadLatestSequence(String aid) {
         Duration delay = KEY_STATE_RETRY_INITIAL_DELAY;
         for (int attempt = 1; attempt <= KEY_STATE_QUERY_ATTEMPTS; attempt++) {
             try {
-                // keyStates().get() answers directly now — there is no long-running query operation to
-                // wait on, so the retry loop around it is what remains of the old wait.
+                client.orElseThrow().operations().wait(
+                        client.orElseThrow().keyStates().query(aid, null), boundedKeyStateWait());
                 Optional<KeyStateRecord> state = client.orElseThrow().keyStates().get(aid);
                 if (state.isPresent() && state.get().getS() != null) {
                     return Optional.of(state.get().getS());
@@ -668,8 +682,19 @@ public class CardAttestService {
                 .orElseThrow(() -> new CardCeremonyNotFoundException("Ceremony %s was not found.".formatted(ceremonyId)));
     }
 
+    /**
+     * Restores the interrupt flag when {@code e} is an interruption in EITHER form.
+     *
+     * <p>Both kinds have to be named. {@code Thread.sleep} still raises the checked
+     * {@link InterruptedException}, but a signify client call now wraps one in
+     * {@link SignifyInterruptedException} — which extends {@code RuntimeException}, not
+     * {@code InterruptedException}. Testing only the checked type therefore matches nothing the client
+     * throws any more: the interrupt is caught by the surrounding {@code catch (Exception e)}, reported
+     * as an ordinary step failure, and the flag is silently dropped — so a caller polling or sleeping
+     * afterwards keeps going to its full timeout instead of stopping.
+     */
     private static void interruptIfNeeded(Exception e) {
-        if (e instanceof InterruptedException) {
+        if (e instanceof InterruptedException || e instanceof SignifyInterruptedException) {
             Thread.currentThread().interrupt();
         }
     }

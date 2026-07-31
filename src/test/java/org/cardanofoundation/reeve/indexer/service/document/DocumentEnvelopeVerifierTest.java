@@ -36,11 +36,10 @@ class DocumentEnvelopeVerifierTest {
     void setUp() {
         ipfsGatewayClient = mock(IpfsGatewayClient.class);
         documentRepository = mock(DocumentRepository.class);
-        // No identity event stubbed: correlation retry is a no-op here, which is what these tests want.
+        // Envelope verification no longer touches identity correlation at all: the wallet attests the
+        // published manifest, so nothing about correlation waits on the envelope bytes any more.
         verifier = new DocumentEnvelopeVerifier(ipfsGatewayClient, documentRepository,
-                new ObjectMapper(), 3, MAX_ATTEMPTS,
-                mock(org.cardanofoundation.reeve.indexer.model.repository.IdentityEventRepository.class),
-                mock(org.cardanofoundation.reeve.indexer.service.keri.KeriService.class));
+                new ObjectMapper(), 3, MAX_ATTEMPTS);
     }
 
     // The verifier must fetch through the CAPPED byte path (never the uncapped String fetch), so a

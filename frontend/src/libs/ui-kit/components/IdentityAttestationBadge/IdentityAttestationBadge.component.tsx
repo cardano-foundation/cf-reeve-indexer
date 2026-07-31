@@ -8,6 +8,7 @@ import { ExportSquare } from 'iconsax-react'
 import { IconsaxIcon, ICONSAX_NAMES } from 'features/iconsax'
 import { useGLEIFVerification } from 'libs/hooks/useGLEIFVerification'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
+import { describeClaims } from 'libs/ui-kit/components/IdentityAttestationBadge/credentialClaims'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { verifyColors } from 'libs/ui-kit/theme/colors.ts'
 
@@ -19,12 +20,6 @@ interface IdentityAttestationBadgeProps {
   lei?: string | null
   txHash?: string
   credentialTxHash?: string
-}
-
-const formatClaimValue = (value: unknown): string => {
-  if (value === null || value === undefined) return '—'
-  if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
 }
 
 /**
@@ -60,7 +55,9 @@ export const IdentityAttestationBadge = ({
   }
 
   const legalName = getLegalName()
-  const claimEntries = claims ? Object.entries(claims) : []
+  // Labelled and ordered per credential type rather than dumped in serialisation order — a Foundation
+  // Employee shows Name / Role, not firstName / engagementContextRole. See describeClaims.
+  const claimRows = describeClaims(claims)
 
   const tooltipContent = (
     <Box sx={{ p: 1.5, minWidth: 280 }}>
@@ -186,7 +183,7 @@ export const IdentityAttestationBadge = ({
               </>
             )}
           </>
-        ) : claimEntries.length > 0 ? (
+        ) : claimRows.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             <Typography
               variant="caption"
@@ -199,13 +196,20 @@ export const IdentityAttestationBadge = ({
             >
               {t({ id: 'claims' })}
             </Typography>
-            {claimEntries.map(([key, value]) => (
-              <Box key={key} sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+            {claimRows.map((claim) => (
+              <Box key={claim.key} sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                 <Typography variant="body2" sx={{ fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
-                  {key}:
+                  {claim.label}:
                 </Typography>
-                <Typography variant="body2" sx={{ color: theme.palette.common.white, wordBreak: 'break-word' }}>
-                  {formatClaimValue(value)}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.common.white,
+                    wordBreak: 'break-word',
+                    ...(claim.mono ? { fontFamily: 'monospace', fontSize: '0.85rem' } : {})
+                  }}
+                >
+                  {claim.value}
                 </Typography>
               </Box>
             ))}

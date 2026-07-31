@@ -45,7 +45,7 @@ public class KeriService {
     private final Optional<SignifyClient> client;
     private final KeriProperties keriProperties;
     private final CredentialSchemaRegistry credentialSchemaRegistry;
-    private final DocumentAttestationCommitmentFactory commitmentFactory;
+    private final AttestationPayloadSaidFactory payloadSaidFactory;
     @Value("${keri.enabled:false}")
     private boolean keriEnabled;
     private final ReportRepository reportRepository;
@@ -198,15 +198,16 @@ public class KeriService {
      * directly. Every document anchored that way keeps verifying exactly as before — this check runs
      * first and nothing about it has moved.
      *
-     * <p>The SECOND covers wallet-driven attestation, where the wallet signs a commitment over the
-     * document rather than the manifest (it cannot see the manifest's ipfs_cid or creation_slot yet)
-     * and seals the SAID of the remotesign payload wrapping that commitment's digest. See
-     * {@link DocumentAttestationCommitmentFactory}.
+     * <p>The SECOND covers wallet-driven attestation. It anchors the digest of that SAME manifest — a
+     * wallet can now derive it, since the manifest no longer carries anything decided at dispatch — but
+     * seals the SAID of the remotesign payload WRAPPING that digest rather than the digest itself,
+     * because a remotesign request has to be self-addressing. So the two contracts differ by exactly
+     * one wrapping step; see {@link AttestationPayloadSaidFactory}.
      *
-     * <p>Neither matching is a no-op, as before. In particular a wallet-attested document whose
-     * envelope has not been fetched yet cannot be checked at all — its commitment includes the
-     * envelope's SHA-256 — so correlation is re-attempted once the envelope lands
-     * ({@code DocumentEnvelopeVerifier}) rather than being decided prematurely here.
+     * <p>Both are decidable from chain data alone, here and now. There used to be a third possibility —
+     * "cannot say yet" — because the wallet attested a commitment covering the envelope's SHA-256,
+     * which is not on chain and had to be fetched from IPFS first, deferring correlation. Nothing is
+     * deferred any more.
      */
     private void verifyAndSaveDocument(DocumentEntity document, IdentityEventEntity identityEntity) {
         try {
@@ -228,14 +229,14 @@ public class KeriService {
         if (Objects.equals(document.getMetadataHash(), identityEntity.getDataHash())) {
             return true;
         }
-        String expectedPayloadSaid = commitmentFactory.expectedPayloadSaid(document,
+        String expectedPayloadSaid = payloadSaidFactory.expectedPayloadSaid(document.getMetadataHash(),
                 identityEntity.getIdentifier());
         if (expectedPayloadSaid == null) {
             return false;
         }
         boolean matches = expectedPayloadSaid.equals(identityEntity.getDataHash());
         if (matches) {
-            log.info("Document tx {} correlated via the wallet commitment (payload SAID {})",
+            log.info("Document tx {} correlated via the wallet-anchored payload SAID {}",
                     document.getTxHash(), expectedPayloadSaid);
         }
         return matches;
@@ -495,9 +496,40 @@ public class KeriService {
         return false;
     }
 
-    /** The presented leaf's own SAID and schema SAID — see {@link #readPresentedCredential}. These are
-     *  read off the chain AS PRESENTED; neither has been verified against anything. */
-    public record PresentedCredential(String credentialSaid, String schemaSaid) {
+    /**
+     * The presented leaf's own SAID, schema SAID, issuer AID and attribute claims — see
+     * {@link #readPresentedCredential}. NONE of these has been verified against anything: they are
+     * read off the chain exactly as presented.
+     *
+     * <p>{@code issuerAid} is the ACDC's own top-level {@code i} — who the credential SAYS issued it.
+     * It is not evidence that they did, and in particular a self-issued credential names its own
+     * holder here. {@code claims} is the attribute block {@code a} with the two structural keys
+     * removed ({@code d}, the block's SAID; {@code i}, the issuee, which is the presenting AID the
+     * caller already has; and {@code u}, the privacy salt) — what remains is the schema's own
+     * attributes, whatever they are.
+     * Both are for DISPLAY, so a person can see what was handed over; neither may gate anything.
+     */
+    public record PresentedCredential(String credentialSaid, String schemaSaid, String issuerAid,
+            Map<String, Object> claims) {
+    }
+
+    /** The attribute block's structural keys — its own SAID, the issuee, and the privacy salt — as
+     *  opposed to the schema's actual attributes. {@code u} is a blinding nonce, so showing it to a
+     *  person would put a random string in the list looking exactly like a real claim. */
+    private static final Set<String> STRUCTURAL_ATTRIBUTE_KEYS = Set.of("d", "i", "u");
+
+    /** @return the leaf's schema attributes ({@code a} minus its structural keys), never null. */
+    private static Map<String, Object> readClaims(Map<String, Object> leaf) {
+        if (!(leaf.get("a") instanceof Map<?, ?> attributes)) {
+            return Map.of();
+        }
+        Map<String, Object> claims = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : attributes.entrySet()) {
+            if (entry.getKey() instanceof String key && !STRUCTURAL_ATTRIBUTE_KEYS.contains(key)) {
+                claims.put(key, entry.getValue());
+            }
+        }
+        return claims;
     }
 
     /**
@@ -564,9 +596,13 @@ public class KeriService {
             // isAcdc() already required a non-null 's', so this is defensive against a non-String.
             String leafSchemaSaid = leaf.get("s") instanceof String s && !s.isBlank() ? s : null;
 
+            // isAcdc() already required a non-null 'i', so this is defensive against a non-String.
+            String leafIssuerAid = leaf.get("i") instanceof String i && !i.isBlank() ? i : null;
+
             log.info("accepting presented credential {} (schema {}) from {} for {} — not verified by the indexer",
                     leafSaid, leafSchemaSaid, presentingAid, logContext);
-            return Optional.of(new PresentedCredential(leafSaid, leafSchemaSaid));
+            return Optional.of(
+                    new PresentedCredential(leafSaid, leafSchemaSaid, leafIssuerAid, readClaims(leaf)));
         } catch (Exception e) {
             log.warn("Reading the presented credential failed for {}: {}", logContext, e.getMessage(), e);
             return Optional.empty();

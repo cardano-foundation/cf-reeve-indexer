@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +23,7 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.exception.OperationTimeoutException;
 import org.cardanofoundation.signify.exception.SignifyAgentException;
+import org.cardanofoundation.signify.exception.SignifyInterruptedException;
 import org.cardanofoundation.signify.exception.SignifyTransportException;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
 
@@ -192,6 +192,13 @@ public class CardAttestationOobiService {
         } catch (KeriOobiValidationException | KeriAgentUnavailableException e) {
             throw e;
         } catch (Exception e) {
+            // An interrupt is reported like any other resolve failure — but the flag has to survive it,
+            // or the caller's own wallet wait keeps polling to its full timeout after being told to
+            // stop. It arrives unchecked now (SignifyInterruptedException wraps the checked one), so
+            // naming only InterruptedException here would match nothing the client throws.
+            if (e instanceof InterruptedException || e instanceof SignifyInterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             log.warn("OOBI resolve failed for AID {} ({}): {}", aid, oobiUrl, e.getMessage());
             if (isTransientAgentFailure(e)) {
                 throw new KeriAgentUnavailableException(
@@ -234,18 +241,11 @@ public class CardAttestationOobiService {
                 || e instanceof OperationTimeoutException) {
             return true;
         }
-        if (e instanceof InterruptedException) {
-            return containsIgnoreCase(e.getMessage(), "timeout");
-        }
         if (e instanceof SignifyAgentException agentError) {
             int status = agentError.getStatusCode();
             return status >= 500 && status < 600;
         }
         return false;
-    }
-
-    private static boolean containsIgnoreCase(String message, String needle) {
-        return message != null && message.toLowerCase(Locale.ROOT).contains(needle);
     }
 
 }

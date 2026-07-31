@@ -11,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
 import org.cardanofoundation.reeve.indexer.model.domain.ceremony.CardCeremonyState;
 import org.cardanofoundation.reeve.indexer.model.entity.CardAttestationCeremonyEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.IssuedCardEntity;
@@ -73,6 +75,8 @@ public class CardAttestationController {
     private final CardAttestService attestService;
     private final CardAttestationOobiService oobiService;
     private final CardIssuanceService cardIssuanceService;
+    private final CredentialSchemaRegistry credentialSchemaRegistry;
+    private final ObjectMapper objectMapper;
 
     @Operation(summary = "Register a card and open an attestation ceremony for it",
             description = "Takes the full client-built REEVE_KEY_CARD (the browser assembles it "
@@ -142,7 +146,8 @@ public class CardAttestationController {
     // --- internals ---
 
     private CardCeremonyView toView(CardAttestationCeremonyEntity ceremony) {
-        return CardCeremonyView.of(ceremony, resolveAgentOobiOrNull(), exportedCardIfAnchored(ceremony));
+        return CardCeremonyView.of(ceremony, resolveAgentOobiOrNull(), exportedCardIfAnchored(ceremony),
+                credentialSchemaRegistry, objectMapper);
     }
 
     /**

@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.cardanofoundation.reeve.indexer.config.CredentialSchema;
 import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
 import org.cardanofoundation.reeve.indexer.config.KeriAgentIdentity;
@@ -38,6 +40,7 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAgreeArgs;
+import org.cardanofoundation.signify.exception.SignifyInterruptedException;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 /**
@@ -110,6 +113,7 @@ public class CardCredentialService {
     private final CredentialSchemaRegistry credentialSchemaRegistry;
     private final KeriService keriService;
     private final KeriProperties keriProperties;
+    private final ObjectMapper objectMapper;
     @Value("${keri.enabled:false}")
     private boolean keriEnabled;
 
@@ -368,10 +372,17 @@ public class CardCredentialService {
 
         String finalCredentialSaid = presented.credentialSaid();
         String finalSchemaSaid = presented.schemaSaid();
+        String finalIssuerAid = presented.issuerAid();
+        // Serialised here, at the one point the parsed chain is in hand, rather than re-parsed from the
+        // CESR on every read. Best-effort: a claims block that will not serialise is not worth failing
+        // an otherwise-good presentation over, since it is display-only either way.
+        String finalClaims = writeClaimsOrNull(presented.claims(), ceremonyId);
         boolean completed = ceremonyService.completeStep(ceremonyId, generation, CardCeremonyState.PAIRED,
                 CardCeremonyState.CREDENTIAL_RECEIVED, c -> {
                     c.setCredentialSaid(finalCredentialSaid);
                     c.setSchemaSaid(finalSchemaSaid);
+                    c.setCredentialIssuerAid(finalIssuerAid);
+                    c.setCredentialClaims(finalClaims);
                 });
         if (!completed) {
             // Stale CAS (a concurrent retry superseded this attempt): the grant notification must be
@@ -535,6 +546,23 @@ public class CardCredentialService {
         }
     }
 
+    /**
+     * @return {@code claims} as JSON text, or {@code null} when there is nothing to show or it will
+     *         not serialise. Display-only data must never be able to fail the ceremony step.
+     */
+    private String writeClaimsOrNull(Map<String, Object> claims, UUID ceremonyId) {
+        if (claims == null || claims.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(claims);
+        } catch (Exception e) {
+            log.warn("Could not serialise the presented credential's claims for ceremony {}: {}", ceremonyId,
+                    e.getMessage());
+            return null;
+        }
+    }
+
     /** Fetches the credential's full CESR chain from the agent's store (post-admit) and reads its
      *  identifiers via {@link KeriService#readPresentedCredential} — which performs NO verification;
      *  see this class's own javadoc. The only failure left is structural: an unreadable chain yields
@@ -611,8 +639,19 @@ public class CardCredentialService {
         return said instanceof String s ? s : null;
     }
 
+    /**
+     * Restores the interrupt flag when {@code e} is an interruption in EITHER form.
+     *
+     * <p>Both kinds have to be named. {@code Thread.sleep} still raises the checked
+     * {@link InterruptedException}, but a signify client call now wraps one in
+     * {@link SignifyInterruptedException} — which extends {@code RuntimeException}, not
+     * {@code InterruptedException}. Testing only the checked type therefore matches nothing the client
+     * throws any more: the interrupt is caught by the surrounding {@code catch (Exception e)}, reported
+     * as an ordinary step failure, and the flag is silently dropped — so a caller polling or sleeping
+     * afterwards keeps going to its full timeout instead of stopping.
+     */
     private static void interruptIfNeeded(Exception e) {
-        if (e instanceof InterruptedException) {
+        if (e instanceof InterruptedException || e instanceof SignifyInterruptedException) {
             Thread.currentThread().interrupt();
         }
     }
