@@ -34,7 +34,7 @@ The detailed explanation of the oobis can be found [here](./Keri-oobis.md) and t
 ### Prerequisites
 
 - **Java 21** or higher
-- **Node.js v20.10.0+** and npm
+- **Node.js v26.6.0** and npm v11.x
 - **Docker & Docker Compose** (recommended)
 - **Git**
 

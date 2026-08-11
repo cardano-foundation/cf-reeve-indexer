@@ -34,9 +34,9 @@ Developed with TypeScript, React.js, and MUI (Material UI), it showcases a user-
 
 ### Prerequisites
 
-- **Node.js** v20.10.0+
+- **Node.js** v26.6.0
   > _(A `.nvmrc` file is included — use `nvm use` to set the correct version.)_
-- **npm** v10.2.x
+- **npm** v11.x
 
 ---
 
