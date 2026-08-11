@@ -14,8 +14,7 @@ services:
     restart: unless-stopped
     read_only: true
     tmpfs:
-      - /tmp:rw,nosuid,nodev,mode=1777
-      - /home/nonroot/.cache:rw,nosuid,nodev,mode=0700,uid=65532,gid=65532
+      - /tmp:rw,exec,nosuid,nodev,mode=1777
     build:
       context: .
     ports:
@@ -47,8 +46,6 @@ services:
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,mode=1777
-      - /run/nginx:rw,noexec,nosuid,nodev,mode=0755,uid=65532,gid=65532
-      - /var/lib/nginx/tmp:rw,noexec,nosuid,nodev,mode=0700,uid=65532,gid=65532
     build:
       context: frontend
     ports:
