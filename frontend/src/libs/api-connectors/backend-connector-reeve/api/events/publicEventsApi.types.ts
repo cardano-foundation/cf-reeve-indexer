@@ -117,6 +117,7 @@ export interface ProjectAuditView {
   projectKey: string | null
   projectId: string | null
   projectTitle: string | null
+  currency: string | null
   allocatedAmount: number
   spentAmount: number
   remaining: number

@@ -37,7 +37,7 @@ export const OrganisationFormSidebar = ({
 }: OrganisationFormSidebarProps) => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { organisations, isFetching } = useGetOrganisationsModel()
+  const { organisations } = useGetOrganisationsModel()
 
   const handleOrgSelect = useCallback((orgId: string) => {
     // Determine current route type (reports or transactions)
@@ -54,9 +54,7 @@ export const OrganisationFormSidebar = ({
     }
   }, [pathname, navigate])
 
-  if (isFetching || !organisations) return null
-
-  const organisationOptions = organisations.map((o: any) => ({
+  const organisationOptions = (organisations ?? []).map((o: any) => ({
     name: o.name,
     value: o.id
   }))
@@ -71,15 +69,9 @@ export const OrganisationFormSidebar = ({
           ...initialValues,
           organisations: defaultOrganisation
         }}
-        onSubmit={onSubmit ?? (() => undefined)}
-        component={() => (
-          <OrganisationFormLayout
-            isSidebarOpen={isSidebarOpen}
-            items={organisationOptions}
-            onOrgSelect={handleOrgSelect}
-          />
-        )}
-      />
+        onSubmit={onSubmit ?? (() => undefined)}>
+        {() => <OrganisationFormLayout isSidebarOpen={isSidebarOpen} items={organisationOptions} onOrgSelect={handleOrgSelect} />}
+      </Formik>
     </OrganisationFormSidebarStyled>
   )
 }

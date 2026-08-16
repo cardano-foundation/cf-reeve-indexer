@@ -21,11 +21,13 @@ interface LayoutPublicContextProps {
   setOrganisations: (orgs: any[]) => void
   isDrawerOpen: boolean
   isResourcesOpen: boolean
+  isProjectsOpen: boolean
   isSidebarOpen: boolean
 }
 
 export enum MenuCategory {
-  RESOURCES = 'RESOURCES'
+  RESOURCES = 'RESOURCES',
+  PROJECTS = 'PROJECTS'
 }
 
 export const LayoutPublicContext = createContext<LayoutPublicContextProps | undefined>(undefined)
@@ -49,6 +51,7 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   const { type, handleCloseDrawer, handleOpenDrawer, isDrawerOpen } = useLayoutDrawer()
 
   const isResourcesOpen = toggledSection === MenuCategory.RESOURCES
+  const isProjectsOpen = toggledSection === MenuCategory.PROJECTS
 
   // Toggle section menu
   const handleSectionMenuToggle = useCallback(
@@ -103,7 +106,8 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   useEffect(() => {
     if (isSidebarOpen && !toggledSection) {
       const categories = {
-        [PATHS.PUBLIC_RESOURCES]: MenuCategory.RESOURCES
+        [PATHS.PUBLIC_RESOURCES]: MenuCategory.RESOURCES,
+        [PATHS.PUBLIC_PROJECTS]: MenuCategory.PROJECTS
       } as const
 
       const section = Object.keys(categories).find((path) => pathname.includes(path))
@@ -148,6 +152,7 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
         setOrganisations,
         isDrawerOpen,
         isResourcesOpen,
+        isProjectsOpen,
         isSidebarOpen
       }}>
       {children}

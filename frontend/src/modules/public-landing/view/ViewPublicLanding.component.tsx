@@ -8,7 +8,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { publicLandingIllustration } from 'assets/images'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
-import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { FieldOrganisations } from 'libs/form-kit/components/FieldOrganisations/FieldOrganisations.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
@@ -39,7 +38,7 @@ export const ViewPublicLanding = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { selectedOrganisation, setSelectedOrganisation } = useLayoutPublicContext()
-  const { organisations, isFetching } = useGetOrganisationsModel()
+  const { organisations } = useGetOrganisationsModel()
 
   const handleOrgSelect = useCallback((orgId: string) => {
     navigate(`/reports/${orgId}`)
@@ -47,7 +46,7 @@ export const ViewPublicLanding = () => {
 
   useEffect(() => {
     const orgId = searchParams.get('organisation_id')
-    if (orgId && organisations?.length > 0) {
+    if (orgId && organisations && organisations.length > 0) {
       const organisationExists = organisations.some((o: any) => o.id === orgId)
       if (organisationExists) {
         setSelectedOrganisation(orgId)
@@ -56,23 +55,7 @@ export const ViewPublicLanding = () => {
     }
   }, [searchParams, organisations, setSelectedOrganisation, navigate])
 
-  if (isFetching || !organisations) {
-    return (
-      <>
-        <LayoutPublic.Header>
-          <LayoutPublic.Header.Details description={t({ id: 'welcome' })} title={t({ id: 'reeveIndexer' })} />
-        </LayoutPublic.Header>
-        <LayoutPublic.Main flexDirection="column" gap={6} isHeightRestricted>
-          <EmptyStatePage
-            message={t({ id: 'selectOrganisationMessage' })}
-            hint={t({ id: 'selectOrganisationHint' })}
-          />
-        </LayoutPublic.Main>
-      </>
-    )
-  }
-
-  const organisationOptions = organisations.map((o: any) => ({
+  const organisationOptions = (organisations ?? []).map((o: any) => ({
     name: o.name,
     value: o.id
   }))
@@ -97,16 +80,13 @@ export const ViewPublicLanding = () => {
             </Typography>
           </Box>
           <OrganisationFormLandingStyled>
-            <Formik<OrganisationFormValues>
-              enableReinitialize
-              initialValues={initialValues}
-              onSubmit={() => undefined}
-              component={() => (
+            <Formik<OrganisationFormValues> enableReinitialize initialValues={initialValues} onSubmit={() => undefined}>
+              {() => (
                 <OrganisationFormStyled noValidate>
                   <FieldOrganisations items={organisationOptions} onSelect={handleOrgSelect} />
                 </OrganisationFormStyled>
               )}
-            />
+            </Formik>
           </OrganisationFormLandingStyled>
         </Box>
         <Box flexGrow={1} display="flex" alignItems="center" justifyContent="center" minHeight={0} py={4}>

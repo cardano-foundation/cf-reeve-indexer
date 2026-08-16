@@ -33,6 +33,7 @@ public class ProjectAuditView {
     private String projectKey;
     private String projectId;
     private String projectTitle;
+    private String currency;
     private BigDecimal allocatedAmount;
     private BigDecimal spentAmount;
     private BigDecimal remaining;

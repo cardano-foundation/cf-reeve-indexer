@@ -22,6 +22,10 @@ import { AuditKpiHeader } from 'modules/public-events-auditor/components/AuditKp
 import { AuditProjectTable } from 'modules/public-events-auditor/components/AuditProjectTable/AuditProjectTable.component.tsx'
 import { useFundingAudit } from 'modules/public-events-auditor/hooks/useFundingAudit.ts'
 
+import { ProjectCard } from 'modules/public-events-auditor/components/ProjectCard/ProjectCard.component.tsx'
+import { ProjectCardsGrid } from '../components/ProjectCardsGrid/ProjectCardsGrid.component'
+import { ProjectAuditView } from 'libs/api-connectors/backend-connector-reeve/api/events/publicEventsApi.types'
+
 const Section = ({ title, description, children }: { title: string; description?: string; children: ReactNode }) => {
   const theme = useTheme()
 
@@ -93,6 +97,7 @@ export const ViewFundingAudit = () => {
   const isEmptyResult = Boolean(audit && audit.fundingCount === 0 && audit.spendingCount === 0 && audit.refundCount === 0)
 
   const renderBody = () => {
+
     if (!hasOrganisation) {
       return (
         <EmptyStatePage
@@ -115,8 +120,23 @@ export const ViewFundingAudit = () => {
       return <EmptyStateTable hint={t({ id: 'auditNoDataHint' })} message={t({ id: 'auditNoDataMessage' })} />
     }
 
+    const fakeProjects: ProjectAuditView[] = [
+      { projectKey: 'p1', projectId: 'proj-1', projectTitle: 'Project AB', currency: 'EUR', allocatedAmount: 200000, spentAmount: 175000, remaining: 25000, milestones: [] },
+      { projectKey: 'p2', projectId: 'proj-2', projectTitle: 'Project CD', currency: 'ADA', allocatedAmount: 200000, spentAmount: 175000, remaining: 25000, milestones: [] },
+      { projectKey: 'p3', projectId: 'proj-3', projectTitle: 'A Much Longer Project Name For Testing', currency: 'EUR', allocatedAmount: 50000, spentAmount: 12500, remaining: 37500, milestones: [] },
+      { projectKey: 'p4', projectId: 'proj-4', projectTitle: 'Project EF', currency: 'ADA', allocatedAmount: 80000, spentAmount: 80000, remaining: 0, milestones: [] },
+      { projectKey: null, projectId: 'proj-5', projectTitle: null, currency: 'EUR', allocatedAmount: 15000, spentAmount: 4200, remaining: 10800, milestones: [] },
+      { projectKey: 'p6', projectId: 'proj-6', projectTitle: 'Project GH', currency: 'ADA', allocatedAmount: 120000, spentAmount: 95000, remaining: 25000, milestones: [] },
+      { projectKey: 'p7', projectId: 'proj-7', projectTitle: 'Project IJ', currency: 'EUR', allocatedAmount: 60000, spentAmount: 15000, remaining: 45000, milestones: [] }
+    ]
+
+
     return (
+
       <Box display="flex" flexDirection="column" gap={6}>
+
+        <ProjectCardsGrid projects={fakeProjects} />
+
         <AuditKpiHeader audit={audit} />
 
         <Section description={t({ id: 'auditAllocationChartDescription' })} title={t({ id: 'auditAllocationChartTitle' })}>
