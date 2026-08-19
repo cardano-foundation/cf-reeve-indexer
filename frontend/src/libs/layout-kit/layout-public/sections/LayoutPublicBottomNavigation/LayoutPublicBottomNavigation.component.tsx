@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material'
-import { ArrowSwapHorizontal, Note1, Book1, Briefcase } from 'iconsax-react'
+import { ArrowSwapHorizontal, Note1, Book1, Notepad2 } from 'iconsax-react'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 
 import { useLocationState } from 'hooks'
@@ -56,7 +56,7 @@ export const LayoutPublicBottomNavigation = () => {
       />
       <LayoutBottomNavigation.Action
         component={RouterLink}
-        icon={<Briefcase color={theme.palette.primary.main} size={24} variant={isProjects ? 'Bold' : 'Outline'} />}
+        icon={<Notepad2 color={theme.palette.primary.main} size={24} variant={isProjects ? 'Bold' : 'Outline'} />}
         label={t({ id: 'publicProjects' })}
         to={projectsPath}
       />

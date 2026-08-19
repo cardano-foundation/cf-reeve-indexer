@@ -4,9 +4,9 @@ import { useSearchDrawerFiltersForm } from 'modules/public-events/components/Sea
 import { DEFAULT_SEARCH_QUICK_FILTERS_VALUES } from 'modules/public-events/components/SearchToolbar/SearchToolbar.consts.ts'
 import { useSearchQuickFiltersForm } from 'modules/public-events/components/SearchToolbar/SearchToolbar.hooks.ts'
 
-export const usePublicEventsFilters = () => {
-  const { quickFilters } = useSearchQuickFiltersForm()
-  const { filters } = useSearchDrawerFiltersForm()
+export const usePublicEventsFilters = (lockedProjectId?: string | null) => {
+  const { quickFilters } = useSearchQuickFiltersForm(lockedProjectId)
+  const { filters } = useSearchDrawerFiltersForm(lockedProjectId)
 
   const { combinedFilters, handleClearFilters, hasFiltersSelected, hasFiltersTouched, isApplyDisabled, isClearDisabled } = useFilters({
     initialFiltersValues: DEFAULT_SEARCH_FILTERS_VALUES,

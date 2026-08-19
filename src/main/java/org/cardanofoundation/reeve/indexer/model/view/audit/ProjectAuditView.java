@@ -38,4 +38,5 @@ public class ProjectAuditView {
     private BigDecimal spentAmount;
     private BigDecimal remaining;
     private List<MilestoneAuditView> milestones;
+    private List<SubProjectAuditView> subProjects;
 }

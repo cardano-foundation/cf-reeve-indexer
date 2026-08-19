@@ -1,4 +1,6 @@
 import Box from '@mui/material/Box'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
 import Table from '@mui/material/Table'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
@@ -8,6 +10,7 @@ import { ArrowDown, ArrowUp } from 'iconsax-react'
 import { styled } from 'styled-components'
 
 import { ButtonIcon } from 'libs/ui-kit/components/ButtonIcon/ButtonIcon.component.tsx'
+import { opacityColors } from 'libs/ui-kit/theme/colors.ts'
 
 export const TableContainerRStyled = styled(TableContainer)`
   && {
@@ -186,5 +189,42 @@ export const TableContainerStyled = styled(Box)`
     border: ${({ theme }) => `1px solid ${theme.palette.divider}`};
     border-radius: ${({ theme }) => `${theme.shape.borderRadius * 2}px`};
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  }
+`
+
+export const MenuStyled = styled(Menu)`
+  && {
+    .MuiPaper-root {
+      background: ${({ theme }) => theme.palette.background.default};
+      border-radius: ${({ theme }) => theme.shape.borderRadius * 2}px;
+      box-shadow: 0 4px 16px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .MuiList-root {
+      padding: ${({ theme }) => theme.spacing(1)};
+    }
+  }
+`
+
+export const MenuItemStyled = styled(MenuItem)`
+  && {
+    display: flex;
+    height: 3.125rem;
+    margin: ${({ theme }) => theme.spacing(0, 0, 0.5)};
+    padding: ${({ theme }) => theme.spacing(0.5)};
+    gap: ${({ theme }) => theme.spacing(0.5)};
+    border-radius: ${({ theme }) => theme.shape.borderRadius * 1.5}px;
+
+    &:last-of-type {
+      margin: 0;
+    }
+
+    &:hover {
+      background: ${opacityColors.button[2]};
+    }
+
+    &.Mui-focusVisible {
+      background: ${opacityColors.button[2]};
+    }
   }
 `

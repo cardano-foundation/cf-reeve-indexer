@@ -5,7 +5,7 @@ import { SearchFiltersValues } from 'modules/public-events/components/SearchFilt
 import { SearchQuickFiltersValues } from 'modules/public-events/components/SearchToolbar/SearchToolbar.types.ts'
 
 export const mapSearchFiltersToRequestBody = (values: SearchFiltersValues & SearchQuickFiltersValues): Omit<PostPublicEventsRequestBody, 'organisationId'> => ({
-  blockChainHash: values.search ? values.search : undefined,
+  search: values.search ? values.search : undefined,
   dateFrom: dayjs(values.dateFrom).isValid() ? dayjs(values.dateFrom).format('YYYY-MM-DD') : undefined,
   dateTo: dayjs(values.dateTo).isValid() ? dayjs(values.dateTo).format('YYYY-MM-DD') : undefined,
   eventTypes: values.eventType.length ? values.eventType : undefined,

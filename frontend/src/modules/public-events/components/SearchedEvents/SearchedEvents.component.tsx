@@ -2,21 +2,21 @@ import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
-import { GridColDef } from '@mui/x-data-grid'
 import dayjs from 'dayjs'
-import { ExportSquare, Eye } from 'iconsax-react'
-import { MouseEvent, useMemo, useRef, useState } from 'react'
+import { ExportSquare } from 'iconsax-react'
+import { useMemo, useRef } from 'react'
 
-import { Modal, useModal } from 'features/common'
-import { IconButton } from 'features/mui/base'
 import { EventView, PostPublicEventsResponse200 } from 'libs/api-connectors/backend-connector-reeve/api/events/publicEventsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
-import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
+import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
+import { CounterChipStyled } from 'libs/ui-kit/components/ChipsGroup/ChipsGroup.styles.tsx'
+import { TableContainer } from 'libs/ui-kit/components/Table/Table.component.tsx'
+import { createColumns } from 'libs/ui-kit/components/Table/Table.utils.ts'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber } from 'libs/utils/format.ts'
-import { EventDetail } from 'modules/public-events/components/EventDetail/EventDetail.component'
+import { EventAllocationBreakdown } from 'modules/public-events/components/EventAllocationBreakdown/EventAllocationBreakdown.component.tsx'
 import { SearchToolbar } from 'modules/public-events/components/SearchToolbar/SearchToolbar.component'
 
 interface SearchedEventsProps {
@@ -27,16 +27,17 @@ interface SearchedEventsProps {
   isLoading: boolean
 }
 
+interface EventRow extends EventView {
+  projectTitles: string[]
+}
+
 export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, isLoading }: SearchedEventsProps) => {
-  const { page, rowsPerPage, handlePagination } = pagination
+  const { rowsPerPage, handlePagination } = pagination
   const { handleSorting } = sorting
 
   const { t } = useTranslations()
 
   const theme = useTheme()
-
-  const { isOpen, handleModalOpen, handleModalClose } = useModal()
-  const [selectedEvent, setSelectedEvent] = useState<EventView | null>(null)
 
   const rowCountRef = useRef(data?.total || 0)
 
@@ -48,133 +49,175 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
     return rowCountRef.current
   }, [data?.total])
 
-  const handleOpenDetail = (event: EventView) => {
-    setSelectedEvent(event)
-    handleModalOpen()
-  }
+  const rows: EventRow[] = (data?.events ?? []).map((event) => ({
+    ...event,
+    projectTitles: event.allocations.map((allocation) => allocation.projectTitle || allocation.projectId)
+  }))
 
-  const columns: GridColDef[] = [
+  const columns = createColumns<EventRow>()([
     {
-      field: 'txHash',
-      headerName: t({ id: 'blockchainHash' }),
-      renderCell: ({ value }) =>
-        value ? (
+      field: 'eventType',
+      headerName: t({ id: 'eventType' }),
+      hideable: false,
+      sortable: true,
+      width: 150,
+      renderCell: (row) => <TruncatedCellText value={row.eventType} />
+    },
+    {
+      field: 'projectTitles',
+      headerName: t({ id: 'auditProjectTitle' }),
+      hideable: false,
+      sortable: false,
+      width: 280,
+      renderCell: (row) => {
+        const [firstProjectTitle, ...remainingProjectTitles] = row.projectTitles
+
+        return (
           <Box alignItems="center" display="flex" gap={1}>
-            <Tooltip title={value}>
-              <Typography component="span" variant="body2">{`${value.slice(0, 4)}...${value.slice(-4)}`}</Typography>
-            </Tooltip>
-            <Tooltip title={t({ id: 'openInExplorer' })}>
-              <Link display="flex" href={`https://explorer.cardano.org/transaction/${value}`} rel="noreferrer" target="_blank" onClick={(event) => event.stopPropagation()}>
-                <ExportSquare color={theme.palette.action.active} size={20} variant="Outline" />
-              </Link>
-            </Tooltip>
+            <TruncatedCellText value={firstProjectTitle ?? '-'} />
+            {remainingProjectTitles.length > 0 && (
+              <Tooltip title={remainingProjectTitles.join('\n')}>
+                <CounterChipStyled label={`+${remainingProjectTitles.length}`} size="small" />
+              </Tooltip>
+            )}
           </Box>
-        ) : null,
-      hideable: false,
-      sortable: true,
-      flex: 1,
-      minWidth: 192
+        )
+      }
     },
-    { field: 'eventId', headerName: t({ id: 'eventId' }), hideable: false, sortable: true, flex: 1, minWidth: 160 },
-    { field: 'eventType', headerName: t({ id: 'eventType' }), hideable: false, sortable: true, flex: 1, minWidth: 160 },
-    { field: 'eventCategory', headerName: t({ id: 'eventCategory' }), hideable: true, sortable: false, flex: 1, minWidth: 160 },
-    {
-      field: 'date',
-      headerName: t({ id: 'eventDate' }),
-      valueFormatter: (value) => (value ? dayjs(value, 'YYYY-MM-DD').format('DD/MM/YYYY') : null),
-      hideable: false,
-      sortable: true,
-      flex: 1,
-      minWidth: 160
-    },
-    { field: 'fundingId', headerName: t({ id: 'fundingId' }), hideable: true, sortable: true, flex: 1, minWidth: 160 },
-    { field: 'fundingEntity', headerName: t({ id: 'fundingEntity' }), hideable: true, sortable: false, flex: 1, minWidth: 160 },
     {
       field: 'totalAmount',
       headerName: t({ id: 'totalAmount' }),
-      valueFormatter: (value) => (value || value === 0 ? formatNumber(value) : null),
       align: 'right',
       headerAlign: 'right',
       hideable: false,
       sortable: true,
-      flex: 1,
-      minWidth: 160
+      width: 170,
+      renderCell: (row) => <TruncatedCellText value={row.totalAmount || row.totalAmount === 0 ? formatNumber(row.totalAmount) : '-'} />
     },
     {
-      field: 'actions',
-      headerName: '',
-      renderCell: ({ row }) => (
-        <Tooltip title={t({ id: 'viewDetails' })}>
-          <IconButton
-            aria-label={t({ id: 'viewDetails' })}
-            size="small"
-            onClick={(event: MouseEvent<HTMLButtonElement>) => {
-              event.stopPropagation()
-              handleOpenDetail(row as EventView)
-            }}>
-            <Eye color={theme.palette.action.active} size={20} variant="Outline" />
-          </IconButton>
-        </Tooltip>
-      ),
+      field: 'currencyCustCode',
+      headerName: t({ id: 'currency' }),
       hideable: false,
       sortable: false,
-      filterable: false,
-      disableColumnMenu: true,
-      align: 'center',
-      headerAlign: 'center',
-      width: 64
+      width: 120,
+      renderCell: (row) => <TruncatedCellText value={row.currencyCustCode ?? '-'} />
+    },
+    {
+      field: 'date',
+      headerName: t({ id: 'eventDate' }),
+      hideable: false,
+      sortable: true,
+      width: 150,
+      renderCell: (row) => <TruncatedCellText value={row.date ? dayjs(row.date, 'YYYY-MM-DD').format('DD/MM/YYYY') : '-'} />
+    },
+    {
+      field: 'txHash',
+      headerName: t({ id: 'blockchainHash' }),
+      hideable: false,
+      sortable: true,
+      width: 240,
+      renderCell: (row) =>
+        row.txHash ? (
+          <Box alignItems="center" display="flex" gap={1}>
+            <Tooltip title={row.txHash}>
+              <Typography component="span" variant="body2">{`${row.txHash.slice(0, 4)}...${row.txHash.slice(-4)}`}</Typography>
+            </Tooltip>
+            <Tooltip title={t({ id: 'openInExplorer' })}>
+              <Link display="flex" href={`https://explorer.cardano.org/transaction/${row.txHash}`} rel="noreferrer" target="_blank" onClick={(event) => event.stopPropagation()}>
+                <ExportSquare color={theme.palette.action.active} size={20} variant="Outline" />
+              </Link>
+            </Tooltip>
+          </Box>
+        ) : null
+    },
+    {
+      field: 'fundingEntity',
+      headerName: t({ id: 'fundingEntity' }),
+      hideable: true,
+      sortable: false,
+      width: 180,
+      renderCell: (row) => <TruncatedCellText value={row.fundingEntity ?? '-'} />
+    },
+    {
+      field: 'spendingCategory',
+      headerName: t({ id: 'spendingCategory' }),
+      hideable: true,
+      sortable: false,
+      width: 180,
+      renderCell: (row) => <TruncatedCellText value={row.spendingCategory ?? '-'} />
+    },
+    {
+      field: 'vendor',
+      headerName: t({ id: 'vendor' }),
+      hideable: true,
+      sortable: false,
+      width: 160,
+      renderCell: (row) => <TruncatedCellText value={row.vendor ?? '-'} />
+    },
+    {
+      field: 'fxRate',
+      headerName: t({ id: 'exchangeRate' }),
+      hideable: true,
+      sortable: false,
+      width: 130,
+      renderCell: (row) => <TruncatedCellText value={row.fxRate ?? '-'} />
+    },
+    {
+      field: 'hash',
+      headerName: t({ id: 'documentHash' }),
+      hideable: true,
+      sortable: false,
+      width: 200,
+      renderCell: (row) => <TruncatedCellText value={row.hash ?? '-'} />
+    },
+    {
+      field: 'notes',
+      headerName: t({ id: 'notes' }),
+      hideable: true,
+      sortable: false,
+      width: 240,
+      renderCell: (row) => <TruncatedCellText value={row.notes ?? '-'} />
     }
-  ]
+  ])
 
   return (
-    <>
-      <DataGridContainer>
-        <DataGridContainer.Toolbar>
-          <SearchToolbar />
-        </DataGridContainer.Toolbar>
-        <DataGridContainer.Table
-          initialState={{
-            columns: {
-              columnVisibilityModel: {
-                eventCategory: false,
-                fundingId: false,
-                fundingEntity: false
-              }
-            },
-            pagination: undefined,
-            sorting: {
-              sortModel: [{ field: 'date', sort: 'desc' }]
+    <TableContainer>
+      <TableContainer.Toolbar>
+        <SearchToolbar />
+      </TableContainer.Toolbar>
+      <TableContainer.Table
+        aria-label={t({ id: 'eventsTable' })}
+        initialState={{
+          columns: {
+            columnVisibilityModel: {
+              fundingEntity: false,
+              spendingCategory: false,
+              vendor: false,
+              fxRate: false,
+              hash: false,
+              notes: false
             }
-          }}
-          noRowsHint={t({ id: 'noPublicEventsHint' }, { organisation: 'Cardano Foundation' })}
-          noRowsMessage={t({ id: 'nothingHereMessage' })}
-          paginationModel={{ page, pageSize: rowsPerPage }}
-          paginationMode="server"
-          sortingMode="server"
-          rowCount={rowCount}
-          columns={columns}
-          rows={data?.events ?? []}
-          onRowClick={(params) => handleOpenDetail(params.row as EventView)}
-          onPaginationModelChange={(model) => {
-            const { page, pageSize } = model
-
-            handlePagination(page, pageSize)
-          }}
-          onSortModelChange={(model) => {
-            const [current] = model
-
-            if (current) {
-              handleSorting(current.field, current.sort)
-            }
-          }}
-          hasFiltersSelected={hasFiltersSelected}
-          isLoading={isLoading}
-        />
-      </DataGridContainer>
-      <Modal isOpen={isOpen} maxWidth="md" onClose={handleModalClose}>
-        <Modal.Header hasCloseButton>{t({ id: 'eventDetailsTitle' })}</Modal.Header>
-        <Modal.Content>{selectedEvent && <EventDetail event={selectedEvent} />}</Modal.Content>
-      </Modal>
-    </>
+          },
+          sorting: {
+            sortModel: [{ field: 'date', sort: 'desc' }]
+          }
+        }}
+        noRowsHint={t({ id: 'noPublicEventsHint' }, { organisation: 'Cardano Foundation' })}
+        noRowsMessage={t({ id: 'nothingHereMessage' })}
+        columns={columns}
+        rows={rows}
+        getRowId={(row) => row.id.toString()}
+        collapsableRow={(row) => (row.allocations.length > 0 ? <EventAllocationBreakdown allocations={row.allocations} fxRate={row.fxRate} /> : null)}
+        paginationMode="server"
+        sortingMode="server"
+        totalRows={rowCount}
+        pageSize={rowsPerPage}
+        onPagination={(newPage, newRowsPerPage) => handlePagination(newPage, newRowsPerPage)}
+        onSortChange={(field, order) => handleSorting(field.toString(), order)}
+        hasFiltersSelected={hasFiltersSelected}
+        isLoading={isLoading}
+        sx={{ minWidth: '75rem' }}
+      />
+    </TableContainer>
   )
 }

@@ -55,7 +55,7 @@ class FundingEventDeserializerTest {
                       "amount_rcy": "85", "amount_fcy": "100", "vendor": "Vendor AB",
                       "spending_category": "Personnel", "fx_rate": "0.85", "hash": "doc-hash-1",
                       "notes": "Invoice #1", "date": "2025-04-03",
-                      "currency": { "id": "ISO_4217:EUR", "cust_code": "EUR" },
+                      "currency_rcy": { "id": "ISO_4217:EUR", "cust_code": "EUR" },
                       "allocation": [
                         { "project_id": "ProjectID1", "project_title": "ProjectTitle",
                           "sub_project": {

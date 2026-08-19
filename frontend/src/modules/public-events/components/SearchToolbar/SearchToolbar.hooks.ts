@@ -9,9 +9,9 @@ import { usePublicEventsContext } from 'modules/public-events/components/PublicE
 import { DEFAULT_SEARCH_QUICK_FILTERS_VALUES } from './SearchToolbar.consts'
 import { SearchQuickFiltersValues } from './SearchToolbar.types'
 
-export const useSearchQuickFiltersForm = () => {
+export const useSearchQuickFiltersForm = (lockedProjectId?: string | null) => {
   const quickFilters = useFormik({
-    initialValues: DEFAULT_SEARCH_QUICK_FILTERS_VALUES,
+    initialValues: { ...DEFAULT_SEARCH_QUICK_FILTERS_VALUES, project: lockedProjectId ? [lockedProjectId] : DEFAULT_SEARCH_QUICK_FILTERS_VALUES.project },
     onSubmit: noop,
     enableReinitialize: true,
     validateOnChange: true

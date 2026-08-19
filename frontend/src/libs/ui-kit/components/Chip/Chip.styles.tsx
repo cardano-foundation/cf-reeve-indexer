@@ -44,6 +44,15 @@ export const ChipStyled = styled(Chip)<ChipPropsMUI>`
       &.MuiChip-outlinedWarning {
         border: 1px solid ${paletteColors.orange[200]};
       }
+
+      &.MuiChip-colorInfo {
+        color: ${paletteColors.blue[800]};
+        background: ${paletteColors.blue[50]};
+      }
+
+      &.MuiChip-outlinedInfo {
+        border: 1px solid ${paletteColors.blue[300]};
+      }
     }
 
     & .MuiChip-label {

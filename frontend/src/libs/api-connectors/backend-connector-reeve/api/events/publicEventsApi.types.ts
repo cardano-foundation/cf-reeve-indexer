@@ -113,6 +113,14 @@ export interface MilestoneAuditView {
   spentAmount: number
 }
 
+export interface SubProjectAuditView {
+  subProjectId: string | null
+  subProjectTitle: string | null
+  allocatedAmount: number
+  spentAmount: number
+  milestones: MilestoneAuditView[]
+}
+
 export interface ProjectAuditView {
   projectKey: string | null
   projectId: string | null
@@ -122,6 +130,7 @@ export interface ProjectAuditView {
   spentAmount: number
   remaining: number
   milestones: MilestoneAuditView[]
+  subProjects: SubProjectAuditView[]
 }
 
 export interface AuditEventLineView {

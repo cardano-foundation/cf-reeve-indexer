@@ -17,6 +17,7 @@ import org.cardanofoundation.reeve.indexer.model.entity.EventMilestoneEntity;
 import org.cardanofoundation.reeve.indexer.model.view.audit.AuditEventLineView;
 import org.cardanofoundation.reeve.indexer.model.view.audit.AuditSummaryView;
 import org.cardanofoundation.reeve.indexer.model.view.audit.ProjectAuditView;
+import org.cardanofoundation.reeve.indexer.model.view.audit.SubProjectAuditView;
 
 class AuditSummaryAssemblerTest {
 
@@ -38,6 +39,27 @@ class AuditSummaryAssemblerTest {
             allocation.addMilestone(milestone);
         }
         return allocation;
+    }
+
+    private static EventAllocationEntity allocationWithSubProject(String projectId, String projectTitle,
+            String subProjectId, String subProjectTitle, EventMilestoneEntity... milestones) {
+        EventAllocationEntity allocation = EventAllocationEntity.builder()
+                .projectId(projectId)
+                .projectTitle(projectTitle)
+                .subProjectId(subProjectId)
+                .subProjectTitle(subProjectTitle)
+                .build();
+        for (EventMilestoneEntity milestone : milestones) {
+            allocation.addMilestone(milestone);
+        }
+        return allocation;
+    }
+
+    private static SubProjectAuditView subProject(ProjectAuditView project, String subProjectId) {
+        return project.getSubProjects().stream()
+                .filter(sp -> subProjectId.equals(sp.getSubProjectId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("sub-project not found: " + subProjectId));
     }
 
     private static EventEntity event(String type, String eventId, String fundingId, String currency,
@@ -245,6 +267,63 @@ class AuditSummaryAssemblerTest {
         assertEquals(3, summary.getEvents().size());
         assertTrue(summary.getEvents().stream().noneMatch(e -> "s2".equals(e.getEventId())));
         assertTrue(summary.getEvents().stream().noneMatch(e -> "f2".equals(e.getEventId())));
+    }
+
+    @Test
+    void attributesFundingAndSpendingToSubProjectMilestones() {
+        List<EventEntity> events = List.of(
+                // F1 funds PA directly (M1: 300) and via a sub-project SP1 (M2: 700).
+                event("FUNDING", "f1", "F1", "USD", LocalDate.parse("2026-04-01"), "1000",
+                        allocation("PA", "Proj A", milestone("M1", "Direct milestone", "300")),
+                        allocationWithSubProject("PA", "Proj A", "SP1", "Sub One",
+                                milestone("M2", "Sub milestone", "700"))),
+                // S1 spends against the sub-project's milestone.
+                event("SPENDING", "s1", "F1", "USD", LocalDate.parse("2026-04-10"), "250",
+                        allocationWithSubProject("PA", "Proj A", "SP1", "Sub One",
+                                milestone("M2", "Sub milestone", "250"))),
+                // S2 spends against the direct (non-sub-project) milestone.
+                event("SPENDING", "s2", "F1", "USD", LocalDate.parse("2026-04-11"), "100",
+                        allocation("PA", "Proj A", milestone("M1", "Direct milestone", "100"))));
+
+        AuditSummaryView summary = AuditSummaryAssembler.assemble("org", "Org Ltd", events, null, null, null);
+
+        ProjectAuditView pa = project(summary, "PA");
+        assertEquals(0, new BigDecimal("1000").compareTo(pa.getAllocatedAmount()));
+        assertEquals(0, new BigDecimal("350").compareTo(pa.getSpentAmount()));
+
+        // The direct milestone (no sub-project) stays on the project itself.
+        assertEquals(1, pa.getMilestones().size());
+        assertEquals("M1", pa.getMilestones().get(0).getMilestoneId());
+        assertEquals(0, new BigDecimal("300").compareTo(pa.getMilestones().get(0).getAllocatedAmount()));
+        assertEquals(0, new BigDecimal("100").compareTo(pa.getMilestones().get(0).getSpentAmount()));
+
+        // The sub-project aggregates its own allocated/spent totals and owns its milestone.
+        assertEquals(1, pa.getSubProjects().size());
+        SubProjectAuditView sp1 = subProject(pa, "SP1");
+        assertEquals("Sub One", sp1.getSubProjectTitle());
+        assertEquals(0, new BigDecimal("700").compareTo(sp1.getAllocatedAmount()));
+        assertEquals(0, new BigDecimal("250").compareTo(sp1.getSpentAmount()));
+        assertEquals(1, sp1.getMilestones().size());
+        assertEquals("M2", sp1.getMilestones().get(0).getMilestoneId());
+        assertEquals(0, new BigDecimal("700").compareTo(sp1.getMilestones().get(0).getAllocatedAmount()));
+        assertEquals(0, new BigDecimal("250").compareTo(sp1.getMilestones().get(0).getSpentAmount()));
+    }
+
+    @Test
+    void resolvesProjectAndOrganisationCurrencyByMostFrequentEventCurrency() {
+        List<EventEntity> events = List.of(
+                event("FUNDING", "f1", "F1", "EUR", LocalDate.parse("2026-05-01"), "1000",
+                        allocation("PA", "Proj A", milestone("M1", "MS1", "1000"))),
+                event("SPENDING", "s1", "F1", "EUR", LocalDate.parse("2026-05-02"), "200",
+                        allocation("PA", "Proj A", milestone("M1", "MS1", "200"))),
+                event("SPENDING", "s2", "F1", "ADA", LocalDate.parse("2026-05-03"), "100",
+                        allocation("PA", "Proj A", milestone("M1", "MS1", "100"))));
+
+        AuditSummaryView summary = AuditSummaryAssembler.assemble("org", "Org Ltd", events, null, null, null);
+
+        // Two EUR events outnumber the single ADA one, both at organisation and project level.
+        assertEquals("EUR", summary.getCurrency());
+        assertEquals("EUR", project(summary, "PA").getCurrency());
     }
 
     @Test

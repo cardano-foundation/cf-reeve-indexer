@@ -22,7 +22,7 @@ export const getAllEventProjectOptions = (projects: EventProjectEntity[] | null 
     ? [...projects]
         .filter((option) => Boolean(option) && Object.keys(option).length > 0)
         .sort((current, next) => current.projectId.localeCompare(next.projectId))
-        .map(({ projectId, projectTitle }) => ({ description: projectId, label: projectTitle || projectId, value: projectId }))
+        .map(({ projectId, projectTitle }) => ({ label: projectTitle || projectId, value: projectId }))
     : []
 }
 
@@ -42,9 +42,9 @@ export const useSearchFiltersOptions = () => {
   }
 }
 
-export const useSearchDrawerFiltersForm = () => {
+export const useSearchDrawerFiltersForm = (lockedProjectId?: string | null) => {
   const filters = useFormik({
-    initialValues: DEFAULT_SEARCH_FILTERS_VALUES,
+    initialValues: { ...DEFAULT_SEARCH_FILTERS_VALUES, project: lockedProjectId ? [lockedProjectId] : DEFAULT_SEARCH_FILTERS_VALUES.project },
     onSubmit: noop,
     enableReinitialize: true,
     validateOnChange: true
