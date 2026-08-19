@@ -310,6 +310,45 @@ class AuditSummaryAssemblerTest {
     }
 
     @Test
+    void spendingEventSplitAcrossMultipleProjects_attributesEachAllocationsOwnMilestoneSum() {
+        // Regression test: a single CSV/API call can now fund or spend across several projects in
+        // one event (LOB-2253). Previously attributeSpend() looked only at the *first* allocation and
+        // dumped the whole event total onto it, inflating that project's spend and leaving the others
+        // untouched — this reproduces exactly that shape (two allocations on one SPENDING event) and
+        // asserts each project gets only its own milestone-summed share.
+        List<EventEntity> events = List.of(
+                event("FUNDING", "f1", "F1", "USD", LocalDate.parse("2026-01-01"), "150",
+                        allocation("PA", "Proj A", milestone("M1", "MS1", "100")),
+                        allocation("PB", "Proj B", milestone("M2", "MS2", "50"))),
+                event("SPENDING", "s1", "F1", "USD", LocalDate.parse("2026-01-10"), "150",
+                        allocation("PA", "Proj A", milestone("M1", "MS1", "100")),
+                        allocation("PB", "Proj B", milestone("M2", "MS2", "50"))));
+
+        AuditSummaryView summary = AuditSummaryAssembler.assemble("org", "Org Ltd", events, null, null, null);
+
+        ProjectAuditView pa = project(summary, "PA");
+        ProjectAuditView pb = project(summary, "PB");
+        assertEquals(0, new BigDecimal("100").compareTo(pa.getSpentAmount()));
+        assertEquals(0, new BigDecimal("100").compareTo(pa.getAllocatedAmount()));
+        assertEquals(0, new BigDecimal("50").compareTo(pb.getSpentAmount()));
+        assertEquals(0, new BigDecimal("50").compareTo(pb.getAllocatedAmount()));
+
+        // Neither project is left overspent, and both ledger lines for s1 carry their own project
+        // and their own (not the whole event's) amount.
+        assertEquals(0, pa.getRemaining().compareTo(BigDecimal.ZERO));
+        assertEquals(0, pb.getRemaining().compareTo(BigDecimal.ZERO));
+
+        List<AuditEventLineView> s1Lines = summary.getEvents().stream().filter(e -> "s1".equals(e.getEventId())).toList();
+        assertEquals(2, s1Lines.size());
+        AuditEventLineView paLine = s1Lines.stream().filter(l -> "Proj A".equals(l.getProjectTitle())).findFirst()
+                .orElseThrow(() -> new AssertionError("no s1 line for Proj A"));
+        AuditEventLineView pbLine = s1Lines.stream().filter(l -> "Proj B".equals(l.getProjectTitle())).findFirst()
+                .orElseThrow(() -> new AssertionError("no s1 line for Proj B"));
+        assertEquals(0, new BigDecimal("100").compareTo(paLine.getAmount()));
+        assertEquals(0, new BigDecimal("50").compareTo(pbLine.getAmount()));
+    }
+
+    @Test
     void resolvesProjectAndOrganisationCurrencyByMostFrequentEventCurrency() {
         List<EventEntity> events = List.of(
                 event("FUNDING", "f1", "F1", "EUR", LocalDate.parse("2026-05-01"), "1000",

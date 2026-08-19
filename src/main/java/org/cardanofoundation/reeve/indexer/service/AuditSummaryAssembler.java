@@ -183,64 +183,83 @@ final class AuditSummaryAssembler {
     private static void attributeSpend(EventEntity s, Map<String, ProjectAgg> projects,
             Map<String, java.util.Set<String>> fundingProjects, List<AuditEventLineView> eventLines,
             java.util.Set<String> projectIds) {
-        BigDecimal amount = nz(s.getTotalAmount());
+        BigDecimal totalAmount = nz(s.getTotalAmount());
 
-        String resolvedProjectKey = null;
-        String resolvedProjectId = null;
-        String resolvedProjectTitle = null;
+        // Step 1: the spend's own allocations name the projects (and sub-projects/milestones) it was
+        // booked against. A spend can be split across several projects in a single event — each
+        // allocation contributes only its own milestone-summed share, mirroring indexFunding's
+        // per-allocation walk. One ledger line is emitted per allocation so "spending under project"
+        // totals reconcile per project too.
+        List<EventAllocationEntity> ownAllocations = selectedAllocations(s, projectIds);
+        if (!ownAllocations.isEmpty()) {
+            // A lone allocation with no milestone breakdown just names the project — the event's
+            // whole amount belongs to it (older/simpler payloads never itemised the spend). Once an
+            // event names more than one project, only its milestones can say how much went where.
+            boolean singleAllocation = ownAllocations.size() == 1;
+            for (EventAllocationEntity own : ownAllocations) {
+                String key = projectKey(own.getProjectId(), own.getProjectTitle());
+                ProjectAgg pa = projects.computeIfAbsent(key,
+                        k -> new ProjectAgg(k, own.getProjectId(), own.getProjectTitle()));
+                pa.applyTitle(own.getProjectTitle());
+                tallyCurrency(pa.currencyTally, s);
 
-        // Step 1: the spend's own allocation names the project (and optionally the milestone). With a
-        // project filter active, resolve to the first *selected* allocation so a spend split across
-        // projects is attributed to the one the auditor is looking at.
-        EventAllocationEntity own = firstAllocation(s, projectIds);
-        if (own != null) {
-            String key = projectKey(own.getProjectId(), own.getProjectTitle());
-            ProjectAgg pa = projects.computeIfAbsent(key,
-                    k -> new ProjectAgg(k, own.getProjectId(), own.getProjectTitle()));
-            pa.applyTitle(own.getProjectTitle());
-            pa.spent = pa.spent.add(amount);
-            tallyCurrency(pa.currencyTally, s);
-            resolvedProjectKey = pa.key;
-            resolvedProjectId = pa.projectId;
-            resolvedProjectTitle = pa.title;
-
-            EventMilestoneEntity ms = own.getMilestones().isEmpty() ? null : own.getMilestones().get(0);
-            if (ms != null) {
                 boolean hasSubProject = isPresent(own.getSubProjectId()) || isPresent(own.getSubProjectTitle());
-                MilestoneAgg ma;
-                if (hasSubProject) {
-                    SubProjectAgg sp = pa.subProject(own.getSubProjectId(), own.getSubProjectTitle());
-                    ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
-                    sp.spent = sp.spent.add(amount);
-                } else {
-                    ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
-                }
-                ma.spent = ma.spent.add(amount);
-            }
+                SubProjectAgg sp = hasSubProject ? pa.subProject(own.getSubProjectId(), own.getSubProjectTitle()) : null;
 
+                BigDecimal allocAmount = BigDecimal.ZERO;
+                for (EventMilestoneEntity ms : own.getMilestones()) {
+                    BigDecimal amt = nz(ms.getAllocatedAmount());
+                    allocAmount = allocAmount.add(amt);
+                    MilestoneAgg ma;
+                    if (sp != null) {
+                        ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                        sp.spent = sp.spent.add(amt);
+                    } else {
+                        ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                    }
+                    ma.spent = ma.spent.add(amt);
+                }
+                if (own.getMilestones().isEmpty() && singleAllocation) {
+                    allocAmount = totalAmount;
+                }
+                pa.spent = pa.spent.add(allocAmount);
+
+                eventLines.add(baseLine(s)
+                        .amount(allocAmount)
+                        .vendor(s.getVendor())
+                        .spendingCategory(s.getSpendingCategory())
+                        .projectKey(pa.key)
+                        .projectId(pa.projectId)
+                        .projectTitle(pa.title)
+                        .build());
+            }
         } else if (isPresent(s.getFundingId()) && singleFundingProject(fundingProjects, s.getFundingId()) != null) {
             // Step 2: fall back to the referenced funding when it maps to exactly one project.
             ProjectAgg pa = projects.get(singleFundingProject(fundingProjects, s.getFundingId()));
-            pa.spent = pa.spent.add(amount);
+            pa.spent = pa.spent.add(totalAmount);
             tallyCurrency(pa.currencyTally, s);
-            resolvedProjectKey = pa.key;
-            resolvedProjectId = pa.projectId;
-            resolvedProjectTitle = pa.title;
+
+            eventLines.add(baseLine(s)
+                    .amount(totalAmount)
+                    .vendor(s.getVendor())
+                    .spendingCategory(s.getSpendingCategory())
+                    .projectKey(pa.key)
+                    .projectId(pa.projectId)
+                    .projectTitle(pa.title)
+                    .build());
         } else {
             // Step 3: unattributed — still counted so per-project spend reconciles with totalSpent.
             ProjectAgg pa = projects.computeIfAbsent(UNATTRIBUTED_KEY, k -> ProjectAgg.unattributed());
-            pa.spent = pa.spent.add(amount);
+            pa.spent = pa.spent.add(totalAmount);
             tallyCurrency(pa.currencyTally, s);
-            resolvedProjectKey = pa.key;
-        }
 
-        eventLines.add(baseLine(s)
-                .vendor(s.getVendor())
-                .spendingCategory(s.getSpendingCategory())
-                .projectKey(resolvedProjectKey)
-                .projectId(resolvedProjectId)
-                .projectTitle(resolvedProjectTitle)
-                .build());
+            eventLines.add(baseLine(s)
+                    .amount(totalAmount)
+                    .vendor(s.getVendor())
+                    .spendingCategory(s.getSpendingCategory())
+                    .projectKey(pa.key)
+                    .build());
+        }
     }
 
     /** The single project key a funding round maps to, or null if it funds zero or many projects. */
@@ -300,20 +319,19 @@ final class AuditSummaryAssembler {
     }
 
     /**
-     * The allocation to attribute a spend to: the first one whose project is selected when a project
-     * filter is active, otherwise simply the first allocation. Returns null when there is none.
+     * All of an event's allocations whose project is selected when a project filter is active,
+     * otherwise every allocation. Empty when the event has none (or none are selected).
      */
-    private static EventAllocationEntity firstAllocation(EventEntity e, java.util.Set<String> projectIds) {
+    private static List<EventAllocationEntity> selectedAllocations(EventEntity e, java.util.Set<String> projectIds) {
         if (e.getAllocations() == null || e.getAllocations().isEmpty()) {
-            return null;
+            return List.of();
         }
         if (projectIds == null || projectIds.isEmpty()) {
-            return e.getAllocations().get(0);
+            return e.getAllocations();
         }
         return e.getAllocations().stream()
                 .filter(a -> isSelected(a, projectIds))
-                .findFirst()
-                .orElse(null);
+                .toList();
     }
 
     /** Whether an allocation's project is in the selected set (or no filter is active). */

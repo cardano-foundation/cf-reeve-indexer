@@ -2,6 +2,9 @@ services:
 
   api:
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,exec,nosuid,nodev,mode=1777
     build:
       context: .
     ports:
@@ -33,10 +36,13 @@ services:
 
   frontend:
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,mode=1777
     build:
       context: frontend
     ports:
-      - "3003:80"
+      - "3003:8080"
     environment:
       PORT: "3003"
       VITE_API_URL: ${API_URL:-http://localhost:9002}
