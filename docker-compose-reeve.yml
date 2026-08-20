@@ -5,6 +5,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp:rw,exec,nosuid,nodev,mode=1777
+    hostname: reeve-indexer-api
     build:
       context: .
     ports:
