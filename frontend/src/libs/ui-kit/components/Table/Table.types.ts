@@ -3,7 +3,7 @@
 import { TableProps as TablePropsMUI } from '@mui/material/Table'
 import { ReactNode } from 'react'
 
-export type GeneralCommonField = 'actions'
+export type GeneralCommonField = 'actions' | 'utilisation' | 'remaining'
 
 export type TransactionsCommonField = 'transactionsCount'
 
@@ -22,6 +22,9 @@ export interface SortInitialState<T extends TableRowModel = TableRowModel, K ext
 
 export interface InitialState<T extends TableRowModel = TableRowModel, K extends keyof T = keyof T> {
   sorting: SortInitialState<T, K>
+  columns?: {
+    columnVisibilityModel?: Record<string, boolean>
+  }
 }
 
 export interface TableRowInternalState {
@@ -36,6 +39,7 @@ export interface TableColDef<T extends TableRowModel = TableRowModel, K extends 
   headerAlign?: 'left' | 'right' | 'center'
   sortable?: boolean
   sticky?: boolean
+  hideable?: boolean
   width?: string | number
   renderCell?: (row: T, rowState: TableRowInternalState) => ReactNode
   valueGetter?: (value: T[K], row: T) => any
@@ -65,6 +69,8 @@ export interface TableProps<T extends TableRowModel = TableRowModel, K extends k
   hasFiltersSelected?: boolean
   hidePagination?: boolean
   isLoading: boolean
+  alwaysExpanded?: boolean
+  fillAvailableWidth?: boolean
 }
 
 export interface ToolbarProps {

@@ -53,6 +53,8 @@ public class FundingEvent {
     private String hash;
     private String notes;
     private LocalDate date;
+
+    @JsonProperty("currency_rcy")
     private Currency currency;
 
     @JsonProperty("allocation")

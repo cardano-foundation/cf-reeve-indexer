@@ -26,13 +26,14 @@ export const LayoutContentHeader = ({ children }: LayoutContentHeaderProps) => {
 
   const isActiveRouteOrDescendant = (route: string) => pathname === route || pathname.startsWith(route)
   const isResources = isActiveRouteOrDescendant(PATHS.PUBLIC_RESOURCES)
+  const isProjectsIndex = pathname === PATHS.PUBLIC_PROJECTS
   const { isMobile } = useMediaQueries()
 
   return (
     <LayoutContentHeaderStyled component="header">
       <Grid container direction={{ xs: 'column', sm: 'row' }} height="100%" wrap="nowrap" sx={{ flexGrow: 1 }}>
-        <Grid flexShrink={0}>{children}</Grid>
-        {!isResources && isMobile && (
+        <Grid flexShrink={0} sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, sm: 3 } }}>{children}</Grid>
+        {!isResources && !isProjectsIndex && isMobile && (
           <Grid size="grow">
             <OrganisationFormSidebar initialValues={initialValues} onSubmit={() => undefined} isSidebarOpen={isSidebarOpen} />
           </Grid>

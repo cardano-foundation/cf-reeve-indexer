@@ -5,10 +5,10 @@ import { useSearchFiltersOptions } from 'modules/public-events/components/Search
 import { usePublicEventsFilters } from 'modules/public-events/hooks/usePublicEventsFilters.ts'
 import { usePublicEventsQueries } from 'modules/public-events/hooks/usePublicEventsQueries.ts'
 
-export const usePublicEvents = () => {
+export const usePublicEvents = (lockedProjectId?: string | null) => {
   const drawer = useLayoutPublicContext()
 
-  const filters = usePublicEventsFilters()
+  const filters = usePublicEventsFilters(lockedProjectId)
 
   const pagination = usePagination()
 

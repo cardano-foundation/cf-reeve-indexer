@@ -44,7 +44,7 @@ export const CollapseNavItem = ({ icon: Icon, label, route, subRoutes, getCurren
             const isSelected = getCurrentPage(route)
 
             return (
-              <ListItemStyled key={route}>
+              <ListItemStyled key={label}>
                 <ListItemButtonStyled component={RouterLink} to={route} selected={isSelected}>
                   <ListItemTextStyled primary={label} primaryTypographyProps={{ fontWeight: isSelected ? 600 : 400 }} $isCurrentPage={isSelected} />
                 </ListItemButtonStyled>

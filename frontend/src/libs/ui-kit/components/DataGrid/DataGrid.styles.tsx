@@ -115,5 +115,9 @@ export const DataGridStyled = styled(DataGrid)`
     & .MuiDataGrid-columnSeparator {
       color: ${({ theme }) => theme.palette.divider};
     }
+
+    & .MuiDataGrid-columnHeader:not(:has(~ .MuiDataGrid-columnHeader)) .MuiDataGrid-columnSeparator {
+      display: none;
+    }
   }
 `

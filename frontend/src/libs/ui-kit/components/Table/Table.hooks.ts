@@ -151,3 +151,29 @@ export const useTableRowSelection = <T extends TableRowModel = TableRowModel>(st
 
   return { selectedRows, handleSelect, handleSelectAll, isChecked, isIndeterminate }
 }
+
+interface TableColumnVisibilityState<T extends TableRowModel = TableRowModel, K extends keyof T = keyof T> {
+  columns: TableColumnsDef<T>
+  initialState?: InitialState<T, K>
+}
+
+export const useTableColumnVisibility = <T extends TableRowModel = TableRowModel, K extends keyof T = keyof T>(state: TableColumnVisibilityState<T, K>) => {
+  const { columns, initialState } = state
+
+  const initialHiddenFields = Object.entries(initialState?.columns?.columnVisibilityModel ?? {})
+    .filter(([, visible]) => visible === false)
+    .map(([field]) => field)
+
+  const [hiddenFields, setHiddenFields] = useState<string[]>(initialHiddenFields)
+
+  const hideableColumns = columns.filter((column) => column.hideable)
+  const hasHideableColumns = hideableColumns.length > 0
+
+  const visibleColumns = columns.filter((column) => !hiddenFields.includes(column.field.toString()))
+
+  const toggleColumn = (field: string) => {
+    setHiddenFields((prev) => (prev.includes(field) ? prev.filter((hiddenField) => hiddenField !== field) : [...prev, field]))
+  }
+
+  return { visibleColumns, hideableColumns, hasHideableColumns, hiddenFields, toggleColumn }
+}

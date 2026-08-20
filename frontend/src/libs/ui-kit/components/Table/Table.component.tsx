@@ -5,8 +5,8 @@ import Paper from '@mui/material/Paper'
 import TableBody from '@mui/material/TableBody'
 import { TableContainerProps as TableContainerMUIProps } from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
-import { ArrowDown2, ArrowUp2, Box2, FilterRemove } from 'iconsax-react'
-import { Fragment, ReactNode } from 'react'
+import { ArrowDown2, ArrowUp2, Box2, FilterRemove, GridEdit } from 'iconsax-react'
+import { Fragment, ReactNode, useState } from 'react'
 
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
 import { ButtonIcon } from 'libs/ui-kit/components/ButtonIcon/ButtonIcon.component.tsx'
@@ -14,11 +14,13 @@ import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx
 import { Checkbox } from 'libs/ui-kit/components/Checkbox/Checkbox.component.tsx'
 import { EmptyStateTable } from 'libs/ui-kit/components/EmptyStateTable/EmptyStateTable.component.tsx'
 import { LoaderCentered } from 'libs/ui-kit/components/LoaderCentered/LoaderCentered.component.tsx'
-import { useTablePagination, useTableRowCollapsable, useTableRowSelection, useTableSorting } from 'libs/ui-kit/components/Table/Table.hooks.ts'
+import { useTablePagination, useTableRowCollapsable, useTableRowSelection, useTableSorting, useTableColumnVisibility } from 'libs/ui-kit/components/Table/Table.hooks.ts'
 import {
   ButtonSortIconStyled,
   IconArrowDownStyled,
   IconArrowUpStyled,
+  MenuItemStyled,
+  MenuStyled,
   TableBodyCellCollapsableStyled,
   TableBodyCellCollapseStyled,
   TableBodyCellEmptyStyled,
@@ -49,6 +51,7 @@ export const Table = <T extends TableRowModel = TableRowModel>({
   sortingMode = 'client',
   totalRows,
   collapsableRow,
+  alwaysExpanded,
   getRowId,
   onPagination,
   onSelectionChange,
@@ -57,6 +60,7 @@ export const Table = <T extends TableRowModel = TableRowModel>({
   hasFiltersSelected,
   hidePagination = false,
   isLoading,
+  fillAvailableWidth = false,
   ...props
 }: TableProps<T>) => {
   const { t } = useTranslations()
@@ -71,7 +75,25 @@ export const Table = <T extends TableRowModel = TableRowModel>({
   )
   const { expandedRows, handleCollapse, handleCollapseAll, hasAnyCollapsableRows, isAllExpanded } = useTableRowCollapsable({ paginatedRows }, { collapsableRow, getRowId })
 
-  const colspan = columns.length + (checkboxSelection ? 1 : 0) + 1
+  const { visibleColumns, hideableColumns, hasHideableColumns, hiddenFields, toggleColumn } = useTableColumnVisibility({ columns, initialState })
+
+  const parseWeight = (width?: string | number) => (typeof width === 'number' ? width : parseFloat(width || '0') || 0)
+
+  const totalWeight = visibleColumns.reduce((sum, column) => sum + parseWeight(column.width), 0)
+
+  const reservedWidth = (checkboxSelection ? 72 : 0) + (collapsableRow && !alwaysExpanded ? 48 : 0) + (hasHideableColumns ? 64 : 0)
+
+  const getColumnWidth = (column: (typeof visibleColumns)[number]) => {
+    if (!fillAvailableWidth) return undefined
+
+    const weight = parseWeight(column.width)
+
+    return weight && totalWeight ? `calc((100% - ${reservedWidth}px) * ${weight / totalWeight})` : column.width
+  }
+
+  const [columnMenuAnchor, setColumnMenuAnchor] = useState<HTMLElement | null>(null)
+
+  const colspan = visibleColumns.length + (checkboxSelection ? 1 : 0) + (hasHideableColumns ? 1 : 0) + 1
 
   const hasRows = paginatedRows && paginatedRows.length > 0
 
@@ -86,10 +108,10 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                   <Checkbox indeterminate={isIndeterminate} checked={isChecked} onChange={handleSelectAll} disabled={!hasRows} />
                 </TableHeadCellSelectionStyled>
               )}
-              {collapsableRow && (
-                <TableHeadCellCollapseStyled align="center" width="72px">
+              {collapsableRow && !alwaysExpanded && (
+                <TableHeadCellCollapseStyled align="center" width={fillAvailableWidth ? '48px' : '72px'}>
                   <ButtonIcon
-                    aria-label={isAllExpanded ? 'collapse all rows' : 'expand all rows'}
+                    aria-label={isAllExpanded ? t({ id: 'collapseAllRows' }) : t({ id: 'expandAllRows' })}
                     size="small"
                     onClick={handleCollapseAll}
                     disabled={!hasAnyCollapsableRows || !hasRows}
@@ -98,8 +120,14 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                   </ButtonIcon>
                 </TableHeadCellCollapseStyled>
               )}
-              {columns.map((column) => (
-                <TableHeadCellStyled key={column.field.toString()} align={column.headerAlign} width={column.width} $isSticky={column.sticky}>
+              {visibleColumns.map((column) => (
+                <TableHeadCellStyled
+                  key={column.field.toString()}
+                  align={column.headerAlign}
+                  width={fillAvailableWidth ? undefined : column.width}
+                  sx={fillAvailableWidth ? { width: getColumnWidth(column) } : undefined}
+                  $isSticky={column.sticky}
+                >
                   {column.sortable ? (
                     <TableSortLabelStyled
                       active={orderBy === column.field}
@@ -118,6 +146,21 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                   )}
                 </TableHeadCellStyled>
               ))}
+              {hasHideableColumns && (
+                <TableHeadCellStyled align="center" width="64px">
+                  <ButtonIcon aria-label={t({ id: 'manageColumns' })} size="small" onClick={(event) => setColumnMenuAnchor(event.currentTarget)}>
+                    <GridEdit size={20} />
+                  </ButtonIcon>
+                  <MenuStyled anchorEl={columnMenuAnchor} open={Boolean(columnMenuAnchor)} onClose={() => setColumnMenuAnchor(null)}>
+                    {hideableColumns.map((column) => (
+                      <MenuItemStyled key={column.field.toString()} disableRipple onClick={() => toggleColumn(column.field.toString())}>
+                        <Checkbox checked={!hiddenFields.includes(column.field.toString())} />
+                        {column.headerName}
+                      </MenuItemStyled>
+                    ))}
+                  </MenuStyled>
+                </TableHeadCellStyled>
+              )}
             </TableRowHeadStyled>
           </TableHead>
           <TableBody>
@@ -136,7 +179,7 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                 const hasCollapsableRow = Boolean(collapsableRow)
                 const hasCollapsableRowRender = Boolean(collapsableRow && collapsableRow(row))
                 const isRowChecked = selectedRows.includes(rowId)
-                const isRowExpanded = expandedRows.includes(rowId) && hasCollapsableRowRender
+                const isRowExpanded = (alwaysExpanded || expandedRows.includes(rowId)) && hasCollapsableRowRender
 
                 return (
                   <Fragment key={rowId}>
@@ -146,17 +189,24 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                           <Checkbox checked={isRowChecked} onChange={() => handleSelect(rowId)} />
                         </TableBodyCellSelectionStyled>
                       )}
-                      {hasCollapsableRow && (
-                        <TableBodyCellCollapseStyled align="center" width="72px" $isExpanded={isRowExpanded}>
+                      {hasCollapsableRow && !alwaysExpanded && (
+                        <TableBodyCellCollapseStyled align="center" width={fillAvailableWidth ? '48px' : '72px'} $isExpanded={isRowExpanded}>
                           {hasCollapsableRowRender && (
-                            <ButtonIcon aria-label={isRowExpanded ? 'collapse row' : 'expand row'} size="small" onClick={() => handleCollapse(rowId)}>
+                            <ButtonIcon aria-label={isRowExpanded ? t({ id: 'collapseRow' }) : t({ id: 'expandRow' })} size="small" onClick={() => handleCollapse(rowId)}>
                               {isRowExpanded ? <ArrowUp2 size={20} /> : <ArrowDown2 size={20} />}
                             </ButtonIcon>
                           )}
                         </TableBodyCellCollapseStyled>
                       )}
-                      {columns.map((column) => (
-                        <TableBodyCellStyled key={column.field.toString()} align={column.align} $isExpanded={isRowExpanded} $isSticky={column.sticky}>
+                      {visibleColumns.map((column) => (
+                        <TableBodyCellStyled
+                          key={column.field.toString()}
+                          align={column.align}
+                          $isExpanded={isRowExpanded}
+                          $isSticky={column.sticky}
+                          width={fillAvailableWidth ? undefined : column.width}
+                          sx={fillAvailableWidth ? { width: getColumnWidth(column) } : undefined}
+                        >
                           {column.renderCell ? (
                             column.renderCell(row, { isRowChecked, isRowExpanded })
                           ) : column.valueGetter ? (
@@ -171,6 +221,7 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                           )}
                         </TableBodyCellStyled>
                       ))}
+                      {hasHideableColumns && <TableBodyCellStyled align="center" width="64px" $isExpanded={isRowExpanded} />}
                     </TableRowBodyStyled>
                     {hasCollapsableRowRender && (
                       <TableRowBodyStyled $hasCollapsableRows={hasCollapsableRowRender}>
