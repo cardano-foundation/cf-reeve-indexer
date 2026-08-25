@@ -9,7 +9,6 @@ import { formatNumber } from 'libs/utils/format.ts'
 
 interface EventAllocationBreakdownProps {
   allocations: EventAllocationView[]
-  fxRate?: string | null
 }
 
 interface AllocationRow {
@@ -18,16 +17,12 @@ interface AllocationRow {
   subProjectTitle: string | null
   milestoneTitle: string
   amountRcy: number | null
-  amountFcy: number | null
 }
 
 const renderAmountCell = ({ value }: { value?: number | null }) => <TruncatedCellText value={value || value === 0 ? formatNumber(value) : '-'} />
 
-export const EventAllocationBreakdown = ({ allocations, fxRate }: EventAllocationBreakdownProps) => {
+export const EventAllocationBreakdown = ({ allocations }: EventAllocationBreakdownProps) => {
   const { t } = useTranslations()
-
-  const fxRateValue = fxRate ? parseFloat(fxRate) : null
-  const hasFxRate = Boolean(fxRateValue)
 
   const rows: AllocationRow[] = allocations.flatMap((allocation) =>
     allocation.milestones.map((milestone) => ({
@@ -35,8 +30,7 @@ export const EventAllocationBreakdown = ({ allocations, fxRate }: EventAllocatio
       projectTitle: allocation.projectTitle,
       subProjectTitle: allocation.subProjectTitle,
       milestoneTitle: milestone.milestoneTitle,
-      amountRcy: milestone.allocatedAmount,
-      amountFcy: hasFxRate && milestone.allocatedAmount !== null ? milestone.allocatedAmount / fxRateValue! : null
+      amountRcy: milestone.allocatedAmount
     }))
   )
 
@@ -68,44 +62,17 @@ export const EventAllocationBreakdown = ({ allocations, fxRate }: EventAllocatio
       minWidth: 192,
       renderCell: ({ value }) => <TruncatedCellText value={value} />
     },
-    hasFxRate
-      ? {
-          field: 'amountRcy',
-          headerName: t({ id: 'amountRcy' }),
-          align: 'right',
-          headerAlign: 'right',
-          hideable: false,
-          sortable: false,
-          flex: 1,
-          minWidth: 160,
-          renderCell: renderAmountCell
-        }
-      : {
-          field: 'amountRcy',
-          headerName: t({ id: 'allocatedAmount' }),
-          align: 'right',
-          headerAlign: 'right',
-          hideable: false,
-          sortable: false,
-          flex: 1,
-          minWidth: 192,
-          renderCell: renderAmountCell
-        },
-    ...(hasFxRate
-      ? [
-          {
-            field: 'amountFcy',
-            headerName: t({ id: 'amountFcy' }),
-            align: 'right' as const,
-            headerAlign: 'right' as const,
-            hideable: false,
-            sortable: false,
-            flex: 1,
-            minWidth: 160,
-            renderCell: renderAmountCell
-          }
-        ]
-      : [])
+    {
+      field: 'amountRcy',
+      headerName: t({ id: 'amountRcy' }),
+      align: 'right',
+      headerAlign: 'right',
+      hideable: false,
+      sortable: false,
+      flex: 1,
+      minWidth: 192,
+      renderCell: renderAmountCell
+    }
   ]
 
   return (

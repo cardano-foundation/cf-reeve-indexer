@@ -85,8 +85,18 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
       }
     },
     {
+      field: 'amountFcy',
+      headerName: t({ id: 'amountFcy' }),
+      align: 'right',
+      headerAlign: 'right',
+      hideable: true,
+      sortable: false,
+      width: 150,
+      renderCell: (row) => <TruncatedCellText value={row.amountFcy || row.amountFcy === 0 ? formatNumber(row.amountFcy) : '-'} />
+    },
+    {
       field: 'totalAmount',
-      headerName: t({ id: 'totalAmount' }),
+      headerName: t({ id: 'amountRcy' }),
       align: 'right',
       headerAlign: 'right',
       hideable: false,
@@ -207,7 +217,7 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
         columns={columns}
         rows={rows}
         getRowId={(row) => row.id.toString()}
-        collapsableRow={(row) => (row.allocations.length > 0 ? <EventAllocationBreakdown allocations={row.allocations} fxRate={row.fxRate} /> : null)}
+        collapsableRow={(row) => (row.allocations.length > 0 ? <EventAllocationBreakdown allocations={row.allocations} /> : null)}
         paginationMode="server"
         sortingMode="server"
         totalRows={rowCount}
