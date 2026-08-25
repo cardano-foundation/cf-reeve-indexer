@@ -82,7 +82,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
                     collapsableRow={(row) => (row.milestones.length > 0 ? <ProjectBreakdownMilestones milestones={row.milestones} /> : null)}
                     isLoading={false}
                     hidePagination
-                    sx={{ minWidth: '50rem' }}
+                    sx={{ minWidth: '70rem' }}
                 />
             </TableContainer>
         </Box>

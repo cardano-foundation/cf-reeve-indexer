@@ -89,7 +89,7 @@ export const ProjectBreakdownProject = ({ project }: ProjectBreakdownProjectProp
                 alwaysExpanded
                 isLoading={false}
                 hidePagination
-                sx={{ minWidth: '50rem' }}
+                sx={{ minWidth: '70rem' }}
             />
         </TableContainer>
     )
