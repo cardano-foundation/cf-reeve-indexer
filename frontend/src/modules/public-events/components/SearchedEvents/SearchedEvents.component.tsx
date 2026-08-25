@@ -68,7 +68,7 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
       headerName: t({ id: 'auditProjectTitle' }),
       hideable: false,
       sortable: false,
-      width: 280,
+      width: 230,
       renderCell: (row) => {
         const [firstProjectTitle, ...remainingProjectTitles] = row.projectTitles
 
@@ -125,7 +125,7 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
       headerName: t({ id: 'blockchainHash' }),
       hideable: false,
       sortable: true,
-      width: 240,
+      width: 130,
       renderCell: (row) =>
         row.txHash ? (
           <Box alignItems="center" display="flex" gap={1}>

@@ -147,7 +147,7 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                 </TableHeadCellStyled>
               ))}
               {hasHideableColumns && (
-                <TableHeadCellStyled align="center" width="64px">
+                <TableHeadCellStyled align="center" width="64px" $isSticky>
                   <ButtonIcon aria-label={t({ id: 'manageColumns' })} size="small" onClick={(event) => setColumnMenuAnchor(event.currentTarget)}>
                     <GridEdit size={20} />
                   </ButtonIcon>
@@ -221,7 +221,7 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                           )}
                         </TableBodyCellStyled>
                       ))}
-                      {hasHideableColumns && <TableBodyCellStyled align="center" width="64px" $isExpanded={isRowExpanded} />}
+                      {hasHideableColumns && <TableBodyCellStyled align="center" width="64px" $isExpanded={isRowExpanded} $isSticky />}
                     </TableRowBodyStyled>
                     {hasCollapsableRowRender && (
                       <TableRowBodyStyled $hasCollapsableRows={hasCollapsableRowRender}>
