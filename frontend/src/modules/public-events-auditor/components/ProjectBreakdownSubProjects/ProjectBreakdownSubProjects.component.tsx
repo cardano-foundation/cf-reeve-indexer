@@ -9,6 +9,8 @@ import { TableContainer } from 'libs/ui-kit/components/Table/Table.component.tsx
 import { createColumns } from 'libs/ui-kit/components/Table/Table.utils.ts'
 import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
 import { ProjectBreakdownMilestones } from 'modules/public-events-auditor/components/ProjectBreakdownMilestones/ProjectBreakdownMilestones.component.tsx'
+import { AllocatedCell } from 'modules/public-events-auditor/components/AllocatedCell/AllocatedCell.component.tsx'
+import { RemainingCell } from 'modules/public-events-auditor/components/RemainingCell/RemainingCell.component.tsx'
 import { UtilisationBar } from '../UtilisationBar/UtilisationBar.component'
 
 interface ProjectBreakdownSubProjectsProps {
@@ -36,7 +38,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             headerAlign: 'right',
             sortable: true,
             width: '18%',
-            renderCell: (row) => <TruncatedCellText value={formatAuditAmount(row.allocatedAmount)} />
+            renderCell: (row) => <AllocatedCell allocated={row.allocatedAmount} refunded={row.refundedAmount} />
         },
         {
             field: 'spentAmount',
@@ -54,7 +56,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             headerAlign: 'right',
             sortable: false,
             width: '18%',
-            renderCell: (row) => <TruncatedCellText value={formatAuditAmount(row.allocatedAmount - row.spentAmount)} />
+            renderCell: (row) => <RemainingCell allocated={row.allocatedAmount} spent={row.spentAmount} />
         },
         {
             field: 'utilisation',

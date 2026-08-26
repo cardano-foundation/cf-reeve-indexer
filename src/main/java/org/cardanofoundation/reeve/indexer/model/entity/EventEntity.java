@@ -100,6 +100,12 @@ public class EventEntity {
     @Column(name = "currency_cust_code")
     private String currencyCustCode;
 
+    @Column(name = "currency_fcy_id")
+    private String currencyFcyId;
+
+    @Column(name = "currency_fcy_cust_code")
+    private String currencyFcyCustCode;
+
     @Column(name = "date")
     private LocalDate date;
 

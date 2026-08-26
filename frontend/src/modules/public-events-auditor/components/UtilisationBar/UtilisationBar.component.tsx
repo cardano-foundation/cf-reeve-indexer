@@ -12,6 +12,7 @@ interface UtilisationBarProps {
 
 export const UtilisationBar = ({ allocated, spent }: UtilisationBarProps) => {
   const theme = useTheme()
+  const hasNoAllocation = allocated <= 0 && spent > 0
   const ratio = allocated > 0 ? spent / allocated : spent > 0 ? 1 : 0
   const overspent = spent > allocated
   const barColor = overspent ? colors.red[500] : ratio >= 1 ? colors.green[600] : colors.blue[600]
@@ -29,7 +30,7 @@ export const UtilisationBar = ({ allocated, spent }: UtilisationBarProps) => {
         }}
       />
       <Typography color={overspent ? colors.red[500] : theme.palette.text.secondary} variant="caption">
-        {`${Math.round(ratio * 100)}%`}
+        {hasNoAllocation ? '-' : `${Math.round(ratio * 100)}%`}
       </Typography>
     </Box>
   )

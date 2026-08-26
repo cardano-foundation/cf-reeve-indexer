@@ -57,6 +57,9 @@ public class FundingEvent {
     @JsonProperty("currency_rcy")
     private Currency currency;
 
+    @JsonProperty("currency_fcy")
+    private Currency currencyFcy;
+
     @JsonProperty("allocation")
     private List<ProjectAllocation> allocations;
 

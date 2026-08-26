@@ -31,6 +31,8 @@ export interface EventView {
   notes: string | null
   currencyId: string | null
   currencyCustCode: string | null
+  currencyFcyId: string | null
+  currencyFcyCustCode: string | null
   date: string | null
   version: string | null
   ipfsCid: string | null
@@ -110,6 +112,7 @@ export interface MilestoneAuditView {
   milestoneId: string | null
   milestoneTitle: string | null
   allocatedAmount: number
+  refundedAmount: number
   spentAmount: number
 }
 
@@ -117,6 +120,7 @@ export interface SubProjectAuditView {
   subProjectId: string | null
   subProjectTitle: string | null
   allocatedAmount: number
+  refundedAmount: number
   spentAmount: number
   milestones: MilestoneAuditView[]
 }
@@ -127,6 +131,7 @@ export interface ProjectAuditView {
   projectTitle: string | null
   currency: string | null
   allocatedAmount: number
+  refundedAmount: number
   spentAmount: number
   remaining: number
   milestones: MilestoneAuditView[]

@@ -142,6 +142,14 @@ public class FundingEventProcessor implements ReeveTypeProcessor {
             currencyRepository.saveIfNotExists(organisationId, currencyId, custCode);
         }
 
+        String currencyFcyId = Optional.ofNullable(event.getCurrencyFcy())
+                .map(c -> c.getId()).orElse(null);
+        String custCodeFcy = Optional.ofNullable(event.getCurrencyFcy())
+                .map(c -> c.getCustCode()).orElse(null);
+        if (currencyFcyId != null) {
+            currencyRepository.saveIfNotExists(organisationId, currencyFcyId, custCodeFcy);
+        }
+
         EventEntity entity = EventEntity.builder()
                 .txHash(metadata.getTxHash())
                 .organisationId(organisationId)
@@ -160,6 +168,8 @@ public class FundingEventProcessor implements ReeveTypeProcessor {
                 .notes(event.getNotes())
                 .currencyId(currencyId)
                 .currencyCustCode(custCode)
+                .currencyFcyId(currencyFcyId)
+                .currencyFcyCustCode(custCodeFcy)
                 .date(event.getResolvedDate())
                 .version(version)
                 .creationSlot(creationSlot)

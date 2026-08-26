@@ -51,7 +51,7 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
 
   const rows: EventRow[] = (data?.events ?? []).map((event) => ({
     ...event,
-    projectTitles: event.allocations.map((allocation) => allocation.projectTitle || allocation.projectId)
+    projectTitles: Array.from(new Set(event.allocations.map((allocation) => allocation.projectTitle || allocation.projectId)))
   }))
 
   const columns = createColumns<EventRow>()([
@@ -83,16 +83,6 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
           </Box>
         )
       }
-    },
-    {
-      field: 'amountFcy',
-      headerName: t({ id: 'amountFcy' }),
-      align: 'right',
-      headerAlign: 'right',
-      hideable: true,
-      sortable: false,
-      width: 150,
-      renderCell: (row) => <TruncatedCellText value={row.amountFcy || row.amountFcy === 0 ? formatNumber(row.amountFcy) : '-'} />
     },
     {
       field: 'totalAmount',
@@ -149,6 +139,22 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
       renderCell: (row) => <TruncatedCellText value={row.fundingEntity ?? '-'} />
     },
     {
+      field: 'fundingId',
+      headerName: t({ id: 'fundingId' }),
+      hideable: true,
+      sortable: false,
+      width: 160,
+      renderCell: (row) => <TruncatedCellText value={row.fundingId ?? '-'} />
+    },
+    {
+      field: 'fundingTx',
+      headerName: t({ id: 'fundingTransaction' }),
+      hideable: true,
+      sortable: false,
+      width: 200,
+      renderCell: (row) => <TruncatedCellText value={row.fundingTx ?? '-'} />
+    },
+    {
       field: 'spendingCategory',
       headerName: t({ id: 'spendingCategory' }),
       hideable: true,
@@ -163,6 +169,24 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
       sortable: false,
       width: 160,
       renderCell: (row) => <TruncatedCellText value={row.vendor ?? '-'} />
+    },
+    {
+      field: 'amountFcy',
+      headerName: t({ id: 'amountFcy' }),
+      align: 'right',
+      headerAlign: 'right',
+      hideable: true,
+      sortable: false,
+      width: 150,
+      renderCell: (row) => <TruncatedCellText value={row.amountFcy || row.amountFcy === 0 ? formatNumber(row.amountFcy) : '-'} />
+    },
+    {
+      field: 'currencyFcyCustCode',
+      headerName: t({ id: 'foreignCurrency' }),
+      hideable: true,
+      sortable: false,
+      width: 120,
+      renderCell: (row) => <TruncatedCellText value={row.currencyFcyCustCode ?? '-'} />
     },
     {
       field: 'fxRate',
@@ -201,7 +225,11 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
           columns: {
             columnVisibilityModel: {
               fundingEntity: false,
+              fundingId: false,
+              fundingTx: false,
               spendingCategory: false,
+              amountFcy: false,
+              currencyFcyCustCode: false,
               vendor: false,
               fxRate: false,
               hash: false,
