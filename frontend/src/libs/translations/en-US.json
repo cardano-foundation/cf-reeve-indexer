@@ -302,7 +302,7 @@
   "auditFundingEventsCount": "{count, plural, one {# funding event} other {# funding events}}",
   "auditSpendingEventsCount": "{count, plural, one {# spending event} other {# spending events}}",
   "auditRefundEventsCount": "{count, plural, one {# refund} other {# refunds}}",
-  "auditAllocated": "Funded Amount",
+  "auditAllocated": "Funding",
   "auditSpent": "Spent Amount",
   "auditAmount": "Amount",
   "auditUtilisation": "Utilisation",
