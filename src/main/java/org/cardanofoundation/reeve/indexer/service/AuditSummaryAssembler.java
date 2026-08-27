@@ -2,6 +2,7 @@ package org.cardanofoundation.reeve.indexer.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -53,12 +54,14 @@ final class AuditSummaryAssembler {
         int refundCount = 0;
         LocalDate firstDate = null;
         LocalDate lastDate = null;
+        LocalDate lastPublishedDate = null;
 
         Map<String, Integer> currencyTally = new HashMap<>();
         Map<String, ProjectAgg> projects = new LinkedHashMap<>();
         // fundingId -> distinct project keys declared by FUNDING events for that funding round.
         Map<String, java.util.Set<String>> fundingProjects = new HashMap<>();
         List<EventEntity> spendingEvents = new ArrayList<>();
+        List<EventEntity> refundEvents = new ArrayList<>();
         List<AuditEventLineView> eventLines = new ArrayList<>();
 
         // Pass 1: totals, funding allocations and the fundingId -> project index.
@@ -71,6 +74,10 @@ final class AuditSummaryAssembler {
             if (e.getDate() != null) {
                 firstDate = (firstDate == null || e.getDate().isBefore(firstDate)) ? e.getDate() : firstDate;
                 lastDate = (lastDate == null || e.getDate().isAfter(lastDate)) ? e.getDate() : lastDate;
+            }
+            LocalDate publishedDate = parsePublishedDate(e.getEventTimestamp());
+            if (publishedDate != null) {
+                lastPublishedDate = (lastPublishedDate == null || publishedDate.isAfter(lastPublishedDate)) ? publishedDate : lastPublishedDate;
             }
             BigDecimal amount = nz(e.getTotalAmount());
             switch (type) {
@@ -88,15 +95,18 @@ final class AuditSummaryAssembler {
                 case REFUND -> {
                     refundCount++;
                     totalRefunded = totalRefunded.add(amount);
-                    eventLines.add(baseLine(e).build());
+                    refundEvents.add(e);
                 }
             }
         }
 
-        // Pass 2: attribute spend now that every funding round's projects are known. Each spend
+        // Pass 2: attribute spend and refunds now that every funding round's projects are known. Each
         // contributes its (attributed) ledger row to eventLines.
         for (EventEntity s : spendingEvents) {
             attributeSpend(s, projects, fundingProjects, eventLines, projectIds);
+        }
+        for (EventEntity r : refundEvents) {
+            attributeRefund(r, projects, fundingProjects, eventLines, projectIds);
         }
 
         eventLines.sort(Comparator.comparing(AuditEventLineView::getDate,
@@ -123,7 +133,7 @@ final class AuditSummaryAssembler {
                 .spendingCount(spendingCount)
                 .refundCount(refundCount)
                 .firstEventDate(firstDate)
-                .lastEventDate(lastDate)
+                .lastEventDate(lastPublishedDate)
                 .projects(projectViews)
                 .events(eventLines)
                 .build();
@@ -262,6 +272,76 @@ final class AuditSummaryAssembler {
         }
     }
 
+    private static void attributeRefund(EventEntity r, Map<String, ProjectAgg> projects,
+            Map<String, java.util.Set<String>> fundingProjects, List<AuditEventLineView> eventLines,
+            java.util.Set<String> projectIds) {
+        BigDecimal totalAmount = nz(r.getTotalAmount());
+
+        // Step 1: the refund's own allocations name the projects (and sub-projects/milestones) it was
+        // booked against, same per-allocation walk as attributeSpend.
+        List<EventAllocationEntity> ownAllocations = selectedAllocations(r, projectIds);
+        if (!ownAllocations.isEmpty()) {
+            boolean singleAllocation = ownAllocations.size() == 1;
+            for (EventAllocationEntity own : ownAllocations) {
+                String key = projectKey(own.getProjectId(), own.getProjectTitle());
+                ProjectAgg pa = projects.computeIfAbsent(key,
+                        k -> new ProjectAgg(k, own.getProjectId(), own.getProjectTitle()));
+                pa.applyTitle(own.getProjectTitle());
+                tallyCurrency(pa.currencyTally, r);
+
+                boolean hasSubProject = isPresent(own.getSubProjectId()) || isPresent(own.getSubProjectTitle());
+                SubProjectAgg sp = hasSubProject ? pa.subProject(own.getSubProjectId(), own.getSubProjectTitle()) : null;
+
+                BigDecimal allocAmount = BigDecimal.ZERO;
+                for (EventMilestoneEntity ms : own.getMilestones()) {
+                    BigDecimal amt = nz(ms.getAllocatedAmount());
+                    allocAmount = allocAmount.add(amt);
+                    MilestoneAgg ma;
+                    if (sp != null) {
+                        ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                        sp.refunded = sp.refunded.add(amt);
+                    } else {
+                        ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                    }
+                    ma.refunded = ma.refunded.add(amt);
+                }
+                if (own.getMilestones().isEmpty() && singleAllocation) {
+                    allocAmount = totalAmount;
+                }
+                pa.refunded = pa.refunded.add(allocAmount);
+
+                eventLines.add(baseLine(r)
+                        .amount(allocAmount)
+                        .projectKey(pa.key)
+                        .projectId(pa.projectId)
+                        .projectTitle(pa.title)
+                        .build());
+            }
+        } else if (isPresent(r.getFundingId()) && singleFundingProject(fundingProjects, r.getFundingId()) != null) {
+            // Step 2: fall back to the referenced funding when it maps to exactly one project.
+            ProjectAgg pa = projects.get(singleFundingProject(fundingProjects, r.getFundingId()));
+            pa.refunded = pa.refunded.add(totalAmount);
+            tallyCurrency(pa.currencyTally, r);
+
+            eventLines.add(baseLine(r)
+                    .amount(totalAmount)
+                    .projectKey(pa.key)
+                    .projectId(pa.projectId)
+                    .projectTitle(pa.title)
+                    .build());
+        } else {
+            // Step 3: unattributed, still counted so per-project refunds reconcile with totalRefunded.
+            ProjectAgg pa = projects.computeIfAbsent(UNATTRIBUTED_KEY, k -> ProjectAgg.unattributed());
+            pa.refunded = pa.refunded.add(totalAmount);
+            tallyCurrency(pa.currencyTally, r);
+
+            eventLines.add(baseLine(r)
+                    .amount(totalAmount)
+                    .projectKey(pa.key)
+                    .build());
+        }
+    }
+
     /** The single project key a funding round maps to, or null if it funds zero or many projects. */
     private static String singleFundingProject(Map<String, java.util.Set<String>> fundingProjects,
             String fundingId) {
@@ -271,22 +351,28 @@ final class AuditSummaryAssembler {
 
     private static ProjectAuditView toProjectView(ProjectAgg p) {
         List<SubProjectAuditView> subProjects = p.subProjects.values().stream()
-                .map(sp -> SubProjectAuditView.builder()
-                        .subProjectId(sp.subProjectId)
-                        .subProjectTitle(sp.title)
-                        .allocatedAmount(sp.allocated)
-                        .spentAmount(sp.spent)
-                        .milestones(toMilestoneViews(sp.milestones))
-                        .build())
+                .map(sp -> {
+                    BigDecimal netAllocated = sp.allocated.subtract(sp.refunded);
+                    return SubProjectAuditView.builder()
+                            .subProjectId(sp.subProjectId)
+                            .subProjectTitle(sp.title)
+                            .allocatedAmount(netAllocated)
+                            .refundedAmount(sp.refunded)
+                            .spentAmount(sp.spent)
+                            .milestones(toMilestoneViews(sp.milestones))
+                            .build();
+                })
                 .toList();
+        BigDecimal netAllocated = p.allocated.subtract(p.refunded);
         return ProjectAuditView.builder()
                 .projectKey(p.key)
                 .projectId(p.projectId)
                 .projectTitle(p.title)
                 .currency(dominantCurrency(p.currencyTally))
-                .allocatedAmount(p.allocated)
+                .allocatedAmount(netAllocated)
+                .refundedAmount(p.refunded)
                 .spentAmount(p.spent)
-                .remaining(p.allocated.subtract(p.spent))
+                .remaining(netAllocated.subtract(p.spent))
                 .milestones(toMilestoneViews(p.milestones))
                 .subProjects(subProjects)
                 .build();
@@ -297,7 +383,8 @@ final class AuditSummaryAssembler {
                 .map(m -> MilestoneAuditView.builder()
                         .milestoneId(m.milestoneId)
                         .milestoneTitle(m.title)
-                        .allocatedAmount(m.allocated)
+                        .allocatedAmount(m.allocated.subtract(m.refunded))
+                        .refundedAmount(m.refunded)
                         .spentAmount(m.spent)
                         .build())
                 .toList();
@@ -308,6 +395,18 @@ final class AuditSummaryAssembler {
                 : (isPresent(e.getCurrencyId()) ? e.getCurrencyId() : null);
         if (code != null) {
             tally.merge(code, 1, Integer::sum);
+        }
+    }
+
+    /** The calendar date an event was published on-chain, read from its metadata timestamp. */
+    private static LocalDate parsePublishedDate(String eventTimestamp) {
+        if (!isPresent(eventTimestamp) || eventTimestamp.length() < 10) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(eventTimestamp.substring(0, 10));
+        } catch (DateTimeParseException ex) {
+            return null;
         }
     }
 
@@ -389,6 +488,7 @@ final class AuditSummaryAssembler {
         private final boolean unattributed;
         private BigDecimal allocated = BigDecimal.ZERO;
         private BigDecimal spent = BigDecimal.ZERO;
+        private BigDecimal refunded = BigDecimal.ZERO;
         private final Map<String, MilestoneAgg> milestones = new LinkedHashMap<>();
         private final Map<String, SubProjectAgg> subProjects = new LinkedHashMap<>();
         private final Map<String, Integer> currencyTally = new HashMap<>();
@@ -431,6 +531,7 @@ final class AuditSummaryAssembler {
         private final String title;
         private BigDecimal allocated = BigDecimal.ZERO;
         private BigDecimal spent = BigDecimal.ZERO;
+        private BigDecimal refunded = BigDecimal.ZERO;
         private final Map<String, MilestoneAgg> milestones = new LinkedHashMap<>();
 
         private SubProjectAgg(String subProjectId, String title) {
@@ -450,6 +551,7 @@ final class AuditSummaryAssembler {
         private final String title;
         private BigDecimal allocated = BigDecimal.ZERO;
         private BigDecimal spent = BigDecimal.ZERO;
+        private BigDecimal refunded = BigDecimal.ZERO;
 
         private MilestoneAgg(String milestoneId, String title) {
             this.milestoneId = milestoneId;

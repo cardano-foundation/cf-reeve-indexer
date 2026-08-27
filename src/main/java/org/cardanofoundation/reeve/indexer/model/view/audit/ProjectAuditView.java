@@ -35,6 +35,7 @@ public class ProjectAuditView {
     private String projectTitle;
     private String currency;
     private BigDecimal allocatedAmount;
+    private BigDecimal refundedAmount;
     private BigDecimal spentAmount;
     private BigDecimal remaining;
     private List<MilestoneAuditView> milestones;

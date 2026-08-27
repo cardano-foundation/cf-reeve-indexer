@@ -3,6 +3,7 @@ package org.cardanofoundation.reeve.indexer.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -150,7 +151,7 @@ class AuditSummaryAssemblerTest {
         assertEquals(7, summary.getEvents().size());
         assertEquals("r1", summary.getEvents().get(0).getEventId());
         assertEquals(LocalDate.parse("2026-01-01"), summary.getFirstEventDate());
-        assertEquals(LocalDate.parse("2026-01-30"), summary.getLastEventDate());
+        assertNull(summary.getLastEventDate());
 
         AuditEventLineView fundingLine = summary.getEvents().stream()
                 .filter(e -> "f1".equals(e.getEventId()))
@@ -363,6 +364,46 @@ class AuditSummaryAssemblerTest {
         // Two EUR events outnumber the single ADA one, both at organisation and project level.
         assertEquals("EUR", summary.getCurrency());
         assertEquals("EUR", project(summary, "PA").getCurrency());
+    }
+
+    @Test
+    void resolvesLastEventDateFromLatestPublishTimestamp() {
+        EventEntity e1 = EventEntity.builder()
+                .txHash("tx-f1").organisationId("org").eventId("f1").eventType("FUNDING").eventCategory("GRANT")
+                .fundingId("F1").currencyCustCode("USD").date(LocalDate.parse("2026-01-05"))
+                .totalAmount(new BigDecimal("100")).eventTimestamp("2026-01-01T10:00:00.000000Z")
+                .build();
+        e1.addAllocation(allocation("PA", "Proj A", milestone("M1", "MS1", "100")));
+
+        EventEntity e2 = EventEntity.builder()
+                .txHash("tx-s1").organisationId("org").eventId("s1").eventType("SPENDING").eventCategory("GRANT")
+                .fundingId("F1").currencyCustCode("USD").date(LocalDate.parse("2026-01-02"))
+                .totalAmount(new BigDecimal("50")).eventTimestamp("2026-01-10T08:30:00.000000Z")
+                .build();
+        e2.addAllocation(allocation("PA", "Proj A", milestone("M1", "MS1", "50")));
+
+        AuditSummaryView summary = AuditSummaryAssembler.assemble("org", "Org Ltd", List.of(e1, e2), null, null, null);
+
+        assertEquals(LocalDate.parse("2026-01-10"), summary.getLastEventDate());
+    }
+
+    @Test
+    void attributesRefundToProjectAndNetsAllocatedAmount() {
+        List<EventEntity> events = List.of(
+                event("FUNDING", "f1", "F1", "USD", LocalDate.parse("2026-06-01"), "1000",
+                        allocation("PA", "Proj A", milestone("M1", "MS1", "1000"))),
+                event("SPENDING", "s1", "F1", "USD", LocalDate.parse("2026-06-02"), "400",
+                        allocation("PA", "Proj A", milestone("M1", "MS1", "400"))),
+                event("REFUND", "r1", "F1", "USD", LocalDate.parse("2026-06-03"), "300",
+                        allocation("PA", "Proj A", milestone("M1", "MS1", "300"))));
+
+        AuditSummaryView summary = AuditSummaryAssembler.assemble("org", "Org Ltd", events, null, null, null);
+
+        ProjectAuditView pa = project(summary, "PA");
+        assertEquals(0, new BigDecimal("700").compareTo(pa.getAllocatedAmount()));
+        assertEquals(0, new BigDecimal("300").compareTo(pa.getRefundedAmount()));
+        assertEquals(0, new BigDecimal("400").compareTo(pa.getSpentAmount()));
+        assertEquals(0, new BigDecimal("300").compareTo(pa.getRemaining()));
     }
 
     @Test

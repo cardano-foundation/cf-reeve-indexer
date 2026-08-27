@@ -7,6 +7,8 @@ import { MilestoneAuditView } from 'libs/api-connectors/backend-connector-reeve/
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
+import { AllocatedCell } from 'modules/public-events-auditor/components/AllocatedCell/AllocatedCell.component.tsx'
+import { RemainingCell } from 'modules/public-events-auditor/components/RemainingCell/RemainingCell.component.tsx'
 import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
 
 interface ProjectBreakdownMilestonesProps {
@@ -36,7 +38,7 @@ export const ProjectBreakdownMilestones = ({ milestones }: ProjectBreakdownMiles
             sortable: true,
             flex: 1,
             minWidth: 140,
-            renderCell: ({ row }) => <TruncatedCellText value={formatAuditAmount(row.allocatedAmount)} />
+            renderCell: ({ row }) => <AllocatedCell allocated={row.allocatedAmount} refunded={row.refundedAmount} />
         },
         {
             field: 'spentAmount',
@@ -58,7 +60,7 @@ export const ProjectBreakdownMilestones = ({ milestones }: ProjectBreakdownMiles
             sortable: false,
             flex: 1,
             minWidth: 140,
-            renderCell: ({ row }) => <TruncatedCellText value={formatAuditAmount(row.allocatedAmount - row.spentAmount)} />
+            renderCell: ({ row }) => <RemainingCell allocated={row.allocatedAmount} spent={row.spentAmount} />
         }
     ]
 
