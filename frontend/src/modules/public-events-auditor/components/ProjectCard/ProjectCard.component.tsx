@@ -1,14 +1,14 @@
-import Card from '@mui/material/Card'
-import Typography from '@mui/material/Typography'
 import { Box, CardActionArea, Divider, useTheme } from '@mui/material'
-import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
-import { colors } from 'libs/ui-kit/theme/colors.ts'
+import Card from '@mui/material/Card'
+import Link from '@mui/material/Link'
+import Typography from '@mui/material/Typography'
+import { useEffect, useRef, useState } from 'react'
 
 import { ProjectAuditView } from 'libs/api-connectors/backend-connector-reeve/api/events/publicEventsApi.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
-import Link from '@mui/material/Link'
+import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
+import { colors } from 'libs/ui-kit/theme/colors.ts'
 import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
-import { useEffect, useRef, useState } from 'react'
 
 interface ProjectCardProps {
   project: ProjectAuditView
@@ -55,7 +55,10 @@ export const ProjectCard = ({ project, currency, isSelected, onClick, onViewEven
       }}>
       <CardActionArea
         component="div"
-        onClick={onClick}
+        onClick={(event) => {
+          if ((event.target as HTMLElement).closest('.MuiTooltip-popper')) return
+          onClick?.()
+        }}
         sx={{
           display: 'flex',
           flexDirection: 'column',
@@ -68,14 +71,7 @@ export const ProjectCard = ({ project, currency, isSelected, onClick, onViewEven
           }
         }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" gap={2}>
-          <Tooltip
-            title={
-              <span onMouseDown={(event) => event.stopPropagation()}>
-                {title}
-              </span>
-            }
-            disableHoverListener={!isTitleTruncated}
-          >
+          <Tooltip title={title} disableHoverListener={!isTitleTruncated}>
             <Typography
               ref={titleRef}
               variant="h6"

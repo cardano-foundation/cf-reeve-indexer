@@ -52,6 +52,7 @@ export const Table = <T extends TableRowModel = TableRowModel>({
   totalRows,
   collapsableRow,
   alwaysExpanded,
+  forceExpandedIds,
   getRowId,
   onPagination,
   onSelectionChange,
@@ -73,7 +74,10 @@ export const Table = <T extends TableRowModel = TableRowModel>({
     { pageSize, paginationMode, sortedRows, hidePagination },
     { onPagination }
   )
-  const { expandedRows, handleCollapse, handleCollapseAll, hasAnyCollapsableRows, isAllExpanded } = useTableRowCollapsable({ paginatedRows }, { collapsableRow, getRowId })
+  const { expandedRows, instant, handleCollapse, handleCollapseAll, hasAnyCollapsableRows, isAllExpanded } = useTableRowCollapsable(
+    { paginatedRows },
+    { collapsableRow, getRowId, forceExpandedIds }
+  )
 
   const { visibleColumns, hideableColumns, hasHideableColumns, hiddenFields, toggleColumn } = useTableColumnVisibility({ columns, initialState })
 
@@ -226,7 +230,7 @@ export const Table = <T extends TableRowModel = TableRowModel>({
                     {hasCollapsableRowRender && (
                       <TableRowBodyStyled $hasCollapsableRows={hasCollapsableRowRender}>
                         <TableBodyCellCollapsableStyled colSpan={colspan} $isExpanded={isRowExpanded}>
-                          <Collapse in={isRowExpanded} timeout="auto" unmountOnExit>
+                          <Collapse in={isRowExpanded} timeout={instant ? 0 : 'auto'} unmountOnExit>
                             {collapsableRow?.(row, orderBy || '', order)}
                           </Collapse>
                         </TableBodyCellCollapsableStyled>

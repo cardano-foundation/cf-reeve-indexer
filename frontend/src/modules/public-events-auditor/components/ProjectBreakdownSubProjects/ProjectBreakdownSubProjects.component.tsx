@@ -7,10 +7,11 @@ import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
 import { TableContainer } from 'libs/ui-kit/components/Table/Table.component.tsx'
 import { createColumns } from 'libs/ui-kit/components/Table/Table.utils.ts'
-import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
-import { ProjectBreakdownMilestones } from 'modules/public-events-auditor/components/ProjectBreakdownMilestones/ProjectBreakdownMilestones.component.tsx'
 import { AllocatedCell } from 'modules/public-events-auditor/components/AllocatedCell/AllocatedCell.component.tsx'
+import { ProjectBreakdownMilestones } from 'modules/public-events-auditor/components/ProjectBreakdownMilestones/ProjectBreakdownMilestones.component.tsx'
 import { RemainingCell } from 'modules/public-events-auditor/components/RemainingCell/RemainingCell.component.tsx'
+import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
+
 import { UtilisationBar } from '../UtilisationBar/UtilisationBar.component'
 
 interface ProjectBreakdownSubProjectsProps {

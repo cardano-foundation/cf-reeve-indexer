@@ -70,6 +70,7 @@ export interface TableProps<T extends TableRowModel = TableRowModel, K extends k
   hidePagination?: boolean
   isLoading: boolean
   alwaysExpanded?: boolean
+  forceExpandedIds?: string[]
   fillAvailableWidth?: boolean
 }
 

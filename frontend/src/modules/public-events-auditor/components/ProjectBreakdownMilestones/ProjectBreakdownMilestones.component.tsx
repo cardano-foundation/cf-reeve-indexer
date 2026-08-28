@@ -1,7 +1,7 @@
-import { GridColDef } from '@mui/x-data-grid'
 import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import { GridColDef } from '@mui/x-data-grid'
 
 import { MilestoneAuditView } from 'libs/api-connectors/backend-connector-reeve/api/events/publicEventsApi.types'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'

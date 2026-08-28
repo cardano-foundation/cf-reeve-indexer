@@ -1,5 +1,6 @@
 import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
+import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import { Dayjs } from 'dayjs'
 import { FilterRemove } from 'iconsax-react'
@@ -10,29 +11,43 @@ import { publicProjectsIllustration } from 'assets/images'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
+import { Chip } from 'libs/ui-kit/components/Chip/Chip.component.tsx'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
-import { EmptyStateTable } from 'libs/ui-kit/components/EmptyStateTable/EmptyStateTable.component.tsx'
 import { LoaderCentered } from 'libs/ui-kit/components/LoaderCentered/LoaderCentered.component.tsx'
 import { AuditFilterBar } from 'modules/public-events-auditor/components/AuditFilterBar/AuditFilterBar.component.tsx'
+import { ProjectBreakdownProjects } from 'modules/public-events-auditor/components/ProjectBreakdownProjects/ProjectBreakdownProjects.component.tsx'
 import { useFundingAudit } from 'modules/public-events-auditor/hooks/useFundingAudit.ts'
-import { Chip } from 'libs/ui-kit/components/Chip/Chip.component.tsx'
 import { formatAuditDate } from 'modules/public-events-auditor/utils/format.ts'
-import Link from '@mui/material/Link'
+import { projectKey } from 'modules/public-events-auditor/utils/projectKey.ts'
 import { getOrgPath } from 'routes'
 
-import { ProjectCardsGrid, projectKey } from '../components/ProjectCardsGrid/ProjectCardsGrid.component'
-import { ProjectBreakdownProject } from 'modules/public-events-auditor/components/ProjectBreakdownProject/ProjectBreakdownProject.component.tsx'
+import { ProjectCardsGrid } from '../components/ProjectCardsGrid/ProjectCardsGrid.component'
 
-const Section = ({ title, description, action, children }: { title: string; description?: string; action?: ReactNode; children: ReactNode }) => {
+const Section = ({
+  title,
+  titleAction,
+  description,
+  action,
+  children
+}: {
+  title: string
+  titleAction?: ReactNode
+  description?: string
+  action?: ReactNode
+  children: ReactNode
+}) => {
   const theme = useTheme()
 
   return (
     <Box display="flex" flexDirection="column" flex={1} minHeight={0} gap={2}>
       <Box display="flex" flexDirection="column" gap={0.5}>
         <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
-          <Typography color={theme.palette.text.primary} variant="h3">
-            {title}
-          </Typography>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography color={theme.palette.text.primary} variant="h3">
+              {title}
+            </Typography>
+            {titleAction}
+          </Box>
           {action}
         </Box>
         {description && (
@@ -56,7 +71,7 @@ export const ViewFundingAudit = () => {
 
   const [dateFrom, setDateFrom] = useState<Dayjs | null>(null)
   const [dateTo, setDateTo] = useState<Dayjs | null>(null)
-  const [selectedProjectKey, setSelectedProjectKey] = useState<string | null>(null)
+  const [selectedProjectKeys, setSelectedProjectKeys] = useState<string[]>([])
 
   useEffect(() => {
     const orgId = orgIdFromPath || searchParams.get('organisation_id')
@@ -120,11 +135,21 @@ export const ViewFundingAudit = () => {
     }
 
     const projects = audit.projects
-    const selectedProject = projects.find((project, index) => projectKey(project, index) === selectedProjectKey) ?? null
+    const keyedProjects = projects.map((project, index) => ({ project, key: projectKey(project, index) }))
+    const activeKeys = selectedProjectKeys.filter((key) => keyedProjects.some((entry) => entry.key === key))
+    const visibleProjects =
+      activeKeys.length === 0 ? projects : keyedProjects.filter((entry) => activeKeys.includes(entry.key)).map((entry) => entry.project)
 
     return (
       <Section
         title={t({ id: 'auditProjectBreakdownTitle' })}
+        titleAction={
+          activeKeys.length > 0 && (
+            <Link component="button" type="button" underline="hover" onClick={() => setSelectedProjectKeys([])} sx={{ color: '#408AD8', fontWeight: 600 }}>
+              {t({ id: 'clearAll' })}
+            </Link>
+          )
+        }
         action={
           <Link
             component="button"
@@ -136,14 +161,8 @@ export const ViewFundingAudit = () => {
           </Link>
         }>
         <Box display="flex" flexDirection="column" flex={1} minHeight={0} gap={4}>
-          <ProjectCardsGrid projects={projects} selectedKey={selectedProjectKey} onSelectKey={setSelectedProjectKey} organisationId={effectiveOrganisation} />
-          {selectedProject ? (
-            <ProjectBreakdownProject project={selectedProject} />
-          ) : (
-            <Box display="flex" alignItems="center" justifyContent="center" flex={1} minHeight="12rem">
-              <EmptyStateTable message={t({ id: 'auditSelectProjectMessage' })} hint={t({ id: 'auditSelectProjectHint' })} />
-            </Box>
-          )}
+          <ProjectCardsGrid projects={projects} selectedKeys={activeKeys} onSelectKeys={setSelectedProjectKeys} organisationId={effectiveOrganisation} />
+          <ProjectBreakdownProjects projects={visibleProjects} forceExpandedIds={activeKeys} />
         </Box>
       </Section>
     )

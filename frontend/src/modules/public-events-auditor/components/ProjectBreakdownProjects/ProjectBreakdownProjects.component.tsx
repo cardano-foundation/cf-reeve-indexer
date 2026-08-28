@@ -3,19 +3,24 @@ import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
 import { TableContainer } from 'libs/ui-kit/components/Table/Table.component.tsx'
 import { createColumns } from 'libs/ui-kit/components/Table/Table.utils.ts'
-import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
-import { ProjectBreakdownSubProjects } from 'modules/public-events-auditor/components/ProjectBreakdownSubProjects/ProjectBreakdownSubProjects.component.tsx'
-import { ProjectBreakdownMilestones } from 'modules/public-events-auditor/components/ProjectBreakdownMilestones/ProjectBreakdownMilestones.component.tsx'
 import { AllocatedCell } from 'modules/public-events-auditor/components/AllocatedCell/AllocatedCell.component.tsx'
+import { ProjectBreakdownMilestones } from 'modules/public-events-auditor/components/ProjectBreakdownMilestones/ProjectBreakdownMilestones.component.tsx'
+import { ProjectBreakdownSubProjects } from 'modules/public-events-auditor/components/ProjectBreakdownSubProjects/ProjectBreakdownSubProjects.component.tsx'
 import { RemainingCell } from 'modules/public-events-auditor/components/RemainingCell/RemainingCell.component.tsx'
+import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
+import { projectKey } from 'modules/public-events-auditor/utils/projectKey.ts'
+
 import { UtilisationBar } from '../UtilisationBar/UtilisationBar.component'
 
-interface ProjectBreakdownProjectProps {
-    project: ProjectAuditView
+interface ProjectBreakdownProjectsProps {
+    projects: ProjectAuditView[]
+    forceExpandedIds?: string[]
 }
 
-export const ProjectBreakdownProject = ({ project }: ProjectBreakdownProjectProps) => {
+export const ProjectBreakdownProjects = ({ projects, forceExpandedIds }: ProjectBreakdownProjectsProps) => {
     const { t } = useTranslations()
+
+    const rowKeys = new Map(projects.map((project, index) => [project, projectKey(project, index)]))
 
     const columns = createColumns<ProjectAuditView>()([
         {
@@ -23,7 +28,7 @@ export const ProjectBreakdownProject = ({ project }: ProjectBreakdownProjectProp
             headerName: t({ id: 'auditProjectTitle' }),
             align: 'left',
             headerAlign: 'left',
-            sortable: false,
+            sortable: true,
             width: '22%',
             renderCell: (row) => <TruncatedCellText value={row.projectTitle || row.projectId || t({ id: 'auditUnattributed' })} />
         },
@@ -32,7 +37,7 @@ export const ProjectBreakdownProject = ({ project }: ProjectBreakdownProjectProp
             headerName: t({ id: 'auditAllocated' }),
             align: 'right',
             headerAlign: 'right',
-            sortable: false,
+            sortable: true,
             width: '17%',
             renderCell: (row) => <AllocatedCell allocated={row.allocatedAmount} refunded={row.refundedAmount} />
         },
@@ -41,7 +46,7 @@ export const ProjectBreakdownProject = ({ project }: ProjectBreakdownProjectProp
             headerName: t({ id: 'auditSpent' }),
             align: 'right',
             headerAlign: 'right',
-            sortable: false,
+            sortable: true,
             width: '17%',
             renderCell: (row) => <TruncatedCellText value={formatAuditAmount(row.spentAmount)} />
         },
@@ -77,10 +82,10 @@ export const ProjectBreakdownProject = ({ project }: ProjectBreakdownProjectProp
     return (
         <TableContainer>
             <TableContainer.Table
-                aria-label="project-breakdown-project-table"
+                aria-label="project-breakdown-projects-table"
                 columns={columns}
-                rows={[project]}
-                getRowId={(row) => row.projectKey ?? row.projectId ?? 'project'}
+                rows={projects}
+                getRowId={(row) => rowKeys.get(row)!}
                 collapsableRow={(row) =>
                     row.subProjects.length > 0 ? (
                         <ProjectBreakdownSubProjects subProjects={row.subProjects} />
@@ -88,7 +93,8 @@ export const ProjectBreakdownProject = ({ project }: ProjectBreakdownProjectProp
                         <ProjectBreakdownMilestones milestones={row.milestones} />
                     ) : null
                 }
-                alwaysExpanded
+                noRowsMessage={t({ id: 'nothingHereMessage' })}
+                forceExpandedIds={forceExpandedIds}
                 isLoading={false}
                 hidePagination
                 sx={{ minWidth: '70rem' }}

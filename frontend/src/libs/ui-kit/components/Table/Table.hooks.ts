@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEvent, ReactNode, useState } from 'react'
+import { ChangeEvent, MouseEvent, ReactNode, useEffect, useRef, useState } from 'react'
 
 import { InitialState, TableColumnsDef, TableRowModel } from 'libs/ui-kit/components/Table/Table.types.ts'
 import { sortAllValues } from 'libs/ui-kit/components/Table/Table.utils.ts'
@@ -87,23 +87,43 @@ interface TableRowCollapsableState<T extends TableRowModel = TableRowModel> {
 interface TableRowCollapsableHandlers<T extends TableRowModel = TableRowModel> {
   collapsableRow?: (row: T) => ReactNode
   getRowId?: (row: T) => string
+  forceExpandedIds?: string[]
 }
 
 export const useTableRowCollapsable = <T extends TableRowModel = TableRowModel>(state: TableRowCollapsableState<T>, handlers: TableRowCollapsableHandlers<T> = {}) => {
   const { paginatedRows } = state
-  const { collapsableRow, getRowId } = handlers
+  const { collapsableRow, getRowId, forceExpandedIds } = handlers
 
-  const [expandedRows, setExpandedRows] = useState<number[]>([])
+  const [expandedRows, setExpandedRows] = useState<string[]>([])
+  const [instant, setInstant] = useState(false)
+
+  const previousForceExpandedIdsRef = useRef<string[]>(forceExpandedIds ?? [])
+
+  useEffect(() => {
+    if (!forceExpandedIds) return
+
+    const previous = previousForceExpandedIdsRef.current
+    const added = forceExpandedIds.filter((id) => !previous.includes(id))
+    const removed = previous.filter((id) => !forceExpandedIds.includes(id))
+
+    if (added.length > 0 || removed.length > 0) {
+      setExpandedRows((prev) => [...prev.filter((id) => !removed.includes(id)), ...added.filter((id) => !prev.includes(id))])
+      setInstant(true)
+    }
+
+    previousForceExpandedIdsRef.current = forceExpandedIds
+  }, [forceExpandedIds])
 
   const collapsableRowsCount = (paginatedRows ?? []).filter((row) => collapsableRow?.(row)).length
 
   const hasAnyCollapsableRows = (paginatedRows ?? []).some((row) => collapsableRow?.(row))
   const isAllExpanded = expandedRows.length > 0 && expandedRows.length === collapsableRowsCount
 
-  const handleCollapse = (id: number) => {
+  const handleCollapse = (id: string) => {
     const newCollapse = expandedRows.includes(id) ? expandedRows.filter((expandedId) => expandedId !== id) : [...expandedRows, id]
 
     setExpandedRows(newCollapse)
+    setInstant(false)
   }
 
   const handleCollapseAll = () => {
@@ -113,9 +133,10 @@ export const useTableRowCollapsable = <T extends TableRowModel = TableRowModel>(
         : []
 
     setExpandedRows(newCollapse)
+    setInstant(false)
   }
 
-  return { expandedRows, handleCollapse, handleCollapseAll, hasAnyCollapsableRows, isAllExpanded }
+  return { expandedRows, instant, handleCollapse, handleCollapseAll, hasAnyCollapsableRows, isAllExpanded }
 }
 
 interface TableRowSelectionState<T extends TableRowModel = TableRowModel> {
