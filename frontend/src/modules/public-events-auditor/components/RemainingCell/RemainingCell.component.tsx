@@ -25,7 +25,7 @@ export const RemainingCell = ({ allocated, spent }: RemainingCellProps) => {
       <Box minWidth={0}>
         <TruncatedCellText value={formatAuditAmount(0)} />
       </Box>
-      <Tooltip title={t({ id: 'auditOverspentBy' }, { amount: formatAuditAmount(Math.abs(remaining)) })}>
+      <Tooltip title={allocated <= 0 ? t({ id: 'auditSpendingExceedsFunding' }) : t({ id: 'auditOverspentBy' }, { amount: formatAuditAmount(Math.abs(remaining)) })}>
         <Box display="flex" flexShrink={0}>
           <Danger color={colors.red[500]} size={20} variant="Outline" />
         </Box>

@@ -33,7 +33,7 @@ export const UtilisationBar = ({ allocated, spent }: UtilisationBarProps) => {
         }}
       />
       <Typography color={overspent ? colors.red[500] : theme.palette.text.secondary} variant="caption">
-        {hasNoAllocation ? t({ id: 'auditNoFundingYet' }) : isOverRefunded ? t({ id: 'auditOverspent' }) : `${Math.round(ratio * 100)}%`}
+        {hasNoAllocation ? t({ id: 'auditNoFundingYet' }) : isOverRefunded ? t({ id: 'auditSpendingExceedsFunding' }) : `${Math.round(ratio * 100)}%`}
       </Typography>
     </Box>
   )
