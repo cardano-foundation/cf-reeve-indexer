@@ -29,7 +29,7 @@ export const ProjectBreakdownProjects = ({ projects, forceExpandedIds }: Project
             align: 'left',
             headerAlign: 'left',
             sortable: true,
-            width: '22%',
+            width: '17%',
             renderCell: (row) => <TruncatedCellText value={row.projectTitle || row.projectId || t({ id: 'auditUnattributed' })} />
         },
         {
@@ -74,7 +74,7 @@ export const ProjectBreakdownProjects = ({ projects, forceExpandedIds }: Project
             align: 'left',
             headerAlign: 'left',
             sortable: false,
-            width: '17%',
+            width: '22%',
             renderCell: (row) => <UtilisationBar allocated={row.allocatedAmount} spent={row.spentAmount} />
         }
     ])

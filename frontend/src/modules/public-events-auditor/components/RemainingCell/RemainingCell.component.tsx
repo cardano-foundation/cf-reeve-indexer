@@ -1,10 +1,10 @@
+import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import { Danger } from 'iconsax-react'
 
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
-import { colors } from 'libs/ui-kit/theme/colors.ts'
 import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
 
 interface RemainingCellProps {
@@ -14,6 +14,7 @@ interface RemainingCellProps {
 
 export const RemainingCell = ({ allocated, spent }: RemainingCellProps) => {
   const { t } = useTranslations()
+  const theme = useTheme()
   const remaining = allocated - spent
 
   if (remaining >= 0) {
@@ -25,9 +26,9 @@ export const RemainingCell = ({ allocated, spent }: RemainingCellProps) => {
       <Box minWidth={0}>
         <TruncatedCellText value={formatAuditAmount(0)} />
       </Box>
-      <Tooltip title={allocated <= 0 ? t({ id: 'auditSpendingExceedsFunding' }) : t({ id: 'auditOverspentBy' }, { amount: formatAuditAmount(Math.abs(remaining)) })}>
+      <Tooltip title={t({ id: 'auditSpendingExceedsFunding' })}>
         <Box display="flex" flexShrink={0}>
-          <Danger color={colors.red[500]} size={20} variant="Outline" />
+          <Danger color={theme.palette.warning.main} size={20} variant="Outline" />
         </Box>
       </Tooltip>
     </Box>
