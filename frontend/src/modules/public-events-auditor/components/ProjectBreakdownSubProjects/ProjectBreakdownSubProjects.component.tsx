@@ -29,7 +29,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             align: 'left',
             headerAlign: 'left',
             sortable: true,
-            width: '25%',
+            width: '24%',
             renderCell: (row) => <TruncatedCellText value={row.subProjectTitle || row.subProjectId || t({ id: 'auditUnattributed' })} />
         },
         {
@@ -65,7 +65,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             align: 'left',
             headerAlign: 'left',
             sortable: false,
-            width: '21%',
+            width: '22%',
             renderCell: (row) => <UtilisationBar allocated={row.allocatedAmount} spent={row.spentAmount} />
         }
     ])
