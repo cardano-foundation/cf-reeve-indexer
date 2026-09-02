@@ -42,4 +42,6 @@ public class ReeveMetadata {
     private Integer year;
     private Integer period;
     private String subType;
+    // Optional: absent on reports published before this field existed
+    private String accountingRegime;
 }

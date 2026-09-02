@@ -247,6 +247,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         .year(rawMetadata.getYear())
                         .period(rawMetadata.getPeriod())
                         .subType(rawMetadata.getSubType()).ver(rawMetadata.getVer())
+                        .accountingRegime(rawMetadata.getAccountingRegime())
                         .fields((String) rawMetadata.getData()).identityVerified(identityVerified)
                         .metadataHash(rawMetadata.getMetadataHash()).build();
                 reportRepository.saveAndFlush(reportEntity);
@@ -258,6 +259,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         .txHash(rawMetadata.getTxHash()).interval(rawMetadata.getInterval())
                         .year(rawMetadata.getYear()).period(rawMetadata.getPeriod())
                         .subType(rawMetadata.getSubType()).ver(rawMetadata.getVer())
+                        .accountingRegime(rawMetadata.getAccountingRegime())
                         // .fields((String) rawMetadata.getData()).identityVerified(identityVerified) // Fields stored in contract data
                         .metadataHash(rawMetadata.getMetadataHash()).build();
                 reportRepository.saveAndFlush(reportEntity);
