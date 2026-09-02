@@ -45,7 +45,7 @@ store:
       # we don't use plugin jars but we have to point to /tmp because of restricted access in new hardened image
       root-path: /tmp/plugins/files
 server:
-  port: 9002
+  port: 9000
 
 
 ipfs:

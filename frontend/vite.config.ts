@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
     server: {
       allowedHosts: ['localhost', '.reeve.cf-deployments.org'],
       host: true,
-      port: 3000,
+      port: 3002,
       proxy: {
         '/api': {
           target: process.env.VITE_API_URL,
