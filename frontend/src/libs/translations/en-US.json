@@ -93,6 +93,8 @@
   "published": "Published",
   "report": "Report",
   "reportType": "Report type",
+  "accountingRegime": "Accounting regime",
+  "legacyReport": "Legacy report",
   "period": "Period",
   "version": "Version",
   "continue": "Continue",

@@ -46,6 +46,7 @@ export type ReportEntity = {
   blockChainHash: string
   identities: LEIResponse[]
   data: NestedMap
+  accountingRegime: string | null 
 }
 
 export interface LEIResponse {
