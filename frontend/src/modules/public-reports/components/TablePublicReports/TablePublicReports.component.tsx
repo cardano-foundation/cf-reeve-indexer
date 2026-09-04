@@ -18,6 +18,7 @@ import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
 import { IdentityVerificationStatus } from 'modules/public-reports/components/IdentityVerificationStatus/IdentityVerificationStatus.component.tsx'
 import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
+import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
 
 interface TableReportsPublicProps {
   data: GetPublicReportsResponse200 | null
@@ -53,6 +54,15 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       valueFormatter: (value) => t({ id: value }),
       hideable: false,
       sortable: true,
+      flex: 1,
+      minWidth: 192
+    },
+    {
+      field: 'accountingRegime',
+      headerName: t({ id: 'accountingRegime' }),
+      renderCell: ({ row }) => <ChipAccountingRegime accountingRegime={row.accountingRegime} />,
+      hideable: false,
+      sortable: false,
       flex: 1,
       minWidth: 192
     },
@@ -104,24 +114,24 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
     {
       field: 'identities',
       headerName: t({ id: 'identityVerified' }),
-        renderCell: ({ row }) => (
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
-            {row.identities?.map((item: LEIResponse, index: number) => (
-              <IdentityVerificationStatus
-                key={index}
-                isVerified={item.identityVerified}
-                lei={item.lei}
-                txHash={item.txHash}
-                credentialTxHash={item.credentialTxHash}
-              />
-            ))}
-          </div>
-        ),
-        hideable: false,
-        sortable: true,
-        flex: 1,
-        minWidth: 50
-      },
+      renderCell: ({ row }) => (
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
+          {row.identities?.map((item: LEIResponse, index: number) => (
+            <IdentityVerificationStatus
+              key={index}
+              isVerified={item.identityVerified}
+              lei={item.lei}
+              txHash={item.txHash}
+              credentialTxHash={item.credentialTxHash}
+            />
+          ))}
+        </div>
+      ),
+      hideable: false,
+      sortable: true,
+      flex: 1,
+      minWidth: 50
+    },
     {
       field: 'actions',
       headerName: '',
