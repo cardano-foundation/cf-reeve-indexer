@@ -109,6 +109,9 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
         if (rootNode.has("period")) {
             rawMetadata.setPeriod(rootNode.get("period").asInt());
         }
+        if (rootNode.has("accounting_regime") && !rootNode.get("accounting_regime").isNull()) {
+            rawMetadata.setAccountingRegime(rootNode.get("accounting_regime").asText());
+        }
         if (rootNode.has("org")) {
             JsonNode orgNode = rootNode.get("org");
             if (orgNode != null && !orgNode.isNull()) {

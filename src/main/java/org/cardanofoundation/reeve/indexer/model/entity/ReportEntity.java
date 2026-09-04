@@ -46,6 +46,9 @@ public class ReportEntity {
 
     private String subType;
 
+    // Optional: absent on reports published before this field existed
+    private String accountingRegime;
+
     private Long ver;
 
     @Column(columnDefinition = "jsonb")
