@@ -7,9 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
+import org.cardanofoundation.reeve.indexer.util.ChunkedStringDeserializer;
 
 @Getter
 @Setter
@@ -20,24 +22,12 @@ import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 public class Organisation {
 
     private String id;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String name;
     private String currencyId;
     private String countryCode;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String taxIdNumber;
-
-    public void setName(Object name) {
-        if (name instanceof String) {
-            this.name = (String) name;
-        } else if (name instanceof java.util.List) {
-            this.name = String.join(",", ((java.util.List<?>) name).stream()
-                    .map(Object::toString)
-                    .toArray(String[]::new));
-        } else if (name != null) {
-            this.name = name.toString();
-        } else {
-            this.name = null;
-        }
-    }
 
     public static Organisation fromEntity(OrganisationEntity organisationEntity) {
         if (organisationEntity == null) {

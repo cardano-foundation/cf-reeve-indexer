@@ -169,6 +169,62 @@ class FundingEventDeserializerTest {
     }
 
     @Test
+    void chunkedLongTextFieldsAreReassembledByConcatenation() throws Exception {
+        // Cardano on-chain metadata caps each CBOR text string at 64 bytes; the writer splits a
+        // longer value into an array of chunks with no separator between them. Every free-text
+        // field (org name/tax id, vendor/notes/spending_category/funding_entity/hash/funding_tx,
+        // milestone/project/sub-project title) must reassemble by plain concatenation, not by
+        // joining with a delimiter — a delimiter would corrupt the reconstructed text.
+        String json = """
+                {
+                  "org": { "id": "org1",
+                           "name": ["Very Long Organisation Name That Exceeds Sixty Four B", "ytes In Total"],
+                           "currency_id": "ISO_4217:CHF", "country_code": "CH",
+                           "tax_id_number": "CHE-184477354" },
+                  "metadata": { "creation_slot": 1, "timestamp": "2025-06-01T10:15:30Z", "version": "1.0" },
+                  "type": "FUNDING",
+                  "data": [
+                    {
+                      "id": "event1", "type": "SPENDING", "funding_id": "fund1",
+                      "amount_rcy": "85", "vendor": ["Vendor Name Long Enough To Need Chunking Across ", "Two Pieces"],
+                      "spending_category": "Personnel",
+                      "notes": ["Line one of a very long note that spans more than sixty four b", "ytes of text"],
+                      "date": "2025-04-03",
+                      "currency_rcy": { "id": "ISO_4217:EUR", "cust_code": "EUR" },
+                      "allocation": [
+                        { "project_id": "ProjectID1",
+                          "project_title": ["A Very Long Project Title That Also Exceeds The Si", "xty Four Byte Limit"],
+                          "sub_project": {
+                            "sub_project_id": "SubProjectID1",
+                            "sub_project_title": ["A Sub Project Title That Is Also Longer Than Sixt", "y Four Bytes"],
+                            "milestones": [ { "milestone_id": "ms1",
+                              "milestone_title": ["M2: Validation of automated variant-calling bioinformatic pipeli", "nes"],
+                              "allocated_amount": "85" } ]
+                          } }
+                      ]
+                    }
+                  ]
+                }
+                """;
+
+        ReeveMetadata metadata = objectMapper.readValue(json, ReeveMetadata.class);
+
+        assertEquals("Very Long Organisation Name That Exceeds Sixty Four Bytes In Total", metadata.getOrg().getName());
+
+        @SuppressWarnings("unchecked")
+        List<FundingEvent> events = (List<FundingEvent>) metadata.getData();
+        FundingEvent event = events.get(0);
+        assertEquals("Vendor Name Long Enough To Need Chunking Across Two Pieces", event.getVendor());
+        assertEquals("Line one of a very long note that spans more than sixty four bytes of text", event.getNotes());
+
+        ProjectAllocation allocation = event.getAllocations().get(0);
+        assertEquals("A Very Long Project Title That Also Exceeds The Sixty Four Byte Limit", allocation.getProjectTitle());
+        assertEquals("A Sub Project Title That Is Also Longer Than Sixty Four Bytes", allocation.getSubProjectTitle());
+        assertEquals("M2: Validation of automated variant-calling bioinformatic pipelines",
+                allocation.getEffectiveMilestones().get(0).getMilestoneTitle());
+    }
+
+    @Test
     void ipfsManifestBundleDeserializes() throws Exception {
         String json = """
                 {
