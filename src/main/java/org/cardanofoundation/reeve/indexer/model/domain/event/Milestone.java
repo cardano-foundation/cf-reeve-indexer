@@ -10,7 +10,10 @@ import lombok.Setter;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import org.cardanofoundation.reeve.indexer.util.ChunkedStringDeserializer;
 
 /**
  * A milestone targeted by an event allocation, with the amount allocated to it in the
@@ -26,6 +29,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public class Milestone {
 
     private String milestoneId;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String milestoneTitle;
     private BigDecimal allocatedAmount;
 }
