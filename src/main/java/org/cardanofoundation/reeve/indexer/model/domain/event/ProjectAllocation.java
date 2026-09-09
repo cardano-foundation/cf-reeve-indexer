@@ -11,7 +11,10 @@ import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import org.cardanofoundation.reeve.indexer.util.ChunkedStringDeserializer;
 
 /**
  * A single project targeted by an event. Milestones are attached either directly (via
@@ -29,6 +32,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public class ProjectAllocation {
 
     private String projectId;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String projectTitle;
 
     /** Milestones targeted directly on the project (direct-allocation shape). */

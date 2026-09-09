@@ -18,9 +18,11 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Currency;
+import org.cardanofoundation.reeve.indexer.util.ChunkedStringDeserializer;
 
 /**
  * A single event inside a {@code FUNDING} metadata bundle. An event is either a well-known
@@ -40,17 +42,23 @@ public class FundingEvent {
 
     private String id;
     private String type;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String fundingTx;
     private String fundingId;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String fundingEntity;
 
     // Inline spend record — present on SPENDING events (a single spend per event, per the schema).
     private BigDecimal amountRcy;
     private BigDecimal amountFcy;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String vendor;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String spendingCategory;
     private String fxRate;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String hash;
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String notes;
     private LocalDate date;
 
