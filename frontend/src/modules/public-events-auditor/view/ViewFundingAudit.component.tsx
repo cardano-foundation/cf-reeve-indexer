@@ -8,11 +8,13 @@ import { ReactNode, useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { publicProjectsIllustration } from 'assets/images'
+import { LegalDisclosureAttribution } from 'libs/layout-kit/layout-public/components/LegalDisclosureAttribution/LegalDisclosureAttribution.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Chip } from 'libs/ui-kit/components/Chip/Chip.component.tsx'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
+import { LegalDisclosureButton } from 'libs/ui-kit/components/LegalDisclosureButton/LegalDisclosureButton.component.tsx'
 import { LoaderCentered } from 'libs/ui-kit/components/LoaderCentered/LoaderCentered.component.tsx'
 import { AuditFilterBar } from 'modules/public-events-auditor/components/AuditFilterBar/AuditFilterBar.component.tsx'
 import { ProjectBreakdownProjects } from 'modules/public-events-auditor/components/ProjectBreakdownProjects/ProjectBreakdownProjects.component.tsx'
@@ -97,9 +99,9 @@ export const ViewFundingAudit = () => {
   const isEmptyResult = Boolean(audit && audit.fundingCount === 0 && audit.spendingCount === 0 && audit.refundCount === 0)
   const hasActiveDateFilter = Boolean(dateFrom || dateTo)
   const showFilters = hasOrganisation && audit && (!isEmptyResult || hasActiveDateFilter)
+  const hasContent = hasOrganisation && Boolean(audit) && !isEmptyResult
 
   const renderBody = () => {
-
     if (!hasOrganisation) {
       return (
         <EmptyStatePage
@@ -137,8 +139,7 @@ export const ViewFundingAudit = () => {
     const projects = audit.projects
     const keyedProjects = projects.map((project, index) => ({ project, key: projectKey(project, index) }))
     const activeKeys = selectedProjectKeys.filter((key) => keyedProjects.some((entry) => entry.key === key))
-    const visibleProjects =
-      activeKeys.length === 0 ? projects : keyedProjects.filter((entry) => activeKeys.includes(entry.key)).map((entry) => entry.project)
+    const visibleProjects = activeKeys.length === 0 ? projects : keyedProjects.filter((entry) => activeKeys.includes(entry.key)).map((entry) => entry.project)
 
     return (
       <Section
@@ -156,10 +157,12 @@ export const ViewFundingAudit = () => {
             type="button"
             underline="hover"
             onClick={() => navigate(getOrgPath('projects/events', effectiveOrganisation))}
-            sx={{ color: '#408AD8', fontWeight: 600 }}>
+            sx={{ color: '#408AD8', fontWeight: 600 }}
+          >
             {t({ id: 'auditViewAllEvents' })}
           </Link>
-        }>
+        }
+      >
         <Box display="flex" flexDirection="column" flex={1} minHeight={0} gap={4}>
           <ProjectCardsGrid projects={projects} selectedKeys={activeKeys} onSelectKeys={setSelectedProjectKeys} organisationId={effectiveOrganisation} />
           <ProjectBreakdownProjects projects={visibleProjects} forceExpandedIds={activeKeys} />
@@ -171,18 +174,16 @@ export const ViewFundingAudit = () => {
   return (
     <>
       <LayoutPublic.Header>
-        <LayoutPublic.Header.Details description={t({ id: 'auditViewDescription' })} title={t({ id: 'auditViewTitle' })} />
+        <Box flex="1 1 auto" minWidth={0}>
+          <LayoutPublic.Header.Details description={t({ id: 'auditViewDescription' })} title={t({ id: 'auditViewTitle' })} />
+        </Box>
+        <LegalDisclosureButton />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={2}>
+        {hasContent && <LegalDisclosureAttribution />}
         {showFilters && (
           <Box display="flex" alignItems="flex-start" flexWrap="wrap-reverse" gap={1.5}>
-            <AuditFilterBar
-              dateFrom={dateFrom}
-              dateTo={dateTo}
-              onClear={clearFilters}
-              onDateFromChange={setDateFrom}
-              onDateToChange={setDateTo}
-            />
+            <AuditFilterBar dateFrom={dateFrom} dateTo={dateTo} onClear={clearFilters} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
             {audit?.lastEventDate && (
               <Box
                 sx={{

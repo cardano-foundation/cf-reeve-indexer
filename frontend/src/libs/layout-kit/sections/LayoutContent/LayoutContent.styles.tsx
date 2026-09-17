@@ -10,7 +10,7 @@ export const LayoutContentStyled = styled(Grid)<LayoutContentStyledProps>`
     margin: ${({ theme, $hasDrawer }) => ($hasDrawer ? theme.spacing(0, 50, 0, 0) : 0)};
     padding: 0;
     background: ${({ theme }) => theme.palette.background.paper};
-    overflow: hidden auto;
+    overflow: hidden;
     transition:
       margin 0.225s cubic-bezier(0, 0, 0.2, 1),
       padding 0.3s ease-in-out;
@@ -18,6 +18,8 @@ export const LayoutContentStyled = styled(Grid)<LayoutContentStyledProps>`
     ${({ theme }) => `
       ${theme.breakpoints.down('sm')} {
         margin: 0;
+        height: auto;
+        min-height: 100%;
         overflow: initial;
       }
     `}
