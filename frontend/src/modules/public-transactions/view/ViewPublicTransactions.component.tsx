@@ -6,10 +6,12 @@ import { useParams, useSearchParams } from 'react-router-dom'
 
 import { publicTransactionsIllustration } from 'assets/images'
 import { ButtonPrimary, ButtonSecondary } from 'features/common'
-import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
+import { LegalDisclosureAttribution } from 'libs/layout-kit/layout-public/components/LegalDisclosureAttribution/LegalDisclosureAttribution.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
+import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
+import { LegalDisclosureButton } from 'libs/ui-kit/components/LegalDisclosureButton/LegalDisclosureButton.component.tsx'
 import { PublicTransactionsContextProvider } from 'modules/public-transactions/components/PublicTransactionsContext/PublicTransactionsContext.component.tsx'
 import { SearchedTransactions } from 'modules/public-transactions/components/SearchedTransactions/SearchedTransactions.component.tsx'
 import { SearchFilters } from 'modules/public-transactions/components/SearchFilters/SearchFilters.component.tsx'
@@ -42,9 +44,12 @@ export const ViewPublicTransactions = () => {
   return (
     <PublicTransactionsContextProvider value={{ filters, options }}>
       <LayoutPublic.Header>
-        <LayoutPublic.Header.Details description={t({ id: 'publicTransactionsViewDescription' })} title={t({ id: 'publicTransactionsViewTitle' })} />
+        <Box flex="1 1 auto" minWidth={0}>
+          <LayoutPublic.Header.Details description={t({ id: 'publicTransactionsViewDescription' })} title={t({ id: 'publicTransactionsViewTitle' })} />
+        </Box>
+        <LegalDisclosureButton />
       </LayoutPublic.Header>
-      <LayoutPublic.Main flexDirection="column" gap={6} isHeightRestricted>
+      <LayoutPublic.Main flexDirection="column" gap={6} hasMinContentHeight isHeightRestricted>
         {hasEmptyPageState ? (
           <EmptyStatePage
             asset={<Box alt={t({ id: 'noPublicTransactionsMessage' })} component="img" maxWidth="47.5rem" src={publicTransactionsIllustration} width="100%" />}
@@ -52,9 +57,14 @@ export const ViewPublicTransactions = () => {
             message={t({ id: 'noPublicTransactionsMessage' })}
           />
         ) : (
-          <FormikProvider value={quickFilters}>
-            <SearchedTransactions data={transactions} pagination={pagination} sorting={sorting} hasFiltersSelected={hasFiltersSelected} isLoading={isFetching} />
-          </FormikProvider>
+          <Box display="flex" flexDirection="column" gap={1} height="100%" minHeight={0}>
+            <LegalDisclosureAttribution />
+            <Box display="flex" flexDirection="column" flex="1 1 0" minHeight="15rem">
+              <FormikProvider value={quickFilters}>
+                <SearchedTransactions data={transactions} pagination={pagination} sorting={sorting} hasFiltersSelected={hasFiltersSelected} isLoading={isFetching} />
+              </FormikProvider>
+            </Box>
+          </Box>
         )}
       </LayoutPublic.Main>
       <LayoutPublic.Drawer open={isDrawerOpen}>
