@@ -8,6 +8,7 @@ import { publicTransactionsIllustration } from 'assets/images'
 import { ButtonPrimary, ButtonSecondary } from 'features/common'
 import { LegalDisclosureAttribution } from 'libs/layout-kit/layout-public/components/LegalDisclosureAttribution/LegalDisclosureAttribution.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
@@ -22,6 +23,7 @@ export const ViewPublicTransactions = () => {
   const { organisationId: orgIdFromPath } = useParams<{ organisationId: string }>()
   const [searchParams] = useSearchParams()
   const { organisations, setSelectedOrganisation } = useLayoutPublicContext()
+  const organisationName = useSelectedOrganisationName()
 
   const { data, drawer, filters, options, pagination, sorting } = usePublicTransactions()
 
@@ -53,7 +55,7 @@ export const ViewPublicTransactions = () => {
         {hasEmptyPageState ? (
           <EmptyStatePage
             asset={<Box alt={t({ id: 'noPublicTransactionsMessage' })} component="img" maxWidth="47.5rem" src={publicTransactionsIllustration} width="100%" />}
-            hint={t({ id: 'noPublicTransactionsHint' }, { organisation: 'Cardano Foundation' })}
+            hint={t({ id: 'noPublicTransactionsHint' }, { organisation: organisationName })}
             message={t({ id: 'noPublicTransactionsMessage' })}
           />
         ) : (

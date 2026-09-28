@@ -8,6 +8,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { publicTransactionsIllustration } from 'assets/images'
 import { ButtonPrimary, ButtonSecondary } from 'features/common'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
@@ -24,6 +25,7 @@ export const ViewPublicEvents = () => {
   const lockedProjectId = searchParams.get('projectId')
   const { organisations, selectedOrganisation, setSelectedOrganisation } = useLayoutPublicContext()
   const effectiveOrganisation = selectedOrganisation || orgIdFromPath || ''
+  const organisationName = useSelectedOrganisationName()
 
 
   const { data, drawer, filters, options, pagination, sorting } = usePublicEvents(lockedProjectId)
@@ -54,7 +56,7 @@ export const ViewPublicEvents = () => {
         {hasEmptyPageState ? (
           <EmptyStatePage
             asset={<Box alt={t({ id: 'noPublicEventsMessage' })} component="img" maxWidth="47.5rem" src={publicTransactionsIllustration} width="100%" />}
-            hint={t({ id: 'noPublicEventsHint' }, { organisation: 'Cardano Foundation' })}
+            hint={t({ id: 'noPublicEventsHint' }, { organisation: organisationName })}
             message={t({ id: 'noPublicEventsMessage' })}
           />
         ) : (
