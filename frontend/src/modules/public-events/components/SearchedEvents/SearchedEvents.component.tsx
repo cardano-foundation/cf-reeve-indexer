@@ -9,6 +9,7 @@ import { useMemo, useRef } from 'react'
 import { EventView, PostPublicEventsResponse200 } from 'libs/api-connectors/backend-connector-reeve/api/events/publicEventsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
 import { CounterChipStyled } from 'libs/ui-kit/components/ChipsGroup/ChipsGroup.styles.tsx'
@@ -36,6 +37,7 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
   const { handleSorting } = sorting
 
   const { t } = useTranslations()
+  const organisationName = useSelectedOrganisationName()
 
   const theme = useTheme()
 
@@ -240,7 +242,7 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
             sortModel: [{ field: 'date', sort: 'desc' }]
           }
         }}
-        noRowsHint={t({ id: 'noPublicEventsHint' }, { organisation: 'Cardano Foundation' })}
+        noRowsHint={t({ id: 'noPublicEventsHint' }, { organisation: organisationName })}
         noRowsMessage={t({ id: 'nothingHereMessage' })}
         columns={columns}
         rows={rows}

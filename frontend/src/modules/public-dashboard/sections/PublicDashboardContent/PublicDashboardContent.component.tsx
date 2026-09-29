@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 
 import { publicDashboardIllustration } from 'assets/images'
 import { GetDashboardsResponse } from 'libs/api-connectors/backend-connector-reeve/api/dashboards/dashboardsApi.types.ts'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { DashboardFilters } from 'libs/ui-kit/components/DashboardFilters/DashboardFilters.component.tsx'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component.tsx'
@@ -19,6 +20,7 @@ interface PublicDashboardContentProps {
 
 export const PublicDashboardContent = ({ dashboard, data, isFetching }: PublicDashboardContentProps) => {
   const { t } = useTranslations()
+  const organisationName = useSelectedOrganisationName()
 
   if (isFetching) {
     return <EmptyStatePage asset={<LoaderCentered size={56} />} message={t({ id: 'loadingMessage' })} />
@@ -28,7 +30,7 @@ export const PublicDashboardContent = ({ dashboard, data, isFetching }: PublicDa
     return (
       <EmptyStatePage
         asset={<Box alt={t({ id: 'noPublicDashboardMessage' })} component="img" maxWidth="47.5rem" src={publicDashboardIllustration} width="100%" />}
-        hint={t({ id: 'noPublicDashboardHint' }, { organisation: 'Cardano Foundation' })}
+        hint={t({ id: 'noPublicDashboardHint' }, { organisation: organisationName })}
         message={t({ id: 'noPublicDashboardMessage' })}
       />
     )

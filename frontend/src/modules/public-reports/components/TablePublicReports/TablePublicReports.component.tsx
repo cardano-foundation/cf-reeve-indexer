@@ -8,6 +8,7 @@ import { useMemo, useRef } from 'react'
 
 import { GetPublicReportsResponse200, ReportEntity, LEIResponse } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useSorting } from 'libs/hooks/useSorting'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
@@ -34,6 +35,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
   const { handleSorting } = sorting
 
   const { t } = useTranslations()
+  const organisationName = useSelectedOrganisationName()
 
   const theme = useTheme()
 
@@ -158,7 +160,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
             sortModel: [{ field: 'period', sort: 'desc' }]
           }
         }}
-        noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: 'Cardano Foundation' })}
+        noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: organisationName })}
         noRowsMessage={t({ id: 'nothingHereMessage' })}
         paginationModel={{ page, pageSize: rowsPerPage }}
         paginationMode="server"

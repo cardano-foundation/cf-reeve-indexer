@@ -10,6 +10,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { publicProjectsIllustration } from 'assets/images'
 import { LegalDisclosureAttribution } from 'libs/layout-kit/layout-public/components/LegalDisclosureAttribution/LegalDisclosureAttribution.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Chip } from 'libs/ui-kit/components/Chip/Chip.component.tsx'
@@ -86,6 +87,7 @@ export const ViewFundingAudit = () => {
   }, [orgIdFromPath, searchParams, organisations, setSelectedOrganisation])
 
   const effectiveOrganisation = selectedOrganisation || orgIdFromPath || ''
+  const organisationName = useSelectedOrganisationName()
 
   const toApiDate = (value: Dayjs | null) => (value ? value.format('YYYY-MM-DD') : undefined)
 
@@ -130,7 +132,7 @@ export const ViewFundingAudit = () => {
       ) : (
         <EmptyStatePage
           asset={<Box alt={t({ id: 'auditNoDataMessage' })} component="img" maxWidth="47.5rem" src={publicProjectsIllustration} width="100%" />}
-          hint={t({ id: 'auditNoDataHint' })}
+          hint={t({ id: 'auditNoDataHint' }, { organisation: organisationName })}
           message={t({ id: 'auditNoDataMessage' })}
         />
       )

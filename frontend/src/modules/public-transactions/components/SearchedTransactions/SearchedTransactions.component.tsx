@@ -10,6 +10,7 @@ import { useMemo, useRef } from 'react'
 import { PostPublicTransactionsResponse200 } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { CellCodeDetails } from 'libs/ui-kit/components/CellCodeDetails/CellCodeDetails.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
@@ -31,6 +32,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
   const { handleSorting } = sorting
 
   const { t } = useTranslations()
+  const organisationName = useSelectedOrganisationName()
 
   const theme = useTheme()
 
@@ -207,7 +209,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
             sortModel: [{ field: 'entryDate', sort: 'desc' }]
           }
         }}
-        noRowsHint={t({ id: 'noPublicTransactionsHint' }, { organisation: 'Cardano Foundation' })}
+        noRowsHint={t({ id: 'noPublicTransactionsHint' }, { organisation: organisationName })}
         noRowsMessage={t({ id: 'nothingHereMessage' })}
         paginationModel={{ page, pageSize: rowsPerPage }}
         paginationMode="server"
