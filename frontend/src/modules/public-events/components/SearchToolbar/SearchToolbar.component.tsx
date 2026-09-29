@@ -22,6 +22,9 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
         <FieldText name="search" slotProps={{ input: { startAdornment: <SearchIconStyled /> } }} placeholder={t({ id: 'publicEventsSearchPlaceholder' })} type="text" />
       </TableToolbar.QuickFilters.Field>
       <Divider orientation="vertical" flexItem />
+      <TableToolbar.QuickFilters.Field>
+        <FieldCombobox label={t({ id: 'project' })} limitTags={1} name="project" options={projectOptions} multiple />
+      </TableToolbar.QuickFilters.Field>
       <TableToolbar.QuickFilters.FieldGroup>
         <TableToolbar.QuickFilters.Field>
           <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo || dateFromMaxDate} />
@@ -32,9 +35,6 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
       </TableToolbar.QuickFilters.FieldGroup>
       <TableToolbar.QuickFilters.Field>
         <FieldCombobox label={t({ id: 'eventType' })} limitTags={1} name="eventType" options={eventTypeOptions} multiple />
-      </TableToolbar.QuickFilters.Field>
-      <TableToolbar.QuickFilters.Field>
-        <FieldCombobox label={t({ id: 'project' })} limitTags={1} name="project" options={projectOptions} multiple />
       </TableToolbar.QuickFilters.Field>
     </TableToolbar.QuickFilters>
   )

@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.5.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.4.0...1.5.0) (2026-09-18)
+
+
+### Features
+
+* [LOB-1305] [BE] Ingest and expose Accounting Regime on indexed … ([#84](https://github.com/cardano-foundation/cf-reeve-indexer/issues/84)) ([f1ed5c2](https://github.com/cardano-foundation/cf-reeve-indexer/commit/f1ed5c29525ac5703e183108786c758079c3df81))
+* [LOB-2306] Added Accounting regime chips to the report table and the detail modal. Also reacts correctly to missing field with legacy report text. ([3e1c205](https://github.com/cardano-foundation/cf-reeve-indexer/commit/3e1c2050a7637e26678d088e1c4b8d168151d686))
+
+## [1.4.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.3.1...1.4.0) (2026-08-25)
+
+
+### Features
+
+* added event bundle implementation ([3dfb470](https://github.com/cardano-foundation/cf-reeve-indexer/commit/3dfb4703eddc538bfc60163f01a6634d313068ae))
+* extending funding visualization ([bd6a4d5](https://github.com/cardano-foundation/cf-reeve-indexer/commit/bd6a4d5310ce44806a797b66ff859dfcc700e6cc))
+* further improvements ([90bc80e](https://github.com/cardano-foundation/cf-reeve-indexer/commit/90bc80eef90139480bc08b4eb0d4a7531d213e77))
+* hardened images ([#76](https://github.com/cardano-foundation/cf-reeve-indexer/issues/76)) ([076fcf6](https://github.com/cardano-foundation/cf-reeve-indexer/commit/076fcf6cc2118861b9d182587e89075a28b55086))
+
 ## [1.3.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.3.0...1.3.1) (2026-06-26)
 
 

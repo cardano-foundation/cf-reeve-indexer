@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { publicTransactionsIllustration } from 'assets/images'
 import { ButtonPrimary, ButtonSecondary } from 'features/common'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
@@ -14,14 +15,19 @@ import { PublicEventsContextProvider } from 'modules/public-events/components/Pu
 import { SearchedEvents } from 'modules/public-events/components/SearchedEvents/SearchedEvents.component.tsx'
 import { SearchFilters } from 'modules/public-events/components/SearchFilters/SearchFilters.component.tsx'
 import { usePublicEvents } from 'modules/public-events/hooks/usePublicEvents.ts'
+import { getOrgPath } from 'routes'
 
 export const ViewPublicEvents = () => {
   const { t } = useTranslations()
   const { organisationId: orgIdFromPath } = useParams<{ organisationId: string }>()
   const [searchParams] = useSearchParams()
-  const { organisations, setSelectedOrganisation } = useLayoutPublicContext()
+  const lockedProjectId = searchParams.get('projectId')
+  const { organisations, selectedOrganisation, setSelectedOrganisation } = useLayoutPublicContext()
+  const effectiveOrganisation = selectedOrganisation || orgIdFromPath || ''
+  const organisationName = useSelectedOrganisationName()
 
-  const { data, drawer, filters, options, pagination, sorting } = usePublicEvents()
+
+  const { data, drawer, filters, options, pagination, sorting } = usePublicEvents(lockedProjectId)
 
   useEffect(() => {
     const orgId = orgIdFromPath || searchParams.get('organisation_id')
@@ -42,13 +48,14 @@ export const ViewPublicEvents = () => {
   return (
     <PublicEventsContextProvider value={{ filters, options }}>
       <LayoutPublic.Header>
+        <LayoutPublic.Header.ButtonBack to={getOrgPath('projects', effectiveOrganisation)} />
         <LayoutPublic.Header.Details description={t({ id: 'publicEventsViewDescription' })} title={t({ id: 'publicEventsViewTitle' })} />
       </LayoutPublic.Header>
-      <LayoutPublic.Main flexDirection="column" gap={6} isHeightRestricted>
+      <LayoutPublic.Main flexDirection="column" gap={6}>
         {hasEmptyPageState ? (
           <EmptyStatePage
             asset={<Box alt={t({ id: 'noPublicEventsMessage' })} component="img" maxWidth="47.5rem" src={publicTransactionsIllustration} width="100%" />}
-            hint={t({ id: 'noPublicEventsHint' }, { organisation: 'Cardano Foundation' })}
+            hint={t({ id: 'noPublicEventsHint' }, { organisation: organisationName })}
             message={t({ id: 'noPublicEventsMessage' })}
           />
         ) : (

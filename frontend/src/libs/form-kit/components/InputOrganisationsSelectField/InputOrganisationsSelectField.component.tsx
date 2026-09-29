@@ -79,8 +79,10 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
           }
         },
         '&& .MuiSelect-select': {
-          minHeight: '2.5rem',
-          padding: theme.spacing(1.25, 2),
+          paddingTop: '18.5px',
+          paddingBottom: '18.5px',
+          paddingLeft: theme.spacing(2),
+          paddingRight: theme.spacing(2),
           display: 'flex',
           alignItems: 'center',
           color: theme.palette.text.primary

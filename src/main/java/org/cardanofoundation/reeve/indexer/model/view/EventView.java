@@ -54,6 +54,8 @@ public class EventView {
     private String notes;
     private String currencyId;
     private String currencyCustCode;
+    private String currencyFcyId;
+    private String currencyFcyCustCode;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
@@ -93,6 +95,8 @@ public class EventView {
                 .notes(entity.getNotes())
                 .currencyId(entity.getCurrencyId())
                 .currencyCustCode(entity.getCurrencyCustCode())
+                .currencyFcyId(entity.getCurrencyFcyId())
+                .currencyFcyCustCode(entity.getCurrencyFcyCustCode())
                 .date(entity.getDate())
                 .version(entity.getVersion())
                 .ipfsCid(entity.getIpfsCid())

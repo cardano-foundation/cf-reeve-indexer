@@ -3,6 +3,7 @@ import Grid from '@mui/material/Grid'
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 
+import { EXTERNAL_URLS } from 'libs/const/urls.ts'
 import { LogoContainerStyled, LogoStyled } from 'libs/layout-kit/layout-public/components/LogoSidebar/LogoSidebar.styles.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { LogoIcon } from 'libs/ui-kit/components/LogoIcon/LogoIcon.tsx'
@@ -25,7 +26,7 @@ export const LogoSidebar = ({ isSidebarOpen }: LogoSidebarProps) => {
                   { id: 'termsOfUseLink' },
                   {
                     terms: (chunks) => (
-                      <Link href="https://www.cardanofoundation.org/policy/terms-and-conditions" target="_blank" rel="noopener noreferrer" underline="always">
+                      <Link href={EXTERNAL_URLS.TERMS_OF_USE} target="_blank" rel="noopener noreferrer" underline="always">
                         {chunks}
                       </Link>
                     )
@@ -39,7 +40,7 @@ export const LogoSidebar = ({ isSidebarOpen }: LogoSidebarProps) => {
                   { id: 'privacyPolicyLink' },
                   {
                     privacy: (chunks) => (
-                      <Link href="https://www.cardanofoundation.org/policy/privacy" target="_blank" rel="noopener noreferrer" underline="always">
+                      <Link href={EXTERNAL_URLS.PRIVACY_POLICY} target="_blank" rel="noopener noreferrer" underline="always">
                         {chunks}
                       </Link>
                     )

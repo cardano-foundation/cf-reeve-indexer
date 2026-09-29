@@ -2,4 +2,5 @@ export { default as publicDashboardIllustration } from './public-dashboard-illus
 export { default as publicReportsIllustration } from './public-reports-illustration.svg'
 export { default as publicTransactionsIllustration } from './public-transactions-illustration.svg'
 export { default as publicLandingIllustration } from './public-landing-illustration.svg'
+export { default as publicProjectsIllustration } from './public-projects-illustration.svg'
 export { default as Logo } from './logo.svg'

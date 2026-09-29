@@ -11,6 +11,7 @@ import { formatNumber } from 'libs/utils/format'
 import { ContentStyled } from './modal-report.styles'
 import { computeNestedSum } from './modal-report.utils'
 import { getLegacyReportConfig } from './modal-report.legacy-configs'
+import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
 
 const createSafeT = (t: any) => (id?: string, variables?: Record<string, any>, fallback?: string) => {
   if (!id) return fallback || ''
@@ -21,7 +22,7 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const { t } = useTranslations()
   const safeT = createSafeT(t)
 
-  const { txHash, currency, period, intervalType, year, data, subType } = report
+  const { txHash, currency, period, intervalType, year, data, subType, accountingRegime } = report
 
   const titleText = safeT(
     'reportViewTitle',
@@ -46,6 +47,9 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
                 {titleText}
               </Typography>
             </Grid>
+            <Grid alignItems="center" container size="auto">
+              <ChipAccountingRegime accountingRegime={accountingRegime} />
+            </Grid>
           </Grid>
           <Divider flexItem />
           <NestedGrid data={data} depth={0} safeT={safeT} reportHash={txHash} reportType={subType} />
@@ -68,10 +72,10 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
   const borderSX =
     depth > 0
       ? {
-          borderLeft: '1px solid',
-          borderColor: 'divider',
-          pl: 2
-        }
+        borderLeft: '1px solid',
+        borderColor: 'divider',
+        pl: 2
+      }
       : {}
 
   const camelize = (s: string) =>
@@ -93,13 +97,13 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
 
   const entries = legacyConfig
     ? Object.entries(data).sort(([a], [b]) => {
-        const ai = legacyConfig.fieldOrder.indexOf(a)
-        const bi = legacyConfig.fieldOrder.indexOf(b)
-        if (ai === -1 && bi === -1) return a.localeCompare(b)
-        if (ai === -1) return -1
-        if (bi === -1) return 1
-        return ai - bi
-      })
+      const ai = legacyConfig.fieldOrder.indexOf(a)
+      const bi = legacyConfig.fieldOrder.indexOf(b)
+      if (ai === -1 && bi === -1) return a.localeCompare(b)
+      if (ai === -1) return -1
+      if (bi === -1) return 1
+      return ai - bi
+    })
     : Object.entries(data)
   const cumulativeTotals = new Map<string, number>()
   if (shouldApplyCumulativeTotals) {

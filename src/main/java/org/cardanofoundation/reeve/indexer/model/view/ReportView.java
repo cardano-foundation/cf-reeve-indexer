@@ -33,6 +33,12 @@ public class ReportView {
     private String currency;
     private String subType;
 
+    // Absent (null) on reports published before this field existed. Always included in the
+    // response, even when null, so the frontend can distinguish "no regime on this legacy
+    // report" from a field that failed to load.
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    private String accountingRegime;
+
     private String txHash;
 
     private String intervalType;
@@ -54,6 +60,7 @@ public class ReportView {
         return ReportView.builder()
                 .organisationId(entity.getOrganisationId())
                 .subType(entity.getSubType())
+                .accountingRegime(entity.getAccountingRegime())
                 .intervalType(entity.getInterval().name())
                 .year(entity.getYear())
                 .period(entity.getPeriod())

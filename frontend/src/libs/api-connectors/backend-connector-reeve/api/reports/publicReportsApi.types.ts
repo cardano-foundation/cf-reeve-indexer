@@ -46,6 +46,7 @@ export type ReportEntity = {
   blockChainHash: string
   identities: IdentityAttestationView[]
   data: NestedMap
+  accountingRegime: string | null 
 }
 
 /**

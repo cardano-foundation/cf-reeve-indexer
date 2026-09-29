@@ -12,16 +12,18 @@ export const LayoutContentHeaderStyled = styled(Grid)<LayoutContentHeaderStyledP
 
     ${({ theme }) => `
       ${theme.breakpoints.down('sm')} {
-        max-height: 11rem;
-        min-height: 11rem;
+        max-height: none;
+        min-height: unset;
+        flex: 0 0 auto;
         padding: ${theme.spacing(2, 3)};
       }
     `}
 
     ${({ theme }) => `
       @media (max-height: 37.5rem) {
-        max-height: 6rem;
-        min-height: 6rem;
+        max-height: none;
+        min-height: unset;
+        flex: 0 0 auto;
         padding: ${theme.spacing(2, 3)};
       }
     `}

@@ -19,6 +19,9 @@ export const SearchFilters = () => {
         <Grid container size="grow" columnSpacing={2} rowSpacing={3}>
           <Typography variant="h3">{t({ id: 'eventDetails' })}</Typography>
           <Grid size={12}>
+            <FieldCombobox label={t({ id: 'project' })} name="project" options={projectOptions} multiple />
+          </Grid>
+          <Grid size={12}>
             <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo || dateFromMaxDate} />
           </Grid>
           <Grid size={12}>
@@ -27,17 +30,14 @@ export const SearchFilters = () => {
           <Grid size={12}>
             <FieldCombobox label={t({ id: 'eventType' })} name="eventType" options={eventTypeOptions} multiple />
           </Grid>
-          <Grid size={12}>
-            <FieldCombobox label={t({ id: 'project' })} name="project" options={projectOptions} multiple />
-          </Grid>
         </Grid>
         <Divider flexItem orientation="horizontal" />
         <Grid container size="grow" columnSpacing={2} rowSpacing={3}>
           <Typography variant="h3">{t({ id: 'amount' })}</Typography>
-          <Grid size={6}>
+          <Grid size={12}>
             <FieldNumeric label={t({ id: 'minAmount' })} name="minAmount" />
           </Grid>
-          <Grid size={6}>
+          <Grid size={12}>
             <FieldNumeric label={t({ id: 'maxAmount' })} name="maxAmount" />
           </Grid>
         </Grid>

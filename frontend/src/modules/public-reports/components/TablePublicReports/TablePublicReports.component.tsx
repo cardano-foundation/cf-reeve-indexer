@@ -9,12 +9,14 @@ import { useMemo, useRef } from 'react'
 import { GetPublicReportsResponse200, IdentityAttestationView, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
 import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
+import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
 import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
@@ -33,6 +35,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
   const { handleSorting } = sorting
 
   const { t } = useTranslations()
+  const organisationName = useSelectedOrganisationName()
 
   const theme = useTheme()
 
@@ -53,6 +56,15 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       valueFormatter: (value) => t({ id: value }),
       hideable: false,
       sortable: true,
+      flex: 1,
+      minWidth: 192
+    },
+    {
+      field: 'accountingRegime',
+      headerName: t({ id: 'accountingRegime' }),
+      renderCell: ({ row }) => <ChipAccountingRegime accountingRegime={row.accountingRegime} />,
+      hideable: false,
+      sortable: false,
       flex: 1,
       minWidth: 192
     },
@@ -104,27 +116,27 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
     {
       field: 'identities',
       headerName: t({ id: 'identityVerified' }),
-        renderCell: ({ row }) => (
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
-            {row.identities?.map((item: IdentityAttestationView, index: number) => (
-              <IdentityAttestationBadge
-                key={index}
-                isVerified={item.identityVerified}
-                schemaName={item.schemaName}
-                schemaSaid={item.schemaSaid}
-                claims={item.claims}
-                lei={item.lei}
-                txHash={item.txHash}
-                credentialTxHash={item.credentialTxHash}
-              />
-            ))}
-          </div>
-        ),
-        hideable: false,
-        sortable: true,
-        flex: 1,
-        minWidth: 50
-      },
+      renderCell: ({ row }) => (
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
+          {row.identities?.map((item: IdentityAttestationView, index: number) => (
+            <IdentityAttestationBadge
+              key={index}
+              isVerified={item.identityVerified}
+              schemaName={item.schemaName}
+              schemaSaid={item.schemaSaid}
+              claims={item.claims}
+              lei={item.lei}
+              txHash={item.txHash}
+              credentialTxHash={item.credentialTxHash}
+            />
+          ))}
+        </div>
+      ),
+      hideable: false,
+      sortable: true,
+      flex: 1,
+      minWidth: 50
+    },
     {
       field: 'actions',
       headerName: '',
@@ -151,7 +163,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
             sortModel: [{ field: 'period', sort: 'desc' }]
           }
         }}
-        noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: 'Cardano Foundation' })}
+        noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: organisationName })}
         noRowsMessage={t({ id: 'nothingHereMessage' })}
         paginationModel={{ page, pageSize: rowsPerPage }}
         paginationMode="server"

@@ -1,14 +1,13 @@
 import { Formik } from 'formik'
-import { useNavigate, useLocation } from 'react-router-dom'
 import { useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
+import { useMediaQueries } from 'hooks'
 import { FieldOrganisations } from 'libs/form-kit/components/FieldOrganisations/FieldOrganisations.component.tsx'
-import {
-  OrganisationFormSidebarStyled,
-  OrganisationsFormStyled
-} from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.styles.tsx'
+import { OrganisationFormSidebarStyled, OrganisationsFormStyled } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.styles.tsx'
 import { OrganisationFormValues } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.types.ts'
 import { useGetOrganisationsModel } from 'libs/models/organisation-model/GetOrganisations/GetOrganisations.service'
+import { getOrgPath } from 'routes'
 
 interface OrganisationFormLayoutProps {
   isSidebarOpen: boolean
@@ -30,33 +29,34 @@ interface OrganisationFormSidebarProps {
   isSidebarOpen: boolean
 }
 
-export const OrganisationFormSidebar = ({
-  initialValues,
-  onSubmit,
-  isSidebarOpen
-}: OrganisationFormSidebarProps) => {
+export const OrganisationFormSidebar = ({ initialValues, onSubmit, isSidebarOpen }: OrganisationFormSidebarProps) => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { organisations, isFetching } = useGetOrganisationsModel()
+  const { organisations } = useGetOrganisationsModel()
+  const { isMobile } = useMediaQueries()
 
-  const handleOrgSelect = useCallback((orgId: string) => {
-    // Determine current route type (reports or transactions)
-    const isReports = pathname.includes('/reports')
-    const isTransactions = pathname.includes('/transactions')
+  const handleOrgSelect = useCallback(
+    (orgId: string) => {
+      // Determine current route type (reports, transactions, or projects)
+      const isReports = pathname.includes('/reports')
+      const isTransactions = pathname.includes('/transactions')
+      const isProjects = pathname.includes('/projects')
 
-    if (isReports) {
-      navigate(`/reports/${orgId}`)
-    } else if (isTransactions) {
-      navigate(`/transactions/${orgId}`)
-    } else {
-      // Default to reports if no specific route detected
-      navigate(`/reports/${orgId}`)
-    }
-  }, [pathname, navigate])
+      if (isReports) {
+        navigate(getOrgPath('reports', orgId))
+      } else if (isTransactions) {
+        navigate(getOrgPath('transactions', orgId))
+      } else if (isProjects) {
+        navigate(getOrgPath('projects', orgId))
+      } else {
+        // Default to reports if no specific route detected
+        navigate(getOrgPath('reports', orgId))
+      }
+    },
+    [pathname, navigate]
+  )
 
-  if (isFetching || !organisations) return null
-
-  const organisationOptions = organisations.map((o: any) => ({
+  const organisationOptions = (organisations ?? []).map((o: any) => ({
     name: o.name,
     value: o.id
   }))
@@ -64,7 +64,7 @@ export const OrganisationFormSidebar = ({
   const defaultOrganisation = initialValues.organisations ?? ''
 
   return (
-    <OrganisationFormSidebarStyled>
+    <OrganisationFormSidebarStyled $isMobile={isMobile}>
       <Formik<OrganisationFormValues>
         enableReinitialize
         initialValues={{
@@ -72,14 +72,9 @@ export const OrganisationFormSidebar = ({
           organisations: defaultOrganisation
         }}
         onSubmit={onSubmit ?? (() => undefined)}
-        component={() => (
-          <OrganisationFormLayout
-            isSidebarOpen={isSidebarOpen}
-            items={organisationOptions}
-            onOrgSelect={handleOrgSelect}
-          />
-        )}
-      />
+      >
+        {() => <OrganisationFormLayout isSidebarOpen={isSidebarOpen} items={organisationOptions} onOrgSelect={handleOrgSelect} />}
+      </Formik>
     </OrganisationFormSidebarStyled>
   )
 }

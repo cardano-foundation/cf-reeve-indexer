@@ -2,8 +2,9 @@ import { createBreakpoints } from '@mui/system'
 
 declare module '@mui/material/styles' {
   interface BreakpointOverrides {
+    smw: true,
     xxl: true
   }
 }
 
-export const breakpoints = createBreakpoints({ values: { xs: 0, sm: 600, md: 1200, lg: 1400, xl: 1900, xxl: 2300 } })
+export const breakpoints = createBreakpoints({ values: { xs: 0, sm: 600, smw: 1000, md: 1200, lg: 1400, xl: 1900, xxl: 2300 } })
