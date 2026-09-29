@@ -6,9 +6,8 @@ import org.springframework.stereotype.Service;
 import co.nstant.in.cbor.CborException;
 import com.bloxbean.cardano.client.common.cbor.CborSerializationUtil;
 import com.bloxbean.cardano.client.metadata.MetadataMap;
-
-import org.cardanofoundation.signify.cesr.Diger;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.Diger;
+import id.veridian.signify.cesr.args.RawArgs;
 
 /**
  * Computes the Blake3-256 digest of a metadata map's canonical CBOR bytes — the CIP-170 digest idiom,

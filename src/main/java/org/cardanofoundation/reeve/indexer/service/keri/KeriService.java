@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.generated.keria.model.KeyEvent;
+import id.veridian.signify.generated.keria.model.KeyEventRecord;
 
 import org.cardanofoundation.reeve.indexer.config.CredentialSchema;
 import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
@@ -33,9 +36,6 @@ import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository
 import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.service.keri.cesr.CESRStreamUtil;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.generated.keria.model.KeyEvent;
-import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
 
 @RequiredArgsConstructor
 @Service
@@ -69,10 +69,10 @@ public class KeriService {
             client.ifPresent(c ->
             {
                 try {
-                    var completed = c.operations().wait(c.oobis().resolve(oobi, null));
-                    // Reaching here means the operation completed without error: the current client
-                    // raises OperationFailedException/OperationTimeoutException instead of returning a
-                    // done-with-error operation, and those are caught below and left retryable.
+                    // wait RETURNS a done FailedOperation rather than throwing it, so the result is
+                    // checked: a failed resolve throws here, is caught below and stays retryable.
+                    var completed = KeriOperations.requireNotFailed(
+                            c.operations().wait(c.oobis().resolve(oobi, null)), "OOBI resolve " + oobi);
                     if (completed != null) {
                         resolvedOobis.add(oobi);
                     }

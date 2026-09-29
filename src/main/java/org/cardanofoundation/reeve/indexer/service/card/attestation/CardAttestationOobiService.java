@@ -16,16 +16,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Operations;
+import id.veridian.signify.exception.OperationTimeoutException;
+import id.veridian.signify.exception.SignifyAgentException;
+import id.veridian.signify.exception.SignifyInterruptedException;
+import id.veridian.signify.exception.SignifyTransportException;
+import id.veridian.signify.generated.keria.model.OOBI;
+
 import org.cardanofoundation.reeve.indexer.config.KeriAgentIdentity;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriAgentUnavailableException;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriOobiValidationException;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operations;
-import org.cardanofoundation.signify.exception.OperationTimeoutException;
-import org.cardanofoundation.signify.exception.SignifyAgentException;
-import org.cardanofoundation.signify.exception.SignifyInterruptedException;
-import org.cardanofoundation.signify.exception.SignifyTransportException;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.reeve.indexer.service.keri.KeriOperations;
 
 /**
  * The "pair" foundation for the card-attestation ceremony: exposes the indexer's own KERI agent OOBI
@@ -182,7 +184,8 @@ public class CardAttestationOobiService {
             Operations.WaitOptions waitOptions = Operations.WaitOptions.builder()
                     .abortSignal(Operations.AbortSignal.builder().timeout(RESOLVE_TIMEOUT_MILLIS).build())
                     .build();
-            client.orElseThrow().operations().wait(resolveResult, waitOptions);
+            KeriOperations.requireNotFailed(client.orElseThrow().operations().wait(resolveResult, waitOptions),
+                    "wallet OOBI resolve");
 
             var contact = client.orElseThrow().contacts().get(aid);
             if (contact.isEmpty()) {

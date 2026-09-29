@@ -6,11 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.bloxbean.cardano.client.common.cbor.CborSerializationUtil;
 import com.bloxbean.cardano.client.metadata.MetadataBuilder;
 import com.bloxbean.cardano.client.metadata.MetadataMap;
+import id.veridian.signify.cesr.Diger;
+import id.veridian.signify.cesr.args.RawArgs;
 
 import org.junit.jupiter.api.Test;
-
-import org.cardanofoundation.signify.cesr.Diger;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
 
 /**
  * Small shape test for {@link Cip170MetadataFactory}, covering {@code digestOf} — the only method this

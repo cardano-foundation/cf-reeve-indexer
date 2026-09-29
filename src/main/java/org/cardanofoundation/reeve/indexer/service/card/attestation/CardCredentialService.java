@@ -22,6 +22,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.veridian.signify.app.Exchanging.ExchangeMessageResult;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Operations;
+import id.veridian.signify.app.credentialing.ipex.IpexAdmitArgs;
+import id.veridian.signify.app.credentialing.ipex.IpexAgreeArgs;
+import id.veridian.signify.exception.SignifyInterruptedException;
+import id.veridian.signify.generated.keria.model.HabState;
 
 import org.cardanofoundation.reeve.indexer.config.CredentialSchema;
 import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
@@ -32,16 +39,10 @@ import org.cardanofoundation.reeve.indexer.model.entity.CardAttestationCeremonyE
 import org.cardanofoundation.reeve.indexer.service.keri.KeriAgentUnavailableException;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelator;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelator.CorrelatedNotification;
+import org.cardanofoundation.reeve.indexer.service.keri.KeriOperations;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriService;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriService.PresentedCredential;
 import org.cardanofoundation.reeve.indexer.service.keri.cesr.CESRStreamUtil;
-import org.cardanofoundation.signify.app.Exchanging.ExchangeMessageResult;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operations;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexAgreeArgs;
-import org.cardanofoundation.signify.exception.SignifyInterruptedException;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 /**
  * Drives the "pair" and "credential presentation" steps of the card-attestation ceremony,
@@ -63,17 +64,18 @@ import org.cardanofoundation.signify.generated.keria.model.HabState;
  *
  * <p><b>The presented credential is NOT verified.</b> The indexer accepts whatever credential the
  * paired wallet grants and records its identifiers ({@link KeriService#readPresentedCredential}) — no
- * registry verification, no schema gate, no revocation check, no issuer/root trust check. This is
+ * registry verification, no revocation check, no issuer/root trust check. This is
  * deliberate: the indexer is a permissionless, public component, and verifying an attestation is the
  * importer's job. The {@code credentialSaid}/{@code schemaSaid} this records are therefore CLAIMS
  * about what was presented, not verified facts — see {@code CardAttestService}'s own note where they
  * are written onto the card. {@code KeriService#verifyCredentialEntity} (the on-chain AUTH_BEGIN
  * path) is unrelated and still verifies in full.
  *
- * <p>Because any schema is now accepted, a wallet may grant a credential whose schema this agent
- * never resolved an OOBI for ({@link #ensureSchemasResolved} only resolves the CONFIGURED ones). The
- * admit can still succeed, but a subsequent fetch failure for such a credential is an expected
- * outcome rather than a defect.
+ * <p>One gate does apply before the admit: the granted credential's schema must be one of the
+ * configured {@code keri.credential-schemas} ({@link #requireConfiguredSchema}). This is a filter on
+ * what our agent stores, not trust verification. It also matches what the agent can process: {@link
+ * #ensureSchemasResolved} only resolves the CONFIGURED schemas' OOBIs, so a credential of any other
+ * schema could not reliably be fetched after the admit anyway.
  */
 @Service
 @RequiredArgsConstructor
@@ -319,6 +321,7 @@ public class CardCredentialService {
                 throw new CardCredentialStepException("CREDENTIAL_PRESENTATION_FAILED",
                         "IPEX grant exchange did not embed an ACDC (e.acdc.d missing).");
             }
+            requireConfiguredSchema(claimedNotification.exn(), ceremonyId);
             // submitAdmit is given the ADMIT's OWN atc here (borrowedAtc = null), not an agree's —
             // there is no agree in this branch to borrow one from.
             admit(claimedNotification.exnSaid(), null, agentName, walletAid);
@@ -355,6 +358,7 @@ public class CardCredentialService {
                 throw new CardCredentialStepException("CREDENTIAL_PRESENTATION_FAILED",
                         "IPEX grant exchange did not embed an ACDC (e.acdc.d missing).");
             }
+            requireConfiguredSchema(grantNotification.exn(), ceremonyId);
             // submitAdmit is given the AGREE exchange's own atc, NOT the admit's own — a proven
             // wallet-contract quirk this module matches.
             admit(grantNotification.exnSaid(), agreeResult.atc(), agentName, walletAid);
@@ -448,7 +452,9 @@ public class CardCredentialService {
                         Operations.WaitOptions waitOptions = Operations.WaitOptions.builder()
                                 .abortSignal(Operations.AbortSignal.builder().timeout(SCHEMA_RESOLVE_TIMEOUT_MILLIS).build())
                                 .build();
-                        client.orElseThrow().operations().wait(resolveResult, waitOptions);
+                        KeriOperations.requireNotFailed(
+                                client.orElseThrow().operations().wait(resolveResult, waitOptions),
+                                "schema OOBI resolve");
                     } catch (Exception e) {
                         interruptIfNeeded(e);
                         throw new KeriAgentUnavailableException(
@@ -499,7 +505,7 @@ public class CardCredentialService {
 
             var applyOp = client.orElseThrow().ipex().submitApply(agentName, applyResult.exn(), applyResult.sigs(),
                     List.of(walletAid));
-            client.orElseThrow().operations().wait(applyOp);
+            KeriOperations.requireNotFailed(client.orElseThrow().operations().wait(applyOp), "IPEX apply");
             log.info("IPEX apply sent to {} for ceremony {} (schema {})", walletAid, ceremonyId, schemaSaid);
         } catch (CardCredentialStepException e) {
             throw e;
@@ -517,7 +523,7 @@ public class CardCredentialService {
                     .offerSaid(offerSaid).datetime(nowKeriTimestamp()).build());
             var agreeOp = client.orElseThrow().ipex().submitAgree(agentName, agreeResult.exn(), agreeResult.sigs(),
                     List.of(walletAid));
-            client.orElseThrow().operations().wait(agreeOp);
+            KeriOperations.requireNotFailed(client.orElseThrow().operations().wait(agreeOp), "IPEX agree");
             log.info("agree sent for grant to {}", walletAid);
             return agreeResult;
         } catch (Exception e) {
@@ -537,7 +543,7 @@ public class CardCredentialService {
             String atc = borrowedAtc != null ? borrowedAtc : admitResult.atc();
             var admitOp = client.orElseThrow().ipex().submitAdmit(agentName, admitResult.exn(), admitResult.sigs(),
                     atc, List.of(walletAid));
-            client.orElseThrow().operations().wait(admitOp);
+            KeriOperations.requireNotFailed(client.orElseThrow().operations().wait(admitOp), "IPEX admit");
             log.info("admit sent for grant {} to {}", grantSaid, walletAid);
         } catch (Exception e) {
             interruptIfNeeded(e);
@@ -624,6 +630,37 @@ public class CardCredentialService {
                 ? s
                 : notification.claimedRoute();
         return route != null && GRANT_ROUTES.contains(route);
+    }
+
+    /**
+     * Refuses to admit a granted credential whose schema ({@code e.acdc.s}) is not one of the configured
+     * {@code keri.credential-schemas}. Checked against the WHOLE configured set, not just the schema the
+     * apply asked for, because a wallet may present spontaneously. The grant notification has already
+     * been recorded in {@code claimedGrantNotificationId} by the caller, so the resulting step failure
+     * cleans it up ({@link #cleanupClaimedGrant}) and the next presentation does not re-claim it.
+     */
+    private void requireConfiguredSchema(Map<String, Object> grantExn, UUID ceremonyId) {
+        String schemaSaid = extractSchemaSaid(grantExn);
+        if (schemaSaid == null || credentialSchemaRegistry.forSaid(schemaSaid).isEmpty()) {
+            log.warn("Rejecting IPEX grant for ceremony {}: schema {} is not a configured credential schema",
+                    ceremonyId, schemaSaid);
+            throw new CardCredentialStepException("CREDENTIAL_PRESENTATION_FAILED",
+                    "The presented credential's schema %s is not one of the configured credential schemas."
+                            .formatted(schemaSaid));
+        }
+    }
+
+    private static String extractSchemaSaid(Map<String, Object> grantExn) {
+        Object e = grantExn.get("e");
+        if (!(e instanceof Map<?, ?> em)) {
+            return null;
+        }
+        Object acdc = em.get("acdc");
+        if (!(acdc instanceof Map<?, ?> am)) {
+            return null;
+        }
+        Object said = am.get("s");
+        return said instanceof String s ? s : null;
     }
 
     private static String extractCredentialSaid(Map<String, Object> grantExn) {

@@ -14,17 +14,18 @@ import java.util.Optional;
 
 import org.springframework.test.util.ReflectionTestUtils;
 
+import id.veridian.signify.app.Exchanging;
+import id.veridian.signify.app.Notifying;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.generated.keria.model.ExchangeResource;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.Notification;
+import id.veridian.signify.generated.keria.model.NotificationData;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.cardanofoundation.reeve.indexer.config.KeriProperties;
-import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.Notifying;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
-import org.cardanofoundation.signify.generated.keria.model.Exn;
-import org.cardanofoundation.signify.generated.keria.model.Notification;
-import org.cardanofoundation.signify.generated.keria.model.NotificationData;
 
 /**
  * The clogged-agent case, which is how "the indexer stopped receiving notifications" actually

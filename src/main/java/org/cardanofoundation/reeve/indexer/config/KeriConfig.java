@@ -19,13 +19,15 @@ import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.generated.keria.model.AgentConfig;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.Tier;
 
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import org.cardanofoundation.reeve.indexer.service.keri.KeriOperations;
 
 @Configuration
 @ConditionalOnProperty(name = "keri.enabled", havingValue = "true", matchIfMissing = false)
@@ -55,7 +57,14 @@ public class KeriConfig {
         }
         log.info("SignifyClient connected");
         for (String oobi : resolvableOobis()) {
-            client.operations().wait(client.oobis().resolve(oobi, null));
+            var resolved = client.operations().wait(client.oobis().resolve(oobi, null));
+            // A failed resolve must not take the whole indexer down: KeriService.resolveOobis re-resolves
+            // the same set on demand, so log it and carry on (a thrown timeout still aborts, as before).
+            try {
+                KeriOperations.requireNotFailed(resolved, "OOBI resolve " + oobi);
+            } catch (RuntimeException e) {
+                log.warn("Startup OOBI resolve failed, will retry on demand: {}", e.getMessage());
+            }
         }
         return client;
     }
@@ -125,7 +134,8 @@ public class KeriConfig {
         if (optionalIdentifier.isPresent()) {
             id = optionalIdentifier.get().getPrefix();
         } else {
-            client.operations().wait(client.identifiers().create(name, kArgs).op());
+            KeriOperations.requireNotFailed(client.operations().wait(client.identifiers().create(name, kArgs).op()),
+                    "agent identifier create");
             // Read the prefix back off the identifier rather than out of the operation: the operation
             // types are now marker interfaces carrying only a name, and this is the same lookup the
             // already-exists branch above uses.
@@ -140,7 +150,9 @@ public class KeriConfig {
                 throw new IllegalStateException("Agent or pre is null");
             }
             if (!hasEndRole(client, name, "agent", eid)) {
-                client.operations().wait(client.identifiers().addEndRole(name, "agent", eid, null).op());
+                KeriOperations.requireNotFailed(
+                        client.operations().wait(client.identifiers().addEndRole(name, "agent", eid, null).op()),
+                        "agent end role");
             }
 
             // Diagnostic: log the freshly-created AID's actual witness set / toad so a live run can
@@ -161,11 +173,11 @@ public class KeriConfig {
     }
 
     static AvailableWitnesses getAvailableWitnesses(SignifyClient client) throws Exception {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> config = (Map<String, Object>) new Coring.Config(client).get();
+        // Typed AgentConfig, not a map: the old cast threw ClassCastException the first time an agent AID
+        // had to be created (a fresh KERIA account), taking startup down with it.
+        AgentConfig config = new Coring.Config(client).get();
 
-        @SuppressWarnings("unchecked")
-        List<String> iurls = (List<String>) config.get("iurls");
+        List<String> iurls = config.getIurls();
         if (iurls == null) {
             throw new IllegalStateException("Agent configuration is missing iurls");
         }

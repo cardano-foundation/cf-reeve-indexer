@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,13 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.veridian.signify.app.Exchanging.ExchangeMessageResult;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Operations;
+import id.veridian.signify.exception.SignifyInterruptedException;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyEventRecord;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
 
 import org.cardanofoundation.reeve.indexer.config.KeriAgentIdentity;
 import org.cardanofoundation.reeve.indexer.config.KeriProperties;
@@ -29,13 +37,7 @@ import org.cardanofoundation.reeve.indexer.model.entity.IssuedCardEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.IssuedCardRepository;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelator;
 import org.cardanofoundation.reeve.indexer.service.keri.KeriNotificationCorrelator.CorrelatedNotification;
-import org.cardanofoundation.signify.app.Exchanging.ExchangeMessageResult;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operations;
-import org.cardanofoundation.signify.exception.SignifyInterruptedException;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.reeve.indexer.service.keri.KeriOperations;
 
 /**
  * Drives the final "ATTEST" step of the card-attestation ceremony, SYNCHRONOUSLY, in the request
@@ -78,6 +80,8 @@ public class CardAttestService {
             List.of("/remotesign/ixn/ref", "/exn/remotesign/ixn/ref");
     private static final String REMOTESIGN_TOPIC = "remotesign";
     private static final String REMOTESIGN_REQUEST_ROUTE = "/remotesign/ixn/req";
+    /** The route on the FETCHED ref exchange itself (the notification carries the {@code /exn} prefix). */
+    private static final String REMOTESIGN_REF_EXN_ROUTE = "/remotesign/ixn/ref";
 
     /** Short wait for the retry pre-check (same value as {@link
      *  CardCredentialService#RETRY_PRECHECK_TIMEOUT}): deliberately much shorter than {@link
@@ -189,14 +193,16 @@ public class CardAttestService {
         String cardDigestQb64 = digestFactory.digestOf(card);
 
         // Retry pre-check: before re-sending, look for a late-arriving ref left over from a previous
-        // attempt. Route-only (no exclude-snapshot possible here — the late ref being looked for is
-        // itself pre-existing), so a claimed ref may be STALE DEBRIS rather than a genuine late reply;
-        // it is resumed ONLY IF it actually anchors THIS ceremony's payload. A non-anchoring ref must
+        // attempt. No exclude-snapshot is possible here (the late ref being looked for is itself
+        // pre-existing); instead the ref must answer the previous attempt's persisted request SAID
+        // (p/i/rp, see remotesignRefMatcher). It is still resumed ONLY IF it actually anchors THIS
+        // ceremony's payload. A non-anchoring ref must
         // not fail the ceremony (that would loop forever on undeleted debris) — it falls through to
         // re-sending below.
         if (retry && ceremony.getRequestExnSaid() != null) {
             Optional<CorrelatedNotification> lateRef = correlator.awaitByRoute(REMOTESIGN_REF_ROUTES,
-                    RETRY_PRECHECK_TIMEOUT);
+                    RETRY_PRECHECK_TIMEOUT, Set.of(),
+                    remotesignRefMatcher(ceremony.getRequestExnSaid(), walletAid, identity.prefix()));
             if (lateRef.isPresent()) {
                 if (ceremony.getKelFloorSequence() == null) {
                     throw new CardAttestStepException("ATTEST_SEAL_MISMATCH", "no sequence floor recorded — re-attest");
@@ -253,6 +259,7 @@ public class CardAttestService {
         Set<String> preexistingRefs = correlator.outstandingNoteIds(REMOTESIGN_REF_ROUTES);
 
         String payloadSaid;
+        String requestExnSaid;
         try {
             HabState sender = client.orElseThrow().identifiers().get(agentName)
                     .orElseThrow(() -> new CardAttestStepException("ATTEST_FAILED",
@@ -266,10 +273,11 @@ public class CardAttestService {
 
             // Persist BEFORE the send completes: the SAID is deterministic from the built (not-yet-sent)
             // exn, matching CardCredentialService#sendApply's idiom.
-            String requestExnSaid = (String) built.exn().getKed().get("d");
+            String builtRequestSaid = (String) built.exn().getKed().get("d");
+            requestExnSaid = builtRequestSaid;
             boolean exnPersisted = ceremonyService.updateWaitingStepData(ceremonyId, generation,
                     CardCeremonyState.CREDENTIAL_RECEIVED, c -> {
-                        c.setRequestExnSaid(requestExnSaid);
+                        c.setRequestExnSaid(builtRequestSaid);
                         c.setPayloadSaid(payloadSaid);
                     });
             if (!exnPersisted) {
@@ -290,7 +298,8 @@ public class CardAttestService {
 
         log.info("waiting for remotesign ref (routes {}) for ceremony {}", REMOTESIGN_REF_ROUTES, ceremonyId);
         CorrelatedNotification ref = correlator
-                .awaitByRoute(REMOTESIGN_REF_ROUTES, keriProperties.getWalletResponseTimeout(), preexistingRefs)
+                .awaitByRoute(REMOTESIGN_REF_ROUTES, keriProperties.getWalletResponseTimeout(), preexistingRefs,
+                        remotesignRefMatcher(requestExnSaid, walletAid, identity.prefix()))
                 .orElseThrow(() -> new CardAttestStepException("WALLET_TIMEOUT",
                         "Timed out waiting for the wallet's remotesign ref."));
         log.info("remotesign ref received {} for ceremony {}", ref.exnSaid(), ceremonyId);
@@ -312,6 +321,20 @@ public class CardAttestService {
             throw new CardAttestStepException("ATTEST_SEAL_MISMATCH",
                     "Error verifying the wallet's anchor: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Matches a fetched remotesign ref exchange to OUR request, as cip113's {@code matchesRemoteSignRef}
+     * does: route {@code /remotesign/ixn/ref}, {@code p} is the request exn's SAID, {@code i} is the
+     * paired wallet and {@code rp} is our agent's AID. The correlator additionally checks the exchange's
+     * own {@code d} against the notification. A ref missing any of these fields does not match.
+     */
+    static Predicate<Map<String, Object>> remotesignRefMatcher(String requestExnSaid, String walletAid,
+            String agentAid) {
+        return exn -> REMOTESIGN_REF_EXN_ROUTE.equals(exn.get("r"))
+                && requestExnSaid != null && requestExnSaid.equals(exn.get("p"))
+                && walletAid != null && walletAid.equals(exn.get("i"))
+                && agentAid != null && agentAid.equals(exn.get("rp"));
     }
 
     /**
@@ -547,8 +570,9 @@ public class CardAttestService {
         Duration delay = KEY_STATE_RETRY_INITIAL_DELAY;
         for (int attempt = 1; attempt <= KEY_STATE_QUERY_ATTEMPTS; attempt++) {
             try {
-                client.orElseThrow().operations().wait(
-                        client.orElseThrow().keyStates().query(aid, null), boundedKeyStateWait());
+                KeriOperations.requireNotFailed(client.orElseThrow().operations().wait(
+                        client.orElseThrow().keyStates().query(aid, null), boundedKeyStateWait()),
+                        "key-state query " + aid);
                 Optional<KeyStateRecord> state = client.orElseThrow().keyStates().get(aid);
                 if (state.isPresent() && state.get().getS() != null) {
                     return Optional.of(state.get().getS());

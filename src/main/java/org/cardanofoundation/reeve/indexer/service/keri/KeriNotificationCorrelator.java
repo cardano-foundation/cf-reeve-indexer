@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -17,13 +18,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.veridian.signify.app.Notifying;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.exception.SignifyInterruptedException;
+import id.veridian.signify.generated.keria.model.ExchangeResource;
+import id.veridian.signify.generated.keria.model.Notification;
 
 import org.cardanofoundation.reeve.indexer.config.KeriProperties;
-import org.cardanofoundation.signify.app.Notifying;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.exception.SignifyInterruptedException;
-import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
-import org.cardanofoundation.signify.generated.keria.model.Notification;
 
 /**
  * Claims KERI agent notifications for an outstanding card-attestation ceremony step, by route.
@@ -35,6 +36,12 @@ import org.cardanofoundation.signify.generated.keria.model.Notification;
  * correlation fields, so requiring them unconditionally would silently discard a legitimate reply.
  * The indexer runs a single ceremony against a given card at a time, so the route match alone is
  * enough to identify which reply belongs to which wait.
+ *
+ * <p>Callers that CAN prove causality pass an exn predicate
+ * ({@link #awaitByRoute(List, Duration, Set, Predicate)}): the remotesign ref wait requires the fetched
+ * exchange's {@code p}/{@code i}/{@code rp} to name our request, the wallet and our agent, as cip113's
+ * {@code matchesRemoteSignRef} does. Those fields are read from the FETCHED exchange, not from the
+ * notification.
  *
  * <p>The polling loop uses a synchronous {@code Thread.sleep} — fine here because the whole
  * ceremony runs synchronously in the indexer's request thread. This app injects an {@code
@@ -55,6 +62,10 @@ public class KeriNotificationCorrelator {
     /** Only ever used to project a typed exn back into the generic map form callers expect. */
     private static final ObjectMapper EXN_MAPPER = new ObjectMapper();
 
+    /** The route-only overloads' predicate. Compared by identity: only a caller-supplied predicate
+     *  switches on the {@code exn.d == note.a.d} check, so route-only callers behave exactly as before. */
+    private static final Predicate<Map<String, Object>> ANY_EXN = exn -> true;
+
     /** Diagnostic de-dupe for {@link #pollOnceByRoute}'s per-poll notification summary: the wait polls
      *  every ~1.5s, so logging the whole notification list every tick would be noise. Instead we log the
      *  list only when its (route, read-state) shape CHANGES — which is exactly when a wallet's
@@ -63,6 +74,9 @@ public class KeriNotificationCorrelator {
      *  under a route we don't match (a wire-shape problem here). Final-with-initializer, so Lombok's
      *  {@code @RequiredArgsConstructor} excludes it. */
     private final AtomicReference<String> lastByRouteNotificationSummary = new AtomicReference<>("");
+
+    /** Last notification id reported as skipped by a caller's match, so a waiting poll loop logs it once. */
+    private final AtomicReference<String> lastSkippedNotificationId = new AtomicReference<>("");
 
     private final Optional<SignifyClient> client;
     private final KeriProperties keriProperties;
@@ -113,13 +127,28 @@ public class KeriNotificationCorrelator {
      */
     public Optional<CorrelatedNotification> awaitByRoute(List<String> routes, Duration timeout,
             Set<String> excludeNoteIds) {
+        return awaitByRoute(routes, timeout, excludeNoteIds, ANY_EXN);
+    }
+
+    /**
+     * As {@link #awaitByRoute(List, Duration, Set)}, but a route-matched notification is claimed only
+     * when its FETCHED exchange also satisfies {@code exnMatches} (e.g. a remotesign ref whose {@code p}
+     * is our request's SAID, {@code i} the wallet and {@code rp} our agent). With a predicate the
+     * correlator additionally requires the fetched exn's own {@code d} to equal the notification's
+     * {@code note.a.d}, so a notification cannot point at one exchange and be claimed for another.
+     *
+     * <p>A notification that fails either check is skipped, never marked or deleted: it may be the reply
+     * another wait is looking for, and deleting it could lose that reply.
+     */
+    public Optional<CorrelatedNotification> awaitByRoute(List<String> routes, Duration timeout,
+            Set<String> excludeNoteIds, Predicate<Map<String, Object>> exnMatches) {
         requireKeriEnabled();
         Instant deadline = Instant.now().plus(timeout);
         Instant start = Instant.now();
         int poll = 0;
         while (true) {
             try {
-                Optional<CorrelatedNotification> claimed = pollOnceByRoute(routes, excludeNoteIds);
+                Optional<CorrelatedNotification> claimed = pollOnceByRoute(routes, excludeNoteIds, exnMatches);
                 if (claimed.isPresent()) {
                     return claimed;
                 }
@@ -252,8 +281,8 @@ public class KeriNotificationCorrelator {
         return all;
     }
 
-    private Optional<CorrelatedNotification> pollOnceByRoute(List<String> routes, Set<String> excludeNoteIds)
-            throws InterruptedException {
+    private Optional<CorrelatedNotification> pollOnceByRoute(List<String> routes, Set<String> excludeNoteIds,
+            Predicate<Map<String, Object>> exnMatches) throws InterruptedException {
         List<Notification> notes = listNotifications();
 
         logNotificationState(notes, routes);
@@ -292,6 +321,29 @@ public class KeriNotificationCorrelator {
             }
             if (exn == null) {
                 continue;
+            }
+            if (exnMatches != ANY_EXN) {
+                if (!noteExnSaid.equals(exn.get("d"))) {
+                    log.debug("Skipping KERI notification on route {}: fetched exn SAID {} differs from the "
+                            + "notification's {}", note.getA().getR(), exn.get("d"), noteExnSaid);
+                    continue;
+                }
+                boolean matches;
+                try {
+                    matches = exnMatches.test(exn);
+                } catch (RuntimeException e) {
+                    log.warn("Could not evaluate KERI exchange {} against the caller's match: {}", noteExnSaid,
+                            e.getMessage());
+                    continue;
+                }
+                if (!matches) {
+                    if (!String.valueOf(note.getI()).equals(lastSkippedNotificationId.getAndSet(String.valueOf(note.getI())))) {
+                        log.info("Skipping KERI notification on route {} (exn {}): it does not answer this wait "
+                                + "(exn r={} p={} i={} rp={})", note.getA().getR(), noteExnSaid,
+                                exn.get("r"), exn.get("p"), exn.get("i"), exn.get("rp"));
+                    }
+                    continue;
+                }
             }
             log.info("Claimed KERI notification on route {} (exn {})", note.getA().getR(), noteExnSaid);
             // Prefer the FETCHED exn's own "d" over the notification's claimed note.a.d.

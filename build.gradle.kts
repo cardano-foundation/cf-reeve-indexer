@@ -26,7 +26,7 @@ repositories {
 
         // Only search this repository for the specific dependency
         content {
-            includeModule("org.cardanofoundation", "signify")
+            includeModule("id.veridian", "signify")
         }
     }
 }
@@ -43,7 +43,7 @@ dependencies {
     implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
 
     // Keri
-    implementation("org.cardanofoundation:signify:0.1.2-5eb55c9-SNAPSHOT")
+    implementation("id.veridian:signify:0.1.2-66227de-SNAPSHOT")
 
     // Yaci store
     implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")

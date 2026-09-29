@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class IpfsGatewayClient {
 
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(30);
 
     /**
      * Hard cap on a single IPFS envelope fetch. Shared by the read proxy ({@link
@@ -34,7 +34,7 @@ public class IpfsGatewayClient {
     @Value("${ipfs.gateway:https://ipfs.io/ipfs/}")
     private String ipfsGateway;
 
-    @Value("${ipfs.timeout-seconds:15}")
+    @Value("${ipfs.timeout-seconds:30}")
     private long requestTimeoutSeconds;
 
     // Bounded so a stalled/unresponsive gateway cannot hang the (transactional) indexing thread.

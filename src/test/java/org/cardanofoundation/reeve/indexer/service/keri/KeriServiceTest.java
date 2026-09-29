@@ -9,6 +9,11 @@ import java.util.Optional;
 
 import org.springframework.test.util.ReflectionTestUtils;
 
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.generated.keria.model.KeyEvent;
+import id.veridian.signify.generated.keria.model.KeyEventRecord;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,10 +27,6 @@ import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.generated.keria.model.KeyEvent;
-import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
 
 /**
  * Covers the parts of {@link KeriService} that don't require fabricating a real CESR/KEL stream:

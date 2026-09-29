@@ -8,11 +8,10 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.KeyEvent;
 
 import org.junit.jupiter.api.Test;
-
-import org.cardanofoundation.signify.generated.keria.model.Exn;
-import org.cardanofoundation.signify.generated.keria.model.KeyEvent;
 
 /**
  * Pins the boundary where signify's typed models are projected back into the generic maps this
