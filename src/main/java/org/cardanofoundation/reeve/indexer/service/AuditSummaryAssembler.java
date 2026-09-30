@@ -165,20 +165,21 @@ final class AuditSummaryAssembler {
             ProjectAgg pa = projects.computeIfAbsent(key,
                     k -> new ProjectAgg(k, alloc.getProjectId(), alloc.getProjectTitle()));
             pa.applyTitle(alloc.getProjectTitle());
+            pa.applyProId(alloc.getProId());
             tallyCurrency(pa.currencyTally, funding);
 
             boolean hasSubProject = isPresent(alloc.getSubProjectId()) || isPresent(alloc.getSubProjectTitle());
-            SubProjectAgg sp = hasSubProject ? pa.subProject(alloc.getSubProjectId(), alloc.getSubProjectTitle()) : null;
+            SubProjectAgg sp = hasSubProject ? pa.subProject(alloc.getSubProjectId(), alloc.getSubProjectTitle(), alloc.getSubProjectProId()) : null;
 
             for (EventMilestoneEntity ms : alloc.getMilestones()) {
                 BigDecimal amt = nz(ms.getAllocatedAmount());
                 pa.allocated = pa.allocated.add(amt);
                 MilestoneAgg ma;
                 if (sp != null) {
-                    ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                    ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle(), ms.getProId());
                     sp.allocated = sp.allocated.add(amt);
                 } else {
-                    ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                    ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle(), ms.getProId());
                 }
                 ma.allocated = ma.allocated.add(amt);
             }
@@ -211,10 +212,11 @@ final class AuditSummaryAssembler {
                 ProjectAgg pa = projects.computeIfAbsent(key,
                         k -> new ProjectAgg(k, own.getProjectId(), own.getProjectTitle()));
                 pa.applyTitle(own.getProjectTitle());
+                pa.applyProId(own.getProId());
                 tallyCurrency(pa.currencyTally, s);
 
                 boolean hasSubProject = isPresent(own.getSubProjectId()) || isPresent(own.getSubProjectTitle());
-                SubProjectAgg sp = hasSubProject ? pa.subProject(own.getSubProjectId(), own.getSubProjectTitle()) : null;
+                SubProjectAgg sp = hasSubProject ? pa.subProject(own.getSubProjectId(), own.getSubProjectTitle(), own.getSubProjectProId()) : null;
 
                 BigDecimal allocAmount = BigDecimal.ZERO;
                 for (EventMilestoneEntity ms : own.getMilestones()) {
@@ -222,10 +224,10 @@ final class AuditSummaryAssembler {
                     allocAmount = allocAmount.add(amt);
                     MilestoneAgg ma;
                     if (sp != null) {
-                        ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                        ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle(), ms.getProId());
                         sp.spent = sp.spent.add(amt);
                     } else {
-                        ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                        ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle(), ms.getProId());
                     }
                     ma.spent = ma.spent.add(amt);
                 }
@@ -241,6 +243,7 @@ final class AuditSummaryAssembler {
                         .projectKey(pa.key)
                         .projectId(pa.projectId)
                         .projectTitle(pa.title)
+                        .proId(pa.proId)
                         .build());
             }
         } else if (isPresent(s.getFundingId()) && singleFundingProject(fundingProjects, s.getFundingId()) != null) {
@@ -256,6 +259,7 @@ final class AuditSummaryAssembler {
                     .projectKey(pa.key)
                     .projectId(pa.projectId)
                     .projectTitle(pa.title)
+                    .proId(pa.proId)
                     .build());
         } else {
             // Step 3: unattributed — still counted so per-project spend reconciles with totalSpent.
@@ -287,10 +291,11 @@ final class AuditSummaryAssembler {
                 ProjectAgg pa = projects.computeIfAbsent(key,
                         k -> new ProjectAgg(k, own.getProjectId(), own.getProjectTitle()));
                 pa.applyTitle(own.getProjectTitle());
+                pa.applyProId(own.getProId());
                 tallyCurrency(pa.currencyTally, r);
 
                 boolean hasSubProject = isPresent(own.getSubProjectId()) || isPresent(own.getSubProjectTitle());
-                SubProjectAgg sp = hasSubProject ? pa.subProject(own.getSubProjectId(), own.getSubProjectTitle()) : null;
+                SubProjectAgg sp = hasSubProject ? pa.subProject(own.getSubProjectId(), own.getSubProjectTitle(), own.getSubProjectProId()) : null;
 
                 BigDecimal allocAmount = BigDecimal.ZERO;
                 for (EventMilestoneEntity ms : own.getMilestones()) {
@@ -298,10 +303,10 @@ final class AuditSummaryAssembler {
                     allocAmount = allocAmount.add(amt);
                     MilestoneAgg ma;
                     if (sp != null) {
-                        ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                        ma = sp.milestone(ms.getMilestoneId(), ms.getMilestoneTitle(), ms.getProId());
                         sp.refunded = sp.refunded.add(amt);
                     } else {
-                        ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle());
+                        ma = pa.milestone(ms.getMilestoneId(), ms.getMilestoneTitle(), ms.getProId());
                     }
                     ma.refunded = ma.refunded.add(amt);
                 }
@@ -315,6 +320,7 @@ final class AuditSummaryAssembler {
                         .projectKey(pa.key)
                         .projectId(pa.projectId)
                         .projectTitle(pa.title)
+                        .proId(pa.proId)
                         .build());
             }
         } else if (isPresent(r.getFundingId()) && singleFundingProject(fundingProjects, r.getFundingId()) != null) {
@@ -328,6 +334,7 @@ final class AuditSummaryAssembler {
                     .projectKey(pa.key)
                     .projectId(pa.projectId)
                     .projectTitle(pa.title)
+                    .proId(pa.proId)
                     .build());
         } else {
             // Step 3: unattributed, still counted so per-project refunds reconcile with totalRefunded.
@@ -356,6 +363,7 @@ final class AuditSummaryAssembler {
                     return SubProjectAuditView.builder()
                             .subProjectId(sp.subProjectId)
                             .subProjectTitle(sp.title)
+                            .proId(sp.proId)
                             .allocatedAmount(netAllocated)
                             .refundedAmount(sp.refunded)
                             .spentAmount(sp.spent)
@@ -368,6 +376,7 @@ final class AuditSummaryAssembler {
                 .projectKey(p.key)
                 .projectId(p.projectId)
                 .projectTitle(p.title)
+                .proId(p.proId)
                 .currency(dominantCurrency(p.currencyTally))
                 .allocatedAmount(netAllocated)
                 .refundedAmount(p.refunded)
@@ -383,6 +392,7 @@ final class AuditSummaryAssembler {
                 .map(m -> MilestoneAuditView.builder()
                         .milestoneId(m.milestoneId)
                         .milestoneTitle(m.title)
+                        .proId(m.proId)
                         .allocatedAmount(m.allocated.subtract(m.refunded))
                         .refundedAmount(m.refunded)
                         .spentAmount(m.spent)
@@ -485,6 +495,7 @@ final class AuditSummaryAssembler {
         private final String key;
         private final String projectId;
         private String title;
+        private String proId;
         private final boolean unattributed;
         private BigDecimal allocated = BigDecimal.ZERO;
         private BigDecimal spent = BigDecimal.ZERO;
@@ -514,14 +525,25 @@ final class AuditSummaryAssembler {
             }
         }
 
-        private SubProjectAgg subProject(String subProjectId, String subProjectTitle) {
-            String key = isPresent(subProjectId) ? "id:" + subProjectId : (isPresent(subProjectTitle) ? "title:" + subProjectTitle : "unknown");
-            return subProjects.computeIfAbsent(key, k -> new SubProjectAgg(subProjectId, subProjectTitle));
+        /** proId never changes once published, but events predating it carry none — keep the first seen. */
+        private void applyProId(String candidate) {
+            if (proId == null && isPresent(candidate)) {
+                proId = candidate;
+            }
         }
 
-        private MilestoneAgg milestone(String id, String title) {
+        private SubProjectAgg subProject(String subProjectId, String subProjectTitle, String subProjectProId) {
+            String key = isPresent(subProjectId) ? "id:" + subProjectId : (isPresent(subProjectTitle) ? "title:" + subProjectTitle : "unknown");
+            SubProjectAgg sp = subProjects.computeIfAbsent(key, k -> new SubProjectAgg(subProjectId, subProjectTitle));
+            sp.applyProId(subProjectProId);
+            return sp;
+        }
+
+        private MilestoneAgg milestone(String id, String title, String proId) {
             String key = isPresent(id) ? "id:" + id : (isPresent(title) ? "title:" + title : "unknown");
-            return milestones.computeIfAbsent(key, k -> new MilestoneAgg(id, title));
+            MilestoneAgg ma = milestones.computeIfAbsent(key, k -> new MilestoneAgg(id, title));
+            ma.applyProId(proId);
+            return ma;
         }
     }
 
@@ -529,6 +551,7 @@ final class AuditSummaryAssembler {
     private static final class SubProjectAgg {
         private final String subProjectId;
         private final String title;
+        private String proId;
         private BigDecimal allocated = BigDecimal.ZERO;
         private BigDecimal spent = BigDecimal.ZERO;
         private BigDecimal refunded = BigDecimal.ZERO;
@@ -539,9 +562,17 @@ final class AuditSummaryAssembler {
             this.title = title;
         }
 
-        private MilestoneAgg milestone(String id, String title) {
+        private void applyProId(String candidate) {
+            if (proId == null && isPresent(candidate)) {
+                proId = candidate;
+            }
+        }
+
+        private MilestoneAgg milestone(String id, String title, String proId) {
             String key = isPresent(id) ? "id:" + id : (isPresent(title) ? "title:" + title : "unknown");
-            return milestones.computeIfAbsent(key, k -> new MilestoneAgg(id, title));
+            MilestoneAgg ma = milestones.computeIfAbsent(key, k -> new MilestoneAgg(id, title));
+            ma.applyProId(proId);
+            return ma;
         }
     }
 
@@ -549,6 +580,7 @@ final class AuditSummaryAssembler {
     private static final class MilestoneAgg {
         private final String milestoneId;
         private final String title;
+        private String proId;
         private BigDecimal allocated = BigDecimal.ZERO;
         private BigDecimal spent = BigDecimal.ZERO;
         private BigDecimal refunded = BigDecimal.ZERO;
@@ -556,6 +588,12 @@ final class AuditSummaryAssembler {
         private MilestoneAgg(String milestoneId, String title) {
             this.milestoneId = milestoneId;
             this.title = title;
+        }
+
+        private void applyProId(String candidate) {
+            if (proId == null && isPresent(candidate)) {
+                proId = candidate;
+            }
         }
     }
 }

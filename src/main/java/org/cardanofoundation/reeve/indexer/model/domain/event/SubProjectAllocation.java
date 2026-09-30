@@ -31,5 +31,8 @@ public class SubProjectAllocation {
     private String subProjectId;
     @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String subProjectTitle;
+    /** Permanent identifier of the sub-project; absent on records published before it existed. */
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
+    private String proId;
     private List<Milestone> milestones;
 }

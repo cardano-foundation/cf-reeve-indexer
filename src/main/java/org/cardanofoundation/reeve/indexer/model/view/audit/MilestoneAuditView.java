@@ -27,6 +27,7 @@ public class MilestoneAuditView {
 
     private String milestoneId;
     private String milestoneTitle;
+    private String proId;
     private BigDecimal allocatedAmount;
     private BigDecimal refundedAmount;
     private BigDecimal spentAmount;

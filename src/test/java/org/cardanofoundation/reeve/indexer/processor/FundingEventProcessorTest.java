@@ -223,4 +223,38 @@ class FundingEventProcessorTest {
         assertEquals(1, saved.size());
         return saved.get(0);
     }
+
+    @Test
+    void persistsProIdOnAllocationAndMilestoneRows() {
+        ProjectAllocation subProjectAllocation = ProjectAllocation.builder()
+                .projectId("P1").projectTitle("Project One").proId("PRJ-001")
+                .subProject(SubProjectAllocation.builder()
+                        .subProjectId("SP1").subProjectTitle("Sub One").proId("PRJ-001-1")
+                        .milestones(List.of(Milestone.builder()
+                                .milestoneId("ms1").milestoneTitle("Milestone 1").proId("PRJ-001-1-1")
+                                .allocatedAmount(new BigDecimal("100")).build()))
+                        .build())
+                .build();
+        ProjectAllocation legacyAllocation = ProjectAllocation.builder()
+                .projectId("P2").projectTitle("Legacy project")
+                .milestones(List.of(Milestone.builder()
+                        .milestoneId("ms2").milestoneTitle("Legacy milestone")
+                        .allocatedAmount(new BigDecimal("50")).build()))
+                .build();
+        FundingEvent event = FundingEvent.builder()
+                .id("event1").type("FUNDING").fundingId("fund1")
+                .allocations(List.of(subProjectAllocation, legacyAllocation))
+                .build();
+
+        processor.process(metadataWith(List.of(event)));
+
+        EventEntity saved = captureSavedSingle();
+        assertEquals("PRJ-001", saved.getAllocations().get(0).getProId());
+        assertEquals("PRJ-001-1", saved.getAllocations().get(0).getSubProjectProId());
+        assertEquals("PRJ-001-1-1", saved.getAllocations().get(0).getMilestones().get(0).getProId());
+
+        assertNull(saved.getAllocations().get(1).getProId());
+        assertNull(saved.getAllocations().get(1).getSubProjectProId());
+        assertNull(saved.getAllocations().get(1).getMilestones().get(0).getProId());
+    }
 }

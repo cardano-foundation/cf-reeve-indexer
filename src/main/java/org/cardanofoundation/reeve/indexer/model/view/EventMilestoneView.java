@@ -25,12 +25,14 @@ public class EventMilestoneView {
 
     private String milestoneId;
     private String milestoneTitle;
+    private String proId;
     private BigDecimal allocatedAmount;
 
     public static EventMilestoneView fromEntity(EventMilestoneEntity entity) {
         return EventMilestoneView.builder()
                 .milestoneId(entity.getMilestoneId())
                 .milestoneTitle(entity.getMilestoneTitle())
+                .proId(entity.getProId())
                 .allocatedAmount(entity.getAllocatedAmount())
                 .build();
     }
