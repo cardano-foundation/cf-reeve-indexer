@@ -34,6 +34,9 @@ public class ProjectAllocation {
     private String projectId;
     @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String projectTitle;
+    /** Permanent identifier of the root project; absent on records published before it existed. */
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
+    private String proId;
 
     /** Milestones targeted directly on the project (direct-allocation shape). */
     private List<Milestone> milestones;
@@ -55,5 +58,10 @@ public class ProjectAllocation {
     @JsonIgnore
     public String getSubProjectTitle() {
         return subProject != null ? subProject.getSubProjectTitle() : null;
+    }
+
+    @JsonIgnore
+    public String getSubProjectProId() {
+        return subProject != null ? subProject.getProId() : null;
     }
 }

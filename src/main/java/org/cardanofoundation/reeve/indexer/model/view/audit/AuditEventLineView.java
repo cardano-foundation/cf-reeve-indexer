@@ -51,4 +51,5 @@ public class AuditEventLineView {
     private String projectKey;
     private String projectId;
     private String projectTitle;
+    private String proId;
 }

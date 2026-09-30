@@ -48,11 +48,17 @@ public class EventAllocationEntity {
     @Column(name = "project_title")
     private String projectTitle;
 
+    @Column(name = "pro_id")
+    private String proId;
+
     @Column(name = "sub_project_id")
     private String subProjectId;
 
     @Column(name = "sub_project_title")
     private String subProjectTitle;
+
+    @Column(name = "sub_project_pro_id")
+    private String subProjectProId;
 
     @ManyToOne
     @JoinColumn(name = "event_ref_id", referencedColumnName = "id", nullable = false)

@@ -24,6 +24,7 @@ public class SubProjectAuditView {
 
     private String subProjectId;
     private String subProjectTitle;
+    private String proId;
     private BigDecimal allocatedAmount;
     private BigDecimal refundedAmount;
     private BigDecimal spentAmount;
