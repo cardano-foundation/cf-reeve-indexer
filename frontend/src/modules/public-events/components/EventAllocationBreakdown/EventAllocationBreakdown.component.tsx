@@ -5,6 +5,7 @@ import { EventAllocationView } from 'libs/api-connectors/backend-connector-reeve
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
+import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber } from 'libs/utils/format.ts'
 
 interface EventAllocationBreakdownProps {
@@ -15,7 +16,9 @@ interface AllocationRow {
   id: string
   projectTitle: string
   subProjectTitle: string | null
+  subProjectProId: string | null
   milestoneTitle: string
+  milestoneProId: string | null
   amountRcy: number | null
 }
 
@@ -29,7 +32,9 @@ export const EventAllocationBreakdown = ({ allocations }: EventAllocationBreakdo
       id: `${allocation.projectId}-${milestone.milestoneId}`,
       projectTitle: allocation.projectTitle,
       subProjectTitle: allocation.subProjectTitle,
+      subProjectProId: allocation.subProjectProId,
       milestoneTitle: milestone.milestoneTitle,
+      milestoneProId: milestone.proId,
       amountRcy: milestone.allocatedAmount
     }))
   )
@@ -50,8 +55,24 @@ export const EventAllocationBreakdown = ({ allocations }: EventAllocationBreakdo
       hideable: false,
       sortable: false,
       flex: 1,
-      minWidth: 192,
+      minWidth: 180,
       renderCell: ({ value }) => <TruncatedCellText value={value ?? '-'} />
+    },
+    {
+      field: 'subProjectProId',
+      headerName: t({ id: 'auditSubProjectProId' }),
+      hideable: false,
+      sortable: false,
+      flex: 1,
+      minWidth: 150,
+      renderCell: ({ value }) =>
+        value ? (
+          <Tooltip title={value}>
+            <TruncatedCellText value={value} />
+          </Tooltip>
+        ) : (
+          <TruncatedCellText value="-" />
+        )
     },
     {
       field: 'milestoneTitle',
@@ -59,8 +80,24 @@ export const EventAllocationBreakdown = ({ allocations }: EventAllocationBreakdo
       hideable: false,
       sortable: false,
       flex: 1,
-      minWidth: 192,
+      minWidth: 180,
       renderCell: ({ value }) => <TruncatedCellText value={value} />
+    },
+    {
+      field: 'milestoneProId',
+      headerName: t({ id: 'auditMilestoneProId' }),
+      hideable: false,
+      sortable: false,
+      flex: 1,
+      minWidth: 150,
+      renderCell: ({ value }) =>
+        value ? (
+          <Tooltip title={value}>
+            <TruncatedCellText value={value} />
+          </Tooltip>
+        ) : (
+          <TruncatedCellText value="-" />
+        )
     },
     {
       field: 'amountRcy',
