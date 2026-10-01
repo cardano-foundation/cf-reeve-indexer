@@ -85,6 +85,11 @@ public class DocumentEnvelopeVerifier {
             evaluateEnvelope(entity, new String(body.get(), StandardCharsets.UTF_8));
             entity.recomputeVerdict();
             documentRepository.save(entity);
+        } catch (IpfsGatewayClient.IpfsRateLimitedException e) {
+            // Every gateway throttled us: nothing was learned about the content, so the retry budget
+            // (ipfsAttempts) is left untouched and the scheduler simply tries again on its next sweep.
+            log.warn("IPFS gateways rate-limited the envelope fetch for tx {}; not counted as an attempt",
+                    entity.getTxHash());
         } catch (OptimisticLockingFailureException e) {
             // Lost the race against a concurrent writer on the same row (e.g. DocumentProcessor
             // re-indexing the same tx). Do not rethrow and do not retry inline here - the

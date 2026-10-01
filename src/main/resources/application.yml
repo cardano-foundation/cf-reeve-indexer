@@ -49,7 +49,9 @@ server:
 
 
 ipfs:
-  gateway: ${IPFS_GATEWAY:https://ipfs.io/ipfs/}
+  # Comma-separated, tried in order. ipfs.io answers path requests with 429 since it switched to a
+  # service-worker-only gateway, so free open gateways that still serve content come first.
+  gateway: ${IPFS_GATEWAY:https://ipfs.filebase.io/ipfs/,https://gateway.pinata.cloud/ipfs/,https://ipfs.io/ipfs/}
 
 indexer:
   verification:

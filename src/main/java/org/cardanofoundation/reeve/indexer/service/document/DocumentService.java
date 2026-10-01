@@ -133,8 +133,12 @@ public class DocumentService {
         if (anchor.getIpfsCid() == null) {
             throw new EnvelopeNotOnIpfsException(documentId);
         }
-        return ipfsGatewayClient.fetchBytes(anchor.getIpfsCid(), IpfsGatewayClient.MAX_ENVELOPE_BYTES)
-                .orElseThrow(() -> new GatewayFailureException(documentId));
+        try {
+            return ipfsGatewayClient.fetchBytes(anchor.getIpfsCid(), IpfsGatewayClient.MAX_ENVELOPE_BYTES)
+                    .orElseThrow(() -> new GatewayFailureException(documentId));
+        } catch (IpfsGatewayClient.IpfsRateLimitedException e) {
+            throw new GatewayFailureException(documentId);
+        }
     }
 
     private Sort parseSort(String sort) {
