@@ -1,12 +1,12 @@
 import { AlertProps as AlertPropsMUI } from '@mui/material/Alert'
-import { Danger, Forbidden2, TickCircle } from 'iconsax-react'
+import { Danger, Forbidden2, InfoCircle, TickCircle } from 'iconsax-react'
 
 import { AlertStyled } from 'libs/ui-kit/components/Alert/Alert.styles.tsx'
 
 const ICONS = {
   error: Forbidden2,
-  // TODO: swap to proper icon when UI starts to use it
-  info: Forbidden2,
+  // An informational note is NOT an error — use a neutral info glyph, never the red Forbidden2 mark.
+  info: InfoCircle,
   success: TickCircle,
   warning: Danger
 }

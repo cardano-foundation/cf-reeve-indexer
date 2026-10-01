@@ -4,7 +4,6 @@ import { FormikProvider } from 'formik'
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 
-import { Link as RouterLink } from 'react-router-dom'
 import { publicTransactionsIllustration } from 'assets/images'
 import { ButtonPrimary, ButtonSecondary } from 'features/common'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
@@ -49,7 +48,7 @@ export const ViewPublicEvents = () => {
   return (
     <PublicEventsContextProvider value={{ filters, options }}>
       <LayoutPublic.Header>
-        <LayoutPublic.Header.ButtonBack component={RouterLink} to={getOrgPath('projects', effectiveOrganisation)} />
+        <LayoutPublic.Header.ButtonBack to={getOrgPath('projects', effectiveOrganisation)} />
         <LayoutPublic.Header.Details description={t({ id: 'publicEventsViewDescription' })} title={t({ id: 'publicEventsViewTitle' })} />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={6}>

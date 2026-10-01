@@ -1,4 +1,4 @@
-import { ArrowSwapHorizontal, Book1, Icon, Note1, Notepad2 } from 'iconsax-react'
+import { ArrowSwapHorizontal, Book1, DocumentText, Icon, Note1, Notepad2 } from 'iconsax-react'
 import { useParams } from 'react-router-dom'
 
 import { useLocationState } from 'hooks'
@@ -26,6 +26,7 @@ export const NavigationSidebar = () => {
   const reportsRoute = organisationId ? getOrgPath('reports', organisationId) : hasOrganisation ? PATHS.PUBLIC_REPORTS : PATHS.ROOT
   const transactionsRoute = organisationId ? getOrgPath('transactions', organisationId) : hasOrganisation ? PATHS.PUBLIC_TRANSACTIONS : PATHS.ROOT
   const projectsRoute = organisationId ? getOrgPath('projects', organisationId) : hasOrganisation ? PATHS.PUBLIC_PROJECTS : PATHS.ROOT
+  const documentsRoute = organisationId ? getOrgPath('documents', organisationId) : hasOrganisation ? PATHS.PUBLIC_DOCUMENTS : PATHS.ROOT
 
 
 
@@ -36,7 +37,8 @@ export const NavigationSidebar = () => {
     // { icon: TrendUp, label: t({ id: 'publicDashboard' }), route: PATHS.PUBLIC_DASHBOARD },
     { icon: Note1, label: t({ id: 'publicReports' }), route: reportsRoute },
     { icon: ArrowSwapHorizontal, label: t({ id: 'publicTransactions' }), route: transactionsRoute },
-    { icon: Notepad2, label: t({ id: 'publicProjects' }), route: projectsRoute, isActive: isProjectsActive }
+    { icon: Notepad2, label: t({ id: 'publicProjects' }), route: projectsRoute, isActive: isProjectsActive },
+    { icon: DocumentText, label: t({ id: 'publicDocuments' }), route: documentsRoute }
   ]
 
   const getCurrentPage = (route: string) => route !== PATHS.ROOT && isActiveRouteOrDescendant(route)

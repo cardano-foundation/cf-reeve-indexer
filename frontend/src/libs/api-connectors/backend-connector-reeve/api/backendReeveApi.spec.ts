@@ -16,4 +16,16 @@ describe('backendReeveApi', () => {
 
     expect(api).toHaveProperty('transactionsApi')
   })
+
+  it('returns documentsApi', ({ expect }) => {
+    const api = backendReeveApi()
+
+    expect(api).toHaveProperty('documentsApi')
+  })
+
+  it('returns cardsApi', ({ expect }) => {
+    const api = backendReeveApi()
+
+    expect(api).toHaveProperty('cardsApi')
+  })
 })

@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.processor;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -197,6 +198,21 @@ class FundingEventProcessorTest {
         assertEquals(2, saved.size());
         assertEquals("event-0", saved.get(0).getEventId());
         assertEquals("dup", saved.get(1).getEventId());
+    }
+
+    @Test
+    void processWithMissingOrgDoesNotThrowAndSkipsSave() {
+        FundingEvent event = FundingEvent.builder().id("e1").type("CUSTOM").build();
+        ReeveMetadata metadata = new ReeveMetadata();
+        metadata.setTxHash("tx1");
+        metadata.setMetadataHash("metahash");
+        metadata.setType(ReeveTransactionType.FUNDING);
+        metadata.setOrg(null);
+        metadata.setData(List.of(event));
+
+        assertDoesNotThrow(() -> processor.process(metadata));
+
+        verify(eventRepository, never()).saveAll(any());
     }
 
     private ReeveMetadata metadataWith(Object data) {
