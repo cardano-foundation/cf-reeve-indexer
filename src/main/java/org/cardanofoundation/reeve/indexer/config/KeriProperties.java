@@ -62,14 +62,15 @@ public class KeriProperties {
 
     /**
      * The credential SCHEMA SERVER's base OOBI URL (e.g. {@code
-     * https://cred-issuance.demo.idw-sandboxes.cf-deployments.org/oobi}, no trailing slash) — the
+     * https://cred-issuance.dev.ecosyseng.cf-deployments.org/oobi}, no trailing slash) — the
      * IPEX apply's top-level {@code oobiUrl} field (with a trailing slash appended), which is where
      * a Veridian-style wallet actually resolves the credential schema behind the apply's {@code s}
      * SAID from ({@code CardCredentialService}). This is a wallet-contract requirement, not our
      * own agent's OOBI. Distinct from {@link CredentialSchema#oobis()}: those are resolved by OUR
      * OWN agent to learn the issuer/registry/root KEL and TEL data a schema's credentials need to
      * verify; this is handed to the WALLET so it knows where to resolve the schema definition
-     * itself.
+     * itself. Our own agent also resolves {@code <this>/<schemaSaid>} before the apply, because KERIA
+     * drops an IPEX exchange for a schema it has never resolved.
      */
-    private String credentialSchemaOobiBaseUrl = "https://cred-issuance.demo.idw-sandboxes.cf-deployments.org/oobi";
+    private String credentialSchemaOobiBaseUrl = "https://cred-issuance.dev.ecosyseng.cf-deployments.org/oobi";
 }

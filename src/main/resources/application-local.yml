@@ -79,7 +79,7 @@ keri:
       chained: false
       trusted-roots: []
       trusted-issuers:
-        - ${KERI_DEMO_ISSUER_AID:EEYYK6bKLenwD0ZvydD9q5FDY85IKFJtOdmEcdx2izl1}
+        - ${KERI_DEMO_ISSUER_AID:EOcGYMIaKnF4_cpkcWhZVzoHcS0EauVQeWdSipHAfTrd}
       # The OOBI is what lets this agent reach the issuer. Trust checks now FAIL CLOSED when a schema
       # names no issuers, so both of these have to be real for Foundation credentials to verify.
-      oobis: ${KERI_DEMO_OOBIS:https://keria-ext.dev.idw-sandboxes.cf-deployments.org/oobi/EEYYK6bKLenwD0ZvydD9q5FDY85IKFJtOdmEcdx2izl1/agent/EFjYeBVmKSZ0eJXkNZqLAlPPiDaRds3V2iH_COkxIs4x}
+      oobis: ${KERI_DEMO_OOBIS:https://keria-ext.dev.ecosyseng.cf-deployments.org/oobi/EOcGYMIaKnF4_cpkcWhZVzoHcS0EauVQeWdSipHAfTrd/agent/EFrACXBZnest_9ldYyGcnKdele6tW50Xot6JEzvslUAU}

@@ -123,6 +123,9 @@ public class CardCredentialService {
      *  this process ({@link #ensureSchemasResolved}): a schema, once resolved, stays resolved for the
      *  life of the agent. */
     private final Set<String> resolvedSchemaSaids = ConcurrentHashMap.newKeySet();
+    /** Schema SAIDs whose schema-server OOBI our agent has resolved; separate from the issuer cache
+     *  above because that one is best-effort and must be retried while it keeps failing. */
+    private final Set<String> resolvedSchemaServerSaids = ConcurrentHashMap.newKeySet();
 
     /**
      * The "pair" step: resolves {@code walletOobiUrl} on the agent (validate shape, resolve, verify
@@ -438,7 +441,11 @@ public class CardCredentialService {
         Collection<CredentialSchema> schemas = credentialSchemaRegistry.all();
         for (CredentialSchema schema : schemas) {
             String said = schema.said();
-            if (said == null || said.isBlank() || resolvedSchemaSaids.contains(said)) {
+            if (said == null || said.isBlank()) {
+                continue;
+            }
+            resolveSchemaServerOobi(said);
+            if (resolvedSchemaSaids.contains(said)) {
                 continue;
             }
             List<String> oobis = schema.oobis();
@@ -464,6 +471,35 @@ public class CardCredentialService {
                 }
             }
             resolvedSchemaSaids.add(said);
+        }
+    }
+
+    /**
+     * Resolves the schema itself ({@code <credential-schema-oobi-base-url>/<said>}) on OUR OWN agent, the
+     * same URL the apply hands the wallet. Without it KERIA drops the wallet's offer/grant for that schema
+     * (the platform resolves it the same way). Best-effort: the schema server is a third party, so a
+     * failure is logged and retried on the next presentation instead of blocking this one — if our agent
+     * already knows the schema the exchange still goes through.
+     */
+    private void resolveSchemaServerOobi(String said) {
+        String baseUrl = keriProperties.getCredentialSchemaOobiBaseUrl();
+        if (baseUrl == null || baseUrl.isBlank() || resolvedSchemaServerSaids.contains(said)) {
+            return;
+        }
+        String schemaOobi = withTrailingSlash(baseUrl) + said;
+        try {
+            var resolveResult = client.orElseThrow().oobis().resolve(schemaOobi, null);
+            Operations.WaitOptions waitOptions = Operations.WaitOptions.builder()
+                    .abortSignal(Operations.AbortSignal.builder().timeout(SCHEMA_RESOLVE_TIMEOUT_MILLIS).build())
+                    .build();
+            KeriOperations.requireNotFailed(client.orElseThrow().operations().wait(resolveResult, waitOptions),
+                    "schema OOBI resolve");
+            resolvedSchemaServerSaids.add(said);
+        } catch (Exception e) {
+            interruptIfNeeded(e);
+            log.warn("Could not resolve schema OOBI {} on our agent; if KERIA does not already know schema {}, "
+                    + "the wallet's reply will be dropped and the step will time out: {}", schemaOobi, said,
+                    e.getMessage());
         }
     }
 
