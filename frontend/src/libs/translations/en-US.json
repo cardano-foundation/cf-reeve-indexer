@@ -94,7 +94,7 @@
   "report": "Report",
   "reportType": "Report type",
   "accountingRegime": "Accounting regime",
-  "legacyReport": "Legacy report",
+  "unspecified": "Unspecified",
   "period": "Period",
   "version": "Version",
   "continue": "Continue",
