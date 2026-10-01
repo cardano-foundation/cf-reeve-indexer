@@ -44,6 +44,9 @@ public class EventMilestoneEntity {
     @Column(name = "milestone_title")
     private String milestoneTitle;
 
+    @Column(name = "pro_id")
+    private String proId;
+
     @Column(name = "allocated_amount")
     private BigDecimal allocatedAmount;
 

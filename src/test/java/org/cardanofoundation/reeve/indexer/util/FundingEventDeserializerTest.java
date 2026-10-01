@@ -249,4 +249,50 @@ class FundingEventDeserializerTest {
         assertEquals(42, manifest.getEventCount());
         assertEquals(LocalDate.of(2025, 6, 1), manifest.getDate());
     }
+
+    @Test
+    void proIdIsParsedAtProjectSubProjectAndMilestoneLevels() throws Exception {
+        String json = """
+                {
+                  "org": { "id": "org1", "name": "CF", "currency_id": "ISO_4217:CHF",
+                           "country_code": "CH", "tax_id_number": "CHE-1" },
+                  "metadata": { "creation_slot": 1, "timestamp": "2025-06-01T10:15:30Z", "version": "1.0" },
+                  "type": "FUNDING",
+                  "data": [
+                    {
+                      "id": "event1", "type": "FUNDING", "funding_tx": "ftx1", "funding_id": "fund1",
+                      "allocation": [
+                        { "project_id": "P1", "project_title": "Project One", "pro_id": "PRJ-001",
+                          "sub_project": {
+                            "sub_project_id": "SP1", "sub_project_title": "Sub One", "pro_id": "PRJ-001-1",
+                            "milestones": [ { "milestone_id": "ms1", "milestone_title": "Milestone 1",
+                                              "pro_id": ["PRJ-001-1-", "1"], "allocated_amount": "100" } ]
+                          } },
+                        { "project_id": "P2", "project_title": "Legacy project",
+                          "milestones": [ { "milestone_id": "ms2", "milestone_title": "Legacy milestone",
+                                            "allocated_amount": "50" } ] }
+                      ]
+                    }
+                  ]
+                }
+                """;
+
+        ReeveMetadata metadata = objectMapper.readValue(json, ReeveMetadata.class);
+        @SuppressWarnings("unchecked")
+        List<FundingEvent> events = (List<FundingEvent>) metadata.getData();
+        FundingEvent event = events.get(0);
+
+        ProjectAllocation withProId = event.getAllocations().get(0);
+        assertEquals("PRJ-001", withProId.getProId());
+        assertEquals("PRJ-001-1", withProId.getSubProjectProId());
+        // Chunked (>64 byte) strings are published as arrays and must be re-joined.
+        assertEquals("PRJ-001-1-1", withProId.getEffectiveMilestones().get(0).getProId());
+
+        // Records published before pro_id existed simply have no value for it.
+        ProjectAllocation legacy = event.getAllocations().get(1);
+        assertNull(legacy.getProId());
+        assertNull(legacy.getSubProjectProId());
+        assertNull(legacy.getEffectiveMilestones().get(0).getProId());
+        assertTrue(event.getCustom().isEmpty());
+    }
 }

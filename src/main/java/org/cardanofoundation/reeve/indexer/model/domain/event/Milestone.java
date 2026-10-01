@@ -31,5 +31,8 @@ public class Milestone {
     private String milestoneId;
     @JsonDeserialize(using = ChunkedStringDeserializer.class)
     private String milestoneTitle;
+    /** Permanent identifier of the milestone; absent on records published before it existed. */
+    @JsonDeserialize(using = ChunkedStringDeserializer.class)
+    private String proId;
     private BigDecimal allocatedAmount;
 }

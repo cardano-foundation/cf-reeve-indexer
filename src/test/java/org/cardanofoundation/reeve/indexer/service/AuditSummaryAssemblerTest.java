@@ -416,4 +416,51 @@ class AuditSummaryAssemblerTest {
         assertTrue(summary.getProjects().isEmpty());
         assertTrue(summary.getEvents().isEmpty());
     }
+
+    @Test
+    void exposesProIdOnProjectsSubProjectsMilestonesAndLedgerLines() {
+        EventAllocationEntity direct = allocation("PA", "Proj A", milestone("M1", "Direct milestone", "300"));
+        direct.setProId("PRJ-A");
+        direct.getMilestones().get(0).setProId("PRJ-A-1");
+
+        EventAllocationEntity viaSub = allocationWithSubProject("PA", "Proj A", "SP1", "Sub One",
+                milestone("M2", "Sub milestone", "700"));
+        viaSub.setProId("PRJ-A");
+        viaSub.setSubProjectProId("PRJ-A-2");
+        viaSub.getMilestones().get(0).setProId("PRJ-A-2-1");
+
+        List<EventEntity> events = List.of(
+                // A legacy funding published before pro_id existed is folded first: it must not hide
+                // the proId carried by a later event for the same project/sub-project/milestone.
+                event("FUNDING", "f0", "F0", "USD", LocalDate.parse("2026-03-01"), "50",
+                        allocationWithSubProject("PA", "Proj A", "SP1", "Sub One",
+                                milestone("M2", "Sub milestone", "50"))),
+                event("FUNDING", "f1", "F1", "USD", LocalDate.parse("2026-04-01"), "1000", direct, viaSub),
+                event("SPENDING", "s1", "F1", "USD", LocalDate.parse("2026-04-10"), "100",
+                        allocation("PA", "Proj A", milestone("M1", "Direct milestone", "100"))));
+
+        AuditSummaryView summary = AuditSummaryAssembler.assemble("org", "Org Ltd", events, null, null, null);
+
+        ProjectAuditView pa = project(summary, "PA");
+        assertEquals("PRJ-A", pa.getProId());
+        assertEquals("PRJ-A-1", pa.getMilestones().get(0).getProId());
+        SubProjectAuditView sp1 = subProject(pa, "SP1");
+        assertEquals("PRJ-A-2", sp1.getProId());
+        assertEquals("PRJ-A-2-1", sp1.getMilestones().get(0).getProId());
+
+        assertEquals("PRJ-A", eventById(summary, "s1").getProId());
+    }
+
+    @Test
+    void proIdStaysNullForProjectsIndexedBeforeItWasPublished() {
+        List<EventEntity> events = List.of(
+                event("FUNDING", "f1", "F1", "USD", LocalDate.parse("2026-04-01"), "100",
+                        allocation("PA", "Proj A", milestone("M1", "Milestone", "100"))));
+
+        AuditSummaryView summary = AuditSummaryAssembler.assemble("org", "Org Ltd", events, null, null, null);
+
+        ProjectAuditView pa = project(summary, "PA");
+        assertNull(pa.getProId());
+        assertNull(pa.getMilestones().get(0).getProId());
+    }
 }

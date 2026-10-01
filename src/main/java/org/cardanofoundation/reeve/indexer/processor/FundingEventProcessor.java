@@ -191,14 +191,17 @@ public class FundingEventProcessor implements ReeveTypeProcessor {
                 EventAllocationEntity allocationEntity = EventAllocationEntity.builder()
                         .projectId(allocation.getProjectId())
                         .projectTitle(allocation.getProjectTitle())
+                        .proId(allocation.getProId())
                         .subProjectId(allocation.getSubProjectId())
                         .subProjectTitle(allocation.getSubProjectTitle())
+                        .subProjectProId(allocation.getSubProjectProId())
                         .build();
                 if (allocation.getEffectiveMilestones() != null) {
                     allocation.getEffectiveMilestones().forEach(milestone ->
                             allocationEntity.addMilestone(EventMilestoneEntity.builder()
                                     .milestoneId(milestone.getMilestoneId())
                                     .milestoneTitle(milestone.getMilestoneTitle())
+                                    .proId(milestone.getProId())
                                     .allocatedAmount(milestone.getAllocatedAmount())
                                     .build()));
                 }
