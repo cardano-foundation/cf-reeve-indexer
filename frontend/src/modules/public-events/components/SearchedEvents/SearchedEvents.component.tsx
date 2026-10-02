@@ -30,6 +30,7 @@ interface SearchedEventsProps {
 
 interface EventRow extends EventView {
   projectTitles: string[]
+  proIds: string[]
 }
 
 export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, isLoading }: SearchedEventsProps) => {
@@ -53,7 +54,8 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
 
   const rows: EventRow[] = (data?.events ?? []).map((event) => ({
     ...event,
-    projectTitles: Array.from(new Set(event.allocations.map((allocation) => allocation.projectTitle || allocation.projectId)))
+    projectTitles: Array.from(new Set(event.allocations.map((allocation) => allocation.projectTitle || allocation.projectId))),
+    proIds: Array.from(new Set(event.allocations.map((allocation) => allocation.proId ?? '-')))
   }))
 
   const columns = createColumns<EventRow>()([
@@ -80,6 +82,33 @@ export const SearchedEvents = ({ data, pagination, sorting, hasFiltersSelected, 
             {remainingProjectTitles.length > 0 && (
               <Tooltip title={remainingProjectTitles.join('\n')}>
                 <CounterChipStyled label={`+${remainingProjectTitles.length}`} size="small" />
+              </Tooltip>
+            )}
+          </Box>
+        )
+      }
+    },
+    {
+      field: 'proIds',
+      headerName: t({ id: 'auditProId' }),
+      hideable: false,
+      sortable: false,
+      width: 160,
+      renderCell: (row) => {
+        const [firstProId, ...remainingProIds] = row.proIds
+
+        return (
+          <Box alignItems="center" display="flex" gap={1}>
+            {firstProId && firstProId !== '-' ? (
+              <Tooltip title={firstProId}>
+                <TruncatedCellText value={firstProId} />
+              </Tooltip>
+            ) : (
+              <TruncatedCellText value="-" />
+            )}
+            {remainingProIds.length > 0 && (
+              <Tooltip title={remainingProIds.join('\n')}>
+                <CounterChipStyled label={`+${remainingProIds.length}`} size="small" />
               </Tooltip>
             )}
           </Box>

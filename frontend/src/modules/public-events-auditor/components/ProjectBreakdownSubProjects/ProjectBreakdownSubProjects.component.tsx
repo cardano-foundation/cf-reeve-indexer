@@ -7,6 +7,7 @@ import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
 import { TableContainer } from 'libs/ui-kit/components/Table/Table.component.tsx'
 import { createColumns } from 'libs/ui-kit/components/Table/Table.utils.ts'
+import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { AllocatedCell } from 'modules/public-events-auditor/components/AllocatedCell/AllocatedCell.component.tsx'
 import { ProjectBreakdownMilestones } from 'modules/public-events-auditor/components/ProjectBreakdownMilestones/ProjectBreakdownMilestones.component.tsx'
 import { RemainingCell } from 'modules/public-events-auditor/components/RemainingCell/RemainingCell.component.tsx'
@@ -29,8 +30,24 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             align: 'left',
             headerAlign: 'left',
             sortable: true,
-            width: '24%',
+            width: '18%',
             renderCell: (row) => <TruncatedCellText value={row.subProjectTitle || row.subProjectId || t({ id: 'auditUnattributed' })} />
+        },
+        {
+            field: 'proId',
+            headerName: t({ id: 'auditSubProjectProId' }),
+            align: 'left',
+            headerAlign: 'left',
+            sortable: true,
+            width: '13%',
+            renderCell: (row) =>
+                row.proId ? (
+                    <Tooltip title={row.proId}>
+                        <TruncatedCellText value={row.proId} />
+                    </Tooltip>
+                ) : (
+                    <TruncatedCellText value="-" />
+                )
         },
         {
             field: 'allocatedAmount',
@@ -38,7 +55,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             align: 'right',
             headerAlign: 'right',
             sortable: true,
-            width: '18%',
+            width: '15%',
             renderCell: (row) => <AllocatedCell allocated={row.allocatedAmount} refunded={row.refundedAmount} />
         },
         {
@@ -47,7 +64,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             align: 'right',
             headerAlign: 'right',
             sortable: true,
-            width: '18%',
+            width: '15%',
             renderCell: (row) => <TruncatedCellText value={formatAuditAmount(row.spentAmount)} />
         },
         {
@@ -56,7 +73,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             align: 'right',
             headerAlign: 'right',
             sortable: false,
-            width: '18%',
+            width: '15%',
             renderCell: (row) => <RemainingCell allocated={row.allocatedAmount} spent={row.spentAmount} />
         },
         {
@@ -65,7 +82,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
             align: 'left',
             headerAlign: 'left',
             sortable: false,
-            width: '22%',
+            width: '24%',
             renderCell: (row) => <UtilisationBar allocated={row.allocatedAmount} spent={row.spentAmount} />
         }
     ])
@@ -85,7 +102,7 @@ export const ProjectBreakdownSubProjects = ({ subProjects }: ProjectBreakdownSub
                     collapsableRow={(row) => (row.milestones.length > 0 ? <ProjectBreakdownMilestones milestones={row.milestones} /> : null)}
                     isLoading={false}
                     hidePagination
-                    sx={{ minWidth: '70rem' }}
+                    sx={{ minWidth: '78rem' }}
                 />
             </TableContainer>
         </Box>

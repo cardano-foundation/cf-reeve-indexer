@@ -361,6 +361,9 @@
   "auditProjectTitle": "Project Title",
   "auditSubprojectTitle": "Subproject Title",
   "auditMilestoneTitle": "Milestone Title",
+  "auditProId": "Project ID",
+  "auditSubProjectProId": "Sub Project ID",
+  "auditMilestoneProId": "Milestone ID",
   "auditLastUpdated": "Last update: {date}",
 
   "_Public resources": "public resources section",

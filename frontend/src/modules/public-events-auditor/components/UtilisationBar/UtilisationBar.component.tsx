@@ -20,7 +20,7 @@ export const UtilisationBar = ({ allocated, spent }: UtilisationBarProps) => {
   const barColor = overspent ? colors.red[500] : ratio >= 1 ? colors.green[600] : colors.blue[600]
 
   return (
-    <Box display="flex" flexDirection="column" justifyContent="center" gap={0.5} height="100%" width="100%" pt={1}>
+    <Box display="flex" flexDirection="column" justifyContent="center" gap={0.5} height="100%" width="100%" minWidth="13rem" pt={1}>
       <LinearProgress
         value={Math.min(ratio, 1) * 100}
         variant="determinate"
