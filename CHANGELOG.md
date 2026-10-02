@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.5.0...1.6.0) (2026-10-02)
+
+
+### Features
+
+* [LOB-2386] [BE] Parse and persist proId in the Reeve on-chain indexer ([#90](https://github.com/cardano-foundation/cf-reeve-indexer/issues/90)) ([9061cda](https://github.com/cardano-foundation/cf-reeve-indexer/commit/9061cda178e2614e1c7653d3a9cdf28612cdb0c5))
+
 ## [1.5.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.4.0...1.5.0) (2026-09-18)
 
 
