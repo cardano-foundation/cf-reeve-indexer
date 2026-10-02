@@ -8,7 +8,9 @@ interface ChipAccountingRegimeProps {
 export const ChipAccountingRegime = ({ accountingRegime }: ChipAccountingRegimeProps) => {
   const { t } = useTranslations()
 
-  return accountingRegime != null
-    ? <Chip color="info" label={t({ id: accountingRegime, defaultMessage: accountingRegime })} />
-    : <Chip color="default" label={t({ id: 'legacyReport' })} />
+  const regime = accountingRegime?.trim()
+
+  return !regime || regime.toLowerCase() === 'not applicable'
+    ? <Chip color="default" label={t({ id: 'unspecified' })} />
+    : <Chip color="info" label={t({ id: regime, defaultMessage: regime })} />
 }
