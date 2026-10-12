@@ -1,10 +1,13 @@
+import { useState } from 'react'
+
 import { Modal } from 'features/common'
+import { ICONSAX_NAMES, IconsaxIcon } from 'features/iconsax'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
 
 import type { ModalReportProps } from './modal-report.types'
 import { getReportPeriod } from 'modules/public-reports/utils/payload'
 import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
-import { Grid, Divider } from 'features/mui/base'
+import { Grid, Divider, IconButton } from 'features/mui/base'
 import { NestedMap } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import Typography from '@mui/material/Typography'
 import { formatNumber } from 'libs/utils/format'
@@ -17,6 +20,16 @@ const createSafeT = (t: any) => (id?: string, variables?: Record<string, any>, f
   if (!id) return fallback || ''
   return t({ id, defaultMessage: fallback || snakeToNormal(id) }, variables)
 }
+
+const LEVEL_SX: Record<number, object> = {
+  0: { textTransform: 'uppercase' },
+  1: { textTransform: 'uppercase' },
+  2: { textDecoration: 'underline' },
+  3: {},
+  4: { fontStyle: 'italic' }
+}
+
+const getLevelSx = (depth: number) => LEVEL_SX[Math.min(depth, 4)]
 
 export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const { t } = useTranslations()
@@ -68,13 +81,14 @@ interface NestedGridProps {
 }
 
 const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportHash, reportType }) => {
-  const indent = depth * 3
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const borderSX =
-    depth > 0
+    depth > 1
       ? {
         borderLeft: '1px solid',
         borderColor: 'divider',
-        pl: 2
+        pl: 2,
+        ml: depth === 2 ? 1 : 0
       }
       : {}
 
@@ -117,7 +131,7 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
   }
 
   return (
-    <Grid container direction="column" mb={1} spacing={1} sx={{ pl: indent, ...borderSX }}>
+    <Grid container direction="column" spacing={2} sx={borderSX}>
       {entries.map(([key, value]) => {
         const isNested = typeof value === 'object' && value !== null
         const label = getLabel(key)
@@ -125,34 +139,51 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
         if (isNested) {
           const subtotal = cumulativeTotals.has(key) ? cumulativeTotals.get(key)! : computeNestedSum(value as NestedMap)
           const totalLabel = getTotalLabel(key, label)
-          return (
-            <Grid key={`nested-${key}`}>
-              <Typography
-                component="span"
-                variant={depth === 0 ? 'overline' : 'h3'}
-                color={depth === 0 ? 'textSecondary' : 'textPrimary'}
-                sx={{
-                  textTransform: depth === 0 ? 'uppercase' : 'none',
-                  fontVariant: depth === 0 ? 'narrow' : 'normal',
-                  fontSize: depth === 0 ? '0.75rem' : undefined
-                }}>
-                {label}
+          const isCollapsible = depth === 1
+          const isOpen = !collapsed[key]
+          const totalSx = depth === 0 ? { textDecoration: 'underline', textDecorationStyle: 'double' } : isCollapsible ? { textDecoration: 'underline' } : undefined
+          const total = (
+            <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '10rem' }} size="grow">
+              <Typography color={'text.primary'} component="span" variant="h3" sx={totalSx}>
+                {formatNumber(subtotal)}
               </Typography>
-
-              <NestedGrid data={value as NestedMap} depth={depth + 1} safeT={safeT} reportHash={reportHash} reportType={reportType} />
-
-              <Grid alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }} sx={{ fontWeight: 'bold', mt: 0.5 }}>
-                <Grid container size={{ xs: 12, sm: 'grow' }}>
-                  <Typography component="span" sx={{ fontWeight: 700 }}>
-                    {totalLabel}
+            </Grid>
+          )
+          return (
+            <Grid key={`nested-${key}`} container direction="column" spacing={2} sx={depth === 0 ? { mb: 4, '&:last-of-type': { mb: 0 } } : undefined}>
+              <Grid alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }}>
+                <Grid alignItems="center" container size={{ xs: 12, sm: 'grow' }} spacing={1} wrap="nowrap">
+                  {isCollapsible && (
+                    <IconButton
+                      aria-label={safeT(isOpen ? 'collapseSubsection' : 'expandSubsection', { title: label })}
+                      size="small"
+                      sx={{ padding: '9px', marginLeft: '-9px' }}
+                      onClick={() => setCollapsed({ ...collapsed, [key]: isOpen })}
+                    >
+                      <IconsaxIcon name={isOpen ? ICONSAX_NAMES.ARROW_UP2 : ICONSAX_NAMES.ARROW_DOWN2} size={16} variant="Outline" />
+                    </IconButton>
+                  )}
+                  <Typography color="textPrimary" component="span" variant="h3" sx={getLevelSx(depth)}>
+                    {label}
                   </Typography>
                 </Grid>
-                <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '14.5rem' }} size="grow">
-                  <Typography color={'text.primary'} component="span" variant="h3" pr={1.75} sx={{ fontWeight: 700 }}>
-                    {formatNumber(subtotal)}
-                  </Typography>
-                </Grid>
+                {!isOpen && total}
               </Grid>
+
+              {isOpen && (
+                <>
+                  <NestedGrid data={value as NestedMap} depth={depth + 1} safeT={safeT} reportHash={reportHash} reportType={reportType} />
+
+                  <Grid alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }}>
+                    <Grid container size={{ xs: 12, sm: 'grow' }}>
+                      <Typography color="textPrimary" component="span" variant="h3" sx={getLevelSx(depth)}>
+                        {totalLabel}
+                      </Typography>
+                    </Grid>
+                    {total}
+                  </Grid>
+                </>
+              )}
             </Grid>
           )
         }
@@ -162,8 +193,8 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
             <Grid container size={{ xs: 12, sm: 'grow' }}>
               <Typography component="span">{label}</Typography>
             </Grid>
-            <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '14.5rem' }} size="grow">
-              <Typography color={'text.primary'} component="span" variant="h3" pr={1.75}>
+            <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '10rem' }} size="grow">
+              <Typography color={'text.primary'} component="span" variant="body1">
                 {formatNumber(Number.parseFloat(value as string))}
               </Typography>
             </Grid>

@@ -140,6 +140,8 @@
   "expandAllRows": "Expand all rows",
   "collapseRow": "Collapse row",
   "expandRow": "Expand row",
+  "collapseSubsection": "Collapse {title}",
+  "expandSubsection": "Expand {title}",
   "eventsTable": "Events table",
   "noResultsMessage": "No results found",
   "noResultsHint": "Try adjusting your filters",
