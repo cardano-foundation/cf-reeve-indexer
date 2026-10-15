@@ -24,7 +24,14 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             AND (:periods IS NULL OR r.period IN :periods)
             AND (:blockChainHash IS NULL OR r.txHash = :blockChainHash)
             AND (:currency IS NULL OR o.currencyId = :currency)
-            AND (r.id in (SELECT MIN(sub.id) FROM ReportEntity sub GROUP BY sub.metadataHash))
+            AND (r.id in (SELECT MIN(sub.id) FROM ReportEntity sub
+                WHERE sub.ver = (SELECT MAX(latest.ver) FROM ReportEntity latest
+                    WHERE latest.organisationId = sub.organisationId
+                    AND latest.subType = sub.subType
+                    AND latest.interval = sub.interval
+                    AND latest.year = sub.year
+                    AND latest.period = sub.period)
+                GROUP BY sub.organisationId, sub.subType, sub.interval, sub.year, sub.period))
             """)
     List<ReportEntity> findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
             @Param("organisationId") String organisationId,
@@ -50,6 +57,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
 
     Optional<ReportEntity> findByTxHash(String txHash);
 
-    List<ReportEntity> findByMetadataHash(String metdataHash);
+    List<ReportEntity> findByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVer(
+            String organisationId, String subType, Interval interval, Integer year, Integer period, Long ver);
 
 }
