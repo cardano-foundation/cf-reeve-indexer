@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.5.0...1.6.0) (2026-10-16)
+
+
+### Features
+
+* [LOB-2370] [BE] Model organisation & auditor attestations and expose them on the report API ([#97](https://github.com/cardano-foundation/cf-reeve-indexer/issues/97)) ([868bfaa](https://github.com/cardano-foundation/cf-reeve-indexer/commit/868bfaae3317613e6d4b647e31dd88a9f7264f63))
+* [LOB-2386] [BE] Parse and persist proId in the Reeve on-chain indexer ([#90](https://github.com/cardano-foundation/cf-reeve-indexer/issues/90)) ([9061cda](https://github.com/cardano-foundation/cf-reeve-indexer/commit/9061cda178e2614e1c7653d3a9cdf28612cdb0c5))
+
 ## [1.5.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.4.0...1.5.0) (2026-09-18)
 
 
