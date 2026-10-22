@@ -911,7 +911,7 @@
   "dashboardTransactionsHint": "{items} line items in {batches} batches",
   "dashboardTransactionsDescription": "Accounting entries published per month",
   "dashboardReports": "Reports",
-  "dashboardReportsHint": "{verified} identity-verified of {publications} publications",
+  "dashboardReportsHint": "{verified} verified, {certificates} certificates",
   "dashboardReportsDescription": "Financial statements published on-chain",
   "dashboardFundingEvents": "Funding events",
   "dashboardFundingHint": "{projects} projects across {rounds} funding rounds",
@@ -942,5 +942,5 @@
   "dashboardLatestReports": "Latest reports",
   "dashboardVerified": "Verified",
   "dashboardIdentityVerified": "Identity verified",
-  "dashboardVerifiedOf": "{verified} of {total} publications signed by a verified identity"
+  "dashboardVerifiedOf": "{verified} of {total} reports signed by a verified identity, with {certificates} certificates"
 }

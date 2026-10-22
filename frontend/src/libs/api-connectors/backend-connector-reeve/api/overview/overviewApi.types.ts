@@ -36,7 +36,6 @@ export interface RecentTransaction {
 }
 
 export interface RecentReport {
-  id: number
   txHash?: string
   subType?: string
   interval?: string
@@ -78,6 +77,7 @@ export interface ReportOverview {
   total: number
   publications: number
   verified: number
+  certificates: number
   bySubType: LabelCount[]
   byInterval: LabelCount[]
   byYear: LabelCount[]

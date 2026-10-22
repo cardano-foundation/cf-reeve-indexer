@@ -3,16 +3,25 @@ package org.cardanofoundation.reeve.indexer.service;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
+import org.cardanofoundation.reeve.indexer.model.view.ReportView;
 import org.cardanofoundation.reeve.indexer.model.view.dashboard.DashboardOverviewView;
 import org.cardanofoundation.reeve.indexer.model.view.dashboard.DashboardOverviewView.CurrencyTotals;
 import org.cardanofoundation.reeve.indexer.model.view.dashboard.DashboardOverviewView.FundingOverview;
@@ -42,7 +51,14 @@ public class DashboardService {
 
     private static final String EVENT_CURRENCY = "COALESCE(e.currency_cust_code, e.currency_id, '')";
 
+    private static final Comparator<ReportView> NEWEST_FIRST = Comparator
+            .comparing(ReportView::getYear, Comparator.nullsFirst(Comparator.<Integer>naturalOrder()))
+            .thenComparing(ReportView::getPeriod, Comparator.nullsFirst(Comparator.<Integer>naturalOrder()))
+            .reversed();
+
     private final NamedParameterJdbcTemplate jdbc;
+    private final ReportService reportService;
+    private final OrganisationService organisationService;
 
     public DashboardOverviewView overview(String organisationId) {
         MapSqlParameterSource params = new MapSqlParameterSource("org", organisationId);
@@ -54,7 +70,7 @@ public class DashboardService {
                 .organisationId(organisationId)
                 .organisationCount(nz(organisationCount))
                 .transactions(transactions(params))
-                .reports(reports(params))
+                .reports(reports(organisationId, params))
                 .funding(funding(params))
                 .build();
     }
@@ -112,54 +128,67 @@ public class DashboardService {
         return overview;
     }
 
-    private ReportOverview reports(MapSqlParameterSource params) {
-        String where = " WHERE " + ORG_FILTER.formatted("r") + " ";
+    /**
+     * The same reports as /api/v1/reports ({@link ReportService#findAllByTypeAndPeriod}): one per organisation,
+     * subType, interval, year and period at its latest version, carrying the certificates of every submission
+     * of it. Each identity signing a report publishes its own copy, so the raw rows count it once per signer.
+     */
+    private ReportOverview reports(String organisationId, MapSqlParameterSource params) {
+        List<ReportView> grouped = reportService.findAllByTypeAndPeriod(
+                organisationId, null, null, null, null, null, null, Pageable.unpaged());
 
-        ReportOverview overview = jdbc.queryForObject("""
-                SELECT COUNT(*) AS publications,
-                       COUNT(DISTINCT (r.organisation_id, r.sub_type, r."interval", r.year, r.period)) AS total,
-                       COUNT(*) FILTER (WHERE r.identity_verified) AS verified
-                FROM reeve_reports r""" + where, params, (rs, i) -> ReportOverview.builder()
-                .publications(rs.getLong("publications"))
-                .total(rs.getLong("total"))
-                .verified(rs.getLong("verified"))
-                .build());
+        Long publications = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM reeve_reports r WHERE " + ORG_FILTER.formatted("r"), params, Long.class);
 
-        overview.setBySubType(jdbc.query("""
-                SELECT COALESCE(r.sub_type, 'UNKNOWN') AS label, COUNT(*) AS count
-                FROM reeve_reports r""" + where + """
-                 GROUP BY label ORDER BY count DESC""", params, LABEL_COUNT));
+        Map<Integer, Long> perYear = grouped.stream().filter(r -> r.getYear() != null)
+                .collect(Collectors.groupingBy(ReportView::getYear, TreeMap::new, Collectors.counting()));
 
-        overview.setByInterval(jdbc.query("""
-                SELECT COALESCE(r."interval", 'UNKNOWN') AS label, COUNT(*) AS count
-                FROM reeve_reports r""" + where + """
-                 GROUP BY label ORDER BY count DESC""", params, LABEL_COUNT));
+        Map<String, String> organisationNames = new HashMap<>();
+        return ReportOverview.builder()
+                .total(grouped.size())
+                .publications(nz(publications))
+                .verified(grouped.stream().filter(DashboardService::isVerified).count())
+                .certificates(grouped.stream().mapToLong(DashboardService::certificateCount).sum())
+                .bySubType(countBy(grouped, ReportView::getSubType))
+                .byInterval(countBy(grouped, ReportView::getIntervalType))
+                .byYear(perYear.entrySet().stream()
+                        .map(e -> new LabelCount(String.valueOf(e.getKey()), e.getValue())).toList())
+                .recent(grouped.stream().sorted(NEWEST_FIRST).limit(RECENT_LIMIT)
+                        .map(r -> toRecent(r, organisationNames)).toList())
+                .build();
+    }
 
-        overview.setByYear(jdbc.query("""
-                SELECT CAST(r.year AS VARCHAR) AS label, COUNT(*) AS count
-                FROM reeve_reports r""" + where + """
-                 AND r.year IS NOT NULL GROUP BY r.year ORDER BY r.year""", params, LABEL_COUNT));
+    private RecentReport toRecent(ReportView report, Map<String, String> organisationNames) {
+        return RecentReport.builder()
+                .txHash(report.getTxHash())
+                .subType(report.getSubType())
+                .interval(report.getIntervalType())
+                .year(report.getYear())
+                .period(report.getPeriod())
+                .ver(report.getVer())
+                .identityVerified(isVerified(report))
+                .organisationId(report.getOrganisationId())
+                .organisationName(organisationNames.computeIfAbsent(report.getOrganisationId(), id ->
+                        organisationService.findById(id).map(OrganisationEntity::getName).orElse(null)))
+                .build();
+    }
 
-        overview.setRecent(jdbc.query("""
-                SELECT r.id, r.tx_hash, r.sub_type, r."interval", r.year, r.period, r.ver,
-                       r.identity_verified, r.organisation_id, o.name
-                FROM reeve_reports r
-                LEFT JOIN reeve_organisation o ON o.id = r.organisation_id""" + where + """
-                 ORDER BY r.year DESC NULLS LAST, r.period DESC NULLS LAST, r.id DESC LIMIT %d"""
-                .formatted(RECENT_LIMIT), params, (rs, i) -> RecentReport.builder()
-                .id(rs.getLong("id"))
-                .txHash(rs.getString("tx_hash"))
-                .subType(rs.getString("sub_type"))
-                .interval(rs.getString("interval"))
-                .year(rs.getObject("year", Integer.class))
-                .period(rs.getObject("period", Integer.class))
-                .ver(rs.getObject("ver", Long.class))
-                .identityVerified(rs.getBoolean("identity_verified"))
-                .organisationId(rs.getString("organisation_id"))
-                .organisationName(rs.getString("name"))
-                .build()));
+    private static boolean isVerified(ReportView report) {
+        return certificateCount(report) > 0;
+    }
 
-        return overview;
+    private static long certificateCount(ReportView report) {
+        return report.getIdentities() == null ? 0 : report.getIdentities().size();
+    }
+
+    private static List<LabelCount> countBy(List<ReportView> reports, Function<ReportView, String> label) {
+        return reports.stream()
+                .collect(Collectors.groupingBy(r -> Objects.requireNonNullElse(label.apply(r), "UNKNOWN"),
+                        Collectors.counting()))
+                .entrySet().stream()
+                .map(e -> new LabelCount(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparingLong(LabelCount::getCount).reversed())
+                .toList();
     }
 
     private FundingOverview funding(MapSqlParameterSource params) {

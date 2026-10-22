@@ -131,7 +131,7 @@ export const ViewPublicLanding = () => {
             <StatTile
               label={t({ id: 'dashboardReports' })}
               value={formatCount(reports?.total)}
-              hint={t({ id: 'dashboardReportsHint' }, { verified: formatCount(reports?.verified), publications: formatCount(reports?.publications) })}
+              hint={t({ id: 'dashboardReportsHint' }, { verified: formatCount(reports?.verified), certificates: formatCount(reports?.certificates) })}
               icon={<DocumentText size={20} color={iconColor} />}
               isLoading={isLoading}
               onClick={organisationId ? () => goTo('reports') : undefined}
@@ -232,7 +232,7 @@ export const ViewPublicLanding = () => {
               icon={<DocumentText size={20} color={iconColor} />}
               action={sectionLink('reports')}
             >
-              <VerifiedShare verified={reports?.verified ?? 0} total={reports?.publications ?? 0} />
+              <VerifiedShare verified={reports?.verified ?? 0} total={reports?.total ?? 0} certificates={reports?.certificates ?? 0} />
               <Grid container spacing={3}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <BreakdownBars title={t({ id: 'dashboardByReportType' })} items={reports?.bySubType ?? []} limit={4} />
@@ -248,7 +248,7 @@ export const ViewPublicLanding = () => {
                 <RecentList
                   emptyMessage={t({ id: 'dashboardNothingYet' })}
                   rows={(reports?.recent ?? []).slice(0, 4).map((report) => ({
-                    key: report.id,
+                    key: [report.organisationId, report.subType, report.interval, report.year, report.period].join('-'),
                     primary: humanize(report.subType),
                     secondary: [
                       formatReportPeriod(report.interval, report.year, report.period),
@@ -281,7 +281,7 @@ const MiniStat = ({ label, value }: { label: string; value: string }) => (
   </Box>
 )
 
-const VerifiedShare = ({ verified, total }: { verified: number; total: number }) => {
+const VerifiedShare = ({ verified, total, certificates }: { verified: number; total: number; certificates: number }) => {
   const { t } = useTranslations()
   const theme = useTheme()
 
@@ -300,7 +300,7 @@ const VerifiedShare = ({ verified, total }: { verified: number; total: number })
           </Typography>
         </Box>
         <Typography color="text.secondary" variant="caption">
-          {t({ id: 'dashboardVerifiedOf' }, { verified: formatCount(verified), total: formatCount(total) })}
+          {t({ id: 'dashboardVerifiedOf' }, { verified: formatCount(verified), total: formatCount(total), certificates: formatCount(certificates) })}
         </Typography>
       </Box>
     </Box>

@@ -63,11 +63,14 @@ public class DashboardOverviewView {
     @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ReportOverview {
-        /** Distinct (organisation, subType, interval, year, period) reports — versions collapsed. */
+        /** Distinct (organisation, subType, interval, year, period) reports: versions and signers collapsed. */
         private long total;
-        /** Every on-chain publication, including superseded versions. */
+        /** Every on-chain publication, including superseded versions and one per signing identity. */
         private long publications;
+        /** Reports with at least one certificate (a verified identity signed one of its submissions). */
         private long verified;
+        /** Certificates over all reports: one per verified identity that signed a report. */
+        private long certificates;
         private List<LabelCount> bySubType;
         private List<LabelCount> byInterval;
         private List<LabelCount> byYear;
@@ -158,7 +161,6 @@ public class DashboardOverviewView {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
     public static class RecentReport {
-        private Long id;
         private String txHash;
         private String subType;
         private String interval;
