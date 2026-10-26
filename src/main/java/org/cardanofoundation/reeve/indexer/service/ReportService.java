@@ -66,7 +66,7 @@ public class ReportService {
 
         // finds all first reports (with min id of the latest version, grouped by organisation, subType, interval, year and period)
         List<ReportEntity> firstReports = reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                organisationId, blockChainHash, currency, reportTypes, intervals, years, periods, pageable);
+                organisationId, likePattern(blockChainHash), currency, reportTypes, intervals, years, periods, pageable);
 
         return firstReports.stream().map(report -> {
             ReportView view;
@@ -191,5 +191,12 @@ public class ReportService {
                                 o.getInterval(),
                                 o.getPeriod(), // handle Optional safely if needed
                                 o.getYear()))));
+    }
+
+    private static String likePattern(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return "%" + value.trim().toLowerCase().replace("...", "%") + "%";
     }
 }
