@@ -10,9 +10,10 @@ type InputOrganisationsSelectFieldProps = SelectPropsMUI<string> & {
   items: SelectOption[]
   value: string
   hasChevron?: boolean
+  placeholder?: string
 }
 
-export const InputOrganisationsSelectField = ({ items, name, value, hasChevron = true, ...props }: InputOrganisationsSelectFieldProps) => {
+export const InputOrganisationsSelectField = ({ items, name, value, hasChevron = true, placeholder, ...props }: InputOrganisationsSelectFieldProps) => {
   const theme = useTheme()
   return (
     <Select
@@ -21,7 +22,7 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
       displayEmpty
       renderValue={(value) => {
         if (!value) {
-          return 'Select organisation'
+          return placeholder
         }
         const org = items.find((item) => item.value === value)
         return (
