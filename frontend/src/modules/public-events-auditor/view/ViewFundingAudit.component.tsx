@@ -89,7 +89,7 @@ export const ViewFundingAudit = () => {
   const effectiveOrganisation = selectedOrganisation || orgIdFromPath || ''
   const organisationName = useSelectedOrganisationName()
 
-  const toApiDate = (value: Dayjs | null) => (value ? value.format('YYYY-MM-DD') : undefined)
+  const toApiDate = (value: Dayjs | null) => (value?.isValid() ? value.format('YYYY-MM-DD') : undefined)
 
   const { audit, isFetching, hasOrganisation } = useFundingAudit(effectiveOrganisation, toApiDate(dateFrom), toApiDate(dateTo))
 
@@ -101,7 +101,6 @@ export const ViewFundingAudit = () => {
   const isEmptyResult = Boolean(audit && audit.fundingCount === 0 && audit.spendingCount === 0 && audit.refundCount === 0)
   const hasActiveDateFilter = Boolean(dateFrom || dateTo)
   const showFilters = hasOrganisation && audit && (!isEmptyResult || hasActiveDateFilter)
-  const hasContent = hasOrganisation && Boolean(audit) && !isEmptyResult
 
   const renderBody = () => {
     if (!hasOrganisation) {
@@ -182,7 +181,7 @@ export const ViewFundingAudit = () => {
         <LegalDisclosureButton />
       </LayoutPublic.Header>
       <LayoutPublic.Main flexDirection="column" gap={2}>
-        {hasContent && <LegalDisclosureAttribution />}
+        {showFilters && <LegalDisclosureAttribution />}
         {showFilters && (
           <Box display="flex" alignItems="flex-start" flexWrap="wrap-reverse" gap={1.5}>
             <AuditFilterBar dateFrom={dateFrom} dateTo={dateTo} onClear={clearFilters} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />

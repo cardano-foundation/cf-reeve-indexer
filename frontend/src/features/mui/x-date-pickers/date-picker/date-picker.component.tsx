@@ -4,6 +4,7 @@ import type { DatePickerProps } from './date-picker.types'
 export const DatePicker = ({ label, maxDate, minDate, name, slotProps, value, onChange, disabled, ...props }: DatePickerProps) => {
   return (
     <DatePickerStyled
+      enableAccessibleFieldDOMStructure
       format="DD/MM/YYYY"
       slotProps={{
         day: { sx: (theme) => ({ borderRadius: `${Number(theme.shape.borderRadius) * 2}px` }), ...slotProps?.day },

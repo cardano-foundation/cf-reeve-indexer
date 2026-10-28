@@ -7,7 +7,7 @@ import type { DatePickerStyledProps } from './date-picker.types'
 export const DatePickerStyled = styled(DatePickerMUI)<DatePickerStyledProps>(
   ({ theme }) => `
   && {
-    & .MuiInputBase-root {
+    & .MuiPickersInputBase-root {
       background: ${theme.palette.background.default};
       border-radius: ${Number(theme.shape.borderRadius) * 2}px;
       box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
