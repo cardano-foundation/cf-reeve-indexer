@@ -22,7 +22,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             AND (:intervals IS NULL OR r.interval IN :intervals)
             AND (:years IS NULL OR r.year IN :years)
             AND (:periods IS NULL OR r.period IN :periods)
-            AND (:blockChainHash IS NULL OR r.txHash = :blockChainHash)
+            AND (:blockChainHash IS NULL OR LOWER(r.txHash) LIKE :blockChainHash)
             AND (:currency IS NULL OR o.currencyId = :currency)
             AND (r.id in (SELECT MIN(sub.id) FROM ReportEntity sub
                 WHERE sub.ver = (SELECT MAX(latest.ver) FROM ReportEntity latest
