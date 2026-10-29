@@ -3,6 +3,7 @@ import { noop } from 'lodash'
 
 import { useTableToolbarContext } from 'features/common'
 import { useDatesRange } from 'hooks'
+import { useFormDateRangeFilterValidation } from 'libs/form-kit/validations/useFormDateRangeFilterValidation.ts'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 import { usePublicTransactionsContext } from 'modules/public-transactions/components/PublicTransactionsContext/PublicTransactionsContext.hooks'
 
@@ -10,8 +11,11 @@ import { DEFAULT_SEARCH_QUICK_FILTERS_VALUES } from './SearchToolbar.consts'
 import { SearchQuickFiltersValues } from './SearchToolbar.types'
 
 export const useSearchQuickFiltersForm = () => {
+  const validationSchema = useFormDateRangeFilterValidation()
+
   const quickFilters = useFormik({
     initialValues: DEFAULT_SEARCH_QUICK_FILTERS_VALUES,
+    validationSchema,
     onSubmit: noop,
     enableReinitialize: true,
     validateOnChange: true

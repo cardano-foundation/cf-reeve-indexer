@@ -3,11 +3,13 @@ import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import { Dayjs } from 'dayjs'
+import { FormikProvider } from 'formik'
 import { FilterRemove } from 'iconsax-react'
 import { ReactNode, useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { publicProjectsIllustration } from 'assets/images'
+import { useDebounce } from 'hooks'
 import { LegalDisclosureAttribution } from 'libs/layout-kit/layout-public/components/LegalDisclosureAttribution/LegalDisclosureAttribution.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
@@ -20,6 +22,7 @@ import { LoaderCentered } from 'libs/ui-kit/components/LoaderCentered/LoaderCent
 import { AuditFilterBar } from 'modules/public-events-auditor/components/AuditFilterBar/AuditFilterBar.component.tsx'
 import { ProjectBreakdownProjects } from 'modules/public-events-auditor/components/ProjectBreakdownProjects/ProjectBreakdownProjects.component.tsx'
 import { useFundingAudit } from 'modules/public-events-auditor/hooks/useFundingAudit.ts'
+import { useFundingAuditFilters } from 'modules/public-events-auditor/hooks/useFundingAuditFilters.ts'
 import { formatAuditDate } from 'modules/public-events-auditor/utils/format.ts'
 import { projectKey } from 'modules/public-events-auditor/utils/projectKey.ts'
 import { getOrgPath } from 'routes'
@@ -72,8 +75,8 @@ export const ViewFundingAudit = () => {
   const [searchParams] = useSearchParams()
   const { organisations, selectedOrganisation, setSelectedOrganisation } = useLayoutPublicContext()
 
-  const [dateFrom, setDateFrom] = useState<Dayjs | null>(null)
-  const [dateTo, setDateTo] = useState<Dayjs | null>(null)
+  const { dateFilters } = useFundingAuditFilters()
+  const { dateFrom, dateTo } = dateFilters.values
   const [selectedProjectKeys, setSelectedProjectKeys] = useState<string[]>([])
 
   useEffect(() => {
@@ -89,14 +92,14 @@ export const ViewFundingAudit = () => {
   const effectiveOrganisation = selectedOrganisation || orgIdFromPath || ''
   const organisationName = useSelectedOrganisationName()
 
-  const toApiDate = (value: Dayjs | null) => (value?.isValid() ? value.format('YYYY-MM-DD') : undefined)
+  const toApiDate = (value: Dayjs | null, hasError: boolean) => (value?.isValid() && !hasError ? value.format('YYYY-MM-DD') : undefined)
 
-  const { audit, isFetching, hasOrganisation } = useFundingAudit(effectiveOrganisation, toApiDate(dateFrom), toApiDate(dateTo))
+  const apiDateFrom = useDebounce(toApiDate(dateFrom, Boolean(dateFilters.errors.dateFrom)))
+  const apiDateTo = useDebounce(toApiDate(dateTo, Boolean(dateFilters.errors.dateTo)))
 
-  const clearFilters = () => {
-    setDateFrom(null)
-    setDateTo(null)
-  }
+  const { audit, isFetching, hasOrganisation } = useFundingAudit(effectiveOrganisation, apiDateFrom ?? undefined, apiDateTo ?? undefined)
+
+  const clearFilters = () => dateFilters.resetForm()
 
   const isEmptyResult = Boolean(audit && audit.fundingCount === 0 && audit.spendingCount === 0 && audit.refundCount === 0)
   const hasActiveDateFilter = Boolean(dateFrom || dateTo)
@@ -184,7 +187,9 @@ export const ViewFundingAudit = () => {
         {showFilters && <LegalDisclosureAttribution />}
         {showFilters && (
           <Box display="flex" alignItems="flex-start" flexWrap="wrap-reverse" gap={1.5}>
-            <AuditFilterBar dateFrom={dateFrom} dateTo={dateTo} onClear={clearFilters} onDateFromChange={setDateFrom} onDateToChange={setDateTo} />
+            <FormikProvider value={dateFilters}>
+              <AuditFilterBar onClear={clearFilters} />
+            </FormikProvider>
             {audit?.lastEventDate && (
               <Box
                 sx={{
@@ -192,7 +197,9 @@ export const ViewFundingAudit = () => {
                   flexBasis: { xs: '100%', md: 'auto' },
                   justifyContent: { xs: 'flex-start', md: 'flex-end' },
                   marginLeft: { xs: 0, md: 'auto' },
-                  alignSelf: 'center'
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  height: '2.5rem'
                 }}
               >
                 <Chip color="info" label={t({ id: 'auditLastUpdated' }, { date: formatAuditDate(audit.lastEventDate) })} />

@@ -27,10 +27,10 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
       </TableToolbar.QuickFilters.Field>
       <TableToolbar.QuickFilters.FieldGroup>
         <TableToolbar.QuickFilters.Field>
-          <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo || dateFromMaxDate} />
+          <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo?.isValid() ? values.dateTo : dateFromMaxDate} />
         </TableToolbar.QuickFilters.Field>
         <TableToolbar.QuickFilters.Field>
-          <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom || dateToMinDate} maxDate={dateToMaxDate} />
+          <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom?.isValid() ? values.dateFrom : dateToMinDate} maxDate={dateToMaxDate} />
         </TableToolbar.QuickFilters.Field>
       </TableToolbar.QuickFilters.FieldGroup>
       <TableToolbar.QuickFilters.Field>

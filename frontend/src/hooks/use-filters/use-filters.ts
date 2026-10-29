@@ -25,7 +25,7 @@ export const useFilters = <FiltersValues extends Record<string, unknown>, QuickF
   const areBothFiltersPristine = !filters.dirty && !quickFilters.dirty
   const isInitialFiltersState = JSON.stringify(combinedFilters) === JSON.stringify({ ...initialQuickFiltersValues, ...initialFiltersValues })
   const isClearDisabled = areBothFiltersPristine && isInitialFiltersState
-  const isApplyDisabled = areBothFiltersPristine && isInitialFiltersState
+  const isApplyDisabled = (areBothFiltersPristine && isInitialFiltersState) || !filters.isValid
 
   const handleClearFilters = () => {
     filters.resetForm({ values: initialFiltersValues, touched: {} })
@@ -33,22 +33,21 @@ export const useFilters = <FiltersValues extends Record<string, unknown>, QuickF
   }
 
   useEffect(() => {
-    Object.entries(quickFilters.values).forEach(([key, value]) => {
-      if (Object.prototype.hasOwnProperty.call(filters.values, key)) {
-        filters.setFieldValue(key, value)
-      }
-    })
-  }, [quickFilters.values, filters.setFieldValue])
+    filters.setValues((prevValues) => ({
+      ...prevValues,
+      ...Object.fromEntries(Object.entries(quickFilters.values).filter(([key]) => Object.prototype.hasOwnProperty.call(prevValues, key)))
+    }))
+  }, [quickFilters.values, filters.setValues])
 
   useEffect(() => {
-    Object.entries(filters.values).forEach(([key, value]) => {
-      if (Object.prototype.hasOwnProperty.call(quickFilters.values, key)) {
-        quickFilters.setFieldValue(key, value)
-      }
-    })
-  }, [filters.submitCount, quickFilters.setFieldValue])
+    quickFilters.setValues((prevValues) => ({
+      ...prevValues,
+      ...Object.fromEntries(Object.entries(filters.values).filter(([key]) => Object.prototype.hasOwnProperty.call(prevValues, key)))
+    }))
+  }, [filters.submitCount, quickFilters.setValues])
 
   useEffect(() => {
+    if (!quickFilters.isValid) return
     setCombinedFilters((prevState) => ({ ...prevState, ...debouncedQuickFilters }))
   }, [debouncedQuickFilters])
 
