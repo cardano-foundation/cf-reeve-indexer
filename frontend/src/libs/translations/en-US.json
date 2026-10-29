@@ -428,6 +428,7 @@
   "selectableDatesTooltip": "Selectable dates are restricted by the\naccounting period set in your application",
   "importFromFileSubtitle": "Max file size is 10 MB. Only CSV files are supported.\nTo ensure correct data format, please <a>download the template</a>.",
   "invalidPeriod": "Invalid period",
+  "dateToBeforeDateFrom": "Earlier than From date",
   "importTypeIsRequired": "Import type is required",
   "invalidImportType": "Invalid import type",
   "organisationIsRequired": "Organization is required",

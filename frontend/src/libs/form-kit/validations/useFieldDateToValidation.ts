@@ -15,13 +15,15 @@ export const useFieldDateToValidation = (state: FieldDateToValidationState) => {
   const { t } = useTranslations()
 
   return Yup.date()
+    .nullable()
+    .transform((value, originalValue) => (dayjs.isDayjs(originalValue) ? originalValue.toDate() : value))
     .min(dateToMinDate.isValid() ? dateToMinDate : dayjs(DEFUALT_MIN_DATE), t({ id: 'invalidPeriod' }))
     .max(dateToMaxDate.isValid() ? dateToMaxDate : dayjs(), t({ id: 'invalidPeriod' }))
     .when('dateFrom', (values, schema) => {
       const [dateFrom] = values
 
       if (dateFrom && dayjs(dateFrom).isValid()) {
-        return schema.min(dateFrom, t({ id: 'invalidPeriod' }))
+        return schema.test('dateToBeforeDateFrom', t({ id: 'dateToBeforeDateFrom' }), (value) => !value || !dayjs(value).isBefore(dateFrom))
       }
 
       return schema
