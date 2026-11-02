@@ -14,7 +14,7 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
 
   const { dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, values } = useSearchQuickFilters()
 
-  const { transactionNumberOptions, transactionTypeOptions, transactionNumberSearchTerm, setTransactionNumberSearchTerm, debouncedTransactionNumberSearchTerm } = options
+  const { transactionNumberOptions, transactionTypeOptions, isOptionsLoading, isTransactionNumbersLoading, transactionNumberSearchTerm, setTransactionNumberSearchTerm, debouncedTransactionNumberSearchTerm } = options
 
   return (
     <TableToolbar.QuickFilters isFirstFieldSkipped>
@@ -34,8 +34,9 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
         <FieldCombobox 
           label={t({ id: 'transactionNumber' })} 
           limitTags={1} name="transactionNumber" 
-          options={transactionNumberOptions} 
-          multiple 
+          options={transactionNumberOptions}
+          loading={isTransactionNumbersLoading}
+          multiple
           noOptionsText={debouncedTransactionNumberSearchTerm ? t({ id: 'noOptionsTransactionNumber' }) : t({ id: 'transactionNumberSearchPlaceholder' })}
           inputValue={transactionNumberSearchTerm} 
           onInputChange={(_event, value, reason) => { 
@@ -43,7 +44,7 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
           filterOptions={(x) => x} />
       </TableToolbar.QuickFilters.Field>
       <TableToolbar.QuickFilters.Field>
-        <FieldCombobox label={t({ id: 'transactionType' })} limitTags={1} name="transactionType" options={transactionTypeOptions} multiple />
+        <FieldCombobox label={t({ id: 'transactionType' })} limitTags={1} name="transactionType" options={transactionTypeOptions} loading={isOptionsLoading} multiple />
       </TableToolbar.QuickFilters.Field>
     </TableToolbar.QuickFilters>
   )
