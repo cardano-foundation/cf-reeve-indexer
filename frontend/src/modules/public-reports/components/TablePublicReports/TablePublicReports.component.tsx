@@ -16,10 +16,14 @@ import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
 import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
+import { AttestationPendingBadge } from 'modules/public-reports/components/AttestationPendingBadge/AttestationPendingBadge.component.tsx'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
 import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
+
+// A report can carry two attestations (publisher and auditor); unfilled slots render as pending.
+const ATTESTATION_SLOTS = 2
 
 interface TableReportsPublicProps {
   data: GetPublicReportsResponse200 | null
@@ -114,8 +118,13 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       minWidth: 192
     },
     {
-      field: 'identities',
-      headerName: t({ id: 'identityVerified' }),
+      field: 'attestations',
+      headerName: t({ id: 'attestations' }),
+      renderHeader: () => (
+        <Tooltip title={t({ id: 'attestationsHeaderInfo' })}>
+          <span className="MuiDataGrid-columnHeaderTitle">{t({ id: 'attestations' })}</span>
+        </Tooltip>
+      ),
       renderCell: ({ row }) => (
         <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
           {row.identities?.map((item: IdentityAttestationView, index: number) => (
@@ -130,12 +139,15 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
               credentialTxHash={item.credentialTxHash}
             />
           ))}
+          {Array.from({ length: Math.max(0, ATTESTATION_SLOTS - (row.identities?.length ?? 0)) }, (_, index) => (
+            <AttestationPendingBadge key={index} />
+          ))}
         </div>
       ),
       hideable: false,
-      sortable: true,
+      sortable: false,
       flex: 1,
-      minWidth: 50
+      minWidth: 120
     },
     {
       field: 'actions',

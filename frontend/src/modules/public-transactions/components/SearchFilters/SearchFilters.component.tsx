@@ -30,10 +30,10 @@ export const SearchFilters = () => {
         <Grid container size="grow" columnSpacing={2} rowSpacing={3}>
           <Typography variant="h3">{t({ id: 'transactionDetails' })}</Typography>
           <Grid size={12}>
-            <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo || dateFromMaxDate} />
+            <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo?.isValid() ? values.dateTo : dateFromMaxDate} />
           </Grid>
           <Grid size={12}>
-            <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom || dateToMinDate} maxDate={dateToMaxDate} />
+            <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom?.isValid() ? values.dateFrom : dateToMinDate} maxDate={dateToMaxDate} />
           </Grid>
           <Grid size={12}>
             <FieldCombobox 

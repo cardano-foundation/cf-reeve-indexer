@@ -1,14 +1,17 @@
 export interface EventMilestoneView {
   milestoneId: string
   milestoneTitle: string
+  proId: string | null
   allocatedAmount: number | null
 }
 
 export interface EventAllocationView {
   projectId: string
   projectTitle: string
+  proId: string | null
   subProjectId: string | null
   subProjectTitle: string | null
+  subProjectProId: string | null
   milestones: EventMilestoneView[]
 }
 
@@ -111,6 +114,7 @@ export type GetEventProjectsResponse200 = EventProjectEntity[]
 export interface MilestoneAuditView {
   milestoneId: string | null
   milestoneTitle: string | null
+  proId: string | null
   allocatedAmount: number
   refundedAmount: number
   spentAmount: number
@@ -119,6 +123,7 @@ export interface MilestoneAuditView {
 export interface SubProjectAuditView {
   subProjectId: string | null
   subProjectTitle: string | null
+  proId: string | null
   allocatedAmount: number
   refundedAmount: number
   spentAmount: number
@@ -129,6 +134,7 @@ export interface ProjectAuditView {
   projectKey: string | null
   projectId: string | null
   projectTitle: string | null
+  proId: string | null
   currency: string | null
   allocatedAmount: number
   refundedAmount: number
@@ -154,6 +160,7 @@ export interface AuditEventLineView {
   projectKey: string | null
   projectId: string | null
   projectTitle: string | null
+  proId: string | null
 }
 
 export interface AuditSummaryView {

@@ -3,6 +3,7 @@ import { useFormik, useFormikContext } from 'formik'
 import { noop } from 'lodash'
 
 import { useDatesRange, useDebounce } from 'hooks'
+import { useFormDateRangeFilterValidation } from 'libs/form-kit/validations/useFormDateRangeFilterValidation.ts'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 import { useGetOrganisationCostCentersModel } from 'libs/models/organisation-model/GetOrganisationCostCenters/GetOrganisationCostCenters.service'
 import { useGetOrganisationCounterpartiesModel } from 'libs/models/organisation-model/GetOrganisationCounterparties/GetOrganisationCounterparties.service'
@@ -92,8 +93,11 @@ export const useSearchFiltersOptions = (selectedTransactionNumbers: string[] = [
 }
 
 export const useSearchDrawerFiltersForm = () => {
+  const validationSchema = useFormDateRangeFilterValidation()
+
   const filters = useFormik({
     initialValues: DEFAULT_SEARCH_FILTERS_VALUES,
+    validationSchema,
     onSubmit: noop,
     enableReinitialize: true,
     validateOnChange: true

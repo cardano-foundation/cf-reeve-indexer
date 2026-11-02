@@ -66,9 +66,9 @@ public class ReportService {
             }
         }
 
-        // finds all first reports (with min id grouped by metadataHash)
+        // finds all first reports (with min id of the latest version, grouped by organisation, subType, interval, year and period)
         List<ReportEntity> firstReports = reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                organisationId, blockChainHash, currency, reportTypes, intervals, years, periods, pageable);
+                organisationId, likePattern(blockChainHash), currency, reportTypes, intervals, years, periods, pageable);
 
         return firstReports.stream().map(report -> {
             ReportView view;
@@ -81,8 +81,10 @@ public class ReportService {
                 throw new RuntimeException(e);
             }
 
-            // load all of the reports associated with metadata hash
-            var allReports = reportRepository.findByMetadataHash(report.getMetadataHash());
+            // load all of the submissions of the same report (same version), each one may be signed by a different identity
+            var allReports = reportRepository.findByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVer(
+                    report.getOrganisationId(), report.getSubType(), report.getInterval(),
+                    report.getYear(), report.getPeriod(), report.getVer());
 
             List<IdentityAttestationView> identities = allReports.stream()
                     .filter(ReportEntity::isIdentityVerified)
@@ -187,5 +189,12 @@ public class ReportService {
                                 o.getInterval(),
                                 o.getPeriod(), // handle Optional safely if needed
                                 o.getYear()))));
+    }
+
+    private static String likePattern(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return "%" + value.trim().toLowerCase().replace("...", "%") + "%";
     }
 }

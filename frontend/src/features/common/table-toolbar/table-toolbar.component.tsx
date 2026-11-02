@@ -40,7 +40,24 @@ const QuickFilters = ({ children, isFirstFieldSkipped = false }: QuickFiltersPro
     <QuickFiltersContext.Provider value={true}>
       <Grid container size="grow" spacing={2}>
         <Form style={{ width: '100%' }} noValidate>
-          <Grid container ref={toolbarRef} size="grow" spacing={2} wrap="nowrap">
+          <Grid
+            container
+            ref={toolbarRef}
+            size="grow"
+            spacing={2}
+            wrap="nowrap"
+            sx={(theme) => ({
+              '& .MuiFormHelperText-root': {
+                position: 'absolute',
+                top: '100%',
+                transform: 'translateY(-50%)',
+                margin: '0 0 0 10px',
+                padding: '0 4px',
+                lineHeight: 1,
+                background: theme.palette.background.default
+              }
+            })}
+          >
             {Children.toArray(children).map((child, index, array) => {
               const isField = (child as ReactElement)?.type === QuickFiltersField || (child as ReactElement)?.type === QuickFiltersFieldGroup
 

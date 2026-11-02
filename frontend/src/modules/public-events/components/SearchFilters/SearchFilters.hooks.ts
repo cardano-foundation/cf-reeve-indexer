@@ -4,6 +4,7 @@ import { noop } from 'lodash'
 import { type AutocompleteOption } from 'features/mui/base'
 import { useDatesRange } from 'hooks'
 import { EventProjectEntity, GetEventTypesResponse200 } from 'libs/api-connectors/backend-connector-reeve/api/events/publicEventsApi.types'
+import { useFormDateRangeFilterValidation } from 'libs/form-kit/validations/useFormDateRangeFilterValidation.ts'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 import { useGetEventProjectsModel } from 'libs/models/events-model/GetEventProjects/GetEventProjectsModel.service'
 import { useGetEventTypesModel } from 'libs/models/events-model/GetEventTypes/GetEventTypesModel.service'
@@ -43,8 +44,11 @@ export const useSearchFiltersOptions = () => {
 }
 
 export const useSearchDrawerFiltersForm = (lockedProjectId?: string | null) => {
+  const validationSchema = useFormDateRangeFilterValidation()
+
   const filters = useFormik({
     initialValues: { ...DEFAULT_SEARCH_FILTERS_VALUES, project: lockedProjectId ? [lockedProjectId] : DEFAULT_SEARCH_FILTERS_VALUES.project },
+    validationSchema,
     onSubmit: noop,
     enableReinitialize: true,
     validateOnChange: true

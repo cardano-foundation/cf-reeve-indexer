@@ -22,10 +22,10 @@ export const SearchFilters = () => {
             <FieldCombobox label={t({ id: 'project' })} name="project" options={projectOptions} multiple />
           </Grid>
           <Grid size={12}>
-            <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo || dateFromMaxDate} />
+            <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo?.isValid() ? values.dateTo : dateFromMaxDate} />
           </Grid>
           <Grid size={12}>
-            <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom || dateToMinDate} maxDate={dateToMaxDate} />
+            <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom?.isValid() ? values.dateFrom : dateToMinDate} maxDate={dateToMaxDate} />
           </Grid>
           <Grid size={12}>
             <FieldCombobox label={t({ id: 'eventType' })} name="eventType" options={eventTypeOptions} multiple />

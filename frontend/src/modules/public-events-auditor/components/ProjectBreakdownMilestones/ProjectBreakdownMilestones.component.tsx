@@ -7,6 +7,7 @@ import { MilestoneAuditView } from 'libs/api-connectors/backend-connector-reeve/
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { TruncatedCellText } from 'libs/ui-kit/components/CellText/TruncatedCellText.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
+import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { AllocatedCell } from 'modules/public-events-auditor/components/AllocatedCell/AllocatedCell.component.tsx'
 import { RemainingCell } from 'modules/public-events-auditor/components/RemainingCell/RemainingCell.component.tsx'
 import { formatAuditAmount } from 'modules/public-events-auditor/utils/format.ts'
@@ -28,6 +29,22 @@ export const ProjectBreakdownMilestones = ({ milestones }: ProjectBreakdownMiles
             flex: 1,
             minWidth: 160,
             renderCell: ({ row }) => <TruncatedCellText value={row.milestoneTitle || row.milestoneId || '-'} />
+        },
+        {
+            field: 'proId',
+            headerName: t({ id: 'auditMilestoneProId' }),
+            hideable: false,
+            sortable: true,
+            flex: 1,
+            minWidth: 140,
+            renderCell: ({ row }) =>
+                row.proId ? (
+                    <Tooltip title={row.proId}>
+                        <TruncatedCellText value={row.proId} />
+                    </Tooltip>
+                ) : (
+                    <TruncatedCellText value="-" />
+                )
         },
         {
             field: 'allocatedAmount',

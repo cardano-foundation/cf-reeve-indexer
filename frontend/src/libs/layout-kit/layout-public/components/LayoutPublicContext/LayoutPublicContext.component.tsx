@@ -21,13 +21,11 @@ interface LayoutPublicContextProps {
   setOrganisations: (orgs: any[]) => void
   isDrawerOpen: boolean
   isResourcesOpen: boolean
-  isProjectsOpen: boolean
   isSidebarOpen: boolean
 }
 
 export enum MenuCategory {
-  RESOURCES = 'RESOURCES',
-  PROJECTS = 'PROJECTS'
+  RESOURCES = 'RESOURCES'
 }
 
 export const LayoutPublicContext = createContext<LayoutPublicContextProps | undefined>(undefined)
@@ -51,7 +49,7 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   const { type, handleCloseDrawer, handleOpenDrawer, isDrawerOpen } = useLayoutDrawer()
 
   const isResourcesOpen = toggledSection === MenuCategory.RESOURCES
-  const isProjectsOpen = toggledSection === MenuCategory.PROJECTS
+  const isResourcesRoute = pathname === PATHS.PUBLIC_RESOURCES || pathname.startsWith(`${PATHS.PUBLIC_RESOURCES}/`)
 
   // Toggle section menu
   const handleSectionMenuToggle = useCallback(
@@ -104,26 +102,14 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   )
 
   useEffect(() => {
-    if (isSidebarOpen && !toggledSection) {
-      const categories = {
-        [PATHS.PUBLIC_RESOURCES]: MenuCategory.RESOURCES,
-        [PATHS.PUBLIC_PROJECTS]: MenuCategory.PROJECTS
-      } as const
-
-      const section = Object.keys(categories).find((path) => pathname.includes(path))
-      if (section) setToggledSection(categories[section])
-    }
-  }, [pathname, isSidebarOpen, toggledSection])
+    if (isSidebarOpen) setToggledSection(isResourcesRoute ? MenuCategory.RESOURCES : null)
+  }, [isResourcesRoute, isSidebarOpen, selectedOrganisation])
 
   useEffect(() => {
     if (!availableOrganisations?.length) return
 
     setOrganisations(availableOrganisations)
   }, [availableOrganisations])
-
-  useEffect(() => {
-    setToggledSection(null)
-  }, [selectedOrganisation])
 
   useEffect(() => {
     return () => {
@@ -152,7 +138,6 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
         setOrganisations,
         isDrawerOpen,
         isResourcesOpen,
-        isProjectsOpen,
         isSidebarOpen
       }}>
       {children}

@@ -11,13 +11,14 @@ export interface InputDatePickerProps extends DatePickerProps<dayjs.Dayjs> {
   helperText?: string
 }
 
-export const InputDatePicker = ({ value, onChange, minDate, maxDate, label, name, id, error, helperText, disabled }: InputDatePickerProps) => {
+export const InputDatePicker = ({ value, onChange, minDate, maxDate, label, name, id, error = false, helperText, disabled }: InputDatePickerProps) => {
   const theme = useTheme()
 
   return (
     <DatePicker
       name={name}
       label={label}
+      enableAccessibleFieldDOMStructure
       format="DD/MM/YYYY"
       minDate={minDate}
       maxDate={maxDate}
@@ -61,7 +62,7 @@ export const InputDatePicker = ({ value, onChange, minDate, maxDate, label, name
         }
       }}
       sx={{
-        '.MuiInputBase-root': {
+        '.MuiPickersInputBase-root': {
           background: theme.palette.common.white,
           borderRadius: '0.5rem',
           boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)'

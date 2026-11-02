@@ -11,6 +11,7 @@ import {
   ArrowSwapHorizontal,
   ArrowUp,
   ArrowUp2,
+  Award,
   Book1,
   Box2,
   Calendar,
@@ -71,6 +72,7 @@ const ARROW_RIGHT2 = 'ARROW_RIGHT2'
 const ARROW_SWAP_HORIZONTAL = 'ARROW_SWAP_HORIZONTAL'
 const ARROW_UP = 'ARROW_UP'
 const ARROW_UP2 = 'ARROW_UP2'
+const AWARD = 'AWARD'
 const BOOK1 = 'BOOK1'
 const BOX2 = 'BOX2'
 const CALENDAR = 'CALENDAR'
@@ -131,6 +133,7 @@ export const ICONSAX_NAMES = {
   ARROW_SWAP_HORIZONTAL,
   ARROW_UP,
   ARROW_UP2,
+  AWARD,
   BOOK1,
   BOX2,
   CALENDAR,
@@ -192,6 +195,7 @@ export const ICONSAX_ICONS = {
   [ICONSAX_NAMES.ARROW_SWAP_HORIZONTAL]: ArrowSwapHorizontal,
   [ICONSAX_NAMES.ARROW_UP]: ArrowUp,
   [ICONSAX_NAMES.ARROW_UP2]: ArrowUp2,
+  [ICONSAX_NAMES.AWARD]: Award,
   [ICONSAX_NAMES.BOOK1]: Book1,
   [ICONSAX_NAMES.BOX2]: Box2,
   [ICONSAX_NAMES.CALENDAR]: Calendar,
