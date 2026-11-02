@@ -11,7 +11,7 @@ export const SearchFilters = () => {
 
   const { values, dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, options } = useSearchFilters()
 
-  const { eventTypeOptions, projectOptions } = options
+  const { eventTypeOptions, projectOptions, isOptionsLoading } = options
 
   return (
     <Form id="public-events-filters" noValidate>
@@ -19,7 +19,7 @@ export const SearchFilters = () => {
         <Grid container size="grow" columnSpacing={2} rowSpacing={3}>
           <Typography variant="h3">{t({ id: 'eventDetails' })}</Typography>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'project' })} name="project" options={projectOptions} multiple />
+            <FieldCombobox label={t({ id: 'project' })} name="project" options={projectOptions} loading={isOptionsLoading} multiple />
           </Grid>
           <Grid size={12}>
             <FieldDateCombobox label={t({ id: 'from' })} name="dateFrom" minDate={dateFromMinDate} maxDate={values.dateTo?.isValid() ? values.dateTo : dateFromMaxDate} />
@@ -28,7 +28,7 @@ export const SearchFilters = () => {
             <FieldDateCombobox label={t({ id: 'to' })} name="dateTo" minDate={values.dateFrom?.isValid() ? values.dateFrom : dateToMinDate} maxDate={dateToMaxDate} />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'eventType' })} name="eventType" options={eventTypeOptions} multiple />
+            <FieldCombobox label={t({ id: 'eventType' })} name="eventType" options={eventTypeOptions} loading={isOptionsLoading} multiple />
           </Grid>
         </Grid>
         <Divider flexItem orientation="horizontal" />

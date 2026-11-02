@@ -2,7 +2,9 @@ import { useField } from 'formik'
 import { useCallback, useMemo, type SyntheticEvent } from 'react'
 
 import { Combobox } from 'features/common'
-import { type AutocompleteOption } from 'features/mui/base'
+import { type AutocompleteOption, Box } from 'features/mui/base'
+import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
+import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 
 import type { FieldComboboxProps } from './field-combobox.types'
 
@@ -16,9 +18,14 @@ export const FieldCombobox = <Multiple extends boolean | undefined, DisableClear
   multiple,
   required,
   isGroupRendered,
+  loading,
+  onInputChange,
   ...props
 }: FieldComboboxProps<Multiple, DisableClearable, FreeSolo>) => {
+  const { t } = useTranslations()
   const [field, meta] = useField<string | string[]>({ name })
+
+  const isEmpty = !loading && !onInputChange && options.length === 0
 
   const value = useMemo(() => {
     if (typeof field.value === 'string') {
@@ -52,19 +59,24 @@ export const FieldCombobox = <Multiple extends boolean | undefined, DisableClear
   )
 
   return (
-    <Combobox
-      textField={{
-        name: field.name,
-        label,
-        error: hasError,
-        helperText: hasError ? meta.error : helperText,
-        required
-      }}
-      // @ts-expect-error - separate single and multiple select components
-      value={normalizedValue}
-      onBlur={field.onBlur}
-      onChange={onChange ? onChange : handleChange}
-      {...{ label, options, disabled, multiple, required, isGroupRendered, ...props }}
-    />
+    <Tooltip title={isEmpty ? t({ id: 'noFilterOptionsAvailable' }) : ''}>
+      <Box>
+        <Combobox
+          textField={{
+            name: field.name,
+            label,
+            error: hasError,
+            helperText: hasError ? meta.error : helperText,
+            required
+          }}
+          // @ts-expect-error - separate single and multiple select components
+          value={normalizedValue}
+          onBlur={field.onBlur}
+          onChange={onChange ? onChange : handleChange}
+          disabled={disabled || isEmpty}
+          {...{ label, options, multiple, required, isGroupRendered, loading, onInputChange, ...props }}
+        />
+      </Box>
+    </Tooltip>
   )
 }

@@ -14,7 +14,7 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
 
   const { dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, values } = useSearchQuickFilters()
 
-  const { eventTypeOptions, projectOptions } = options
+  const { eventTypeOptions, projectOptions, isOptionsLoading } = options
 
   return (
     <TableToolbar.QuickFilters isFirstFieldSkipped>
@@ -23,7 +23,7 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
       </TableToolbar.QuickFilters.Field>
       <Divider orientation="vertical" flexItem />
       <TableToolbar.QuickFilters.Field>
-        <FieldCombobox label={t({ id: 'project' })} limitTags={1} name="project" options={projectOptions} multiple />
+        <FieldCombobox label={t({ id: 'project' })} limitTags={1} name="project" options={projectOptions} loading={isOptionsLoading} multiple />
       </TableToolbar.QuickFilters.Field>
       <TableToolbar.QuickFilters.FieldGroup>
         <TableToolbar.QuickFilters.Field>
@@ -34,7 +34,7 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
         </TableToolbar.QuickFilters.Field>
       </TableToolbar.QuickFilters.FieldGroup>
       <TableToolbar.QuickFilters.Field>
-        <FieldCombobox label={t({ id: 'eventType' })} limitTags={1} name="eventType" options={eventTypeOptions} multiple />
+        <FieldCombobox label={t({ id: 'eventType' })} limitTags={1} name="eventType" options={eventTypeOptions} loading={isOptionsLoading} multiple />
       </TableToolbar.QuickFilters.Field>
     </TableToolbar.QuickFilters>
   )
