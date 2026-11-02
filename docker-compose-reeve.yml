@@ -21,6 +21,7 @@ services:
       - KERI_OOBIS=${KERI_OOBIS:-https://keria-ext.dev.idw-sandboxes.cf-deployments.org/oobi/EBZp6edrImtyoDK5meMtvWLyxqN69Ls0FNqkmUM11R6r/agent/EM1ckXW6YliQy_t8q4jVAYg9ignJN4tuFFNr3wROPpLd}
       - KERI_URL=${KERI_URL:-https://keria.dev.idw-sandboxes.cf-deployments.org}
       - KERI_BOOT_URL=${KERI_BOOT_URL:-https://keria-boot.dev.idw-sandboxes.cf-deployments.org}
+      - KERI_DEMO_ISSUER_AID=${KERI_DEMO_ISSUER_AID:-EBZp6edrImtyoDK5meMtvWLyxqN69Ls0FNqkmUM11R6r}
     depends_on:
       - postgres
     networks:
