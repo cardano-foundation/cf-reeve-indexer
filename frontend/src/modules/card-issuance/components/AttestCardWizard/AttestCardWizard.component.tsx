@@ -1,12 +1,16 @@
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
 import Step from '@mui/material/Step'
 import StepLabel from '@mui/material/StepLabel'
 import Stepper from '@mui/material/Stepper'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { Scan } from 'iconsax-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useRef, useState } from 'react'
 
 import type { AttestedKeyCard, CardCeremonyState } from 'libs/api-connectors/backend-connector-reeve/api/cards/cardsApi.types'
@@ -14,6 +18,7 @@ import type { KeyCard } from 'libs/document-vault-crypto/cards'
 import { downloadCardFile } from 'libs/document-vault-crypto/issue'
 import { useAttestCardCeremony } from 'libs/models/cards-model/AttestCardCeremony/AttestCardCeremony.service'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
+import { QrScannerDialog } from 'libs/ui-kit/components/QrScannerDialog/QrScannerDialog.component'
 import { AttestWaitingPanel } from 'modules/card-issuance/components/AttestCardWizard/AttestWaitingPanel.component'
 import { PresentedCredentialPanel } from 'modules/card-issuance/components/AttestCardWizard/PresentedCredentialPanel.component'
 import {
@@ -22,6 +27,8 @@ import {
   ATTEST_ANCHOR_TITLE,
   ATTEST_AGENT_OOBI_LABEL,
   ATTEST_AGENT_OOBI_PENDING,
+  ATTEST_AGENT_OOBI_QR_CAPTION,
+  ATTEST_AGENT_OOBI_QR_LABEL,
   ATTEST_CANCEL_LABEL,
   ATTEST_CLOSE_LABEL,
   ATTEST_COPY_OOBI_DONE_LABEL,
@@ -38,6 +45,8 @@ import {
   ATTEST_PRESENT_BUTTON_LABEL,
   ATTEST_PRESENT_GUIDANCE,
   ATTEST_PRESENT_TITLE,
+  ATTEST_SCAN_WALLET_OOBI_DIALOG_TITLE,
+  ATTEST_SCAN_WALLET_OOBI_LABEL,
   ATTEST_START_OVER_LABEL,
   ATTEST_STEPS,
   ATTEST_ANCHOR_LABEL,
@@ -118,6 +127,13 @@ export const AttestCardWizard = ({ card, onClose }: Props) => {
 
   const [walletOobi, setWalletOobi] = useState('')
   const [oobiCopied, setOobiCopied] = useState(false)
+  const [isScanningWalletOobi, setIsScanningWalletOobi] = useState(false)
+
+  // A scan only fills the field (still editable): the holder reviews it and presses "Pair wallet".
+  const handleWalletOobiScanned = (text: string) => {
+    setWalletOobi(text)
+    setIsScanningWalletOobi(false)
+  }
 
   // Open the ceremony exactly once when the wizard mounts. The ref guard survives the re-render the
   // first createCeremony triggers, so React 18 StrictMode's double-invoke does not open two ceremonies.
@@ -133,6 +149,7 @@ export const AttestCardWizard = ({ card, onClose }: Props) => {
   const startOver = () => {
     setWalletOobi('')
     setOobiCopied(false)
+    setIsScanningWalletOobi(false)
     startedRef.current = true
     reset()
     createCeremony(card)
@@ -205,6 +222,17 @@ export const AttestCardWizard = ({ card, onClose }: Props) => {
               <Typography color={theme.palette.text.secondary} variant="caption">
                 {ATTEST_AGENT_OOBI_LABEL}
               </Typography>
+              {/* Always black on white, whatever the theme: wallet scanners expect dark modules on a
+                  light quiet zone, and a dark-mode inversion is not reliably readable. */}
+              <Box alignItems="center" display="flex" flexDirection="column" gap={0.5} sx={{ alignSelf: 'flex-start', py: 1 }}>
+                <Box aria-label={ATTEST_AGENT_OOBI_QR_LABEL} role="img" sx={{ bgcolor: '#FFFFFF', borderRadius: 1, lineHeight: 0, p: 1 }}>
+                  {/* The wrapper is the one named image; qrcode.react's own svg role="img" is unnamed. */}
+                  <QRCodeSVG aria-hidden bgColor="#FFFFFF" fgColor="#000000" level="M" marginSize={2} size={200} value={ceremony.agent_oobi} />
+                </Box>
+                <Typography color={theme.palette.text.secondary} variant="caption">
+                  {ATTEST_AGENT_OOBI_QR_CAPTION}
+                </Typography>
+              </Box>
               <Box alignItems="center" display="flex" gap={1}>
                 <Typography sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }} variant="body2">
                   {ceremony.agent_oobi}
@@ -227,8 +255,30 @@ export const AttestCardWizard = ({ card, onClose }: Props) => {
                 helperText={ATTEST_WALLET_OOBI_GUIDANCE}
                 label={ATTEST_WALLET_OOBI_LABEL}
                 size="small"
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label={ATTEST_SCAN_WALLET_OOBI_LABEL}
+                          edge="end"
+                          size="small"
+                          title={ATTEST_SCAN_WALLET_OOBI_LABEL}
+                          onClick={() => setIsScanningWalletOobi(true)}>
+                          <Scan size={20} />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }
+                }}
                 value={walletOobi}
                 onChange={(event) => setWalletOobi(event.target.value)}
+              />
+              <QrScannerDialog
+                open={isScanningWalletOobi}
+                title={ATTEST_SCAN_WALLET_OOBI_DIALOG_TITLE}
+                onClose={() => setIsScanningWalletOobi(false)}
+                onScan={handleWalletOobiScanned}
               />
 
               {requestError && <Alert severity="error">{requestError}</Alert>}

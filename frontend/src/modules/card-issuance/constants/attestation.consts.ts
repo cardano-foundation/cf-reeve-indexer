@@ -22,13 +22,20 @@ export const ATTEST_PREPARING_LABEL = 'Preparing the ceremony…'
 
 // --- pairing (CREATED) ---
 export const ATTEST_PAIR_TITLE = '1. Pair your Veridian wallet'
-export const ATTEST_AGENT_OOBI_LABEL = 'Indexer OOBI — resolve this in your Veridian wallet first'
+export const ATTEST_AGENT_OOBI_LABEL = 'Indexer OOBI — scan or resolve this in your Veridian wallet first'
 export const ATTEST_AGENT_OOBI_PENDING = 'The indexer’s KERI agent is still starting up. Please retry in a moment.'
+// The indexer OOBI is also shown as a QR code: Veridian connects by scanning, and a long URL is
+// awkward to move from a desktop screen onto a phone. The copyable text stays alongside it.
+export const ATTEST_AGENT_OOBI_QR_LABEL = 'QR code of the indexer OOBI'
+export const ATTEST_AGENT_OOBI_QR_CAPTION = 'Scan with your Veridian wallet'
 export const ATTEST_COPY_OOBI_LABEL = 'Copy OOBI'
 export const ATTEST_COPY_OOBI_DONE_LABEL = 'Copied'
 export const ATTEST_WALLET_OOBI_LABEL = 'Your wallet OOBI'
 export const ATTEST_WALLET_OOBI_GUIDANCE =
-  'In Veridian, resolve the indexer OOBI above, then copy your own wallet’s OOBI URL and paste it here.'
+  'In Veridian, scan or resolve the indexer OOBI above. Then scan your wallet’s connection QR code with the scan button in this field, or paste your wallet’s OOBI URL here.'
+// Scanning only fills the field above — the holder still reviews it and presses "Pair wallet".
+export const ATTEST_SCAN_WALLET_OOBI_LABEL = 'Scan wallet QR code'
+export const ATTEST_SCAN_WALLET_OOBI_DIALOG_TITLE = 'Scan your wallet’s QR code'
 export const ATTEST_PAIR_BUTTON_LABEL = 'Pair wallet'
 export const ATTEST_PAIRING_LABEL = 'Pairing…'
 

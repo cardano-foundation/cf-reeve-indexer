@@ -7,30 +7,33 @@ import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
 import { Key } from 'iconsax-react'
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 
-import type { DocumentView } from 'libs/api-connectors/backend-connector-reeve/api/documents/documentsApi.types'
+import type { DocumentVerdict, DocumentView } from 'libs/api-connectors/backend-connector-reeve/api/documents/documentsApi.types'
 import { useGetDocumentEnvelopeModel } from 'libs/models/documents-model/GetDocumentEnvelope/GetDocumentEnvelope.service.ts'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
+import type { DecryptAvailability } from 'modules/public-document-detail/components/DecryptPanel/DecryptPanel.hooks.ts'
 import { useDecryptPanel } from 'modules/public-document-detail/components/DecryptPanel/DecryptPanel.hooks.ts'
 import { DocumentViewer } from 'modules/public-document-detail/components/DocumentViewer/DocumentViewer.component.tsx'
 import {
-  buildDownloadFilename,
-  DECRYPT_BUTTON_LABEL,
   DECRYPT_DECRYPTING_LABEL,
+  DECRYPT_IPFS_RETRYING_MESSAGE,
   DECRYPT_MATCH_MESSAGE,
   DECRYPT_MISMATCH_MESSAGE,
   DECRYPT_PANEL_DESCRIPTION,
   DECRYPT_PANEL_TITLE,
   DECRYPT_PASSKEY_DESCRIPTION,
   DECRYPT_PASSKEY_UNLOCK_BUTTON_LABEL,
+  DECRYPT_PENDING_MESSAGE,
   DECRYPT_RAW_KEY_LABEL,
   DECRYPT_RESET_BUTTON_LABEL,
   DECRYPT_SOURCE_PASSKEY,
   DECRYPT_SOURCE_RAW,
   DECRYPT_SOURCE_SELECTOR_LABEL,
+  DECRYPT_UNAVAILABLE_MESSAGE,
   DECRYPT_USE_KEY_BUTTON_LABEL
 } from 'modules/public-document-detail/constants/detail.consts.ts'
+import { saveDecryptedFile } from 'modules/public-document-detail/utils/download.ts'
 
 type DecryptPanelProps = {
   anchor: DocumentView
@@ -39,10 +42,19 @@ type DecryptPanelProps = {
 
 type KeySource = 'passkey' | 'raw'
 
+// Availability decides whether the key form works; the verdict picks the explanation, because
+// PENDING and IPFS_UNAVAILABLE are both "not yet", for different reasons.
+const lockedNoteFor = (verdict: DocumentVerdict, availability: DecryptAvailability) => {
+  if (availability === 'available') return null
+  if (availability === 'unavailable') return { severity: 'warning', message: DECRYPT_UNAVAILABLE_MESSAGE } as const
+  return { severity: 'info', message: verdict === 'IPFS_UNAVAILABLE' ? DECRYPT_IPFS_RETRYING_MESSAGE : DECRYPT_PENDING_MESSAGE } as const
+}
+
 /**
  * In-browser decrypt panel. All crypto and the private key itself stay client-side
- * (`useDecryptPanel`); the only network call this component triggers is the envelope fetch (on the
- * user's explicit "Decrypt" click - never on mount) via the public proxy.
+ * (`useDecryptPanel`); the only network call this component triggers is the envelope fetch via the
+ * public proxy. It starts in the same click that presents a key ("Use this key", or a successful
+ * passkey unlock) — there is no separate Decrypt step, and nothing is fetched on mount.
  *
  * The key is supplied one of two ways, chosen with the source selector: re-derived from the
  * holder's passkey (the primary, permissionless path — no uploaded record), or a raw hex key
@@ -52,7 +64,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
   const theme = useTheme()
   const { fetchEnvelope } = useGetDocumentEnvelopeModel()
 
-  const { status, errorMessage, outcome, setRawKey, unlockWithPasskey, decrypt, reset } = useDecryptPanel({
+  const { availability, status, errorMessage, outcome, setRawKey, unlockWithPasskey, decrypt, reset } = useDecryptPanel({
     anchor,
     deps: { fetchEnvelope }
   })
@@ -61,7 +73,15 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
   const [rawKeyInput, setRawKeyInput] = useState('')
   const [unlocking, setUnlocking] = useState(false)
 
+  const isAvailable = availability === 'available'
+  const lockedNote = lockedNoteFor(anchor.verdict, availability)
   const isBusy = status === 'decrypting'
+
+  // The panel is not remounted when another anchor is picked. A key typed but not yet handed to the
+  // hook must not follow the user there — least of all into a field that is now disabled.
+  useLayoutEffect(() => {
+    setRawKeyInput('')
+  }, [anchor.tx_hash, availability])
   const isKeyInputVisible = status !== 'success'
 
   const handleSourceChange = (_event: React.MouseEvent<HTMLElement>, next: KeySource | null) => {
@@ -82,8 +102,13 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
     try {
       await unlockWithPasskey()
     } finally {
+      // Only the passkey prompt holds this lock. While decrypting, the controls are disabled by the
+      // decrypting status instead, which another anchor resets; this flag would outlive the switch.
       setUnlocking(false)
     }
+    // Presenting the key is the request to open the document. decrypt() does nothing if the
+    // unlock failed, or if the anchor changed while the passkey prompt was open.
+    await decrypt()
   }
 
   const handleUseRawKey = () => {
@@ -91,6 +116,8 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
     // Clear the component-level copy the instant it's handed to the hook — the hook's
     // own privateKeysRef is the sole surviving copy from here on, cleared after every decrypt / unmount.
     setRawKeyInput('')
+    // Straight on to the decrypt; a malformed key was rejected above and leaves nothing to try.
+    void decrypt()
   }
 
   const handleReset = () => {
@@ -100,17 +127,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
 
   const handleDownload = () => {
     if (!outcome) return
-    // Re-wrap: DecryptOutcome types plaintext as Uint8Array<ArrayBufferLike>; BlobPart requires
-    // Uint8Array<ArrayBuffer> (TS 5.7+ generic-buffer typing only, same bytes) - see decrypt.ts.
-    const blob = new Blob([new Uint8Array(outcome.plaintext)])
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = buildDownloadFilename(documentId)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
+    saveDecryptedFile(documentId, outcome)
   }
 
   return (
@@ -122,6 +139,8 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
         </Typography>
       </Box>
 
+      {lockedNote && <Alert severity={lockedNote.severity}>{lockedNote.message}</Alert>}
+
       {isKeyInputVisible && (
         <Box display="flex" flexDirection="column" gap={2}>
           <Box display="flex" flexDirection="column" gap={0.75}>
@@ -131,7 +150,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
             <ToggleButtonGroup
               aria-label={DECRYPT_SOURCE_SELECTOR_LABEL}
               color="primary"
-              disabled={isBusy}
+              disabled={isBusy || !isAvailable}
               exclusive
               size="small"
               value={source}
@@ -148,7 +167,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
               </Typography>
               <Box>
                 <Button
-                  disabled={isBusy || unlocking}
+                  disabled={isBusy || unlocking || !isAvailable}
                   startIcon={<Key size={18} variant="Outline" />}
                   variant="contained"
                   onClick={() => void handleUnlockPasskey()}>
@@ -162,6 +181,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
             <Box alignItems="center" display="flex" gap={1}>
               <TextField
                 autoComplete="off"
+                disabled={isBusy || !isAvailable}
                 fullWidth
                 label={DECRYPT_RAW_KEY_LABEL}
                 size="small"
@@ -169,7 +189,7 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
                 value={rawKeyInput}
                 onChange={(event) => setRawKeyInput(event.target.value)}
               />
-              <Button disabled={!rawKeyInput || isBusy} variant="outlined" onClick={handleUseRawKey}>
+              <Button disabled={!rawKeyInput || isBusy || !isAvailable} variant="outlined" onClick={handleUseRawKey}>
                 {DECRYPT_USE_KEY_BUTTON_LABEL}
               </Button>
             </Box>
@@ -177,19 +197,16 @@ export const DecryptPanel = ({ anchor, documentId }: DecryptPanelProps) => {
         </Box>
       )}
 
-      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-
-      {(status === 'keyReady' || status === 'decrypting') && (
-        <Box>
-          <Button
-            disabled={isBusy}
-            startIcon={isBusy ? <CircularProgress size={16} /> : undefined}
-            variant="contained"
-            onClick={() => void decrypt()}>
-            {isBusy ? DECRYPT_DECRYPTING_LABEL : DECRYPT_BUTTON_LABEL}
-          </Button>
+      {isBusy && (
+        <Box alignItems="center" display="flex" gap={1} role="status">
+          <CircularProgress size={16} />
+          <Typography color={theme.palette.text.secondary} variant="body2">
+            {DECRYPT_DECRYPTING_LABEL}
+          </Typography>
         </Box>
       )}
+
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
       {status === 'success' && outcome && (
         <Box display="flex" flexDirection="column" gap={1.5}>

@@ -143,6 +143,17 @@ export const DECRYPT_PANEL_TITLE = 'Decrypt this document'
 export const DECRYPT_PANEL_DESCRIPTION =
   'Everything below runs in your browser. Your private key is never sent to Reeve, logged, or stored — the only network calls this page makes are the two public GET requests that load the anchor details and the encrypted envelope.'
 
+// Shown instead of a usable key form while the anchor is not VERIFIED: the encrypted file is only
+// served for verified anchors, so a decrypt could not succeed yet (or ever, for a failed anchor).
+export const DECRYPT_PENDING_MESSAGE =
+  'Decryption becomes available once this anchor is verified against IPFS. Verification is still running and can take several minutes — this page updates when you come back to it, or you can reload it.'
+
+export const DECRYPT_IPFS_RETRYING_MESSAGE =
+  'The encrypted file could not be fetched from IPFS yet. The indexer keeps retrying for a while; decryption becomes available once the file is fetched and verified.'
+
+export const DECRYPT_UNAVAILABLE_MESSAGE =
+  'This anchor failed verification, so its encrypted file is not served and it cannot be decrypted here.'
+
 // Key-source selector — the two ways to supply a decryption key, most-secure first.
 export const DECRYPT_SOURCE_PASSKEY = 'Passkey'
 
@@ -160,8 +171,6 @@ export const DECRYPT_RAW_KEY_LABEL = 'Or paste a raw private key (64 hex charact
 export const DECRYPT_RAW_KEY_INVALID = 'Enter a 64-character hexadecimal private key.'
 
 export const DECRYPT_USE_KEY_BUTTON_LABEL = 'Use this key'
-
-export const DECRYPT_BUTTON_LABEL = 'Decrypt'
 
 export const DECRYPT_DECRYPTING_LABEL = 'Decrypting…'
 
@@ -195,10 +204,15 @@ export const DECRYPT_VIEWER_PDF_UNREADABLE_MESSAGE =
 
 export const PDF_RENDERING_LABEL = 'Rendering…'
 
-export const PDF_PREVIOUS_PAGE_LABEL = 'Previous page'
+export const PDF_VIEWER_LABEL = 'PDF preview'
 
-export const PDF_NEXT_PAGE_LABEL = 'Next page'
+export const PDF_ZOOM_IN_LABEL = 'Zoom in'
 
+export const PDF_ZOOM_OUT_LABEL = 'Zoom out'
+
+export const PDF_FIT_WIDTH_LABEL = 'Fit width'
+
+// Also each page's accessible name in the scrolling viewer.
 export const PDF_PAGE_POSITION = (page: number, total: number) => `Page ${page} of ${total}`
 
 export const PDF_PAGE_COUNT = (total: number) => (total === 1 ? '1 page' : `${total} pages`)
@@ -216,5 +230,6 @@ export const DECRYPT_MATCH_MESSAGE = 'Decrypted content matches the on-chain pla
 
 export const DECRYPT_MISMATCH_MESSAGE = 'Decrypted content does NOT match the on-chain plaintext hash.'
 
-// The downloaded file name is generic by design: the real name is PII and never left Reeve.
-export const buildDownloadFilename = (documentId: string) => `document-${documentId}.bin`
+// The downloaded file name is generic by design: the real name is PII and never left Reeve. Only
+// the extension is real, taken from the decrypted content (utils/download.ts).
+export const buildDownloadFilename = (documentId: string, extension: string) => `document-${documentId}.${extension}`
