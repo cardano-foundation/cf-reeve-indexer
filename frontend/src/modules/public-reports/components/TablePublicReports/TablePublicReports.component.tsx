@@ -6,20 +6,24 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ExportSquare } from 'iconsax-react'
 import { useMemo, useRef } from 'react'
 
-import { GetPublicReportsResponse200, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { GetPublicReportsResponse200, IdentityAttestationView, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
-import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useSorting } from 'libs/hooks/useSorting'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
+import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
+import { AttestationPendingBadge } from 'modules/public-reports/components/AttestationPendingBadge/AttestationPendingBadge.component.tsx'
+import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
+import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
-import { AttestationBadge } from 'modules/public-reports/components/AttestationBadge/AttestationBadge.component.tsx'
-import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
-import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
+
+// A report can carry two attestations (publisher and auditor); unfilled slots render as pending.
+const ATTESTATION_SLOTS = 2
 
 interface TableReportsPublicProps {
   data: GetPublicReportsResponse200 | null
@@ -123,8 +127,21 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       ),
       renderCell: ({ row }) => (
         <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
-          <AttestationBadge attestation={row.identities?.[0]} />
-          <AttestationBadge attestation={row.identities?.[1]} />
+          {row.identities?.map((item: IdentityAttestationView, index: number) => (
+            <IdentityAttestationBadge
+              key={index}
+              isVerified={item.identityVerified}
+              schemaName={item.schemaName}
+              schemaSaid={item.schemaSaid}
+              claims={item.claims}
+              lei={item.lei}
+              txHash={item.txHash}
+              credentialTxHash={item.credentialTxHash}
+            />
+          ))}
+          {Array.from({ length: Math.max(0, ATTESTATION_SLOTS - (row.identities?.length ?? 0)) }, (_, index) => (
+            <AttestationPendingBadge key={index} />
+          ))}
         </div>
       ),
       hideable: false,

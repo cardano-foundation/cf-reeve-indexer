@@ -21,11 +21,12 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
-import org.cardanofoundation.reeve.indexer.model.response.LEIResponse;
+import org.cardanofoundation.reeve.indexer.model.response.IdentityAttestationView;
 import org.cardanofoundation.reeve.indexer.model.view.ReportView;
 
 @Service
@@ -38,6 +39,7 @@ public class ReportService {
     private final ObjectMapper objectMapper;
     private final Clock clock;
     private final CredentialRepository credentialRepository;
+    private final CredentialSchemaRegistry credentialSchemaRegistry;
 
     public List<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency,
             List<String> reportTypes, List<String> intervalTypes, List<Integer> years, List<Integer> periods, Pageable pageable) {
@@ -84,20 +86,16 @@ public class ReportService {
                     report.getOrganisationId(), report.getSubType(), report.getInterval(),
                     report.getYear(), report.getPeriod(), report.getVer());
 
-            List<LEIResponse> leiResponses = allReports.stream()
+            List<IdentityAttestationView> identities = allReports.stream()
                     .filter(ReportEntity::isIdentityVerified)
                     .map(r -> credentialRepository.findById(r.getIdentifier())
-                            .map(cred -> LEIResponse.builder()
-                                    .identityVerified(true)
-                                    .lei(cred.getLei())
-                                    .credentialTxHash(cred.getTxHash())
-                                    .txHash(r.getTxHash())
-                                    .build()))
+                            .map(cred -> IdentityAttestationView.from(r.getIdentifier(), r.getTxHash(),
+                                    cred, credentialSchemaRegistry, objectMapper)))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .toList();
 
-            view.setIdentities(leiResponses);
+            view.setIdentities(identities);
             return view;
         }).toList();
     }

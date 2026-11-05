@@ -13,6 +13,14 @@ export const sendRequest = async <TResponse>(
 ): Promise<TResponse> => {
   const accessToken = getSessionStorageItem('accessToken')
 
+  // Authorization resolution: '' suppresses the header (public endpoints, e.g. the cards status flag),
+  // a non-empty value is sent as-is, otherwise default to the session Bearer token.
+  const resolveAuthorizationHeader = (): string | undefined => {
+    if (headers?.Authorization === '') return undefined
+    if (headers?.Authorization) return headers.Authorization
+    return `Bearer ${accessToken}`
+  }
+
   const request: AxiosRequestConfig = {
     method,
     url,
@@ -20,7 +28,7 @@ export const sendRequest = async <TResponse>(
     headers: {
       ...DEFAULT_CONTENT_TYPE_HEADERS,
       ...headers,
-      Authorization: headers?.Authorization === '' ? undefined : `Bearer ${accessToken}`
+      Authorization: resolveAuthorizationHeader()
     },
     params,
     responseType

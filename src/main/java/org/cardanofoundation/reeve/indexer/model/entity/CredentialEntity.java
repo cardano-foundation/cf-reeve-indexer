@@ -43,6 +43,14 @@ public class CredentialEntity {
     @Column(name = "lei")
     private String lei;
 
+    /** Schema SAID of the leaf credential (from label-170 AUTH_BEGIN {@code s}). */
+    @Column(name = "schema_said")
+    private String schemaSaid;
+
+    /** JSON text of the credential's generic claim map ({@code m} minus the {@code l} labels key). */
+    @Column(name = "claims")
+    private String claims;
+
     @Column(name = "valid")
     private Boolean valid;
 
