@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.6.0...1.7.0) (2026-11-06)
+
+
+### Features
+
+* **workflow:** migrate to earthbuild ([#107](https://github.com/cardano-foundation/cf-reeve-indexer/issues/107)) ([f0e2f7b](https://github.com/cardano-foundation/cf-reeve-indexer/commit/f0e2f7bffddb28818bdf01c454ab9eaf0991769c))
+
+
+### Bug Fixes
+
+* fixed pdf reader and file format and simplified the flow slightly ([59997f0](https://github.com/cardano-foundation/cf-reeve-indexer/commit/59997f0ab56463218959abe9510395db5cebe4cd))
+
 ## [1.6.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.5.0...1.6.0) (2026-10-21)
 
 
