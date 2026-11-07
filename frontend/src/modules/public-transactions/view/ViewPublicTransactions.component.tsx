@@ -1,11 +1,15 @@
+import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import { FormikProvider } from 'formik'
+import { Monitor } from 'iconsax-react'
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 
 import { publicTransactionsIllustration } from 'assets/images'
 import { ButtonPrimary, ButtonSecondary } from 'features/common'
+import { useMediaQueries } from 'hooks'
+import { OrganisationEntity } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
 import { LegalDisclosureAttribution } from 'libs/layout-kit/layout-public/components/LegalDisclosureAttribution/LegalDisclosureAttribution.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
@@ -16,6 +20,8 @@ import { LegalDisclosureButton } from 'libs/ui-kit/components/LegalDisclosureBut
 import { PublicTransactionsContextProvider } from 'modules/public-transactions/components/PublicTransactionsContext/PublicTransactionsContext.component.tsx'
 import { SearchedTransactions } from 'modules/public-transactions/components/SearchedTransactions/SearchedTransactions.component.tsx'
 import { SearchFilters } from 'modules/public-transactions/components/SearchFilters/SearchFilters.component.tsx'
+import { TransactionsAbout } from 'modules/public-transactions/components/TransactionsAbout/TransactionsAbout.component.tsx'
+import { TransactionsOverview } from 'modules/public-transactions/components/TransactionsOverview/TransactionsOverview.component.tsx'
 import { usePublicTransactions } from 'modules/public-transactions/hooks/usePublicTransactions.ts'
 
 export const ViewPublicTransactions = () => {
@@ -26,11 +32,13 @@ export const ViewPublicTransactions = () => {
   const organisationName = useSelectedOrganisationName()
 
   const { data, drawer, filters, options, pagination, sorting } = usePublicTransactions()
+  const { isMobile } = useMediaQueries()
+  const theme = useTheme()
 
   useEffect(() => {
     const orgId = orgIdFromPath || searchParams.get('organisation_id')
     if (orgId && organisations?.length > 0) {
-      const organisationExists = organisations.some((o: any) => o.id === orgId)
+      const organisationExists = organisations.some((o: OrganisationEntity) => o.id === orgId)
       if (organisationExists) {
         setSelectedOrganisation(orgId)
       }
@@ -51,46 +59,60 @@ export const ViewPublicTransactions = () => {
         </Box>
         <LegalDisclosureButton />
       </LayoutPublic.Header>
-      <LayoutPublic.Main flexDirection="column" gap={6} hasMinContentHeight isHeightRestricted>
-        {hasEmptyPageState ? (
+      {isMobile ? (
+        <LayoutPublic.Main flexDirection="column">
           <EmptyStatePage
-            asset={<Box alt={t({ id: 'noPublicTransactionsMessage' })} component="img" maxWidth="47.5rem" src={publicTransactionsIllustration} width="100%" />}
-            hint={t({ id: 'noPublicTransactionsHint' }, { organisation: organisationName })}
-            message={t({ id: 'noPublicTransactionsMessage' })}
+            asset={<Monitor aria-hidden color={theme.palette.action.disabled} size={56} variant="Outline" />}
+            hint={t({ id: 'publicTransactionsMobileUnavailableHint' })}
+            message={t({ id: 'publicTransactionsMobileUnavailableMessage' })}
           />
-        ) : (
-          <Box display="flex" flexDirection="column" gap={1} height="100%" minHeight={0}>
-            <LegalDisclosureAttribution />
-            <Box display="flex" flexDirection="column" flex="1 1 0" minHeight="15rem">
-              <FormikProvider value={quickFilters}>
-                <SearchedTransactions data={transactions} pagination={pagination} sorting={sorting} hasFiltersSelected={hasFiltersSelected} isLoading={isFetching} />
+        </LayoutPublic.Main>
+      ) : (
+        <>
+          <LayoutPublic.Main flexDirection="column" gap={6} hasMinContentHeight>
+            {hasEmptyPageState ? (
+              <EmptyStatePage
+                asset={<Box alt={t({ id: 'noPublicTransactionsMessage' })} component="img" maxWidth="47.5rem" src={publicTransactionsIllustration} width="100%" />}
+                hint={t({ id: 'noPublicTransactionsHint' }, { organisation: organisationName })}
+                message={t({ id: 'noPublicTransactionsMessage' })}
+              />
+            ) : (
+              <Box display="flex" flexDirection="column" gap={2}>
+                <LegalDisclosureAttribution />
+                <TransactionsAbout />
+                <TransactionsOverview />
+                <Box display="flex" flexDirection="column">
+                  <FormikProvider value={quickFilters}>
+                    <SearchedTransactions data={transactions} pagination={pagination} sorting={sorting} hasFiltersSelected={hasFiltersSelected} isLoading={isFetching} />
+                  </FormikProvider>
+                </Box>
+              </Box>
+            )}
+          </LayoutPublic.Main>
+          <LayoutPublic.Drawer open={isDrawerOpen}>
+            <LayoutPublic.Drawer.Header title={t({ id: 'filters' })} onClose={handleDrawerClose} />
+            <LayoutPublic.Drawer.Content>
+              <FormikProvider value={drawerFilters}>
+                <SearchFilters />
               </FormikProvider>
-            </Box>
-          </Box>
-        )}
-      </LayoutPublic.Main>
-      <LayoutPublic.Drawer open={isDrawerOpen}>
-        <LayoutPublic.Drawer.Header title={t({ id: 'filters' })} onClose={handleDrawerClose} />
-        <LayoutPublic.Drawer.Content>
-          <FormikProvider value={drawerFilters}>
-            <SearchFilters />
-          </FormikProvider>
-        </LayoutPublic.Drawer.Content>
-        <LayoutPublic.Drawer.Footer>
-          <Grid container size="grow" spacing={2}>
-            <Grid size="grow">
-              <ButtonSecondary type="button" onClick={handleClearFilters} disabled={isClearDisabled} fullWidth>
-                {t({ id: 'clearAll' })}
-              </ButtonSecondary>
-            </Grid>
-            <Grid size="grow">
-              <ButtonPrimary form="public-transactions-filters" type="submit" disabled={isApplyDisabled} fullWidth>
-                {t({ id: 'applyFilters' })}
-              </ButtonPrimary>
-            </Grid>
-          </Grid>
-        </LayoutPublic.Drawer.Footer>
-      </LayoutPublic.Drawer>
+            </LayoutPublic.Drawer.Content>
+            <LayoutPublic.Drawer.Footer>
+              <Grid container size="grow" spacing={2}>
+                <Grid size="grow">
+                  <ButtonSecondary type="button" onClick={handleClearFilters} disabled={isClearDisabled} fullWidth>
+                    {t({ id: 'clearAll' })}
+                  </ButtonSecondary>
+                </Grid>
+                <Grid size="grow">
+                  <ButtonPrimary form="public-transactions-filters" type="submit" disabled={isApplyDisabled} fullWidth>
+                    {t({ id: 'applyFilters' })}
+                  </ButtonPrimary>
+                </Grid>
+              </Grid>
+            </LayoutPublic.Drawer.Footer>
+          </LayoutPublic.Drawer>
+        </>
+      )}
     </PublicTransactionsContextProvider>
   )
 }

@@ -1,5 +1,5 @@
 import { ButtonProps as ButtonPropsMUI } from '@mui/material/Button'
-import { ReactNode } from 'react'
+import { forwardRef, ReactNode } from 'react'
 import { LinkProps } from 'react-router-dom'
 
 import { Button } from 'libs/ui-kit/components/Button/Button.component.tsx'
@@ -10,10 +10,12 @@ interface ButtonSecondaryProps extends ButtonPropsMUI {
   children: ReactNode
 }
 
-export const ButtonSecondary = ({ children, ...rest }: ButtonSecondaryProps) => {
+export const ButtonSecondary = forwardRef<HTMLButtonElement, ButtonSecondaryProps>(({ children, ...rest }, ref) => {
   return (
-    <Button size="medium" variant="outlined" {...rest}>
+    <Button ref={ref} size="medium" variant="outlined" {...rest}>
       {children}
     </Button>
   )
-}
+})
+
+ButtonSecondary.displayName = 'ButtonSecondary'

@@ -3,11 +3,27 @@ import { styled } from 'styled-components'
 
 import { theme } from 'libs/ui-kit/theme/theme'
 
-export const AvatarStyled = styled(Avatar)`
+interface AvatarStyledProps {
+  $background?: string
+}
+
+export const AvatarStyled = styled(Avatar)<AvatarStyledProps>`
   && {
     width: 2.5rem;
     height: 2.5rem;
     background: ${theme.palette.primary.main};
     line-height: 1;
+  }
+
+  &&& {
+    ${({ $background }) =>
+      $background
+        ? `
+      background: ${$background};
+      color: ${theme.palette.text.primary};
+      font-size: 0.75rem;
+      font-weight: 600;
+    `
+        : ''}
   }
 `

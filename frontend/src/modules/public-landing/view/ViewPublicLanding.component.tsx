@@ -1,105 +1,71 @@
-import { Formik } from 'formik'
+import { useMediaQuery } from '@mui/material'
 import Box from '@mui/material/Box'
-import { Form } from 'formik'
-import Typography from '@mui/material/Typography'
-import { styled } from 'styled-components'
-import { useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import { publicLandingIllustration } from 'assets/images'
-import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
-import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
-import { FieldOrganisations } from 'libs/form-kit/components/FieldOrganisations/FieldOrganisations.component.tsx'
-import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { useGetOrganisationsModel } from 'libs/models/organisation-model/GetOrganisations/GetOrganisations.service'
-import { OrganisationFormValues } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.types.ts'
-import { PATHS } from 'routes'
+import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
+import { CookieConsentBanner } from 'libs/ui-kit/components/CookieConsentBanner/CookieConsentBanner.tsx'
+import { LandingFaq } from 'modules/public-landing/components/LandingFaq/LandingFaq.component.tsx'
+import { LandingFooter } from 'modules/public-landing/components/LandingFooter/LandingFooter.component.tsx'
+import { LandingGetStarted } from 'modules/public-landing/components/LandingGetStarted/LandingGetStarted.component.tsx'
+import { LandingHeader } from 'modules/public-landing/components/LandingHeader/LandingHeader.component.tsx'
+import { LandingHero } from 'modules/public-landing/components/LandingHero/LandingHero.component.tsx'
+import { LandingKeys } from 'modules/public-landing/components/LandingKeys/LandingKeys.component.tsx'
+import { LandingOrganisations } from 'modules/public-landing/components/LandingOrganisations/LandingOrganisations.component.tsx'
+import { LandingPartners } from 'modules/public-landing/components/LandingPartners/LandingPartners.component.tsx'
+import { LandingSection } from 'modules/public-landing/components/LandingSection/LandingSection.component.tsx'
+import { getGridColumns } from 'modules/public-landing/utils/grid.ts'
+import { mockPartners } from 'modules/public-landing/utils/mockLanding.ts'
+import { getOrgPath } from 'routes'
 
-
-const OrganisationFormLandingStyled = styled(Box)`
-  && {
-    display: flex;
-    width: 100%;
-    padding: ${({ theme }) => theme.spacing(2, 0, 2, 0)};
-    align-items: center;
-    justify-content: center;
-  }
-`
-
-const OrganisationFormStyled = styled(Form)`
-  && {
-    width: 100%;
-    max-width: 400px;
-  }
-`
+import { LandingGlobalStyle, LandingStyled, MainStyled, SkipLinkStyled, TopGridStyled } from './ViewPublicLanding.styles'
 
 export const ViewPublicLanding = () => {
   const { t } = useTranslations()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { selectedOrganisation, setSelectedOrganisation } = useLayoutPublicContext()
-  const { organisations } = useGetOrganisationsModel()
-
-  const handleOrgSelect = useCallback((orgId: string) => {
-    navigate(`/reports/${orgId}`)
-  }, [navigate])
+  const { organisations, isPending, isError } = useGetOrganisationsModel()
+  const faqTitleRef = useRef<HTMLHeadingElement>(null)
+  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
 
   useEffect(() => {
     const orgId = searchParams.get('organisation_id')
-    if (orgId && organisations && organisations.length > 0) {
-      const organisationExists = organisations.some((o: any) => o.id === orgId)
-      if (organisationExists) {
-        setSelectedOrganisation(orgId)
-        navigate(PATHS.PUBLIC_REPORTS, { replace: true })
-      }
+    if (orgId && organisations?.some((organisation) => organisation.id === orgId)) {
+      navigate(getOrgPath('reports', orgId), { replace: true })
     }
-  }, [searchParams, organisations, setSelectedOrganisation, navigate])
+  }, [searchParams, organisations, navigate])
 
-  const organisationOptions = (organisations ?? []).map((o: any) => ({
-    name: o.name,
-    value: o.id
-  }))
+  const handleFaqClick = useCallback(() => {
+    faqTitleRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' })
+    faqTitleRef.current?.focus({ preventScroll: true })
+  }, [prefersReducedMotion])
 
-  const initialValues: OrganisationFormValues = {
-    organisations: selectedOrganisation ?? ''
-  }
+  const isLoaded = organisations !== null || isError
+  const partners = isLoaded ? mockPartners : []
+  const isSplit = (organisations?.length ?? 0) <= 1 && partners.length === 1
 
   return (
-    <>
-      <LayoutPublic.Header>
-        <LayoutPublic.Header.Details description={t({ id: 'welcome' })} title={t({ id: 'reeveIndexer' })} />
-      </LayoutPublic.Header>
-      <LayoutPublic.Main flexDirection="column" isHeightRestricted>
-        <Box pt={2} display="flex" flexDirection="column" alignItems="center" gap={4}>
-          <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
-            <Typography color="text.primary" component="p" textAlign="center" variant="h2">
-              {t({ id: 'selectOrganisationMessage' })}
-            </Typography>
-            <Typography color="text.secondary" component="p" textAlign="center" variant="body1">
-              {t({ id: 'selectOrganisationHint' })}
-            </Typography>
-          </Box>
-          <OrganisationFormLandingStyled>
-            <Formik<OrganisationFormValues> enableReinitialize initialValues={initialValues} onSubmit={() => undefined}>
-              {() => (
-                <OrganisationFormStyled noValidate>
-                  <FieldOrganisations items={organisationOptions} onSelect={handleOrgSelect} />
-                </OrganisationFormStyled>
-              )}
-            </Formik>
-          </OrganisationFormLandingStyled>
-        </Box>
-        <Box flexGrow={1} display="flex" alignItems="center" justifyContent="center" minHeight={0} py={4}>
-          <Box
-            component="img"
-            src={publicLandingIllustration}
-            alt=""
-            maxWidth="47.5rem"
-            width="100%"
-            sx={{ maxHeight: '100%', objectFit: 'contain', pt: 8 }}
-          />
-        </Box>
-      </LayoutPublic.Main>
-    </>
+    <LandingStyled>
+      <LandingGlobalStyle />
+      <SkipLinkStyled href="#main-content">{t({ id: 'landingSkipToContent' })}</SkipLinkStyled>
+      <LandingHeader />
+      <Box component="main" id="main-content" tabIndex={-1} flex="1 0 auto" sx={{ outline: 'none' }}>
+        <LandingHero onFaqClick={handleFaqClick} />
+        <MainStyled>
+          <TopGridStyled $isSplit={isSplit} $isPartnerAnimated={!isError}>
+            <LandingSection title={t({ id: 'landingPublishedTitle' })} description={t({ id: 'landingPublishedDescription' })}>
+              <LandingOrganisations organisations={organisations} isPending={isPending} isError={isError} isCompact={isSplit} />
+            </LandingSection>
+            <LandingPartners partners={partners} columns={getGridColumns(partners.length)} />
+          </TopGridStyled>
+          <LandingKeys />
+          <LandingFaq ref={faqTitleRef} />
+          <LandingGetStarted />
+        </MainStyled>
+      </Box>
+      <LandingFooter />
+      <CookieConsentBanner />
+    </LandingStyled>
   )
 }

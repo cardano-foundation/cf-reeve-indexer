@@ -26,8 +26,9 @@ export const useSearchQuickFiltersForm = () => {
 
 export const useSearchActionControls = () => {
   const { drawer, visibilityCount, hasFiltersTouched } = useTableToolbarContext()
+  const { handleDrawerClose } = useLayoutPublicContext()
 
-  return { drawer, visibilityCount, hasFiltersTouched }
+  return { drawer, visibilityCount, hasFiltersTouched, onDrawerClose: handleDrawerClose }
 }
 
 export const useSearchQuickFilters = () => {

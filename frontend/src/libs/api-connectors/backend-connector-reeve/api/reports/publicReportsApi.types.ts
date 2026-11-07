@@ -43,7 +43,7 @@ export type ReportEntity = {
   year: number
   period: number
   ver: number
-  blockChainHash: string
+  txHash: string
   identities: IdentityAttestationView[]
   data: NestedMap
   accountingRegime: string | null 

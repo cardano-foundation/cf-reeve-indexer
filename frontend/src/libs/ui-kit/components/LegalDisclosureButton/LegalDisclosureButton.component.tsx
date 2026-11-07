@@ -19,7 +19,7 @@ export const LegalDisclosureButton = () => {
         onClick={handleModalOpen}
         size="small"
         startIcon={<InfoCircle size={24} variant="Outline" />}
-        sx={{ alignSelf: 'flex-start', backgroundColor: 'background.default', borderColor: 'divider', color: 'text.secondary', flexShrink: 0, px: 1.5, py: 0.75 }}
+        sx={{ alignSelf: 'center', backgroundColor: 'background.default', borderColor: 'divider', color: 'text.secondary', flexShrink: 0, px: 1.5, py: 0.75 }}
       >
         {t({ id: 'legalDisclosureLink' })}
       </ButtonSecondary>

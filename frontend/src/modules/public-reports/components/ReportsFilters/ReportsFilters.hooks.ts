@@ -1,15 +1,17 @@
 import { useFormik } from 'formik'
 import { noop } from 'lodash'
 
-import { getAllReportPeriodOptions, getAllReportTypeOptions } from 'libs/utils/formFieldOptions'
+import { ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { getAllReportPeriodOptions, getAllReportTypeOptions, getReportStandardOptions } from 'libs/utils/formFieldOptions'
 
 import { DEFAULT_REPORTS_FILTERS_VALUES } from './ReportsFilters.consts'
 
-export const useReportsFiltersOptions = () => {
+export const useReportsFiltersOptions = (reports?: ReportEntity[] | null) => {
   const periodOptions = getAllReportPeriodOptions()
   const reportOptions = getAllReportTypeOptions()
+  const standardOptions = getReportStandardOptions(reports)
 
-  return { periodOptions, reportOptions }
+  return { periodOptions, reportOptions, standardOptions }
 }
 
 export const useReportsDrawerFiltersForm = () => {
