@@ -5,6 +5,7 @@ import { ButtonPrimaryStyled } from 'libs/ui-kit/components/ButtonPrimary/Button
 
 interface ButtonPrimaryProps extends ButtonPropsMUI {
   to?: string
+  viewTransition?: boolean
   children: ReactNode
 }
 

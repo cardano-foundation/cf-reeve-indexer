@@ -1,20 +1,31 @@
-import { useState } from 'react'
+import Box from '@mui/material/Box'
+import Link from '@mui/material/Link'
+import Typography from '@mui/material/Typography'
+import { ExportSquare } from 'iconsax-react'
+import { Fragment, useState } from 'react'
 
 import { Modal } from 'features/common'
 import { ICONSAX_NAMES, IconsaxIcon } from 'features/iconsax'
-import { useTranslations } from 'libs/translations/hooks/useTranslations'
-
-import type { ModalReportProps } from './modal-report.types'
-import { getReportPeriod } from 'modules/public-reports/utils/payload'
-import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
 import { Grid, Divider, IconButton } from 'features/mui/base'
 import { NestedMap } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
-import Typography from '@mui/material/Typography'
+import { truncateHash } from 'libs/documents-kit/utils/format.ts'
+import { getLegalName, useGLEIFVerification } from 'libs/hooks/useGLEIFVerification'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
+import { useTranslations } from 'libs/translations/hooks/useTranslations'
+import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber } from 'libs/utils/format'
-import { ContentStyled } from './modal-report.styles'
-import { computeNestedSum } from './modal-report.utils'
-import { getLegacyReportConfig } from './modal-report.legacy-configs'
+import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
+import { formatAuditDate } from 'modules/public-events-auditor/utils/format.ts'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
+import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
+import { mockReportDates } from 'modules/public-reports/utils/mockReports.ts'
+import { getReportPeriod } from 'modules/public-reports/utils/payload'
+
+import { REPORT_ACTIONS } from './modal-report.consts'
+import { getLegacyReportConfig } from './modal-report.legacy-configs'
+import { ActionsStyled, ComingSoonButtonStyled, ContentStyled } from './modal-report.styles'
+import type { ModalReportProps, ReportDetailsProps } from './modal-report.types'
+import { computeNestedSum } from './modal-report.utils'
 
 const createSafeT = (t: any) => (id?: string, variables?: Record<string, any>, fallback?: string) => {
   if (!id) return fallback || ''
@@ -64,11 +75,87 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
               <ChipAccountingRegime accountingRegime={accountingRegime} />
             </Grid>
           </Grid>
+          <ReportDetails report={report} />
           <Divider flexItem />
           <NestedGrid data={data} depth={0} safeT={safeT} reportHash={txHash} reportType={subType} />
         </ContentStyled>
       </Modal.Content>
+      <ActionsStyled>
+        {REPORT_ACTIONS.map(({ id, icon: ActionIcon }) => (
+          <Tooltip key={id} title={t({ id: 'comingSoon' })} describeChild>
+            <ComingSoonButtonStyled aria-disabled disableRipple startIcon={<ActionIcon size={20} variant="Outline" />}>
+              {t({ id })}
+            </ComingSoonButtonStyled>
+          </Tooltip>
+        ))}
+      </ActionsStyled>
     </Modal>
+  )
+}
+
+const ReportDetails = ({ report }: ReportDetailsProps) => {
+  const { t } = useTranslations()
+  const organisationName = useSelectedOrganisationName()
+
+  const [publisher, auditor] = report.identities ?? []
+
+  const { data: auditorGleif, isLoading: isAuditorLoading } = useGLEIFVerification(auditor?.lei)
+  const auditorName = getLegalName(auditorGleif)
+
+  const isPublisherVerified = Boolean(publisher?.identityVerified)
+  const isAuditorVerified = Boolean(auditor?.identityVerified)
+
+  const identityId =
+    isPublisherVerified && isAuditorVerified
+      ? 'reportIdentityBothVerified'
+      : isPublisherVerified
+        ? 'reportIdentityPublisherVerified'
+        : isAuditorVerified
+          ? 'reportIdentityAuditorVerified'
+          : 'attestationPending'
+
+  const audited = !auditor
+    ? t({ id: 'attestationPending' })
+    : isAuditorLoading
+      ? t({ id: 'verifyingLEI' })
+      : t({ id: 'reportDateBy' }, { date: formatAuditDate(mockReportDates.auditedAt), name: auditorName || auditor.schemaName })
+
+  const rows = [
+    { label: t({ id: 'published' }), value: t({ id: 'reportDateBy' }, { date: formatAuditDate(mockReportDates.publishedAt), name: organisationName }) },
+    { label: t({ id: 'reportAudited' }), value: audited },
+    { label: t({ id: 'reportIdentity' }), value: t({ id: identityId }) },
+    {
+      label: t({ id: 'onChainRecord' }),
+      value: report.txHash ? (
+        <>
+          <Tooltip title={report.txHash}>
+            <span>{truncateHash(report.txHash, 4, 4)}</span>
+          </Tooltip>
+          <Tooltip title={t({ id: 'openInExplorer' })}>
+            <Link aria-label={t({ id: 'openInExplorer' })} color="inherit" display="flex" href={`${EXPLORER_TX_URL}${encodeURIComponent(report.txHash)}`} rel="noreferrer" target="_blank">
+              <ExportSquare size={20} variant="Outline" />
+            </Link>
+          </Tooltip>
+        </>
+      ) : (
+        t({ id: 'none' })
+      )
+    }
+  ]
+
+  return (
+    <Box columnGap={3} component="dl" display="grid" gridTemplateColumns={{ xs: '1fr', sm: 'auto 1fr' }} m={0} rowGap={1} width="100%">
+      {rows.map(({ label, value }) => (
+        <Fragment key={label}>
+          <Typography color="text.primary" component="dt" variant="body1">
+            {label}
+          </Typography>
+          <Typography alignItems="center" color="text.primary" component="dd" display="flex" gap={1} justifyContent={{ xs: 'flex-start', sm: 'flex-end' }} m={0} mb={{ xs: 1, sm: 0 }} variant="body1">
+            {value}
+          </Typography>
+        </Fragment>
+      ))}
+    </Box>
   )
 }
 

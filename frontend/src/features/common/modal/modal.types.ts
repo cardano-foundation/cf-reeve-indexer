@@ -1,7 +1,10 @@
+import type { ReactNode } from 'react'
+
 import type { DialogActionsProps, DialogContentProps, DialogProps, DialogTitleProps } from 'features/mui/base'
 
 export interface ModalHeaderProps extends DialogTitleProps {
   hasCloseButton?: boolean
+  subtitle?: ReactNode
 }
 
 export interface ModalContentProps extends DialogContentProps {

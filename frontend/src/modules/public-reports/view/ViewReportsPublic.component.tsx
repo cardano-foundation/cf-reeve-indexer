@@ -54,7 +54,7 @@ export const ViewReportsPublic = () => {
         </Box>
         <LegalDisclosureButton />
       </LayoutPublic.Header>
-      <LayoutPublic.Main flexDirection="column" gap={6} hasMinContentHeight isHeightRestricted>
+      <LayoutPublic.Main flexDirection="column" gap={6} hasMinContentHeight>
         {hasEmptyPageState ? (
           <EmptyStatePage
             asset={<Box alt={t({ id: 'noPublicReportsMessage' })} component="img" maxWidth="47.5rem" src={publicReportsIllustration} width="100%" />}
@@ -62,9 +62,9 @@ export const ViewReportsPublic = () => {
             message={t({ id: 'noPublicReportsMessage' })}
           />
         ) : (
-          <Box display="flex" flexDirection="column" gap={1} height="100%" minHeight={0}>
+          <Box display="flex" flexDirection="column" gap={1}>
             <LegalDisclosureAttribution />
-            <Box display="flex" flexDirection="column" flex="1 1 0" minHeight="15rem">
+            <Box display="flex" flexDirection="column">
               <FormikProvider value={quickFilters}>
                 <TableReportsPublic
                   data={reports}

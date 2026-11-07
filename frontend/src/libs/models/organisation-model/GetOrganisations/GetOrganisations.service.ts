@@ -13,10 +13,12 @@ const getOrganisationsQuery = async ({ hasAuthorizationHeader }: { hasAuthorizat
 }
 
 export const useGetOrganisationsModel = ({ hasAuthorizationHeader }: { hasAuthorizationHeader?: boolean } = {}) => {
-  const { data, isFetching } = useQuery({ queryKey: ['ORGANISATIONS'], queryFn: () => getOrganisationsQuery({ hasAuthorizationHeader }) })
+  const { data, isFetching, isError, isPending } = useQuery({ queryKey: ['ORGANISATIONS'], queryFn: () => getOrganisationsQuery({ hasAuthorizationHeader }) })
 
   return {
     organisations: data ?? null,
-    isFetching
+    isFetching,
+    isError,
+    isPending
   }
 }

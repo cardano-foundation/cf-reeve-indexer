@@ -15,7 +15,7 @@ const ReportsQuickFilters = ({ options }: ReportsQuickFiltersProps) => {
 
   useReportsQuickFilters()
 
-  const { periodOptions, reportOptions } = options
+  const { periodOptions, reportOptions, standardOptions } = options
 
   return (
     <TableToolbar.QuickFilters isFirstFieldSkipped>
@@ -28,6 +28,9 @@ const ReportsQuickFilters = ({ options }: ReportsQuickFiltersProps) => {
       </TableToolbar.QuickFilters.Field>
       <TableToolbar.QuickFilters.Field>
         <FieldCombobox label={t({ id: 'period' })} limitTags={1} name="period" options={periodOptions} multiple />
+      </TableToolbar.QuickFilters.Field>
+      <TableToolbar.QuickFilters.Field>
+        <FieldCombobox label={t({ id: 'standard' })} limitTags={1} name="standard" options={standardOptions} multiple />
       </TableToolbar.QuickFilters.Field>
     </TableToolbar.QuickFilters>
   )

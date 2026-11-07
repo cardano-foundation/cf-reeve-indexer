@@ -13,8 +13,10 @@ import {
   OrganisationTransactionTypeEntity,
   OrganisationVatCodeEntity
 } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types'
-import { ReportMonth, ReportQuarter, ReportType } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { ReportEntity, ReportMonth, ReportQuarter, ReportType } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { intl } from 'libs/translations/utils/intl'
+import { REPORT_STANDARD_NOT_STATED_VALUE } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.consts'
+import { getReportStandard } from 'modules/public-reports/utils/format'
 
 const BASE_YEAR = '2023'
 
@@ -131,6 +133,17 @@ export const getAllReportPeriodOptions = (periodFrom: string = BASE_YEAR) => {
 
     return [yearOption, ...quarterOptions.flatMap<AutocompleteOption>((option, index) => [option, ...monthOptions.slice(index * 3, (index + 1) * 3)])]
   })
+}
+
+export const getReportStandardOptions = (reports: ReportEntity[] | null | undefined) => {
+  const standards = new Set((reports ?? []).map((report) => getReportStandard(report.accountingRegime) ?? REPORT_STANDARD_NOT_STATED_VALUE))
+
+  return [...standards]
+    .sort((current, next) => current.localeCompare(next))
+    .map<AutocompleteOption>((standard) => ({
+      label: standard === REPORT_STANDARD_NOT_STATED_VALUE ? intl.formatMessage({ id: 'unspecified' }) : intl.formatMessage({ id: standard, defaultMessage: standard }),
+      value: standard
+    }))
 }
 
 export const getAllReportTypeOptions = () => {

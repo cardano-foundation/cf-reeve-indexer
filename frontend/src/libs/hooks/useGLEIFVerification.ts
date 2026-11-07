@@ -67,3 +67,5 @@ export const useGLEIFVerification = (lei?: string | null) => {
     retry: 1
   })
 }
+
+export const getLegalName = (entity?: GLEIFLegalEntity | null) => (typeof entity?.legalName === 'string' ? entity.legalName : entity?.legalName?.name)

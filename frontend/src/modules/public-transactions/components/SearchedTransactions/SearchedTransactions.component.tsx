@@ -2,14 +2,15 @@ import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
-import { GridColDef } from '@mui/x-data-grid'
+import { GridColDef, GridPreferencePanelsValue, useGridApiRef } from '@mui/x-data-grid'
 import dayjs from 'dayjs'
 import { ExportSquare } from 'iconsax-react'
-import { useMemo, useRef } from 'react'
+import { MouseEvent, useId, useMemo, useRef, useState } from 'react'
 
 import { PostPublicTransactionsResponse200 } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
+import { useSelectedOrganisationCurrency } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationCurrency.ts'
 import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { CellCodeDetails } from 'libs/ui-kit/components/CellCodeDetails/CellCodeDetails.component.tsx'
@@ -33,6 +34,8 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
 
   const { t } = useTranslations()
   const organisationName = useSelectedOrganisationName()
+  const organisationCurrency = useSelectedOrganisationCurrency()
+  const apiRef = useGridApiRef()
 
   const theme = useTheme()
 
@@ -46,10 +49,25 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
     return rowCountRef.current
   }, [data?.total])
 
+  const [columnsAnchorEl, setColumnsAnchorEl] = useState<HTMLElement | null>(null)
+  const [isColumnsOpen, setIsColumnsOpen] = useState(false)
+  const columnsPanelId = useId()
+
+  const handleColumnsToggle = (event: MouseEvent<HTMLElement>) => {
+    if (isColumnsOpen) {
+      apiRef.current?.hidePreferences()
+
+      return
+    }
+
+    setColumnsAnchorEl(event.currentTarget)
+    apiRef.current?.showPreferences(GridPreferencePanelsValue.columns, columnsPanelId)
+  }
+
   const columns: GridColDef[] = [
     {
       field: 'blockChainHash',
-      headerName: t({ id: 'blockchainHash' }),
+      headerName: t({ id: 'onChainRecord' }),
       renderCell: ({ value }) => (
         <Box alignItems="center" display="flex" gap={1}>
           <Tooltip title={value}>
@@ -68,16 +86,8 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
       minWidth: 192
     },
     {
-      field: 'transactionInternalNumber',
-      headerName: t({ id: 'transactionNumber' }),
-      hideable: false,
-      sortable: true,
-      flex: 1,
-      maxWidth: 192
-    },
-    {
       field: 'entryDate',
-      headerName: t({ id: 'transactionDate' }),
+      headerName: t({ id: 'date' }),
       valueFormatter: (value) => value ? dayjs(value, 'YYYY-MM-DD').format('DD/MM/YYYY') : null,
       hideable: false,
       sortable: true,
@@ -85,29 +95,47 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
       minWidth: 192
     },
     { field: 'transactionType', headerName: t({ id: 'transactionType' }), hideable: true, sortable: true, flex: 1, minWidth: 192 },
+    {
+      field: 'transactionInternalNumber',
+      headerName: t({ id: 'transactionNumber' }),
+      hideable: false,
+      sortable: true,
+      flex: 1,
+      maxWidth: 192
+    },
     { field: 'documentNumber', headerName: t({ id: 'documentNumber' }), hideable: true, sortable: true, flex: 1, minWidth: 192 },
+    {
+      field: 'accountEvent',
+      headerName: t({ id: 'event' }),
+      valueGetter: (_, row) => row.accountEventCode,
+      renderCell: ({ row }) => <CellCodeDetails code={row.accountEventCode} description={row.accountEventName} />,
+      hideable: false,
+      sortable: true,
+      flex: 1,
+      minWidth: 240
+    },
     { field: 'documentCurrencyCustomerCode', headerName: t({ id: 'currency' }), valueFormatter: (value) => value ? formatCurrency(value) : null, hideable: false, sortable: true, flex: 1, minWidth: 192 },
     {
       field: 'amountFcy',
-      headerName: t({ id: 'amountFCY' }),
+      headerName: t({ id: 'amountDocumentCurrency' }),
       valueFormatter: (value) => value ? formatNumber(value) : null,
       align: 'right',
       headerAlign: 'right',
       hideable: false,
       sortable: true,
       flex: 1,
-      minWidth: 192
+      minWidth: 240
     },
     {
       field: 'amountLcy',
-      headerName: t({ id: 'amountLCY' }),
+      headerName: t({ id: 'amountReportingCurrency' }, { currency: organisationCurrency }),
       valueFormatter: (value) => value ? formatNumber(value) : null,
       align: 'right',
       headerAlign: 'right',
       hideable: false,
       sortable: true,
       flex: 1,
-      minWidth: 192
+      minWidth: 280
     },
     {
       field: 'fxRate',
@@ -174,25 +202,18 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
       sortable: true,
       flex: 1,
       minWidth: 192
-    },
-    {
-      field: 'accountEvent',
-      headerName: t({ id: 'event' }),
-      valueGetter: (_, row) => row.accountEventCode,
-      renderCell: ({ row }) => <CellCodeDetails code={row.accountEventCode} description={row.accountEventName} />,
-      hideable: false,
-      sortable: true,
-      flex: 1,
-      minWidth: 240
     }
   ]
 
   return (
     <DataGridContainer>
       <DataGridContainer.Toolbar>
-        <SearchToolbar />
+        <SearchToolbar columnsPanelId={columnsPanelId} isColumnsOpen={isColumnsOpen} onColumnsToggle={handleColumnsToggle} />
       </DataGridContainer.Toolbar>
       <DataGridContainer.Table
+        apiRef={apiRef}
+        sx={{ '--DataGrid-overlayHeight': '20rem' }}
+        autoHeight
         initialState={{
           columns: {
             columnVisibilityModel: {
@@ -227,8 +248,12 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
 
           handleSorting(current.field, current.sort)
         }}
+        onPreferencePanelOpen={() => setIsColumnsOpen(true)}
+        onPreferencePanelClose={() => setIsColumnsOpen(false)}
+        slotProps={{ pagination: { hasPageInput: true }, panel: { anchorEl: columnsAnchorEl, placement: 'bottom-end' } }}
         hasFiltersSelected={hasFiltersSelected}
         isLoading={isLoading}
+        disableColumnMenu
       />
     </DataGridContainer>
   )

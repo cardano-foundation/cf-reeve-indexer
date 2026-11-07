@@ -8,6 +8,12 @@ export const formatCurrency = (value: string) => {
   return value.slice(startIndex + 1, startIndex + 4)
 }
 
+export const getReportStandard = (accountingRegime: string | null) => {
+  const regime = accountingRegime?.trim()
+
+  return !regime || regime.toLowerCase() === 'not applicable' ? null : regime
+}
+
 export const snakeToNormal = (input: string): string => {
   if (!input) return ''
 
