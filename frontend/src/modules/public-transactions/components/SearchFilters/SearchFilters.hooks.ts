@@ -38,21 +38,35 @@ export const useSearchFiltersOptions = (selectedTransactionNumbers: string[] = [
   const [transactionNumberSearchTerm, setTransactionNumberSearchTerm] = useState<string>('')
   const debouncedTransactionNumberSearchTerm = useDebounce(transactionNumberSearchTerm)
 
-  const { costCenters } = useGetOrganisationCostCentersModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
-  const { counterparties } = useGetOrganisationCounterpartiesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
-  const { counterpartyTypes } = useGetOrganisationCounterpartyTypesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
-  const { currencies } = useGetOrganisationCurrenciesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
-  const { documentNumbers } = useGetOrganisationDocumentNumbersModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
-  const { events } = useGetOrganisationEventsModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
-  const { projects } = useGetOrganisationProjectsModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { costCenters, isCostCentersFetching } = useGetOrganisationCostCentersModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { counterparties, isCounterpartiesFetching } = useGetOrganisationCounterpartiesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { counterpartyTypes, isCounterpartyTypesFetching } = useGetOrganisationCounterpartyTypesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { currencies, isCurrenciesFetching } = useGetOrganisationCurrenciesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { documentNumbers, isDocumentNumbersFetching } = useGetOrganisationDocumentNumbersModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { events, isEventsFetching } = useGetOrganisationEventsModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { projects, isProjectsFetching } = useGetOrganisationProjectsModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
 
-  const { transactionNumbers } = useGetOrganisationTransactionNumbersModel(
+  const { transactionNumbers, isTransactionNumbersFetching } = useGetOrganisationTransactionNumbersModel(
     { parameters: { organisationId: selectedOrganisation, number: debouncedTransactionNumberSearchTerm ?? undefined } },
     isOrganisationSelected
   )
 
-  const { transactionTypes } = useGetOrganisationTransactionTypesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
-  const { vatCodes } = useGetOrganisationVatCodesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const isTransactionNumbersLoading = isTransactionNumbersFetching || transactionNumberSearchTerm !== (debouncedTransactionNumberSearchTerm ?? '')
+
+  const { transactionTypes, isTransactionTypesFetching } = useGetOrganisationTransactionTypesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { vatCodes, isVatCodesFetching } = useGetOrganisationVatCodesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+
+  const isOptionsLoading =
+    !isOrganisationSelected ||
+    (isCostCentersFetching && !costCenters) ||
+    (isCounterpartiesFetching && !counterparties) ||
+    (isCounterpartyTypesFetching && !counterpartyTypes) ||
+    (isCurrenciesFetching && !currencies) ||
+    (isDocumentNumbersFetching && !documentNumbers) ||
+    (isEventsFetching && !events) ||
+    (isProjectsFetching && !projects) ||
+    (isTransactionTypesFetching && !transactionTypes) ||
+    (isVatCodesFetching && !vatCodes)
 
   const costCenterOptions = getAllCostCenterOptions(costCenters)
   const counterpartyOptions = getAllCounterpartyOptions(counterparties)
@@ -86,6 +100,8 @@ export const useSearchFiltersOptions = (selectedTransactionNumbers: string[] = [
     transactionNumberOptions,
     transactionTypeOptions,
     vatCodeOptions,
+    isOptionsLoading,
+    isTransactionNumbersLoading,
     transactionNumberSearchTerm,
     debouncedTransactionNumberSearchTerm,
     setTransactionNumberSearchTerm
@@ -119,7 +135,9 @@ export const useSearchFilters = () => {
     projectOptions,
     transactionNumberOptions,
     transactionTypeOptions,
-    vatCodeOptions, 
+    vatCodeOptions,
+    isOptionsLoading,
+    isTransactionNumbersLoading,
     transactionNumberSearchTerm,
     debouncedTransactionNumberSearchTerm,
     setTransactionNumberSearchTerm
@@ -133,6 +151,7 @@ export const useSearchFilters = () => {
     dateFromMinDate,
     dateToMaxDate,
     dateToMinDate,
+    isTransactionNumbersLoading,
     transactionNumberSearchTerm,
     debouncedTransactionNumberSearchTerm,
     setTransactionNumberSearchTerm,
@@ -146,7 +165,8 @@ export const useSearchFilters = () => {
       projectOptions,
       transactionNumberOptions,
       transactionTypeOptions,
-      vatCodeOptions
+      vatCodeOptions,
+      isOptionsLoading
     }
   }
 }
