@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
 import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
+import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 
 public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
 
@@ -59,5 +60,13 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
 
     List<ReportEntity> findByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVer(
             String organisationId, String subType, Interval interval, Integer year, Integer period, Long ver);
+
+    @Query("""
+            SELECT NEW org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView(r.organisationId, MAX(r.blockTime))
+            FROM ReportEntity r
+            WHERE r.blockTime IS NOT NULL
+            GROUP BY r.organisationId
+            """)
+    List<OrganisationLastUpdatedView> findLastUpdatedPerOrganisation();
 
 }

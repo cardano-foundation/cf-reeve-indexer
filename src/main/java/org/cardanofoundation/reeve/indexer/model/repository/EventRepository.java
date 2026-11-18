@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.reeve.indexer.model.entity.EventEntity;
 import org.cardanofoundation.reeve.indexer.model.view.EventProjectView;
+import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 
 public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
@@ -90,4 +91,12 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
             "FROM EventEntity e JOIN e.allocations a " +
             "WHERE e.organisationId = :orgId AND a.projectId IS NOT NULL")
     List<EventProjectView> findDistinctProjectsByOrganisationId(@Param("orgId") String orgId);
+
+    @Query("""
+            SELECT NEW org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView(e.organisationId, MAX(e.blockTime))
+            FROM EventEntity e
+            WHERE e.blockTime IS NOT NULL
+            GROUP BY e.organisationId
+            """)
+    List<OrganisationLastUpdatedView> findLastUpdatedPerOrganisation();
 }

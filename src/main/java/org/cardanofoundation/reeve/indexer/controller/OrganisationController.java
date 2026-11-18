@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
+import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
 import org.cardanofoundation.reeve.indexer.service.OrganisationService;
 
@@ -39,6 +40,13 @@ public class OrganisationController {
         log.info("Fetching all organisations");
         List<Organisation> organisations = organisationService.getAllOrganisations();
         return ResponseEntity.ok(organisations);
+    }
+
+    @GetMapping("/lastUpdated")
+    public ResponseEntity<List<OrganisationLastUpdatedView>> getLastUpdatedPerOrganisation() {
+        log.info("Fetching last updated per organisation");
+        List<OrganisationLastUpdatedView> lastUpdated = organisationService.getLastUpdatedPerOrganisation();
+        return ResponseEntity.ok(lastUpdated);
     }
 
     @GetMapping("/{orgId}/currencies")

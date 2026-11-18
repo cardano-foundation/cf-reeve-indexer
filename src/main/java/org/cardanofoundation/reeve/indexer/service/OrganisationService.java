@@ -2,6 +2,8 @@ package org.cardanofoundation.reeve.indexer.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +16,14 @@ import org.springframework.stereotype.Service;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CurrencyRepository;
+import org.cardanofoundation.reeve.indexer.model.repository.DocumentRepository;
+import org.cardanofoundation.reeve.indexer.model.repository.EventRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.OrganisationRepository;
+import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
 import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
+import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
 
 @Service
@@ -28,6 +34,9 @@ public class OrganisationService {
     private final OrganisationRepository organisationRepository;
     private final CurrencyRepository currencyRepository;
     private final TransactionRepository transactionRepository;
+    private final ReportRepository reportRepository;
+    private final EventRepository eventRepository;
+    private final DocumentRepository documentRepository;
 
     public Optional<OrganisationEntity> findById(String organisationId) {
         return organisationRepository.findById(organisationId);
@@ -38,6 +47,21 @@ public class OrganisationService {
         List<OrganisationEntity> organisationEntities = organisationRepository.findAll();
         return organisationEntities.stream()
                 .map(this::mapToDomain)
+                .toList();
+    }
+
+    public List<OrganisationLastUpdatedView> getLastUpdatedPerOrganisation() {
+        log.info("Fetching last updated per organisation");
+        return Stream.of(
+                        reportRepository.findLastUpdatedPerOrganisation(),
+                        transactionRepository.findLastUpdatedPerOrganisation(),
+                        eventRepository.findLastUpdatedPerOrganisation(),
+                        documentRepository.findLastUpdatedPerOrganisation())
+                .flatMap(List::stream)
+                .collect(Collectors.toMap(OrganisationLastUpdatedView::getOrganisationId,
+                        OrganisationLastUpdatedView::getLastUpdated, Math::max))
+                .entrySet().stream()
+                .map(entry -> new OrganisationLastUpdatedView(entry.getKey(), entry.getValue()))
                 .toList();
     }
 
