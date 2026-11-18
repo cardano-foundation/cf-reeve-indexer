@@ -22,6 +22,7 @@ import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
 import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
+import org.cardanofoundation.reeve.indexer.model.view.TransactionsOverviewView;
 import org.cardanofoundation.reeve.indexer.service.OrganisationService;
 
 
@@ -55,6 +56,14 @@ public class OrganisationController {
             @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         List<CurrencyView> currencies = organisationService.getCurrenciesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(currencies);
+    }
+
+    @GetMapping("/{orgId}/transactionsOverview")
+    public ResponseEntity<TransactionsOverviewView> getTransactionsOverview(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+        log.info("Fetching transactions overview for organisation: {}", orgId);
+        TransactionsOverviewView overview = organisationService.getTransactionsOverviewForOrganisation(orgId);
+        return ResponseEntity.ok(overview);
     }
 
     @GetMapping("/{orgId}/internalNumber")

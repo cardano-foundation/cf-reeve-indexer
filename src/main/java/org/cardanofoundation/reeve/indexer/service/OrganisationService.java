@@ -25,6 +25,7 @@ import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
 import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
+import org.cardanofoundation.reeve.indexer.model.view.TransactionsOverviewView;
 
 @Service
 @Slf4j
@@ -99,6 +100,10 @@ public class OrganisationService {
 
     public List<String> getDistinctInternalNumbersForOrganisation(String orgId, String number) {
         return transactionRepository.findDistinctInternalNumbersByOrganisationId(orgId, number);
+    }
+
+    public TransactionsOverviewView getTransactionsOverviewForOrganisation(String orgId) {
+        return transactionRepository.findOverviewByOrganisationId(orgId);
     }
 
     public List<String> getDistinctTransactionTypesForOrganisation(String orgId, Pageable pageable) {
