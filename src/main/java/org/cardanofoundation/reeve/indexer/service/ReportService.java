@@ -9,10 +9,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,12 +43,23 @@ public class ReportService {
     private final CredentialRepository credentialRepository;
     private final CredentialSchemaRegistry credentialSchemaRegistry;
 
-    public List<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency,
-            List<String> reportTypes, List<String> intervalTypes, List<Integer> years, List<Integer> periods, Pageable pageable) {
+    public Page<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency,
+            List<String> reportTypes, List<String> intervalTypes, List<Integer> years, List<Integer> periods,
+            List<String> accountingRegimes, Boolean accountingRegimeNotStated, Pageable pageable) {
         List<Interval> intervals = intervalTypes != null ?
             intervalTypes.stream()
                 .map(Interval::valueOf)
                 .toList() : null;
+
+        boolean filterByPeriodPairs = intervals != null && years != null && periods != null
+                && intervals.size() == years.size() && years.size() == periods.size();
+        List<String> periodKeys = filterByPeriodPairs
+                ? IntStream.range(0, intervals.size())
+                        .mapToObj(i -> intervals.get(i).name() + "-" + years.get(i) + "-" + periods.get(i))
+                        .toList()
+                : null;
+        List<String> regimes = accountingRegimes == null || accountingRegimes.isEmpty() ? null : accountingRegimes;
+        Boolean notStated = Boolean.TRUE.equals(accountingRegimeNotStated) ? true : null;
 
         // That's a workaround to make sure that if the sorting contains period, we also sort by year and interval before
         // because period is not unique without them, so we need to make sure that the sorting is consistent with the way we group the reports later
@@ -67,10 +80,14 @@ public class ReportService {
         }
 
         // finds all first reports (with min id of the latest version, grouped by organisation, subType, interval, year and period)
-        List<ReportEntity> firstReports = reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                organisationId, likePattern(blockChainHash), currency, reportTypes, intervals, years, periods, pageable);
+        Page<ReportEntity> firstReports = reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+                organisationId, likePattern(blockChainHash), currency, reportTypes,
+                filterByPeriodPairs ? null : intervals,
+                filterByPeriodPairs ? null : years,
+                filterByPeriodPairs ? null : periods,
+                periodKeys, regimes, notStated, pageable);
 
-        return firstReports.stream().map(report -> {
+        return firstReports.map(report -> {
             ReportView view;
             try {
                 view = ReportView.fromEntity(report,
@@ -97,7 +114,7 @@ public class ReportService {
 
             view.setIdentities(identities);
             return view;
-        }).toList();
+        });
     }
 
     public Set<ReportEntity> findReportsInDateRange(String organisationId,

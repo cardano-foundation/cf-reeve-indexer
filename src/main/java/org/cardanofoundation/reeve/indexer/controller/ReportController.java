@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -26,6 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
 import org.cardanofoundation.reeve.indexer.model.request.ReportSearchRequest;
 import org.cardanofoundation.reeve.indexer.model.view.ReportResponseView;
+import org.cardanofoundation.reeve.indexer.model.view.ReportView;
 import org.cardanofoundation.reeve.indexer.service.OrganisationService;
 import org.cardanofoundation.reeve.indexer.service.ReportService;
 
@@ -61,14 +63,18 @@ public class ReportController {
                         }
                 }
 
-                return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByTypeAndPeriod(
+                Page<ReportView> page = reportService.findAllByTypeAndPeriod(
                                 reportSearchRequest.getOrganisationId(),
                                 reportSearchRequest.getBlockChainHash(),
                                 reportSearchRequest.getCurrency(),
                                 reportSearchRequest.getReportType(),
                                 reportSearchRequest.getIntervalType(),
                                 reportSearchRequest.getYear(),
-                                reportSearchRequest.getPeriod(), pageable)));
+                                reportSearchRequest.getPeriod(),
+                                reportSearchRequest.getAccountingRegime(),
+                                reportSearchRequest.getAccountingRegimeNotStated(), pageable);
+                return ResponseEntity.ok().body(ReportResponseView.createSuccess(page.getContent(),
+                                page.getTotalElements()));
         }
 
 }

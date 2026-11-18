@@ -83,6 +83,15 @@ public class OrganisationController {
         return ResponseEntity.ok(transactionTypes);
     }
 
+    @GetMapping("/{orgId}/accountingRegime")
+    public ResponseEntity<List<String>> getAccountingRegimes(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
+        log.info("Fetching distinct accounting regimes for organisation: {}", orgId);
+        List<String> accountingRegimes = organisationService.getDistinctAccountingRegimesForOrganisation(orgId, pageable);
+        return ResponseEntity.ok(accountingRegimes);
+    }
+
     @GetMapping("/{orgId}/documentNumber")
     public ResponseEntity<List<String>> getDocumentNumbers(
             @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,

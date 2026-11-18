@@ -49,4 +49,13 @@ public class ReportSearchRequest {
         schema = @Schema(example = "3")
     )
     private List<Integer> period;
+
+    @ArraySchema(
+        arraySchema = @Schema(description = "List of accounting standards to filter by"),
+        schema = @Schema(example = "IFRS")
+    )
+    private List<String> accountingRegime;
+
+    @Schema(description = "Also include reports without a stated accounting standard")
+    private Boolean accountingRegimeNotStated;
 }

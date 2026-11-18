@@ -110,6 +110,10 @@ public class OrganisationService {
         return transactionRepository.findDistinctTransactionTypesByOrganisationId(orgId, pageable).getContent();
     }
 
+    public List<String> getDistinctAccountingRegimesForOrganisation(String orgId, Pageable pageable) {
+        return reportRepository.findDistinctAccountingRegimesByOrganisationId(orgId, pageable).getContent();
+    }
+
     public List<String> getDistinctDocumentNumbersForOrganisation(String orgId, Pageable pageable) {
         Pageable mappedPageable = mapSortProperties(pageable, java.util.Map.of("documentNumber", "ti.documentNumber"));
         return transactionRepository.findDistinctDocumentNumbersByOrganisationId(orgId, mappedPageable).getContent();

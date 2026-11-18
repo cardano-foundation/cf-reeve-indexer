@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,6 +24,12 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             AND (:intervals IS NULL OR r.interval IN :intervals)
             AND (:years IS NULL OR r.year IN :years)
             AND (:periods IS NULL OR r.period IN :periods)
+            AND (:periodKeys IS NULL OR CONCAT(CAST(r.interval AS String), '-', CAST(r.year AS String), '-', CAST(r.period AS String)) IN :periodKeys)
+            AND ((:accountingRegimes IS NULL AND :accountingRegimeNotStated IS NULL)
+                OR r.accountingRegime IN :accountingRegimes
+                OR (:accountingRegimeNotStated = true AND (r.accountingRegime IS NULL
+                    OR TRIM(r.accountingRegime) = ''
+                    OR LOWER(TRIM(r.accountingRegime)) = 'not applicable')))
             AND (:blockChainHash IS NULL OR LOWER(r.txHash) LIKE :blockChainHash)
             AND (:currency IS NULL OR o.currencyId = :currency)
             AND (r.id in (SELECT MIN(sub.id) FROM ReportEntity sub
@@ -34,7 +41,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
                     AND latest.period = sub.period)
                 GROUP BY sub.organisationId, sub.subType, sub.interval, sub.year, sub.period))
             """)
-    List<ReportEntity> findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+    Page<ReportEntity> findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
             @Param("organisationId") String organisationId,
             @Param("blockChainHash") String blockChainHash,
             @Param("currency") String currency,
@@ -42,6 +49,9 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             @Param("intervals") List<Interval> intervals,
             @Param("years") List<Integer> years,
             @Param("periods") List<Integer> periods,
+            @Param("periodKeys") List<String> periodKeys,
+            @Param("accountingRegimes") List<String> accountingRegimes,
+            @Param("accountingRegimeNotStated") Boolean accountingRegimeNotStated,
             Pageable pageable);
 
     @Query("""
@@ -68,5 +78,19 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             GROUP BY r.organisationId
             """)
     List<OrganisationLastUpdatedView> findLastUpdatedPerOrganisation();
+
+    @Query("""
+            SELECT DISTINCT r.accountingRegime FROM ReportEntity r
+            WHERE r.organisationId = :orgId
+            AND (r.id in (SELECT MIN(sub.id) FROM ReportEntity sub
+                WHERE sub.ver = (SELECT MAX(latest.ver) FROM ReportEntity latest
+                    WHERE latest.organisationId = sub.organisationId
+                    AND latest.subType = sub.subType
+                    AND latest.interval = sub.interval
+                    AND latest.year = sub.year
+                    AND latest.period = sub.period)
+                GROUP BY sub.organisationId, sub.subType, sub.interval, sub.year, sub.period))
+            """)
+    Page<String> findDistinctAccountingRegimesByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
 
 }
