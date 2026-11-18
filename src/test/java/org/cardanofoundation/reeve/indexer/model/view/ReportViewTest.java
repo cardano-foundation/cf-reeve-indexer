@@ -1,6 +1,7 @@
 package org.cardanofoundation.reeve.indexer.model.view;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -71,5 +72,25 @@ public class ReportViewTest {
         // The key must still appear (as null) so the frontend can distinguish an absent legacy
         // value from a field that failed to load, even though other null fields are omitted.
         assertTrue(json.contains("\"accountingRegime\":null"));
+    }
+
+    @Test
+    void fromEntityCarriesBlockTimeWhenPresent() throws Exception {
+        ReportEntity entity = baseReport().blockTime(1736899200L).build();
+
+        ReportView view = ReportView.fromEntity(entity, org(), objectMapper);
+
+        assertEquals(1736899200L, view.getBlockTime());
+    }
+
+    @Test
+    void missingBlockTimeIsOmittedFromJson() throws Exception {
+        ReportEntity entity = baseReport().build();
+        ReportView view = ReportView.fromEntity(entity, org(), objectMapper);
+
+        String json = objectMapper.writeValueAsString(view);
+
+        assertNull(view.getBlockTime());
+        assertFalse(json.contains("blockTime"));
     }
 }

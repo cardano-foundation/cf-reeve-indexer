@@ -49,6 +49,8 @@ public class ReportView {
 
     private Long ver;
 
+    private Long blockTime;
+
     private Map<String, Object> data; // Assuming fields is a JSON string, adjust as necessary
 
     private List<IdentityAttestationView> identities;
@@ -67,6 +69,7 @@ public class ReportView {
                 .ver(entity.getVer())
                 .currency(organisationEntity.getCurrencyId())
                 .txHash(entity.getTxHash())
+                .blockTime(entity.getBlockTime())
                 .data(transformedData)
                 .build();
     }
