@@ -123,7 +123,7 @@ public class ReportService {
                 .filter(ReportEntity::isIdentityVerified)
                 .map(r -> credentialRepository.findById(r.getIdentifier())
                         .map(cred -> IdentityAttestationView.from(r.getIdentifier(), r.getTxHash(),
-                                cred, credentialSchemaRegistry, objectMapper)))
+                                r.getBlockTime(), cred, credentialSchemaRegistry, objectMapper)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();

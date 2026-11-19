@@ -44,6 +44,7 @@ public class IdentityAttestationView {
     private Map<String, Object> claims;
     private String lei;
     private String txHash;
+    private Long blockTime;
     private String credentialTxHash;
 
     /**
@@ -53,12 +54,13 @@ public class IdentityAttestationView {
      *
      * @param aid the identifier/AID the credential is presented for (also the credential lookup key)
      * @param txHash the txHash of the attesting (report/document) entity, not the credential's own tx
+     * @param blockTime the block time of that attesting entity's tx
      * @param credential the resolved credential row
      * @param schemaRegistry resolves {@code credential.schemaSaid} to a human-readable name
      * @param objectMapper parses {@code credential.claims} JSON into a map
      */
-    public static IdentityAttestationView from(String aid, String txHash, CredentialEntity credential,
-            CredentialSchemaRegistry schemaRegistry, ObjectMapper objectMapper) {
+    public static IdentityAttestationView from(String aid, String txHash, Long blockTime,
+            CredentialEntity credential, CredentialSchemaRegistry schemaRegistry, ObjectMapper objectMapper) {
         String schemaSaid = credential.getSchemaSaid();
         String schemaName = schemaRegistry.forSaid(schemaSaid)
                 .map(CredentialSchema::name)
@@ -72,6 +74,7 @@ public class IdentityAttestationView {
                 .claims(parseClaims(credential.getClaims(), objectMapper))
                 .lei(credential.getLei())
                 .txHash(txHash)
+                .blockTime(blockTime)
                 .credentialTxHash(credential.getTxHash())
                 .build();
     }

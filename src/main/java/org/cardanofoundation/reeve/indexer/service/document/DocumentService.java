@@ -92,7 +92,7 @@ public class DocumentService {
         }
         return credentialRepository.findById(entity.getIdentifier())
                 .map(cred -> IdentityAttestationView.from(entity.getIdentifier(), entity.getTxHash(),
-                        cred, credentialSchemaRegistry, objectMapper))
+                        entity.getBlockTime(), cred, credentialSchemaRegistry, objectMapper))
                 .map(List::of)
                 .orElseGet(List::of);
     }
