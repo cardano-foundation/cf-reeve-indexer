@@ -87,34 +87,49 @@ public class ReportService {
                 filterByPeriodPairs ? null : periods,
                 periodKeys, regimes, notStated, pageable);
 
-        return firstReports.map(report -> {
-            ReportView view;
-            try {
-                view = ReportView.fromEntity(report,
-                        organisationService.findById(report.getOrganisationId())
-                                .orElseThrow(),
-                        objectMapper);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+        return firstReports.map(this::toView);
+    }
 
-            // load all of the submissions of the same report (same version), each one may be signed by a different identity
-            var allReports = reportRepository.findByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVer(
-                    report.getOrganisationId(), report.getSubType(), report.getInterval(),
-                    report.getYear(), report.getPeriod(), report.getVer());
+    public List<ReportView> findByTxHash(String organisationId, String txHash) {
+        return reportRepository.findByTxHash(txHash)
+                .filter(report -> report.getOrganisationId().equals(organisationId))
+                .flatMap(report -> reportRepository
+                        .findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVerNotNullOrderByVerDescIdAsc(
+                                report.getOrganisationId(), report.getSubType(), report.getInterval(),
+                                report.getYear(), report.getPeriod())
+                        .filter(latest -> Objects.equals(latest.getVer(), report.getVer())))
+                .map(this::toView)
+                .stream()
+                .toList();
+    }
 
-            List<IdentityAttestationView> identities = allReports.stream()
-                    .filter(ReportEntity::isIdentityVerified)
-                    .map(r -> credentialRepository.findById(r.getIdentifier())
-                            .map(cred -> IdentityAttestationView.from(r.getIdentifier(), r.getTxHash(),
-                                    cred, credentialSchemaRegistry, objectMapper)))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .toList();
+    private ReportView toView(ReportEntity report) {
+        ReportView view;
+        try {
+            view = ReportView.fromEntity(report,
+                    organisationService.findById(report.getOrganisationId())
+                            .orElseThrow(),
+                    objectMapper);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
-            view.setIdentities(identities);
-            return view;
-        });
+        // load all of the submissions of the same report (same version), each one may be signed by a different identity
+        var allReports = reportRepository.findByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVer(
+                report.getOrganisationId(), report.getSubType(), report.getInterval(),
+                report.getYear(), report.getPeriod(), report.getVer());
+
+        List<IdentityAttestationView> identities = allReports.stream()
+                .filter(ReportEntity::isIdentityVerified)
+                .map(r -> credentialRepository.findById(r.getIdentifier())
+                        .map(cred -> IdentityAttestationView.from(r.getIdentifier(), r.getTxHash(),
+                                cred, credentialSchemaRegistry, objectMapper)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+
+        view.setIdentities(identities);
+        return view;
     }
 
     public Set<ReportEntity> findReportsInDateRange(String organisationId,

@@ -1,5 +1,7 @@
 package org.cardanofoundation.reeve.indexer.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -9,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,23 +22,51 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
+import org.cardanofoundation.reeve.indexer.model.domain.Interval;
+import org.cardanofoundation.reeve.indexer.model.domain.ReportType;
+import org.cardanofoundation.reeve.indexer.model.entity.OrganisationEntity;
+import org.cardanofoundation.reeve.indexer.model.entity.ReportEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
+import org.cardanofoundation.reeve.indexer.model.view.ReportView;
 
 class ReportServiceTest {
 
     private ReportRepository reportRepository;
+    private OrganisationService organisationService;
     private ReportService reportService;
 
     @BeforeEach
     void setUp() {
         reportRepository = mock(ReportRepository.class);
-        reportService = new ReportService(reportRepository, mock(OrganisationService.class),
+        organisationService = mock(OrganisationService.class);
+        reportService = new ReportService(reportRepository, organisationService,
                 new ObjectMapper(), Clock.systemUTC(), mock(CredentialRepository.class),
                 mock(CredentialSchemaRegistry.class));
         when(reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of()));
+        when(organisationService.findById("org-1"))
+                .thenReturn(Optional.of(OrganisationEntity.builder().id("org-1").currencyId("ISO_4217:CHF").build()));
+    }
+
+    private ReportEntity report(String txHash, String organisationId, long ver) {
+        return ReportEntity.builder()
+                .txHash(txHash)
+                .organisationId(organisationId)
+                .type(ReportType.V1)
+                .interval(Interval.MONTH)
+                .year(2023)
+                .period(3)
+                .subType("BALANCE_SHEET")
+                .ver(ver)
+                .fields("{}")
+                .build();
+    }
+
+    private void latestVersionIs(ReportEntity latest) {
+        when(reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVerNotNullOrderByVerDescIdAsc(
+                "org-1", "BALANCE_SHEET", Interval.MONTH, 2023, 3)).thenReturn(Optional.of(latest));
     }
 
     @Test
@@ -76,5 +107,50 @@ class ReportServiceTest {
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), eq(List.of("IFRS")), eq(true), any());
+    }
+
+    @Test
+    void unknownTxHashReturnsNoReport() {
+        when(reportRepository.findByTxHash("tx-unknown")).thenReturn(Optional.empty());
+
+        assertTrue(reportService.findByTxHash("org-1", "tx-unknown").isEmpty());
+    }
+
+    @Test
+    void txHashOfLatestVersionReturnsTheReport() {
+        ReportEntity latest = report("tx-1", "org-1", 2L);
+        when(reportRepository.findByTxHash("tx-1")).thenReturn(Optional.of(latest));
+        latestVersionIs(latest);
+
+        List<ReportView> reports = reportService.findByTxHash("org-1", "tx-1");
+
+        assertEquals(1, reports.size());
+        assertEquals("tx-1", reports.get(0).getTxHash());
+    }
+
+    @Test
+    void txHashOfAnotherSignatureReturnsTheListedReport() {
+        when(reportRepository.findByTxHash("tx-2")).thenReturn(Optional.of(report("tx-2", "org-1", 2L)));
+        latestVersionIs(report("tx-1", "org-1", 2L));
+
+        List<ReportView> reports = reportService.findByTxHash("org-1", "tx-2");
+
+        assertEquals(1, reports.size());
+        assertEquals("tx-1", reports.get(0).getTxHash());
+    }
+
+    @Test
+    void txHashOfSupersededVersionReturnsNoReport() {
+        when(reportRepository.findByTxHash("tx-old")).thenReturn(Optional.of(report("tx-old", "org-1", 1L)));
+        latestVersionIs(report("tx-1", "org-1", 2L));
+
+        assertTrue(reportService.findByTxHash("org-1", "tx-old").isEmpty());
+    }
+
+    @Test
+    void txHashOfAnotherOrganisationReturnsNoReport() {
+        when(reportRepository.findByTxHash("tx-other")).thenReturn(Optional.of(report("tx-other", "org-2", 2L)));
+
+        assertTrue(reportService.findByTxHash("org-1", "tx-other").isEmpty());
     }
 }

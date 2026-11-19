@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.validation.Valid;
@@ -13,9 +14,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,6 +79,24 @@ public class ReportController {
                                 reportSearchRequest.getAccountingRegimeNotStated(), pageable);
                 return ResponseEntity.ok().body(ReportResponseView.createSuccess(page.getContent(),
                                 page.getTotalElements()));
+        }
+
+        @Operation(description = "Get the report of a transaction, only if it is the latest version of a report of the organisation")
+        @GetMapping(value = "/by-tx/{txHash}", produces = "application/json")
+        public ResponseEntity<ReportResponseView> getReportByTxHash(@PathVariable String txHash,
+                        @RequestParam String organisationId) {
+                Optional<OrganisationEntity> orgO = organisationService.findById(organisationId);
+
+                if (orgO.isEmpty()) {
+                        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
+                                        "Unable to find Organisation by Id: %s".formatted(organisationId));
+                        problemDetail.setTitle("ORGANISATION_NOT_FOUND");
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                        .body(ReportResponseView.createFail(problemDetail));
+                }
+
+                List<ReportView> reports = reportService.findByTxHash(organisationId, txHash);
+                return ResponseEntity.ok().body(ReportResponseView.createSuccess(reports, reports.size()));
         }
 
 }

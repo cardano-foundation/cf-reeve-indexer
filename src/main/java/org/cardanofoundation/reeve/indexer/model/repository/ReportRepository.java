@@ -71,6 +71,9 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
     List<ReportEntity> findByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVer(
             String organisationId, String subType, Interval interval, Integer year, Integer period, Long ver);
 
+    Optional<ReportEntity> findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVerNotNullOrderByVerDescIdAsc(
+            String organisationId, String subType, Interval interval, Integer year, Integer period);
+
     @Query("""
             SELECT NEW org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView(r.organisationId, MAX(r.blockTime))
             FROM ReportEntity r
