@@ -10,14 +10,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -109,6 +113,28 @@ public class TransactionController {
 
             return ResponseEntity.ok().body(transactionService.findTransactionsByDateRange(
                 request.getOrganisationId(), request.getDateFrom(), request.getDateTo(), pageable));
+        }
+
+        @Tag(name = "Public", description = "Download transactions as CSV")
+        @PostMapping(value = "/download/{orgId}", produces = "text/csv", consumes = "application/json")
+        @Operation(description = "Download transaction items matching the search filters as CSV - Public interface", responses = {
+            @ApiResponse(responseCode = "200", description = "CSV file with the matching transaction items",
+                content = @Content(mediaType = "text/csv"))
+        })
+        public ResponseEntity<StreamingResponseBody> downloadTransactionsCsv(
+                @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+                @Valid @RequestBody TransactionsSearchRequest request) {
+
+            if (organisationService.findById(orgId).isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            request.setOrganisationId(orgId);
+
+            StreamingResponseBody body = outputStream -> transactionService.downloadCsvTransactions(request, outputStream);
+            return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"transactions_%s.csv\"".formatted(orgId))
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(body);
         }
 
 }

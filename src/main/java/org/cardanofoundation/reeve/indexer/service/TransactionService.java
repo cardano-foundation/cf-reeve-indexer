@@ -1,5 +1,11 @@
 package org.cardanofoundation.reeve.indexer.service;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +25,13 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Service;
 
+import com.opencsv.CSVWriter;
+
 import org.cardanofoundation.reeve.indexer.model.entity.TransactionEntity;
 import org.cardanofoundation.reeve.indexer.model.entity.TransactionItemEntity;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionItemRepository;
 import org.cardanofoundation.reeve.indexer.model.repository.TransactionRepository;
+import org.cardanofoundation.reeve.indexer.model.request.TransactionsSearchRequest;
 import org.cardanofoundation.reeve.indexer.model.view.ExtractionTransactionItemView;
 import org.cardanofoundation.reeve.indexer.model.view.ExtractionTransactionView;
 import org.cardanofoundation.reeve.indexer.model.view.TransactionFullView;
@@ -60,6 +69,29 @@ public class TransactionService {
         SORT_FIELD_MAPPING.put("counterPartyType", "i.counterPartyType");
         SORT_FIELD_MAPPING.put("counterPartyCustCode", "i.counterPartyCustCode");
     }
+
+    private static final int CSV_PAGE_SIZE = 1000;
+
+    private static final String[] CSV_HEADER = {"Transaction Number",
+            "Transaction Date",
+            "Transaction Type",
+            "Fx Rate",
+            "AmountLCY",
+            "AmountFCY",
+            "Event code",
+            "Event Name",
+            "Project Code",
+            "Project Name",
+            "Document Name",
+            "Currency",
+            "VAT Rate",
+            "VAT Code",
+            "Cost Center Code",
+            "Cost Center Name",
+            "Counterparty Code",
+            "Counterparty Type",
+            "Blockchain Hash",
+            "Block Time"};
 
     public Page<TransactionView> findAllTransactions(Pageable pageable) {
         Page<TransactionEntity> transactionPage = transactionRepository.findAll(pageable);
@@ -156,5 +188,71 @@ public class TransactionService {
                 .map(ExtractionTransactionItemView::fromEntity).toList();
         return ExtractionTransactionView.createSuccess(itemViews, transactionItems.getTotalElements(),
                 pageable.getPageNumber(), pageable.getPageSize());
+    }
+
+    public void downloadCsvTransactions(TransactionsSearchRequest request, OutputStream outputStream) {
+        try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+            CSVWriter csvWriter = new CSVWriter(writer);
+            csvWriter.writeNext(CSV_HEADER, false);
+            for (int page = 0; ; page++) {
+                ExtractionTransactionView result = findTransactionItems(
+                        request.getOrganisationId(), request.getTransactionInternalNumber(),
+                        request.getDateFrom(), request.getDateTo(), request.getEvents(),
+                        request.getCurrency(), request.getMinAmountLcy(), request.getMaxAmountLcy(),
+                        request.getMinAmountFcy(), request.getMaxAmountFcy(),
+                        request.getTransactionHashes(), request.getDocumentNumber(), request.getType(),
+                        request.getVatCustCode(), request.getCostCenterCustCode(),
+                        request.getProjectCustCode(), request.getCounterPartyType(),
+                        request.getCounterPartyCustCode(),
+                        PageRequest.of(page, CSV_PAGE_SIZE, Sort.by("id")));
+                if (!Boolean.TRUE.equals(result.getSuccess())) {
+                    break;
+                }
+                result.getTransactions().forEach(item -> csvWriter.writeNext(toCsvRow(item), false));
+                if ((long) (page + 1) * CSV_PAGE_SIZE >= result.getTotal()) {
+                    break;
+                }
+            }
+            csvWriter.flush();
+        } catch (Exception e) {
+            log.error("Error while writing transactions to CSV for orgId {}: {}",
+                    request.getOrganisationId(), e.getMessage(), e);
+        }
+    }
+
+    private static String[] toCsvRow(ExtractionTransactionItemView item) {
+        return new String[] {
+            csvText(item.getTransactionInternalNumber()),
+            item.getEntryDate() != null ? item.getEntryDate().toString() : "",
+            csvText(item.getTransactionType()),
+            csvText(item.getFxRate()),
+            csvNumber(item.getAmountLcy()),
+            csvNumber(item.getAmountFcy()),
+            csvText(item.getAccountEventCode()),
+            csvText(item.getAccountEventName()),
+            csvText(item.getProjectCustomerCode()),
+            csvText(item.getProjectName()),
+            csvText(item.getDocumentNumber()),
+            csvText(item.getDocumentCurrencyCustomerCode()),
+            csvText(item.getVatRate()),
+            csvText(item.getVatCustomerCode()),
+            csvText(item.getCostCenterCustomerCode()),
+            csvText(item.getCostCenterName()),
+            csvText(item.getCounterPartyCustCode()),
+            csvText(item.getCounterPartyType()),
+            csvText(item.getBlockChainHash()),
+            item.getBlockTime() != null ? Instant.ofEpochSecond(item.getBlockTime()).toString() : ""
+        };
+    }
+
+    private static String csvText(String value) {
+        if (value == null) {
+            return "";
+        }
+        return !value.isEmpty() && "=+-@\t\r".indexOf(value.charAt(0)) >= 0 ? "'" + value : value;
+    }
+
+    private static String csvNumber(BigDecimal value) {
+        return value != null ? value.stripTrailingZeros().toPlainString() : "";
     }
 }
