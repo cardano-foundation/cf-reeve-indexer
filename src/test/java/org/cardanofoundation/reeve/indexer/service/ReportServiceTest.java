@@ -9,8 +9,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.PageImpl;
@@ -66,6 +70,23 @@ class ReportServiceTest {
                 .ver(ver)
                 .fields("{}")
                 .build();
+    }
+
+    private ReportView reportView(Integer period, Map<String, Object> data) {
+        return ReportView.builder()
+                .subType("BALANCE_SHEET")
+                .intervalType("MONTH")
+                .year(2023)
+                .period(period)
+                .currency("ISO_4217:CHF")
+                .data(data)
+                .build();
+    }
+
+    private String[] csvLines(ReportView report) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        reportService.downloadReportAsCsv(report, out);
+        return out.toString(StandardCharsets.UTF_8).split("\n");
     }
 
     private void latestVersionIs(ReportEntity latest) {
@@ -187,5 +208,67 @@ class ReportServiceTest {
         assertEquals(100L, identities.get(0).getBlockTime());
         assertEquals("aid-auditor", identities.get(1).getAid());
         assertEquals(200L, identities.get(1).getBlockTime());
+    }
+
+    @Test
+    void csvHasOneRowPerLeafFieldWithItsDottedPathInReportOrder() {
+        Map<String, Object> assets = new LinkedHashMap<>();
+        assets.put("cash", "100");
+        assets.put("bank", "50");
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("assets", assets);
+        data.put("liabilities", "0");
+
+        String[] lines = csvLines(reportView(3, data));
+
+        assertEquals(4, lines.length);
+        assertEquals("Template name,Interval type,Period,Year,Field name,Amount,Currency", lines[0]);
+        assertEquals("BALANCE_SHEET,MONTH,3,2023,assets.cash,100,ISO_4217:CHF", lines[1]);
+        assertEquals("BALANCE_SHEET,MONTH,3,2023,assets.bank,50,ISO_4217:CHF", lines[2]);
+        assertEquals("BALANCE_SHEET,MONTH,3,2023,liabilities,0,ISO_4217:CHF", lines[3]);
+    }
+
+    @Test
+    void csvKeepsNegativeAmountsAsNumbersButEscapesFormulaText() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("loss", "-1500");
+        data.put("note", "=SUM(A1)");
+
+        String[] lines = csvLines(reportView(3, data));
+
+        assertEquals("BALANCE_SHEET,MONTH,3,2023,loss,-1500,ISO_4217:CHF", lines[1]);
+        assertEquals("BALANCE_SHEET,MONTH,3,2023,note,'=SUM(A1),ISO_4217:CHF", lines[2]);
+    }
+
+    @Test
+    void csvEscapesFieldNamesStartingWithAFormulaCharacter() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("=cmd", "1");
+
+        assertEquals("BALANCE_SHEET,MONTH,3,2023,'=cmd,1,ISO_4217:CHF", csvLines(reportView(3, data))[1]);
+    }
+
+    @Test
+    void csvLeavesThePeriodEmptyWhenTheReportHasNone() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("cash", "1");
+
+        assertEquals("BALANCE_SHEET,MONTH,,2023,cash,1,ISO_4217:CHF", csvLines(reportView(null, data))[1]);
+    }
+
+    @Test
+    void csvWritesNumericValuesUnchanged() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("cash", 5);
+
+        assertEquals("BALANCE_SHEET,MONTH,3,2023,cash,5,ISO_4217:CHF", csvLines(reportView(3, data))[1]);
+    }
+
+    @Test
+    void csvLeavesTheAmountEmptyWhenTheValueIsMissing() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("cash", null);
+
+        assertEquals("BALANCE_SHEET,MONTH,3,2023,cash,,ISO_4217:CHF", csvLines(reportView(3, data))[1]);
     }
 }

@@ -36,6 +36,7 @@ import org.cardanofoundation.reeve.indexer.model.view.ExtractionTransactionItemV
 import org.cardanofoundation.reeve.indexer.model.view.ExtractionTransactionView;
 import org.cardanofoundation.reeve.indexer.model.view.TransactionFullView;
 import org.cardanofoundation.reeve.indexer.model.view.TransactionView;
+import org.cardanofoundation.reeve.indexer.util.CsvSanitizer;
 
 @Service
 @RequiredArgsConstructor
@@ -222,34 +223,27 @@ public class TransactionService {
 
     private static String[] toCsvRow(ExtractionTransactionItemView item) {
         return new String[] {
-            csvText(item.getTransactionInternalNumber()),
+            CsvSanitizer.sanitize(item.getTransactionInternalNumber()),
             item.getEntryDate() != null ? item.getEntryDate().toString() : "",
-            csvText(item.getTransactionType()),
-            csvText(item.getFxRate()),
+            CsvSanitizer.sanitize(item.getTransactionType()),
+            CsvSanitizer.sanitize(item.getFxRate()),
             csvNumber(item.getAmountLcy()),
             csvNumber(item.getAmountFcy()),
-            csvText(item.getAccountEventCode()),
-            csvText(item.getAccountEventName()),
-            csvText(item.getProjectCustomerCode()),
-            csvText(item.getProjectName()),
-            csvText(item.getDocumentNumber()),
-            csvText(item.getDocumentCurrencyCustomerCode()),
-            csvText(item.getVatRate()),
-            csvText(item.getVatCustomerCode()),
-            csvText(item.getCostCenterCustomerCode()),
-            csvText(item.getCostCenterName()),
-            csvText(item.getCounterPartyCustCode()),
-            csvText(item.getCounterPartyType()),
-            csvText(item.getBlockChainHash()),
+            CsvSanitizer.sanitize(item.getAccountEventCode()),
+            CsvSanitizer.sanitize(item.getAccountEventName()),
+            CsvSanitizer.sanitize(item.getProjectCustomerCode()),
+            CsvSanitizer.sanitize(item.getProjectName()),
+            CsvSanitizer.sanitize(item.getDocumentNumber()),
+            CsvSanitizer.sanitize(item.getDocumentCurrencyCustomerCode()),
+            CsvSanitizer.sanitize(item.getVatRate()),
+            CsvSanitizer.sanitize(item.getVatCustomerCode()),
+            CsvSanitizer.sanitize(item.getCostCenterCustomerCode()),
+            CsvSanitizer.sanitize(item.getCostCenterName()),
+            CsvSanitizer.sanitize(item.getCounterPartyCustCode()),
+            CsvSanitizer.sanitize(item.getCounterPartyType()),
+            CsvSanitizer.sanitize(item.getBlockChainHash()),
             item.getBlockTime() != null ? Instant.ofEpochSecond(item.getBlockTime()).toString() : ""
         };
-    }
-
-    private static String csvText(String value) {
-        if (value == null) {
-            return "";
-        }
-        return !value.isEmpty() && "=+-@\t\r".indexOf(value.charAt(0)) >= 0 ? "'" + value : value;
     }
 
     private static String csvNumber(BigDecimal value) {

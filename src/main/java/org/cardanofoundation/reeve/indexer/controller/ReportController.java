@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -97,6 +100,31 @@ public class ReportController {
 
                 List<ReportView> reports = reportService.findByTxHash(organisationId, txHash);
                 return ResponseEntity.ok().body(ReportResponseView.createSuccess(reports, reports.size()));
+        }
+
+        @Operation(summary = "Download report as CSV", description = "Downloads the report data as a CSV file. Only available for published reports.")
+        @GetMapping(value = "/download", produces = "text/csv")
+        public ResponseEntity<StreamingResponseBody> downloadReports(@RequestParam(value = "organisationId", required = true)
+                                                                        @Parameter(
+                                                                                description = "Filter by organisation ID",
+                                                                                example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94"
+                                                                        ) String organisationId,
+                                                                    @RequestParam(value = "txHash", required = true) String txHash) {
+                if (organisationService.findById(organisationId).isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                }
+
+                List<ReportView> reports = reportService.findByTxHash(organisationId, txHash);
+                if (reports.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                }
+
+                StreamingResponseBody result = outputstream -> reportService.downloadReportAsCsv(reports.get(0), outputstream);
+
+                return ResponseEntity.ok()
+                                .header("Content-Disposition", "attachment; filename=reports_" + organisationId + ".csv")
+                                .contentType(MediaType.parseMediaType("text/csv"))
+                                .body(result);
         }
 
 }
