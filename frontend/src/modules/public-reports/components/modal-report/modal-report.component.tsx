@@ -1,8 +1,9 @@
-import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
+import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import dayjs from 'dayjs'
 import { ExportSquare } from 'iconsax-react'
-import { Fragment, useState } from 'react'
+import { useState } from 'react'
 
 import { Modal } from 'features/common'
 import { ICONSAX_NAMES, IconsaxIcon } from 'features/iconsax'
@@ -17,15 +18,15 @@ import { formatNumber } from 'libs/utils/format'
 import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
 import { formatAuditDate } from 'modules/public-events-auditor/utils/format.ts'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
+import { DetailRow } from 'modules/public-reports/components/DetailRow/DetailRow.component.tsx'
 import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestationKinds.ts'
 import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
-import { mockReportDates } from 'modules/public-reports/utils/mockReports.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload'
 
 import { REPORT_ACTIONS } from './modal-report.consts'
 import { getLegacyReportConfig } from './modal-report.legacy-configs'
 import { ActionsStyled, ComingSoonButtonStyled, ContentStyled } from './modal-report.styles'
-import type { ModalReportProps, ReportDetailsProps } from './modal-report.types'
+import type { ModalReportProps, ReportDetailRow, ReportDetailsProps } from './modal-report.types'
 import { computeNestedSum } from './modal-report.utils'
 
 const createSafeT = (t: any) => (id?: string, variables?: Record<string, any>, fallback?: string) => {
@@ -122,44 +123,51 @@ const ReportDetails = ({ report }: ReportDetailsProps) => {
     ? t({ id: 'verifyingLEI' })
     : !auditor
       ? t({ id: 'attestationPending' })
-      : t({ id: 'reportDateBy' }, { date: formatAuditDate(mockReportDates.auditedAt), name: auditorName || auditor.schemaName })
+      : t({ id: 'reportDateBy' }, { date: formatAuditDate(auditor.blockTime ? dayjs.unix(auditor.blockTime).format('YYYY-MM-DD') : null), name: auditorName || auditor.schemaName })
 
-  const rows = [
-    { label: t({ id: 'published' }), value: t({ id: 'reportDateBy' }, { date: formatAuditDate(mockReportDates.publishedAt), name: organisationName }) },
+  const rows: ReportDetailRow[] = [
+    {
+      label: t({ id: 'published' }),
+      value: t({ id: 'reportDateBy' }, { date: formatAuditDate(report.blockTime ? dayjs.unix(report.blockTime).format('YYYY-MM-DD') : null), name: organisationName })
+    },
     { label: t({ id: 'reportAudited' }), value: audited },
     { label: t({ id: 'reportIdentity' }), value: t({ id: identityId }) },
     {
       label: t({ id: 'onChainRecord' }),
       value: report.txHash ? (
-        <>
-          <Tooltip title={report.txHash}>
-            <span>{truncateHash(report.txHash, 4, 4)}</span>
-          </Tooltip>
-          <Tooltip title={t({ id: 'openInExplorer' })}>
-            <Link aria-label={t({ id: 'openInExplorer' })} color="inherit" display="flex" href={`${EXPLORER_TX_URL}${encodeURIComponent(report.txHash)}`} rel="noreferrer" target="_blank">
-              <ExportSquare size={20} variant="Outline" />
-            </Link>
-          </Tooltip>
-        </>
+        <Tooltip title={report.txHash}>
+          <span>{truncateHash(report.txHash, 4, 4)}</span>
+        </Tooltip>
       ) : (
         t({ id: 'none' })
+      ),
+      actions: report.txHash && (
+        <Tooltip title={t({ id: 'openInExplorer' })}>
+          <Link
+            aria-label={t({ id: 'openInExplorer' })}
+            color="inherit"
+            display="flex"
+            href={`${EXPLORER_TX_URL}${encodeURIComponent(report.txHash)}`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <ExportSquare size={20} variant="Outline" />
+          </Link>
+        </Tooltip>
       )
     }
   ]
 
   return (
-    <Box columnGap={3} component="dl" display="grid" gridTemplateColumns={{ xs: '1fr', sm: 'auto 1fr' }} m={0} rowGap={1} width="100%">
-      {rows.map(({ label, value }) => (
-        <Fragment key={label}>
-          <Typography color="text.primary" component="dt" variant="body1">
-            {label}
-          </Typography>
-          <Typography alignItems="center" color="text.primary" component="dd" display="flex" gap={1} justifyContent={{ xs: 'flex-start', sm: 'flex-end' }} m={0} mb={{ xs: 1, sm: 0 }} variant="body1">
+    <Stack spacing={1} width="100%">
+      {rows.map(({ label, value, actions }) => (
+        <DetailRow key={label} label={label} actions={actions}>
+          <Typography color="text.primary" variant="body1">
             {value}
           </Typography>
-        </Fragment>
+        </DetailRow>
       ))}
-    </Box>
+    </Stack>
   )
 }
 

@@ -44,6 +44,7 @@ export type ReportEntity = {
   period: number
   ver: number
   txHash: string
+  blockTime: number | null
   identities: IdentityAttestationView[]
   data: NestedMap
   accountingRegime: string | null 
@@ -63,6 +64,7 @@ export interface IdentityAttestationView {
   claims: Record<string, unknown> | null
   lei: string | null
   txHash?: string
+  blockTime?: number | null
   credentialTxHash?: string
 }
 

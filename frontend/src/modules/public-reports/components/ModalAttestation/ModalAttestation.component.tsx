@@ -12,35 +12,13 @@ import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { colors } from 'libs/ui-kit/theme/colors.ts'
 import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
+import { DetailRow } from 'modules/public-reports/components/DetailRow/DetailRow.component.tsx'
 import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestationKinds.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
 
 import { ATTESTATION_CONFIG, COPY_RESET_DELAY } from './ModalAttestation.consts'
 import { ActionButtonStyled, KindIconStyled, ModalContentStyled, MonoValueStyled } from './ModalAttestation.styles'
-import type {
-  AttestationCopyButtonProps,
-  AttestationDetailsProps,
-  AttestationExplorerLinkProps,
-  AttestationRowProps,
-  CopyState,
-  ModalAttestationProps
-} from './ModalAttestation.types'
-
-const AttestationRow = ({ label, children, actions }: AttestationRowProps) => (
-  <Box alignItems="center" display="flex" gap={2} py={2}>
-    <Box display="flex" flex="1 1 auto" flexDirection="column" gap={0.5} minWidth={0}>
-      <Typography color="text.secondary" variant="caption">
-        {label}
-      </Typography>
-      {children}
-    </Box>
-    {actions && (
-      <Box display="flex" flexShrink={0}>
-        {actions}
-      </Box>
-    )}
-  </Box>
-)
+import type { AttestationCopyButtonProps, AttestationDetailsProps, AttestationExplorerLinkProps, CopyState, ModalAttestationProps } from './ModalAttestation.types'
 
 const AttestationCopyButton = ({ label, value }: AttestationCopyButtonProps) => {
   const { t } = useTranslations()
@@ -104,8 +82,8 @@ const AttestationDetails = ({ identity }: AttestationDetailsProps) => {
   const attestedBy = [getLegalName(gleifData), gleifData?.legalAddress?.city, gleifData?.legalAddress?.country].filter(Boolean).join(', ')
 
   return (
-    <Stack divider={<Divider />} mt={2} sx={{ borderTop: 1, borderColor: 'divider' }}>
-      <AttestationRow label={t({ id: 'status' })}>
+    <Stack divider={<Divider />} mt={2} pt={2} spacing={2} sx={{ borderTop: 1, borderColor: 'divider' }}>
+      <DetailRow label={t({ id: 'status' })}>
         <Box alignItems="center" display="flex" gap={0.5}>
           {identity.identityVerified ? (
             <>
@@ -123,24 +101,24 @@ const AttestationDetails = ({ identity }: AttestationDetailsProps) => {
             </>
           )}
         </Box>
-      </AttestationRow>
+      </DetailRow>
       {identity.lei && (isGLEIFLoading || attestedBy) && (
-        <AttestationRow label={t({ id: 'attestedBy' })}>
+        <DetailRow label={t({ id: 'attestedBy' })}>
           <Typography fontWeight={600} variant="body1">
             {isGLEIFLoading ? t({ id: 'verifyingLEI' }) : attestedBy}
           </Typography>
-        </AttestationRow>
+        </DetailRow>
       )}
       {identity.lei && (
-        <AttestationRow label={t({ id: 'leiCode' })} actions={<AttestationCopyButton label={t({ id: 'leiCode' })} value={identity.lei} />}>
+        <DetailRow label={t({ id: 'leiCode' })} actions={<AttestationCopyButton label={t({ id: 'leiCode' })} value={identity.lei} />}>
           <MonoValueStyled variant="body2">{identity.lei}</MonoValueStyled>
           <Typography color="text.secondary" variant="body2">
             {t({ id: 'leiCodeDescription' })}
           </Typography>
-        </AttestationRow>
+        </DetailRow>
       )}
       {identity.txHash && (
-        <AttestationRow
+        <DetailRow
           label={t({ id: 'attestationTxHash' })}
           actions={
             <>
@@ -150,10 +128,10 @@ const AttestationDetails = ({ identity }: AttestationDetailsProps) => {
           }
         >
           <MonoValueStyled variant="body2">{identity.txHash}</MonoValueStyled>
-        </AttestationRow>
+        </DetailRow>
       )}
       {identity.credentialTxHash && (
-        <AttestationRow
+        <DetailRow
           label={t({ id: 'credentialTxHash' })}
           actions={
             <>
@@ -163,7 +141,7 @@ const AttestationDetails = ({ identity }: AttestationDetailsProps) => {
           }
         >
           <MonoValueStyled variant="body2">{identity.credentialTxHash}</MonoValueStyled>
-        </AttestationRow>
+        </DetailRow>
       )}
     </Stack>
   )
