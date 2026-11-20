@@ -310,7 +310,7 @@
   "publicTransactionsOverviewItems": "Items",
   "publicTransactionsOverviewLastUpdated": "Last updated",
   "publicTransactionsExport": "Export CSV",
-  "publicTransactionsExportComingSoon": "CSV export coming soon",
+  "publicTransactionsExportError": "Download failed. Please try again.",
   "publicTransactionsMobileUnavailableMessage": "Transactions are available on larger screens",
   "publicTransactionsMobileUnavailableHint": "Please switch to a desktop or tablet to explore the published transactions.",
   "onChainRecord": "On-chain record",

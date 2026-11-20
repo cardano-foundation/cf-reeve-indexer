@@ -10,13 +10,6 @@ export const ColumnsToggleButtonStyled = styled(ToggleButton)`
   }
 `
 
-export const ComingSoonToggleButtonStyled = styled(ToggleButton)`
-  && {
-    opacity: 0.5;
-    cursor: default;
-  }
-`
-
 export const SearchIconStyled = styled((props: Icon) => <IconsaxIcon name={ICONSAX_NAMES.SEARCH_NORMAL1} size={24} variant="Outline" {...props} />)(
   ({ theme }) => `
   && {

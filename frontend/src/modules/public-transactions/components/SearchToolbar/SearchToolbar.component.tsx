@@ -3,11 +3,12 @@ import { TableToolbar } from 'features/common'
 import { FieldDateCombobox, FieldText, FieldCombobox } from 'features/forms'
 import { Badge, Box, Divider, ToggleButton } from 'features/mui/base'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
+import { Snackbar, SnackbarType } from 'libs/ui-kit/components/Snackbar/Snackbar.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { DEFAULT_SEARCH_FILTERS_VALUES } from 'modules/public-transactions/components/SearchFilters/SearchFilters.consts'
 
-import { useSearchActionControls, useSearchQuickFilters, useSearchToolbar } from './SearchToolbar.hooks'
-import { ColumnsIconStyled, ColumnsToggleButtonStyled, ComingSoonToggleButtonStyled, ExportIconStyled, SearchIconStyled, SortIconStyled } from './SearchToolbar.styles'
+import { useSearchActionControls, useSearchExport, useSearchQuickFilters, useSearchToolbar } from './SearchToolbar.hooks'
+import { ColumnsIconStyled, ColumnsToggleButtonStyled, ExportIconStyled, SearchIconStyled, SortIconStyled } from './SearchToolbar.styles'
 import type { SearchQuickFiltersProps, SearchToolbarProps } from './SearchToolbar.types'
 
 const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
@@ -53,6 +54,7 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
 const SearchActionControls = ({ columnsPanelId, isColumnsOpen, onColumnsToggle }: SearchToolbarProps) => {
   const { t } = useTranslations()
   const { drawer, visibilityCount, hasFiltersTouched, onDrawerClose } = useSearchActionControls()
+  const { isExportPending, handleExport, isSnackbarVisible, handleSnackbarClose } = useSearchExport()
 
   const { type, onDrawerOpen, isDrawerOpen } = drawer
 
@@ -76,10 +78,10 @@ const SearchActionControls = ({ columnsPanelId, isColumnsOpen, onColumnsToggle }
             <ColumnsIconStyled />
           </ColumnsToggleButtonStyled>
         </Tooltip>
-        <Tooltip title={t({ id: 'publicTransactionsExportComingSoon' })} describeChild>
-          <ComingSoonToggleButtonStyled value="export" aria-label={t({ id: 'publicTransactionsExport' })} aria-disabled disableRipple>
+        <Tooltip title={t({ id: 'publicTransactionsExport' })}>
+          <ToggleButton value="export" aria-label={t({ id: 'publicTransactionsExport' })} aria-disabled={isExportPending} onClick={isExportPending ? undefined : handleExport}>
             <ExportIconStyled />
-          </ComingSoonToggleButtonStyled>
+          </ToggleButton>
         </Tooltip>
         {visibilityCount < totalCount && (
           <Badge color="success" variant="dot" invisible={isDrawerOpen || !hasFiltersTouched}>
@@ -89,6 +91,7 @@ const SearchActionControls = ({ columnsPanelId, isColumnsOpen, onColumnsToggle }
           </Badge>
         )}
       </Box>
+      <Snackbar open={isSnackbarVisible} message={t({ id: 'publicTransactionsExportError' })} type={SnackbarType.ERROR} onClose={handleSnackbarClose} />
     </TableToolbar.ActionControls>
   )
 }
