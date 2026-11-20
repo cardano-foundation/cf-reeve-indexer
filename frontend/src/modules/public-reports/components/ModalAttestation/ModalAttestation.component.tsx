@@ -10,13 +10,21 @@ import { Modal } from 'features/common'
 import { getLegalName, useGLEIFVerification } from 'libs/hooks/useGLEIFVerification'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
-import { verifyColors } from 'libs/ui-kit/theme/colors.ts'
+import { colors } from 'libs/ui-kit/theme/colors.ts'
 import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
+import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestationKinds.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
 
-import { ATTESTATION_CONFIG, ATTESTATION_KINDS, COPY_RESET_DELAY } from './ModalAttestation.consts'
+import { ATTESTATION_CONFIG, COPY_RESET_DELAY } from './ModalAttestation.consts'
 import { ActionButtonStyled, KindIconStyled, ModalContentStyled, MonoValueStyled } from './ModalAttestation.styles'
-import type { AttestationCopyButtonProps, AttestationExplorerLinkProps, AttestationRowProps, CopyState, ModalAttestationProps } from './ModalAttestation.types'
+import type {
+  AttestationCopyButtonProps,
+  AttestationDetailsProps,
+  AttestationExplorerLinkProps,
+  AttestationRowProps,
+  CopyState,
+  ModalAttestationProps
+} from './ModalAttestation.types'
 
 const AttestationRow = ({ label, children, actions }: AttestationRowProps) => (
   <Box alignItems="center" display="flex" gap={2} py={2}>
@@ -88,16 +96,86 @@ const AttestationExplorerLink = ({ value }: AttestationExplorerLinkProps) => {
   )
 }
 
+const AttestationDetails = ({ identity }: AttestationDetailsProps) => {
+  const { t } = useTranslations()
+
+  const { data: gleifData, isLoading: isGLEIFLoading } = useGLEIFVerification(identity.lei)
+
+  const attestedBy = [getLegalName(gleifData), gleifData?.legalAddress?.city, gleifData?.legalAddress?.country].filter(Boolean).join(', ')
+
+  return (
+    <Stack divider={<Divider />} mt={2} sx={{ borderTop: 1, borderColor: 'divider' }}>
+      <AttestationRow label={t({ id: 'status' })}>
+        <Box alignItems="center" display="flex" gap={0.5}>
+          {identity.identityVerified ? (
+            <>
+              <TickCircle aria-hidden color={colors.green[500]} size={20} variant="Bold" />
+              <Typography fontWeight={500} variant="body1">
+                {t({ id: 'verified' })}
+              </Typography>
+            </>
+          ) : (
+            <>
+              <CloseCircle aria-hidden size={20} variant="Outline" />
+              <Typography fontWeight={500} variant="body1">
+                {t({ id: 'notVerified' })}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </AttestationRow>
+      {identity.lei && (isGLEIFLoading || attestedBy) && (
+        <AttestationRow label={t({ id: 'attestedBy' })}>
+          <Typography fontWeight={600} variant="body1">
+            {isGLEIFLoading ? t({ id: 'verifyingLEI' }) : attestedBy}
+          </Typography>
+        </AttestationRow>
+      )}
+      {identity.lei && (
+        <AttestationRow label={t({ id: 'leiCode' })} actions={<AttestationCopyButton label={t({ id: 'leiCode' })} value={identity.lei} />}>
+          <MonoValueStyled variant="body2">{identity.lei}</MonoValueStyled>
+          <Typography color="text.secondary" variant="body2">
+            {t({ id: 'leiCodeDescription' })}
+          </Typography>
+        </AttestationRow>
+      )}
+      {identity.txHash && (
+        <AttestationRow
+          label={t({ id: 'attestationTxHash' })}
+          actions={
+            <>
+              <AttestationCopyButton label={t({ id: 'attestationTxHash' })} value={identity.txHash} />
+              <AttestationExplorerLink value={identity.txHash} />
+            </>
+          }
+        >
+          <MonoValueStyled variant="body2">{identity.txHash}</MonoValueStyled>
+        </AttestationRow>
+      )}
+      {identity.credentialTxHash && (
+        <AttestationRow
+          label={t({ id: 'credentialTxHash' })}
+          actions={
+            <>
+              <AttestationCopyButton label={t({ id: 'credentialTxHash' })} value={identity.credentialTxHash} />
+              <AttestationExplorerLink value={identity.credentialTxHash} />
+            </>
+          }
+        >
+          <MonoValueStyled variant="body2">{identity.credentialTxHash}</MonoValueStyled>
+        </AttestationRow>
+      )}
+    </Stack>
+  )
+}
+
 export const ModalAttestation = ({ report, kind, onClose }: ModalAttestationProps) => {
   const { t } = useTranslations()
 
-  const identity = report.identities?.[ATTESTATION_KINDS.indexOf(kind)]
-
-  const { data: gleifData, isLoading: isGLEIFLoading } = useGLEIFVerification(identity?.lei)
+  const { identities } = useAttestationKinds(report.identities)
+  const kindIdentities = identities[kind]
 
   const { icon: KindIcon, titleId, descriptionId } = ATTESTATION_CONFIG[kind]
-
-  const attestedBy = [getLegalName(gleifData), gleifData?.legalAddress?.city, gleifData?.legalAddress?.country].filter(Boolean).join(', ')
 
   return (
     <Modal maxWidth="sm" onClose={onClose} fullWidth isOpen>
@@ -106,7 +184,7 @@ export const ModalAttestation = ({ report, kind, onClose }: ModalAttestationProp
       </Modal.Header>
       <ModalContentStyled>
         <Box alignItems="center" display="flex" gap={1.5} mt={2}>
-          <KindIconStyled $isAvailable={Boolean(identity)}>
+          <KindIconStyled $isAvailable={kindIdentities.length > 0}>
             <KindIcon aria-hidden size={20} variant="Outline" />
           </KindIconStyled>
           <Box display="flex" flexDirection="column">
@@ -114,74 +192,13 @@ export const ModalAttestation = ({ report, kind, onClose }: ModalAttestationProp
               {t({ id: titleId })}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              {identity ? t({ id: descriptionId }) : t({ id: 'attestationPending' })}
+              {kindIdentities.length ? t({ id: descriptionId }) : t({ id: 'attestationPending' })}
             </Typography>
           </Box>
         </Box>
-        {identity && (
-          <Stack divider={<Divider />} mt={2} sx={{ borderTop: 1, borderColor: 'divider' }}>
-            <AttestationRow label={t({ id: 'status' })}>
-              <Box alignItems="center" display="flex" gap={0.5}>
-                {identity.identityVerified ? (
-                  <>
-                    <TickCircle aria-hidden color={verifyColors.blue[600]} size={20} variant="Bold" />
-                    <Typography color={verifyColors.blue[600]} fontWeight={500} variant="body1">
-                      {t({ id: 'verified' })}
-                    </Typography>
-                  </>
-                ) : (
-                  <>
-                    <CloseCircle aria-hidden size={20} variant="Outline" />
-                    <Typography fontWeight={500} variant="body1">
-                      {t({ id: 'notVerified' })}
-                    </Typography>
-                  </>
-                )}
-              </Box>
-            </AttestationRow>
-            {identity.lei && (isGLEIFLoading || attestedBy) && (
-              <AttestationRow label={t({ id: 'attestedBy' })}>
-                <Typography fontWeight={600} variant="body1">
-                  {isGLEIFLoading ? t({ id: 'verifyingLEI' }) : attestedBy}
-                </Typography>
-              </AttestationRow>
-            )}
-            {identity.lei && (
-              <AttestationRow label={t({ id: 'leiCode' })} actions={<AttestationCopyButton label={t({ id: 'leiCode' })} value={identity.lei} />}>
-                <MonoValueStyled variant="body2">{identity.lei}</MonoValueStyled>
-                <Typography color="text.secondary" variant="body2">
-                  {t({ id: 'leiCodeDescription' })}
-                </Typography>
-              </AttestationRow>
-            )}
-            {identity.txHash && (
-              <AttestationRow
-                label={t({ id: 'attestationTxHash' })}
-                actions={
-                  <>
-                    <AttestationCopyButton label={t({ id: 'attestationTxHash' })} value={identity.txHash} />
-                    <AttestationExplorerLink value={identity.txHash} />
-                  </>
-                }
-              >
-                <MonoValueStyled variant="body2">{identity.txHash}</MonoValueStyled>
-              </AttestationRow>
-            )}
-            {identity.credentialTxHash && (
-              <AttestationRow
-                label={t({ id: 'credentialTxHash' })}
-                actions={
-                  <>
-                    <AttestationCopyButton label={t({ id: 'credentialTxHash' })} value={identity.credentialTxHash} />
-                    <AttestationExplorerLink value={identity.credentialTxHash} />
-                  </>
-                }
-              >
-                <MonoValueStyled variant="body2">{identity.credentialTxHash}</MonoValueStyled>
-              </AttestationRow>
-            )}
-          </Stack>
-        )}
+        {kindIdentities.map((identity) => (
+          <AttestationDetails key={identity.txHash ?? identity.aid} identity={identity} />
+        ))}
       </ModalContentStyled>
     </Modal>
   )

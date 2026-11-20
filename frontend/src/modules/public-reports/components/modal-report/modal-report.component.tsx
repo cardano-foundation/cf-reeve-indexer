@@ -17,6 +17,7 @@ import { formatNumber } from 'libs/utils/format'
 import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
 import { formatAuditDate } from 'modules/public-events-auditor/utils/format.ts'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
+import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestationKinds.ts'
 import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
 import { mockReportDates } from 'modules/public-reports/utils/mockReports.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload'
@@ -97,16 +98,19 @@ const ReportDetails = ({ report }: ReportDetailsProps) => {
   const { t } = useTranslations()
   const organisationName = useSelectedOrganisationName()
 
-  const [publisher, auditor] = report.identities ?? []
+  const { identities, isLoading } = useAttestationKinds(report.identities)
+  const [publisher] = identities.organisation
+  const [auditor] = identities.auditor
 
-  const { data: auditorGleif, isLoading: isAuditorLoading } = useGLEIFVerification(auditor?.lei)
+  const { data: auditorGleif } = useGLEIFVerification(auditor?.lei)
   const auditorName = getLegalName(auditorGleif)
 
   const isPublisherVerified = Boolean(publisher?.identityVerified)
   const isAuditorVerified = Boolean(auditor?.identityVerified)
 
-  const identityId =
-    isPublisherVerified && isAuditorVerified
+  const identityId = isLoading
+    ? 'verifyingLEI'
+    : isPublisherVerified && isAuditorVerified
       ? 'reportIdentityBothVerified'
       : isPublisherVerified
         ? 'reportIdentityPublisherVerified'
@@ -114,10 +118,10 @@ const ReportDetails = ({ report }: ReportDetailsProps) => {
           ? 'reportIdentityAuditorVerified'
           : 'attestationPending'
 
-  const audited = !auditor
-    ? t({ id: 'attestationPending' })
-    : isAuditorLoading
-      ? t({ id: 'verifyingLEI' })
+  const audited = isLoading
+    ? t({ id: 'verifyingLEI' })
+    : !auditor
+      ? t({ id: 'attestationPending' })
       : t({ id: 'reportDateBy' }, { date: formatAuditDate(mockReportDates.auditedAt), name: auditorName || auditor.schemaName })
 
   const rows = [

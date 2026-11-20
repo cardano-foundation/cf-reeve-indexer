@@ -4,7 +4,7 @@ import { styled } from 'styled-components'
 
 import { Modal } from 'features/common'
 import { ButtonIcon } from 'libs/ui-kit/components/ButtonIcon/ButtonIcon.component.tsx'
-import { colors, verifyColors } from 'libs/ui-kit/theme/colors.ts'
+import { colors } from 'libs/ui-kit/theme/colors.ts'
 
 export const ModalContentStyled = styled(Modal.Content)`
   &&& {
@@ -27,8 +27,9 @@ export const KindIconStyled = styled(Box)<{ $isAvailable: boolean }>`
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    color: ${({ $isAvailable }) => ($isAvailable ? verifyColors.blue[600] : colors.neutral[600])};
-    background: ${({ theme, $isAvailable }) => ($isAvailable ? verifyColors.blue[50] : theme.palette.action.hover)};
+    color: ${({ $isAvailable }) => ($isAvailable ? colors.green[800] : colors.neutral[600])};
+    background: ${({ theme, $isAvailable }) => ($isAvailable ? colors.green[50] : theme.palette.action.hover)};
+    border: 1px solid ${({ $isAvailable }) => ($isAvailable ? colors.green[300] : 'transparent')};
   }
 `
 

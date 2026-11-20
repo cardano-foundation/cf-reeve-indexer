@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 
-import { ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { IdentityAttestationView, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 
 export type AttestationKind = 'organisation' | 'auditor'
 
@@ -19,6 +19,10 @@ export interface AttestationRowProps {
   label: string
   children: ReactNode
   actions?: ReactNode
+}
+
+export interface AttestationDetailsProps {
+  identity: IdentityAttestationView
 }
 
 export interface AttestationCopyButtonProps {

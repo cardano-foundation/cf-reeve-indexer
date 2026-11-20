@@ -16,12 +16,12 @@ import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
-import { AttestationButton } from 'modules/public-reports/components/AttestationButton/AttestationButton.component.tsx'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
 import { ModalAttestation } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.component.tsx'
-import { ATTESTATION_KINDS } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.consts'
 import type { SelectedAttestation } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.types'
+import { ReportAttestations } from 'modules/public-reports/components/ReportAttestations/ReportAttestations.component.tsx'
 import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
+import { useAttestationsLoading } from 'modules/public-reports/hooks/useAttestationKinds.ts'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
 
@@ -44,6 +44,8 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
   const theme = useTheme()
 
   const [selectedAttestation, setSelectedAttestation] = useState<SelectedAttestation | null>(null)
+
+  const isAttestationsLoading = useAttestationsLoading(data?.reports ?? [])
 
   const rowCountRef = useRef(data?.total || 0)
 
@@ -104,17 +106,11 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
           <span className="MuiDataGrid-columnHeaderTitle">{t({ id: 'attestation' })}</span>
         </Tooltip>
       ),
-      renderCell: ({ row }) => (
-        <Box alignItems="center" display="flex" height="100%">
-          {ATTESTATION_KINDS.map((kind, index) => (
-            <AttestationButton key={kind} kind={kind} isAvailable={Boolean(row.identities?.[index])} onClick={() => setSelectedAttestation({ report: row, kind })} />
-          ))}
-        </Box>
-      ),
+      renderCell: ({ row }) => <ReportAttestations report={row} isLoading={isAttestationsLoading} onSelect={(kind) => setSelectedAttestation({ report: row, kind })} />,
       hideable: false,
       sortable: false,
       flex: 1,
-      minWidth: 120
+      minWidth: 240
     },
     {
       field: 'txHash',
@@ -137,7 +133,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       hideable: false,
       sortable: true,
       flex: 1,
-      minWidth: 192
+      minWidth: 144
     },
     {
       field: 'actions',
