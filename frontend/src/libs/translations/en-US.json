@@ -305,7 +305,7 @@
   "publicTransactionsAboutAmounts": "<strong>Two amounts.</strong> The amount in the currency of the document (FCY) and the same amount in the publisher's reporting currency, {currency} (LCY), converted at the exchange rate shown.",
   "publicTransactionsAboutTypes": "<strong>Transaction types.</strong> VendorBill: a supplier invoice. VendorPayment: a payment to a supplier. Journal: a manual entry. FxRevaluation: an adjustment for exchange-rate changes.",
   "publicTransactionsOverviewPeriod": "Period published",
-  "publicTransactionsOverviewPeriodRange": "{from} to {to}",
+  "publicTransactionsOverviewPeriodRange": "{from} - {to}",
   "publicTransactionsOverviewTransactions": "Transactions",
   "publicTransactionsOverviewItems": "Items",
   "publicTransactionsOverviewLastUpdated": "Last updated",

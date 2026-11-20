@@ -18,6 +18,8 @@ import {
   GetOrganisationsResponse200,
   GetOrganisationTransactionNumbersRequest,
   GetOrganisationTransactionNumbersResponse200,
+  GetOrganisationTransactionsOverviewRequest,
+  GetOrganisationTransactionsOverviewResponse200,
   GetOrganisationTransactionTypesRequest,
   GetOrganisationTransactionTypesResponse200,
   GetOrganisationVatCodesRequest,
@@ -101,6 +103,14 @@ export const organisationApi = (baseUrl: string) => {
     return get<GetOrganisationProjectsResponse200>(`api/v1/organisations/${organisationId}/projects`)
   }
 
+  const getOrganisationTransactionsOverview = (request: GetOrganisationTransactionsOverviewRequest) => {
+    const {
+      parameters: { organisationId }
+    } = request
+
+    return get<GetOrganisationTransactionsOverviewResponse200>(`api/v1/organisations/${organisationId}/transactionsOverview`)
+  }
+
   const getOrganisationTransactionTypes = (request: GetOrganisationTransactionTypesRequest) => {
     const {
       parameters: { organisationId }
@@ -128,6 +138,7 @@ export const organisationApi = (baseUrl: string) => {
     getOrganisationEvents,
     getOrganisationInternalNumbers,
     getOrganisationProjects,
+    getOrganisationTransactionsOverview,
     getOrganisationTransactionTypes,
     getOrganisationVatCodes
   }

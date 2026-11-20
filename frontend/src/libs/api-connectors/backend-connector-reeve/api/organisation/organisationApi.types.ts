@@ -49,6 +49,14 @@ interface GetOrganisationTransactionNumbersRequestParameters {
 
 export type OrganisationTransactionNumberEntity = string
 
+export interface OrganisationTransactionsOverviewEntity {
+  periodFrom: string | null
+  periodTo: string | null
+  transactionsCount: number
+  itemsCount: number
+  lastUpdated: number | null
+}
+
 export type OrganisationTransactionTypeEntity = string
 
 export type OrganisationVatCodeEntity = string
@@ -90,6 +98,10 @@ export type GetOrganisationTransactionNumbersRequest = {
 }
 
 export type GetOrganisationTransactionNumbersResponse200 = OrganisationTransactionNumberEntity[]
+
+export type GetOrganisationTransactionsOverviewRequest = OrganisationEntityRequest
+
+export type GetOrganisationTransactionsOverviewResponse200 = OrganisationTransactionsOverviewEntity
 
 export type GetOrganisationTransactionTypesRequest = OrganisationEntityRequest
 
