@@ -14,6 +14,11 @@ export interface OrganisationEntity {
   tax_id_number: string
 }
 
+export interface OrganisationLastUpdatedEntity {
+  organisationId: string
+  lastUpdated: number
+}
+
 export type OrganisationCostCenterEntity = string
 
 export type OrganisationCounterpartyEntity = string
@@ -49,6 +54,8 @@ export type OrganisationTransactionTypeEntity = string
 export type OrganisationVatCodeEntity = string
 
 export type GetOrganisationsResponse200 = OrganisationEntity[]
+
+export type GetOrganisationsLastUpdatedResponse200 = OrganisationLastUpdatedEntity[]
 
 export type GetOrganisationCostCentersRequest = OrganisationEntityRequest
 

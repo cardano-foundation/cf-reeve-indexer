@@ -14,6 +14,7 @@ import {
   GetOrganisationEventsResponse200,
   GetOrganisationProjectsRequest,
   GetOrganisationProjectsResponse200,
+  GetOrganisationsLastUpdatedResponse200,
   GetOrganisationsResponse200,
   GetOrganisationTransactionNumbersRequest,
   GetOrganisationTransactionNumbersResponse200,
@@ -28,6 +29,10 @@ export const organisationApi = (baseUrl: string) => {
 
   const getOrganisations = ({ hasAuthorizationHeader = true }: { hasAuthorizationHeader?: boolean } = {}) => {
     return get<GetOrganisationsResponse200>(`api/v1/organisations`, null, !hasAuthorizationHeader ? { Authorization: '' } : undefined)
+  }
+
+  const getOrganisationsLastUpdated = () => {
+    return get<GetOrganisationsLastUpdatedResponse200>(`api/v1/organisations/lastUpdated`)
   }
 
   const getOrganisationCostCenters = (request: GetOrganisationCostCentersRequest) => {
@@ -114,6 +119,7 @@ export const organisationApi = (baseUrl: string) => {
 
   return {
     getOrganisations,
+    getOrganisationsLastUpdated,
     getOrganisationCostCenters,
     getOrganisationCounterparties,
     getOrganisationCounterpartyTypes,

@@ -9,7 +9,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { FieldText } from 'features/forms'
 import { Divider } from 'features/mui/base'
 import { useMediaQueries } from 'hooks'
-import { OrganisationEntity } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
+import { OrganisationEntity, OrganisationLastUpdatedEntity } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
 import { FieldSelect } from 'libs/form-kit/components/FieldSelect/FieldSelect.component.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { Alert } from 'libs/ui-kit/components/Alert/Alert.component.tsx'
@@ -39,6 +39,7 @@ import { OrganisationSort } from './LandingOrganisations.types'
 
 interface LandingOrganisationsProps {
   organisations: OrganisationEntity[] | null
+  organisationsLastUpdated: OrganisationLastUpdatedEntity[] | null
   isPending: boolean
   isError: boolean
   isCompact: boolean
@@ -75,7 +76,7 @@ const OrganisationCard = ({ id, name, lastUpdated, index }: { id: string; name: 
   )
 }
 
-export const LandingOrganisations = ({ organisations, isPending, isError, isCompact }: LandingOrganisationsProps) => {
+export const LandingOrganisations = ({ organisations, organisationsLastUpdated, isPending, isError, isCompact }: LandingOrganisationsProps) => {
   const { t } = useTranslations()
   const theme = useTheme()
   const { isMobile } = useMediaQueries()
@@ -83,9 +84,14 @@ export const LandingOrganisations = ({ organisations, isPending, isError, isComp
   const pageSize = isMobile ? ORGANISATIONS_PAGE_SIZE.MOBILE : ORGANISATIONS_PAGE_SIZE.DESKTOP
 
   const { filters } = useLandingOrganisationsFilters()
-  const { items, filteredCount, columns, visibleItems, currentPage, pageCount, handlePageChange } = useLandingOrganisations(organisations ?? [], filters.values, pageSize)
+  const { items, filteredCount, columns, visibleItems, currentPage, pageCount, handlePageChange } = useLandingOrganisations(
+    organisations ?? [],
+    organisationsLastUpdated ?? [],
+    filters.values,
+    pageSize
+  )
 
-  if (!organisations && (isPending || isError)) {
+  if ((!organisations || !organisationsLastUpdated) && (isPending || isError)) {
     return (
       <NoResultsStackStyled>
         <OrganisationRowStyled aria-hidden sx={{ visibility: 'hidden' }}>

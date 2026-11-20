@@ -8,9 +8,9 @@ import { Avatar } from 'libs/ui-kit/components/Avatar/Avatar.component.tsx'
 import { colors } from 'libs/ui-kit/theme/colors.ts'
 import { getInitials } from 'libs/utils/getInitials.ts'
 import { LandingSection } from 'modules/public-landing/components/LandingSection/LandingSection.component.tsx'
-import { LandingPartner } from 'modules/public-landing/utils/mockLanding.ts'
 
 import { PartnerLinkStyled, PartnerListStyled } from './LandingPartners.styles'
+import { LandingPartner } from './LandingPartners.types'
 
 interface LandingPartnersProps {
   partners: LandingPartner[]

@@ -1,10 +1,10 @@
+import dayjs from 'dayjs'
 import { useFormik } from 'formik'
 import { noop } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 
-import { OrganisationEntity } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
+import { OrganisationEntity, OrganisationLastUpdatedEntity } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
 import { getGridColumns } from 'modules/public-landing/utils/grid.ts'
-import { getMockOrganisationStats } from 'modules/public-landing/utils/mockLanding.ts'
 
 import { DEFAULT_LANDING_ORGANISATIONS_FILTERS_VALUES } from './LandingOrganisations.consts'
 import { LandingOrganisationsFiltersValues, OrganisationSort } from './LandingOrganisations.types'
@@ -25,14 +25,27 @@ export const useLandingOrganisationsFilters = () => {
   return { filters }
 }
 
-export const useLandingOrganisations = (organisations: OrganisationEntity[], { search, sort }: LandingOrganisationsFiltersValues, pageSize: number) => {
+export const useLandingOrganisations = (
+  organisations: OrganisationEntity[],
+  organisationsLastUpdated: OrganisationLastUpdatedEntity[],
+  { search, sort }: LandingOrganisationsFiltersValues,
+  pageSize: number
+) => {
   const [page, setPage] = useState(1)
 
   useEffect(() => {
     setPage(1)
   }, [search, sort, pageSize])
 
-  const items = useMemo(() => organisations.map((organisation) => ({ ...organisation, ...getMockOrganisationStats(organisation.id) })), [organisations])
+  const items = useMemo(() => {
+    const lastUpdatedById = new Map(organisationsLastUpdated.map(({ organisationId, lastUpdated }) => [organisationId, dayjs.unix(lastUpdated).toISOString()]))
+
+    return organisations.flatMap((organisation) => {
+      const lastUpdated = lastUpdatedById.get(organisation.id)
+
+      return lastUpdated ? [{ ...organisation, lastUpdated }] : []
+    })
+  }, [organisations, organisationsLastUpdated])
 
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase()
