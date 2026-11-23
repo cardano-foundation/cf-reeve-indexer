@@ -65,7 +65,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
     },
     {
       field: 'accountingRegime',
-      headerName: t({ id: 'accountingRegime' }),
+      headerName: t({ id: 'standard' }),
       renderCell: ({ row }) => <ChipAccountingRegime accountingRegime={row.accountingRegime} />,
       hideable: false,
       sortable: false,
