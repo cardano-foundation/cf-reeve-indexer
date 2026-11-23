@@ -32,8 +32,13 @@ export const useAttestationKinds = (identities: IdentityAttestationView[] | unde
 
   const isLoading = !organisationName || gleifQueries.some((query) => query.isLoading)
 
-  const isOrganisation = (identity: IdentityAttestationView) =>
-    !identity.lei || isSameOrganisationName(organisationName, getLegalName(gleifQueries[leis.indexOf(identity.lei)].data))
+  const isOrganisation = (identity: IdentityAttestationView) => {
+    if (!identity.lei) return true
+
+    const gleifData = gleifQueries[leis.indexOf(identity.lei)].data
+
+    return !gleifData || isSameOrganisationName(organisationName, getLegalName(gleifData))
+  }
 
   const identitiesByKind: Record<AttestationKind, IdentityAttestationView[]> = isLoading
     ? { organisation: [], auditor: [] }

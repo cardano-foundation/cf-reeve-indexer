@@ -18,7 +18,6 @@ import { Snackbar, SnackbarType } from 'libs/ui-kit/components/Snackbar/Snackbar
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber } from 'libs/utils/format'
 import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
-import { formatAuditDate } from 'modules/public-events-auditor/utils/format.ts'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
 import { DetailRow } from 'modules/public-reports/components/DetailRow/DetailRow.component.tsx'
 import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestationKinds.ts'
@@ -131,12 +130,12 @@ const ReportDetails = ({ report }: ReportDetailsProps) => {
     ? t({ id: 'verifyingLEI' })
     : !auditor
       ? t({ id: 'attestationPending' })
-      : t({ id: 'reportDateBy' }, { date: formatAuditDate(auditor.blockTime ? dayjs.unix(auditor.blockTime).format('YYYY-MM-DD') : null), name: auditorName || auditor.schemaName })
+      : t({ id: 'reportDateBy' }, { date: auditor.blockTime ? dayjs.unix(auditor.blockTime).format('DD/MM/YYYY') : '-', name: auditorName || auditor.schemaName })
 
   const rows: ReportDetailRow[] = [
     {
       label: t({ id: 'published' }),
-      value: t({ id: 'reportDateBy' }, { date: formatAuditDate(report.blockTime ? dayjs.unix(report.blockTime).format('YYYY-MM-DD') : null), name: organisationName })
+      value: t({ id: 'reportDateBy' }, { date: report.blockTime ? dayjs.unix(report.blockTime).format('DD/MM/YYYY') : '-', name: organisationName })
     },
     { label: t({ id: 'reportAudited' }), value: audited },
     { label: t({ id: 'reportIdentity' }), value: t({ id: identityId }) },

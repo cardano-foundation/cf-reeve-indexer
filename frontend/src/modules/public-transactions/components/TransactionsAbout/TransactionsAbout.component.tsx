@@ -5,11 +5,11 @@ import { ArrowDown2, ArrowUp2 } from 'iconsax-react'
 import { ReactNode, useEffect, useId, useState } from 'react'
 
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
-import { useSelectedOrganisationCurrency } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationCurrency.ts'
 import { getLocalStorageItem } from 'libs/storage-connectors/local-storage-connector/utils/getLocalStorageItem.ts'
 import { setLocalStorageItem } from 'libs/storage-connectors/local-storage-connector/utils/setLocalStorageItem.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonText } from 'libs/ui-kit/components/ButtonText/ButtonText.component.tsx'
+import { useSelectedOrganisationCurrency } from 'modules/public-transactions/hooks/useSelectedOrganisationCurrency.ts'
 
 import { ABOUT_STORAGE_KEY } from './TransactionsAbout.consts'
 import { AboutContentStyled, AboutHeaderStyled, AboutStyled } from './TransactionsAbout.styles'

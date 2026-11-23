@@ -10,7 +10,6 @@ import { MouseEvent, useId, useMemo, useRef, useState } from 'react'
 import { PostPublicTransactionsResponse200 } from 'libs/api-connectors/backend-connector-reeve/api/transactions/publicTransactionsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
-import { useSelectedOrganisationCurrency } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationCurrency.ts'
 import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { CellCodeDetails } from 'libs/ui-kit/components/CellCodeDetails/CellCodeDetails.component.tsx'
@@ -19,6 +18,7 @@ import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber, formatNumberPercentage } from 'libs/utils/format.ts'
 import { formatCurrency } from 'modules/public-reports/utils/format'
 import { SearchToolbar } from 'modules/public-transactions/components/SearchToolbar/SearchToolbar.component'
+import { useSelectedOrganisationCurrency } from 'modules/public-transactions/hooks/useSelectedOrganisationCurrency.ts'
 
 interface SearchedTransactionsProps {
   data: PostPublicTransactionsResponse200 | null

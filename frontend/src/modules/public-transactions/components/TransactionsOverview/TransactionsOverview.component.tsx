@@ -33,7 +33,7 @@ export const TransactionsOverview = () => {
     },
     { label: t({ id: 'publicTransactionsOverviewTransactions' }), value: formatCount(transactionsCount) },
     { label: t({ id: 'publicTransactionsOverviewItems' }), value: formatCount(itemsCount) },
-    { label: t({ id: 'publicTransactionsOverviewLastUpdated' }), value: formatAuditDate(lastUpdated ? dayjs.unix(lastUpdated).format('YYYY-MM-DD') : null) }
+    { label: t({ id: 'publicTransactionsOverviewLastUpdated' }), value: lastUpdated ? dayjs.unix(lastUpdated).format('DD/MM/YYYY') : '-' }
   ]
 
   return (

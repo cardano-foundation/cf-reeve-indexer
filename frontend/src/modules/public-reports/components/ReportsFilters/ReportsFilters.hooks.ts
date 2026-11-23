@@ -3,7 +3,8 @@ import { noop } from 'lodash'
 
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 import { useGetOrganisationAccountingRegimesModel } from 'libs/models/organisation-model/GetOrganisationAccountingRegimes/GetOrganisationAccountingRegimes.service'
-import { getAllReportPeriodOptions, getAllReportTypeOptions, getReportStandardOptions } from 'libs/utils/formFieldOptions'
+import { getAllReportPeriodOptions, getAllReportTypeOptions } from 'libs/utils/formFieldOptions'
+import { getReportStandardOptions } from 'modules/public-reports/utils/format'
 
 import { DEFAULT_REPORTS_FILTERS_VALUES } from './ReportsFilters.consts'
 

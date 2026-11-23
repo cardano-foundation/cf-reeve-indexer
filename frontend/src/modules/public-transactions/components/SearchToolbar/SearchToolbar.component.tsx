@@ -3,6 +3,7 @@ import { TableToolbar } from 'features/common'
 import { FieldDateCombobox, FieldText, FieldCombobox } from 'features/forms'
 import { Badge, Box, Divider, ToggleButton } from 'features/mui/base'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
+import { ButtonIcon } from 'libs/ui-kit/components/ButtonIcon/ButtonIcon.component.tsx'
 import { Snackbar, SnackbarType } from 'libs/ui-kit/components/Snackbar/Snackbar.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { DEFAULT_SEARCH_FILTERS_VALUES } from 'modules/public-transactions/components/SearchFilters/SearchFilters.consts'
@@ -79,9 +80,9 @@ const SearchActionControls = ({ columnsPanelId, isColumnsOpen, onColumnsToggle }
           </ColumnsToggleButtonStyled>
         </Tooltip>
         <Tooltip title={t({ id: 'publicTransactionsExport' })}>
-          <ToggleButton value="export" aria-label={t({ id: 'publicTransactionsExport' })} aria-disabled={isExportPending} onClick={isExportPending ? undefined : handleExport}>
+          <ButtonIcon variant="outlined" aria-label={t({ id: 'publicTransactionsExport' })} aria-disabled={isExportPending} onClick={isExportPending ? undefined : handleExport}>
             <ExportIconStyled />
-          </ToggleButton>
+          </ButtonIcon>
         </Tooltip>
         {visibilityCount < totalCount && (
           <Badge color="success" variant="dot" invisible={isDrawerOpen || !hasFiltersTouched}>
