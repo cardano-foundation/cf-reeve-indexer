@@ -122,7 +122,7 @@ public class ReportController {
                 StreamingResponseBody result = outputstream -> reportService.downloadReportAsCsv(reports.get(0), outputstream);
 
                 return ResponseEntity.ok()
-                                .header("Content-Disposition", "attachment; filename=reports_" + organisationId + ".csv")
+                                .header("Content-Disposition", "attachment; filename=\"reports_%s.csv\"".formatted(organisationId))
                                 .contentType(MediaType.parseMediaType("text/csv"))
                                 .body(result);
         }
