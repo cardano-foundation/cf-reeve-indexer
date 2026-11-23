@@ -5,7 +5,7 @@ RUN npm install
 COPY . ./
 RUN npm run build
 
-FROM dhi.io/nginx:1.30-alpine-dev AS frontend
+FROM dhi.io/nginx:1.31-alpine-dev AS frontend
 WORKDIR /app
 ARG VITE_VERSION="0.0.0"
 ENV VITE_VERSION $VITE_VERSION

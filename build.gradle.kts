@@ -8,7 +8,7 @@ plugins {
 
 group = "org.cardanofoundation"
 // x-release-please-start-version
-version = "1.6.0"
+version = "1.6.1"
 // x-release-please-end
 
 java {
@@ -34,8 +34,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("com.bloxbean.cardano:yaci-store-spring-boot-starter:0.1.4")
+    implementation("com.bloxbean.cardano:yaci-store-spring-boot-starter:0.1.7")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     // Jackson annotations are useful for the generated classes
     implementation("com.fasterxml.jackson.core:jackson-annotations")
@@ -51,10 +50,10 @@ dependencies {
     // NOTE: no tx-submission backend here on purpose. The indexer is a chain READER (yaci-store node
     // sync) and submits nothing — cardano-client-backend-blockfrost was added solely for the card
     // attestation's on-chain publish and was removed with it (2026-07-28 design).
-    implementation("com.bloxbean.cardano:yaci-store-metadata-spring-boot-starter:0.1.6")
-    implementation("com.bloxbean.cardano:yaci-store-utxo-spring-boot-starter:0.1.6")
-    implementation("com.bloxbean.cardano:yaci-store-script-spring-boot-starter:0.1.6")
-    implementation("com.bloxbean.cardano:yaci-store-assets-spring-boot-starter:0.1.6")
+    implementation("com.bloxbean.cardano:yaci-store-metadata-spring-boot-starter:0.1.7")
+    implementation("com.bloxbean.cardano:yaci-store-utxo-spring-boot-starter:0.1.7")
+    implementation("com.bloxbean.cardano:yaci-store-script-spring-boot-starter:0.1.7")
+    implementation("com.bloxbean.cardano:yaci-store-assets-spring-boot-starter:0.1.7")
     implementation("com.bloxbean.cardano:aiken-java-binding:0.1.0")
 
     // implementation("org.zalando:problem-spring-web-starter:0.29.1")

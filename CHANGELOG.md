@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.6.0...1.6.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* fixed pdf reader and file format and simplified the flow slightly ([59997f0](https://github.com/cardano-foundation/cf-reeve-indexer/commit/59997f0ab56463218959abe9510395db5cebe4cd))
+* nginx update ([#109](https://github.com/cardano-foundation/cf-reeve-indexer/issues/109)) ([8a2aa0a](https://github.com/cardano-foundation/cf-reeve-indexer/commit/8a2aa0a6369cd5dc1233f1b9bbd62cb484b35e46))
+
 ## [1.6.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.5.0...1.6.0) (2026-10-21)
 
 

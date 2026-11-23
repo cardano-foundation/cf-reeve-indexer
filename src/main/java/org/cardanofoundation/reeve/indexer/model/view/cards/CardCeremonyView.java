@@ -21,9 +21,9 @@ import org.cardanofoundation.reeve.indexer.model.entity.CardAttestationCeremonyE
  * never turns an otherwise-successful ceremony call into a 500; {@code null} when unavailable.
  *
  * <p>{@code card} is the exported, now-attested REEVE_KEY_CARD (its {@code attestation} block
- * populated), included ONLY once the ceremony reaches {@code ATTEST_ANCHORED} — the public wizard has
- * no operator credentials to call the gated {@code /{cardId}/export}, so this is how the holder
- * retrieves the attested card to import into the platform. {@code null} at every earlier state.
+ * populated), included ONLY once the ceremony reaches {@code ATTEST_ANCHORED} — this is how the
+ * wizard hands the holder the attested card to import into the platform, without a separate
+ * {@code /{cardId}/export} call. {@code null} at every earlier state.
  *
  * <p>{@code presentedCredential} is what the paired wallet handed over, for display — populated from
  * {@code CREDENTIAL_RECEIVED} onward, {@code null} before that. It is NOT a verification result; see

@@ -84,7 +84,7 @@ public class CardIssuanceService {
         return issuanceEnabled;
     }
 
-    /** Assembles the card and returns its wire JSON — the operator {@code /issue} entry point. */
+    /** Assembles the card and returns its wire JSON — the {@code /issue} entry point. */
     public JsonNode issue(JsonNode request) {
         return toCardJson(issueEntity(request));
     }

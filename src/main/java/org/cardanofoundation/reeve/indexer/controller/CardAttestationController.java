@@ -49,16 +49,11 @@ import org.cardanofoundation.reeve.indexer.service.card.issuance.CardIssuanceSer
  * (from {@link CardCeremonyService}), a malformed OOBI, or a transiently unreachable KERI agent —
  * produces a non-2xx response, via {@link CardAttestationExceptionHandler}.
  *
- * <p><b>SECURITY (deliberate choice, matching the card-issuance flow's own posture):</b> every
- * endpoint here is PUBLIC (no auth), UNLIKE the operator-gated {@code /api/v1/cards/issue}/{@code
- * /export}/{@code registry} (HTTP Basic, see {@code SecurityConfig}). The card-issuance frontend
- * this wizard extends is itself unauthenticated and fully client-side (see {@code
- * ViewCardIssuance.component.tsx}'s own comment: "there is no login and no network call to create a
- * card" — its only existing network call is the public {@code /status} probe) and has no operator
- * credentials to attach to a request; gating these ceremony endpoints the same way {@code /issue}
- * is gated would make the wizard undrivable from that frontend. {@code SecurityConfig} carries a
- * matching {@code permitAll} rule for exactly this controller's paths — see that class for the
- * reasoning in one place.
+ * <p><b>SECURITY:</b> every endpoint here is PUBLIC (no auth), like the rest of the indexer's API.
+ * The card-issuance frontend this wizard extends is itself unauthenticated and fully client-side
+ * (see {@code ViewCardIssuance.component.tsx}'s own comment: "there is no login and no network call
+ * to create a card" — its only existing network call is the public {@code /status} probe) and holds
+ * no credentials to attach to a request.
  */
 @RestController
 @RequestMapping("/api/v1/cards")
@@ -66,8 +61,7 @@ import org.cardanofoundation.reeve.indexer.service.card.issuance.CardIssuanceSer
 @Slf4j
 @Tag(name = "Card attestation ceremony",
         description = "Pair a Veridian wallet, present a credential, and attest an already-issued "
-                + "card, synchronously. Public — no operator auth, matching the card-issuance "
-                + "frontend's own unauthenticated posture.")
+                + "card, synchronously. Public — no auth, like the rest of the indexer's API.")
 public class CardAttestationController {
 
     private final CardCeremonyService ceremonyService;
@@ -81,7 +75,7 @@ public class CardAttestationController {
     @Operation(summary = "Register a card and open an attestation ceremony for it",
             description = "Takes the full client-built REEVE_KEY_CARD (the browser assembles it "
                     + "entirely client-side, so it has no server cardId yet): registers it in the "
-                    + "issued-card registry — same validation as the operator /issue path — then opens "
+                    + "issued-card registry — same validation as the /issue path — then opens "
                     + "a ceremony against the new cardId. 400 if the card is malformed or carries "
                     + "private-key material. The response's agentOobi lets the wizard render the "
                     + "pairing QR immediately.")
@@ -151,8 +145,8 @@ public class CardAttestationController {
     }
 
     /**
-     * The now-attested card, so the public wizard (which has no operator credentials for the gated
-     * {@code /{cardId}/export}) can hand the holder the card to import into the platform — but ONLY
+     * The now-attested card, so the wizard can hand the holder the card to import into the platform
+     * without a separate {@code /{cardId}/export} call — but ONLY
      * once {@link CardCeremonyState#ATTEST_ANCHORED}, when the {@code attestation} block has been
      * bound. {@code null} at every earlier state, and best-effort: a missing/failed export never turns
      * an otherwise-successful ceremony response into a 500.
