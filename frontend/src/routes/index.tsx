@@ -64,7 +64,7 @@ export const router = createBrowserRouter(
         <Route index element={<ViewPublicLanding />} />
         {/* NOTE: [LOB-2061] revoke dashboard route since it requires additional changes */}
         {/* <Route element={<ViewPublicDashboard />} path={ROUTES.PUBLIC_DASHBOARD} /> */}
-        {/* No ProtectedRoute: no org gate here - the backend enforces operator auth (HTTP Basic) on every card endpoint. */}
+        {/* No ProtectedRoute: card issuance is permissionless and every card endpoint is public. */}
         <Route element={<ViewCardIssuance />} path={ROUTES.CARD_ISSUANCE} />
         <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS} />
         <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS_WITH_ORG} />

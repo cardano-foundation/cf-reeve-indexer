@@ -63,11 +63,9 @@ indexer:
     max-batch-per-tick: ${VERIFICATION_MAX_BATCH_PER_TICK:200}
   issuance:
     # Card import is permissionless: the Indexer holds no issuer signing key and assembles
-    # UNSIGNED cards. This flag only toggles whether this deployment offers the assembly endpoint;
-    # the endpoint itself stays behind the operator HTTP Basic credentials below.
+    # UNSIGNED cards. This flag toggles whether this deployment registers cards at all (the public
+    # /issue endpoint and the attestation ceremony's card registration).
     enabled: ${ISSUANCE_ENABLED:true}
-    username: ${ISSUANCE_USERNAME:}
-    password: ${ISSUANCE_PASSWORD:}
 
 keri:
   enabled: false
