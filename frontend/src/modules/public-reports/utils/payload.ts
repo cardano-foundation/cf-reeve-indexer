@@ -1,8 +1,18 @@
 import dayjs from 'dayjs'
 
 import { GetPublicReportsRequestBody, IntervalType, ReportMonth, ReportQuarter } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types.ts'
+import { REPORT_STANDARD_NOT_STATED_VALUE } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.consts'
 import { ReportsFiltersValues } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.types'
 import { ReportsQuickFiltersValues } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.types'
+
+const getReportStandardPayload = (standards: string[]) => {
+  const accountingRegime = standards.filter((standard) => standard !== REPORT_STANDARD_NOT_STATED_VALUE)
+
+  return {
+    accountingRegime: accountingRegime.length ? accountingRegime : undefined,
+    accountingRegimeNotStated: standards.includes(REPORT_STANDARD_NOT_STATED_VALUE) || undefined
+  }
+}
 
 const getReportPeriodPayload = (periods: string[]) => {
   const yearAndTimeFramePeriods = periods.map((period) => period.split(/\s/g))
@@ -55,5 +65,6 @@ export const getReportPeriod = (intervalType: IntervalType, period: number, year
 export const mapSearchFiltersToRequestBody = (values: ReportsFiltersValues & ReportsQuickFiltersValues): Omit<GetPublicReportsRequestBody, 'organisationId'> => ({
   blockChainHash: values.search ? values.search : undefined,
   reportType: values.report.length ? values.report : undefined,
+  ...getReportStandardPayload(values.standard),
   ...(values.period.length ? getReportPeriodPayload(values.period) : { intervalType: undefined, period: undefined, year: undefined })
 })

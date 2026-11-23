@@ -19,6 +19,8 @@ export interface OrganisationLastUpdatedEntity {
   lastUpdated: number
 }
 
+export type OrganisationAccountingRegimeEntity = string
+
 export type OrganisationCostCenterEntity = string
 
 export type OrganisationCounterpartyEntity = string
@@ -64,6 +66,10 @@ export type OrganisationVatCodeEntity = string
 export type GetOrganisationsResponse200 = OrganisationEntity[]
 
 export type GetOrganisationsLastUpdatedResponse200 = OrganisationLastUpdatedEntity[]
+
+export type GetOrganisationAccountingRegimesRequest = OrganisationEntityRequest
+
+export type GetOrganisationAccountingRegimesResponse200 = OrganisationAccountingRegimeEntity[]
 
 export type GetOrganisationCostCentersRequest = OrganisationEntityRequest
 

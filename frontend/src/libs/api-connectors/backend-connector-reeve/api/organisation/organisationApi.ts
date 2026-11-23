@@ -1,5 +1,7 @@
 import { httpService } from 'libs/api-connectors/backend-connector-reeve/api/httpService.ts'
 import {
+  GetOrganisationAccountingRegimesRequest,
+  GetOrganisationAccountingRegimesResponse200,
   GetOrganisationCostCentersRequest,
   GetOrganisationCostCentersResponse200,
   GetOrganisationCounterpartiesRequest,
@@ -35,6 +37,14 @@ export const organisationApi = (baseUrl: string) => {
 
   const getOrganisationsLastUpdated = () => {
     return get<GetOrganisationsLastUpdatedResponse200>(`api/v1/organisations/lastUpdated`)
+  }
+
+  const getOrganisationAccountingRegimes = (request: GetOrganisationAccountingRegimesRequest) => {
+    const {
+      parameters: { organisationId }
+    } = request
+
+    return get<GetOrganisationAccountingRegimesResponse200>(`api/v1/organisations/${organisationId}/accountingRegime`)
   }
 
   const getOrganisationCostCenters = (request: GetOrganisationCostCentersRequest) => {
@@ -130,6 +140,7 @@ export const organisationApi = (baseUrl: string) => {
   return {
     getOrganisations,
     getOrganisationsLastUpdated,
+    getOrganisationAccountingRegimes,
     getOrganisationCostCenters,
     getOrganisationCounterparties,
     getOrganisationCounterpartyTypes,

@@ -1,15 +1,21 @@
 import { useFormik } from 'formik'
 import { noop } from 'lodash'
 
-import { ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
+import { useGetOrganisationAccountingRegimesModel } from 'libs/models/organisation-model/GetOrganisationAccountingRegimes/GetOrganisationAccountingRegimes.service'
 import { getAllReportPeriodOptions, getAllReportTypeOptions, getReportStandardOptions } from 'libs/utils/formFieldOptions'
 
 import { DEFAULT_REPORTS_FILTERS_VALUES } from './ReportsFilters.consts'
 
-export const useReportsFiltersOptions = (reports?: ReportEntity[] | null) => {
+export const useReportsFiltersOptions = () => {
+  const { selectedOrganisation } = useLayoutPublicContext()
+  const isOrganisationSelected = Boolean(selectedOrganisation)
+
+  const { accountingRegimes } = useGetOrganisationAccountingRegimesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+
   const periodOptions = getAllReportPeriodOptions()
   const reportOptions = getAllReportTypeOptions()
-  const standardOptions = getReportStandardOptions(reports)
+  const standardOptions = getReportStandardOptions(accountingRegimes)
 
   return { periodOptions, reportOptions, standardOptions }
 }

@@ -81,6 +81,8 @@ export interface GetPublicReportsRequestBody {
   blockChainHash?: string
   year?: number[]
   period?: number[]
+  accountingRegime?: string[]
+  accountingRegimeNotStated?: boolean
 }
 
 export interface GetPublicReportsRequest {
