@@ -30,9 +30,9 @@ export const LandingHero = ({ onFaqClick }: LandingHeroProps) => {
   const { isMobile } = useMediaQueries()
 
   const steps = [
-    { icon: Buliding, label: t({ id: 'landingStepFind' }), background: colors.blue[300] },
-    { icon: DocumentText, label: t({ id: 'landingStepRead' }), background: colors.green[300] },
-    { icon: ShieldTick, label: t({ id: 'landingStepVerify' }), background: colors.orange[300] }
+    { icon: Buliding, label: t({ id: 'landingStepFind' }), background: colors.blue[400] },
+    { icon: DocumentText, label: t({ id: 'landingStepRead' }), background: colors.green[400] },
+    { icon: ShieldTick, label: t({ id: 'landingStepVerify' }), background: colors.orange[400] }
   ]
 
   return (
