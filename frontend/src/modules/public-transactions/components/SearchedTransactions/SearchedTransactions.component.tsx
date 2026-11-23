@@ -129,6 +129,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
     {
       field: 'amountLcy',
       headerName: t({ id: 'amountReportingCurrency' }, { currency: organisationCurrency }),
+      valueGetter: (value, row) => value ?? (row.documentCurrencyCustomerCode && formatCurrency(row.documentCurrencyCustomerCode) === organisationCurrency ? row.amountFcy : null),
       valueFormatter: (value) => value ? formatNumber(value) : null,
       align: 'right',
       headerAlign: 'right',
@@ -212,7 +213,7 @@ export const SearchedTransactions = ({ data, pagination, sorting, hasFiltersSele
       </DataGridContainer.Toolbar>
       <DataGridContainer.Table
         apiRef={apiRef}
-        sx={{ '--DataGrid-overlayHeight': '20rem' }}
+        sx={{ '--DataGrid-overlayHeight': '20rem', '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'normal' } }}
         autoHeight
         initialState={{
           columns: {

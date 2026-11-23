@@ -58,4 +58,7 @@ public class ReportSearchRequest {
 
     @Schema(description = "Also include reports without a stated accounting standard")
     private Boolean accountingRegimeNotStated;
+
+    @Schema(description = "Only include reports with at least one verified identity attestation")
+    private Boolean attestedOnly;
 }

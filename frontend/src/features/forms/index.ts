@@ -1,3 +1,6 @@
+export { FieldCheckbox } from './field-checkbox/field-checkbox.component'
+export type { FieldCheckboxProps } from './field-checkbox/field-checkbox.types'
+
 export { FieldCombobox } from './field-combobox/field-combobox.component'
 export type { FieldComboboxProps } from './field-combobox/field-combobox.types'
 

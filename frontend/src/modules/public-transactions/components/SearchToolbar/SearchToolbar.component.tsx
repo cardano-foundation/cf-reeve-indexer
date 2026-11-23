@@ -34,8 +34,11 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
         </TableToolbar.QuickFilters.Field>
       </TableToolbar.QuickFilters.FieldGroup>
       <TableToolbar.QuickFilters.Field>
-        <FieldCombobox 
-          label={t({ id: 'transactionNumber' })} 
+        <FieldCombobox label={t({ id: 'transactionType' })} limitTags={1} name="transactionType" options={transactionTypeOptions} multiple />
+      </TableToolbar.QuickFilters.Field>
+      <TableToolbar.QuickFilters.Field>
+        <FieldCombobox
+          label={t({ id: 'transactionNumber' })}
           limitTags={1} name="transactionNumber" 
           options={transactionNumberOptions} 
           multiple 
@@ -44,9 +47,6 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
           onInputChange={(_event, value, reason) => { 
             if (reason !== 'reset') setTransactionNumberSearchTerm(value) }} 
           filterOptions={(x) => x} />
-      </TableToolbar.QuickFilters.Field>
-      <TableToolbar.QuickFilters.Field>
-        <FieldCombobox label={t({ id: 'transactionType' })} limitTags={1} name="transactionType" options={transactionTypeOptions} multiple />
       </TableToolbar.QuickFilters.Field>
     </TableToolbar.QuickFilters>
   )

@@ -3,6 +3,7 @@ import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import { GridColDef } from '@mui/x-data-grid'
+import dayjs from 'dayjs'
 import { ExportSquare } from 'iconsax-react'
 import { useMemo, useRef, useState } from 'react'
 
@@ -132,6 +133,15 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
         ),
       hideable: false,
       sortable: true,
+      flex: 1,
+      minWidth: 144
+    },
+    {
+      field: 'blockTime',
+      headerName: t({ id: 'published' }),
+      valueFormatter: (value) => (value ? dayjs.unix(value).format('DD/MM/YYYY') : '-'),
+      hideable: false,
+      sortable: false,
       flex: 1,
       minWidth: 144
     },

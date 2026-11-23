@@ -53,7 +53,7 @@ public class ReportService {
 
     public Page<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency,
             List<String> reportTypes, List<String> intervalTypes, List<Integer> years, List<Integer> periods,
-            List<String> accountingRegimes, Boolean accountingRegimeNotStated, Pageable pageable) {
+            List<String> accountingRegimes, Boolean accountingRegimeNotStated, Boolean attestedOnly, Pageable pageable) {
         List<Interval> intervals = intervalTypes != null ?
             intervalTypes.stream()
                 .map(Interval::valueOf)
@@ -68,6 +68,7 @@ public class ReportService {
                 : null;
         List<String> regimes = accountingRegimes == null || accountingRegimes.isEmpty() ? null : accountingRegimes;
         Boolean notStated = Boolean.TRUE.equals(accountingRegimeNotStated) ? true : null;
+        Boolean attested = Boolean.TRUE.equals(attestedOnly) ? true : null;
 
         // That's a workaround to make sure that if the sorting contains period, we also sort by year and interval before
         // because period is not unique without them, so we need to make sure that the sorting is consistent with the way we group the reports later
@@ -93,7 +94,7 @@ public class ReportService {
                 filterByPeriodPairs ? null : intervals,
                 filterByPeriodPairs ? null : years,
                 filterByPeriodPairs ? null : periods,
-                periodKeys, regimes, notStated, pageable);
+                periodKeys, regimes, notStated, attested, pageable);
 
         return firstReports.map(this::toView);
     }

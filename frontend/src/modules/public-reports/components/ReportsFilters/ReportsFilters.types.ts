@@ -4,6 +4,7 @@ export interface ReportsFiltersValues extends Record<string, unknown> {
   report: string[]
   period: string[]
   standard: string[]
+  attestedOnly: boolean
 }
 
 export interface ReportsFiltersProps {

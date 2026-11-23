@@ -79,7 +79,8 @@ public class ReportController {
                                 reportSearchRequest.getYear(),
                                 reportSearchRequest.getPeriod(),
                                 reportSearchRequest.getAccountingRegime(),
-                                reportSearchRequest.getAccountingRegimeNotStated(), pageable);
+                                reportSearchRequest.getAccountingRegimeNotStated(),
+                                reportSearchRequest.getAttestedOnly(), pageable);
                 return ResponseEntity.ok().body(ReportResponseView.createSuccess(page.getContent(),
                                 page.getTotalElements()));
         }

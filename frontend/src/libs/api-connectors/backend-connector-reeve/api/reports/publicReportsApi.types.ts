@@ -83,6 +83,7 @@ export interface GetPublicReportsRequestBody {
   period?: number[]
   accountingRegime?: string[]
   accountingRegimeNotStated?: boolean
+  attestedOnly?: boolean
 }
 
 export interface GetPublicReportsRequest {

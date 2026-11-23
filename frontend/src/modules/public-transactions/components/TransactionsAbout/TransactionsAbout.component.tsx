@@ -1,14 +1,17 @@
 import { useMediaQuery } from '@mui/material'
 import Collapse from '@mui/material/Collapse'
+import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import { ArrowDown2, ArrowUp2 } from 'iconsax-react'
 import { ReactNode, useEffect, useId, useState } from 'react'
 
+import { useModal } from 'features/common'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { getLocalStorageItem } from 'libs/storage-connectors/local-storage-connector/utils/getLocalStorageItem.ts'
 import { setLocalStorageItem } from 'libs/storage-connectors/local-storage-connector/utils/setLocalStorageItem.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonText } from 'libs/ui-kit/components/ButtonText/ButtonText.component.tsx'
+import { ModalTransactionTypes } from 'modules/public-transactions/components/ModalTransactionTypes/ModalTransactionTypes.component.tsx'
 import { useSelectedOrganisationCurrency } from 'modules/public-transactions/hooks/useSelectedOrganisationCurrency.ts'
 
 import { ABOUT_STORAGE_KEY } from './TransactionsAbout.consts'
@@ -28,6 +31,7 @@ export const TransactionsAbout = () => {
   const { isDrawerOpen } = useLayoutPublicContext()
   const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const [isOpen, setIsOpen] = useState<boolean>(getInitialIsOpen)
+  const { handleModalOpen, handleModalClose, isOpen: isTypesModalOpen } = useModal()
 
   useEffect(() => {
     if (isDrawerOpen) setIsOpen(false)
@@ -50,7 +54,17 @@ export const TransactionsAbout = () => {
     t({ id: 'publicTransactionsAboutItems' }, { strong }),
     t({ id: 'publicTransactionsAboutOnChainRecord' }, { strong }),
     t({ id: 'publicTransactionsAboutAmounts' }, { strong, currency }),
-    t({ id: 'publicTransactionsAboutTypes' }, { strong })
+    t(
+      { id: 'publicTransactionsAboutTypes' },
+      {
+        strong,
+        link: (chunks) => (
+          <Link component="button" type="button" onClick={handleModalOpen} underline="always" variant="body2" sx={{ verticalAlign: 'baseline' }}>
+            {chunks}
+          </Link>
+        )
+      }
+    )
   ]
 
   return (
@@ -72,6 +86,7 @@ export const TransactionsAbout = () => {
           ))}
         </AboutContentStyled>
       </Collapse>
+      <ModalTransactionTypes isOpen={isTypesModalOpen} onClose={handleModalClose} />
     </AboutStyled>
   )
 }

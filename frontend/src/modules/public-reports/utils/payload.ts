@@ -66,5 +66,6 @@ export const mapSearchFiltersToRequestBody = (values: ReportsFiltersValues & Rep
   blockChainHash: values.search ? values.search : undefined,
   reportType: values.report.length ? values.report : undefined,
   ...getReportStandardPayload(values.standard),
+  attestedOnly: values.attestedOnly || undefined,
   ...(values.period.length ? getReportPeriodPayload(values.period) : { intervalType: undefined, period: undefined, year: undefined })
 })

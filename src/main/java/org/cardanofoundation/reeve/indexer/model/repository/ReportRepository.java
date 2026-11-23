@@ -30,6 +30,15 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
                 OR (:accountingRegimeNotStated = true AND (r.accountingRegime IS NULL
                     OR TRIM(r.accountingRegime) = ''
                     OR LOWER(TRIM(r.accountingRegime)) = 'not applicable')))
+            AND (:attestedOnly IS NULL OR EXISTS (SELECT attested.id FROM ReportEntity attested
+                WHERE attested.organisationId = r.organisationId
+                AND attested.subType = r.subType
+                AND attested.interval = r.interval
+                AND attested.year = r.year
+                AND attested.period = r.period
+                AND attested.ver = r.ver
+                AND attested.identityVerified = true
+                AND EXISTS (SELECT c.prefixId FROM CredentialEntity c WHERE c.prefixId = attested.identifier)))
             AND (:blockChainHash IS NULL OR LOWER(r.txHash) LIKE :blockChainHash)
             AND (:currency IS NULL OR o.currencyId = :currency)
             AND (r.id in (SELECT MIN(sub.id) FROM ReportEntity sub
@@ -52,6 +61,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             @Param("periodKeys") List<String> periodKeys,
             @Param("accountingRegimes") List<String> accountingRegimes,
             @Param("accountingRegimeNotStated") Boolean accountingRegimeNotStated,
+            @Param("attestedOnly") Boolean attestedOnly,
             Pageable pageable);
 
     @Query("""

@@ -52,7 +52,7 @@ class ReportServiceTest {
                 new ObjectMapper(), Clock.systemUTC(), credentialRepository,
                 mock(CredentialSchemaRegistry.class));
         when(reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of()));
         when(organisationService.findById("org-1"))
                 .thenReturn(Optional.of(OrganisationEntity.builder().id("org-1").currencyId("ISO_4217:CHF").build()));
@@ -97,41 +97,61 @@ class ReportServiceTest {
     @Test
     void periodsAreMatchedAsPairsWhenAllThreeListsAreGiven() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                List.of("MONTH", "YEAR"), List.of(2024, 2023), List.of(3, 1), null, null, PageRequest.of(0, 10));
+                List.of("MONTH", "YEAR"), List.of(2024, 2023), List.of(3, 1), null, null, null, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-                eq(List.of("MONTH-2024-3", "YEAR-2023-1")), isNull(), isNull(), any());
+                eq(List.of("MONTH-2024-3", "YEAR-2023-1")), isNull(), isNull(), isNull(), any());
     }
 
     @Test
     void periodListsStayIndependentWhenNotAllThreeAreGiven() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                null, List.of(2024), null, null, null, PageRequest.of(0, 10));
+                null, List.of(2024), null, null, null, null, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), eq(List.of(2024)), isNull(),
-                isNull(), isNull(), isNull(), any());
+                isNull(), isNull(), isNull(), isNull(), any());
     }
 
     @Test
     void emptyAccountingRegimeFilterIsNotApplied() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                null, null, null, List.of(), false, PageRequest.of(0, 10));
+                null, null, null, List.of(), false, null, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), any());
+                isNull(), isNull(), isNull(), isNull(), any());
     }
 
     @Test
     void accountingRegimeFilterIsPassedWhenSet() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                null, null, null, List.of("IFRS"), true, PageRequest.of(0, 10));
+                null, null, null, List.of("IFRS"), true, null, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), eq(List.of("IFRS")), eq(true), any());
+                isNull(), eq(List.of("IFRS")), eq(true), isNull(), any());
+    }
+
+    @Test
+    void attestedFilterIsNotAppliedWhenFalse() {
+        reportService.findAllByTypeAndPeriod("org-1", null, null, null,
+                null, null, null, null, null, false, PageRequest.of(0, 10));
+
+        verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+                eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull(), isNull(), isNull(), any());
+    }
+
+    @Test
+    void attestedFilterIsPassedWhenSet() {
+        reportService.findAllByTypeAndPeriod("org-1", null, null, null,
+                null, null, null, null, null, true, PageRequest.of(0, 10));
+
+        verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+                eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull(), isNull(), eq(true), any());
     }
 
     @Test
