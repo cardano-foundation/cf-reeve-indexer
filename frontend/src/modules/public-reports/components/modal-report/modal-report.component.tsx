@@ -2,7 +2,7 @@ import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import dayjs from 'dayjs'
-import { ExportSquare } from 'iconsax-react'
+import { Copy, DocumentDownload, ExportSquare } from 'iconsax-react'
 import { useState } from 'react'
 
 import { Modal } from 'features/common'
@@ -13,6 +13,8 @@ import { truncateHash } from 'libs/documents-kit/utils/format.ts'
 import { getLegalName, useGLEIFVerification } from 'libs/hooks/useGLEIFVerification'
 import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
+import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
+import { Snackbar, SnackbarType } from 'libs/ui-kit/components/Snackbar/Snackbar.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber } from 'libs/utils/format'
 import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
@@ -23,9 +25,9 @@ import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestation
 import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
 import { getReportPeriod } from 'modules/public-reports/utils/payload'
 
-import { REPORT_ACTIONS } from './modal-report.consts'
+import { useModalReportDownload } from './modal-report.hooks'
 import { getLegacyReportConfig } from './modal-report.legacy-configs'
-import { ActionsStyled, ComingSoonButtonStyled, ContentStyled } from './modal-report.styles'
+import { ActionsStyled, ContentStyled } from './modal-report.styles'
 import type { ModalReportProps, ReportDetailRow, ReportDetailsProps } from './modal-report.types'
 import { computeNestedSum } from './modal-report.utils'
 
@@ -49,6 +51,8 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const safeT = createSafeT(t)
 
   const { txHash, currency, period, intervalType, year, data, subType, accountingRegime } = report
+
+  const { isDownloadPending, handleDownload, isSnackbarVisible, handleSnackbarClose } = useModalReportDownload(report)
 
   const titleText = safeT(
     'reportViewTitle',
@@ -83,14 +87,12 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
         </ContentStyled>
       </Modal.Content>
       <ActionsStyled>
-        {REPORT_ACTIONS.map(({ id, icon: ActionIcon }) => (
-          <Tooltip key={id} title={t({ id: 'comingSoon' })} describeChild>
-            <ComingSoonButtonStyled aria-disabled disableRipple startIcon={<ActionIcon size={20} variant="Outline" />}>
-              {t({ id })}
-            </ComingSoonButtonStyled>
-          </Tooltip>
-        ))}
+        <ButtonSecondary startIcon={<Copy size={20} variant="Outline" />}>{t({ id: 'reportCopyLink' })}</ButtonSecondary>
+        <ButtonSecondary aria-disabled={isDownloadPending} startIcon={<DocumentDownload size={20} variant="Outline" />} onClick={isDownloadPending ? undefined : handleDownload}>
+          {t({ id: 'reportDownloadCsv' })}
+        </ButtonSecondary>
       </ActionsStyled>
+      <Snackbar open={isSnackbarVisible} message={t({ id: 'publicTransactionsExportError' })} type={SnackbarType.ERROR} onClose={handleSnackbarClose} />
     </Modal>
   )
 }

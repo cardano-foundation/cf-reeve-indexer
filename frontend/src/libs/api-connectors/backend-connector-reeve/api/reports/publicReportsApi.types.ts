@@ -88,6 +88,13 @@ export interface GetPublicReportsRequest {
   body: GetPublicReportsRequestBody
 }
 
+export interface GetPublicReportDownloadRequest {
+  organisationId: string
+  txHash: string
+}
+
+export type GetPublicReportDownloadResponse200 = string
+
 export interface GetPublicReportsResponse200 {
   success: boolean
   reports: ReportEntity[]

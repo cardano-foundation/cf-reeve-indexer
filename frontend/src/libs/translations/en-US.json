@@ -765,8 +765,6 @@
   "reportIdentityAuditorVerified": "Auditor verified (vLEI)",
   "reportCopyLink": "Copy link",
   "reportDownloadCsv": "Download CSV",
-  "reportDownloadPdf": "Download PDF",
-  "comingSoon": "Coming soon",
   "reportDialogPreviewTitle": "Report preview",
 
   "_ReportPublish": "report publish section",
