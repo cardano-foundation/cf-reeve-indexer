@@ -964,7 +964,7 @@
   "landingStepVerify": "Verify any item on the blockchain",
   "landingFaqLink": "Questions? Click here",
   "landingPublishedTitle": "Published data",
-  "landingPublishedDescription": "Organizations publish their reports and transactions here. Everyone can read them and check them against the blockchain.",
+  "landingPublishedDescription": "Organizations publish their reports and transactions here. Everyone can read and check them against the blockchain.",
   "landingOrganisationsEmptyTitle": "Coming soon!",
   "landingOrganisationsError": "Organizations could not be loaded. Please try again later.",
   "landingOrganisationsEmptyHint": "Organizations will appear here once they publish through Reeve.",
