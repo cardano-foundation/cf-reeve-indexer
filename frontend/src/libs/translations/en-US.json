@@ -765,6 +765,8 @@
   "reportIdentityAuditorVerified": "Auditor verified (vLEI)",
   "reportCopyLink": "Copy link",
   "reportDownloadCsv": "Download CSV",
+  "reportNotFound": "Report not found.",
+  "reportLoadError": "Report could not be loaded. Please try again later.",
   "reportDialogPreviewTitle": "Report preview",
 
   "_ReportPublish": "report publish section",

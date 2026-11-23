@@ -2,7 +2,7 @@ import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import dayjs from 'dayjs'
-import { Copy, DocumentDownload, ExportSquare } from 'iconsax-react'
+import { Copy, DocumentDownload, ExportSquare, TickCircle } from 'iconsax-react'
 import { useState } from 'react'
 
 import { Modal } from 'features/common'
@@ -25,7 +25,7 @@ import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestation
 import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
 import { getReportPeriod } from 'modules/public-reports/utils/payload'
 
-import { useModalReportDownload } from './modal-report.hooks'
+import { useModalReportCopyLink, useModalReportDownload } from './modal-report.hooks'
 import { getLegacyReportConfig } from './modal-report.legacy-configs'
 import { ActionsStyled, ContentStyled } from './modal-report.styles'
 import type { ModalReportProps, ReportDetailRow, ReportDetailsProps } from './modal-report.types'
@@ -53,6 +53,7 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const { txHash, currency, period, intervalType, year, data, subType, accountingRegime } = report
 
   const { isDownloadPending, handleDownload, isSnackbarVisible, handleSnackbarClose } = useModalReportDownload(report)
+  const { copyState, handleCopyLink } = useModalReportCopyLink(report)
 
   const titleText = safeT(
     'reportViewTitle',
@@ -87,7 +88,12 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
         </ContentStyled>
       </Modal.Content>
       <ActionsStyled>
-        <ButtonSecondary startIcon={<Copy size={20} variant="Outline" />}>{t({ id: 'reportCopyLink' })}</ButtonSecondary>
+        <ButtonSecondary
+          startIcon={copyState === 'copied' ? <TickCircle size={20} variant="Outline" /> : <Copy size={20} variant="Outline" />}
+          onClick={() => void handleCopyLink()}
+        >
+          {copyState === 'copied' ? t({ id: 'copied' }) : copyState === 'failed' ? t({ id: 'copyFailed' }) : t({ id: 'reportCopyLink' })}
+        </ButtonSecondary>
         <ButtonSecondary aria-disabled={isDownloadPending} startIcon={<DocumentDownload size={20} variant="Outline" />} onClick={isDownloadPending ? undefined : handleDownload}>
           {t({ id: 'reportDownloadCsv' })}
         </ButtonSecondary>

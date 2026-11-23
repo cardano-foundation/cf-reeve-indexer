@@ -88,6 +88,11 @@ export interface GetPublicReportsRequest {
   body: GetPublicReportsRequestBody
 }
 
+export interface GetPublicReportByTxHashRequest {
+  organisationId: string
+  txHash: string
+}
+
 export interface GetPublicReportDownloadRequest {
   organisationId: string
   txHash: string

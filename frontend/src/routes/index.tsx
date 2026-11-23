@@ -23,6 +23,7 @@ export const ROUTES = {
   CARD_ISSUANCE: 'cards',
   PUBLIC_REPORTS: 'reports',
   PUBLIC_REPORTS_WITH_ORG: 'reports/:organisationId',
+  PUBLIC_REPORT_DETAIL: 'reports/:organisationId/:txHash',
   PUBLIC_TRANSACTIONS: 'transactions',
   PUBLIC_TRANSACTIONS_WITH_ORG: 'transactions/:organisationId',
   PUBLIC_PROJECTS: 'projects',
@@ -76,6 +77,7 @@ export const router = createBrowserRouter(
         <Route element={<ViewCardIssuance />} path={ROUTES.CARD_ISSUANCE} />
         <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS} />
         <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS_WITH_ORG} />
+        <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORT_DETAIL} />
         <Route element={<ProtectedRoute element={<ViewPublicTransactions />} />} path={ROUTES.PUBLIC_TRANSACTIONS} />
         <Route element={<ProtectedRoute element={<ViewPublicTransactions />} />} path={ROUTES.PUBLIC_TRANSACTIONS_WITH_ORG} />
         <Route element={<Outlet />} path={ROUTES.PUBLIC_PROJECTS}>

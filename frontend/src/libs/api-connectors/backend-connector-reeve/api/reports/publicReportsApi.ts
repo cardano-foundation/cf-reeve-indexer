@@ -1,5 +1,6 @@
 import { httpService } from 'libs/api-connectors/backend-connector-reeve/api/httpService.ts'
 import {
+  GetPublicReportByTxHashRequest,
   GetPublicReportDownloadRequest,
   GetPublicReportDownloadResponse200,
   GetPublicReportsResponse200,
@@ -37,6 +38,16 @@ export const reportsApi = (baseUrl: string) => {
     return post<GetPublicReportsResponse200, GetPublicReportsRequestBody>(`${url}${queryString}`, body, { Authorization: '' })
   }
 
+  const getReportByTxHash = (request: GetPublicReportByTxHashRequest) => {
+    const { organisationId, txHash } = request
+
+    const url = `api/v1/reports/by-tx/${encodeURIComponent(txHash)}`
+
+    const queryString = `?organisationId=${encodeURIComponent(organisationId)}`
+
+    return get<GetPublicReportsResponse200>(`${url}${queryString}`, null, { Authorization: '' })
+  }
+
   const downloadReport = (request: GetPublicReportDownloadRequest) => {
     const { organisationId, txHash } = request
 
@@ -49,6 +60,7 @@ export const reportsApi = (baseUrl: string) => {
 
   return {
     getPublicReports,
+    getReportByTxHash,
     downloadReport
   }
 }
