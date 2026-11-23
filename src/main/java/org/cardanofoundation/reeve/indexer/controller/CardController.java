@@ -23,7 +23,7 @@ import org.cardanofoundation.reeve.indexer.service.card.issuance.CardIssuanceSer
 @RestController
 @RequestMapping("/api/v1/cards")
 @RequiredArgsConstructor
-@Tag(name = "Key cards", description = "Assemble and re-export UNSIGNED REEVE_KEY_CARDs. Import is permissionless; the operator endpoint stays behind HTTP Basic.")
+@Tag(name = "Key cards", description = "Assemble and re-export UNSIGNED REEVE_KEY_CARDs. Import is permissionless and every endpoint is public.")
 public class CardController {
 
     private final CardIssuanceService cardIssuanceService;

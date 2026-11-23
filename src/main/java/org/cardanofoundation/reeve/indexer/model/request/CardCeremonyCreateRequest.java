@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  * the full client-built {@code REEVE_KEY_CARD} to register and immediately open an attestation
  * ceremony for. The card is a raw {@link JsonNode} (its own camelCase {@code {v, type, subject, key}}
  * shape) rather than a typed DTO so it is validated by {@code CardIssuanceService#issueEntityFromCard}
- * — the same allowlist / private-key rejection the operator {@code /issue} path uses — instead of
+ * — the same allowlist / private-key rejection the {@code /issue} path uses — instead of
  * being silently coerced by binding.
  */
 @Getter
