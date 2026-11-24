@@ -115,9 +115,10 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
         if (rootNode.has("period")) {
             rawMetadata.setPeriod(rootNode.get("period").asInt());
         }
-        if (rootNode.has("accounting_regime") && !rootNode.get("accounting_regime").isNull()) {
-            rawMetadata.setAccountingRegime(rootNode.get("accounting_regime").asText());
-        }
+        // Report "Standard": published as "standard" from metadata version 1.3, as "accounting_regime" up to 1.2.
+        // Reports already on-chain keep the legacy key, so both are read; "standard" wins if both are present.
+        String standard = nonBlankText(rootNode, "standard");
+        rawMetadata.setAccountingRegime(standard != null ? standard : nonBlankText(rootNode, "accounting_regime"));
         if (rootNode.has("org")) {
             JsonNode orgNode = rootNode.get("org");
             if (orgNode != null && !orgNode.isNull()) {
@@ -135,5 +136,14 @@ public class ReeveMetadataDeserializer extends StdDeserializer<ReeveMetadata> {
         }
 
         return rawMetadata;
+    }
+
+    private static String nonBlankText(JsonNode rootNode, String key) {
+        JsonNode node = rootNode.get(key);
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        String text = node.asText();
+        return text.isBlank() ? null : text;
     }
 }
