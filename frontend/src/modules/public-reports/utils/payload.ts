@@ -14,33 +14,24 @@ const getReportStandardPayload = (standards: string[]) => {
   }
 }
 
-const getReportPeriodPayload = (periods: string[]) => {
+const getReportPeriodKeys = (periods: string[]) => {
   const yearAndTimeFramePeriods = periods.map((period) => period.split(/\s/g))
 
-  return yearAndTimeFramePeriods.reduce(
-    (acc, [year, timeFrame]) => {
-      if (Object.values(ReportMonth).includes(timeFrame.toUpperCase() as ReportMonth)) {
-        acc.intervalType.push(IntervalType.MONTH)
-        acc.period.push(dayjs(new Date(`${year} ${timeFrame}`)).month() + 1)
-        acc.year.push(Number(year))
-      }
+  return yearAndTimeFramePeriods.reduce<string[]>((acc, [year, timeFrame]) => {
+    if (Object.values(ReportMonth).includes(timeFrame.toUpperCase() as ReportMonth)) {
+      acc.push(`${IntervalType.MONTH}-${year}-${dayjs(new Date(`${year} ${timeFrame}`)).month() + 1}`)
+    }
 
-      if (Object.values(ReportQuarter).includes(timeFrame as ReportQuarter)) {
-        acc.intervalType.push(IntervalType.QUARTER)
-        acc.period.push(Number(timeFrame.slice(1)))
-        acc.year.push(Number(year))
-      }
+    if (Object.values(ReportQuarter).includes(timeFrame as ReportQuarter)) {
+      acc.push(`${IntervalType.QUARTER}-${year}-${Number(timeFrame.slice(1))}`)
+    }
 
-      if (timeFrame === 'FY') {
-        acc.intervalType.push(IntervalType.YEAR)
-        acc.period.push(1)
-        acc.year.push(Number(year))
-      }
+    if (timeFrame === 'FY') {
+      acc.push(`${IntervalType.YEAR}-${year}-1`)
+    }
 
-      return acc
-    },
-    { intervalType: [] as IntervalType[], period: [] as number[], year: [] as number[] }
-  )
+    return acc
+  }, [])
 }
 
 export const getReportPeriod = (intervalType: IntervalType, period: number, year: number) => {
@@ -67,5 +58,5 @@ export const mapSearchFiltersToRequestBody = (values: ReportsFiltersValues & Rep
   reportType: values.report.length ? values.report : undefined,
   ...getReportStandardPayload(values.standard),
   attestedOnly: values.attestedOnly || undefined,
-  ...(values.period.length ? getReportPeriodPayload(values.period) : { intervalType: undefined, period: undefined, year: undefined })
+  periodKeys: values.period.length ? getReportPeriodKeys(values.period) : undefined
 })

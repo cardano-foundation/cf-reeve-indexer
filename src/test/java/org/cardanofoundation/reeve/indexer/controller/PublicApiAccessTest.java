@@ -76,7 +76,7 @@ class PublicApiAccessTest {
     @Test
     void anonymousPostWithoutCsrfTokenReachesReportSearch() throws Exception {
         when(reportService.findAllByTypeAndPeriod(any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any())).thenReturn(Page.empty());
+                any(), any(), any(), any(), any())).thenReturn(Page.empty());
 
         mockMvc.perform(post("/api/v1/reports")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -84,7 +84,7 @@ class PublicApiAccessTest {
                 .andExpect(status().isOk());
 
         verify(reportService).findAllByTypeAndPeriod(isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), any());
+                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), any());
     }
 
     @Test

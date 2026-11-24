@@ -78,6 +78,7 @@ public class ReportController {
                                 reportSearchRequest.getIntervalType(),
                                 reportSearchRequest.getYear(),
                                 reportSearchRequest.getPeriod(),
+                                reportSearchRequest.getPeriodKeys(),
                                 reportSearchRequest.getAccountingRegime(),
                                 reportSearchRequest.getAccountingRegimeNotStated(),
                                 reportSearchRequest.getAttestedOnly(), pageable);

@@ -95,9 +95,19 @@ class ReportServiceTest {
     }
 
     @Test
-    void periodsAreMatchedAsPairsWhenAllThreeListsAreGiven() {
+    void periodListsStayIndependentWhenTheyHaveTheSameSize() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                List.of("MONTH", "YEAR"), List.of(2024, 2023), List.of(3, 1), null, null, null, PageRequest.of(0, 10));
+                List.of("YEAR", "YEAR"), List.of(2025, 2026), List.of(1, 2), null, null, null, null, PageRequest.of(0, 10));
+
+        verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+                eq("org-1"), isNull(), isNull(), isNull(), eq(List.of(Interval.YEAR, Interval.YEAR)),
+                eq(List.of(2025, 2026)), eq(List.of(1, 2)), isNull(), isNull(), isNull(), isNull(), any());
+    }
+
+    @Test
+    void periodKeysArePassedWhenSet() {
+        reportService.findAllByTypeAndPeriod("org-1", null, null, null,
+                null, null, null, List.of("MONTH-2024-3", "YEAR-2023-1"), null, null, null, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
@@ -105,19 +115,19 @@ class ReportServiceTest {
     }
 
     @Test
-    void periodListsStayIndependentWhenNotAllThreeAreGiven() {
+    void emptyPeriodKeysAreNotApplied() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                null, List.of(2024), null, null, null, null, PageRequest.of(0, 10));
+                null, null, null, List.of(), null, null, null, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                eq("org-1"), isNull(), isNull(), isNull(), isNull(), eq(List.of(2024)), isNull(),
+                eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), isNull(), isNull(), isNull(), any());
     }
 
     @Test
     void emptyAccountingRegimeFilterIsNotApplied() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                null, null, null, List.of(), false, null, PageRequest.of(0, 10));
+                null, null, null, null, List.of(), false, null, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
@@ -127,7 +137,7 @@ class ReportServiceTest {
     @Test
     void accountingRegimeFilterIsPassedWhenSet() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                null, null, null, List.of("IFRS"), true, null, PageRequest.of(0, 10));
+                null, null, null, null, List.of("IFRS"), true, null, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
@@ -137,7 +147,7 @@ class ReportServiceTest {
     @Test
     void attestedFilterIsNotAppliedWhenFalse() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                null, null, null, null, null, false, PageRequest.of(0, 10));
+                null, null, null, null, null, null, false, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
@@ -147,7 +157,7 @@ class ReportServiceTest {
     @Test
     void attestedFilterIsPassedWhenSet() {
         reportService.findAllByTypeAndPeriod("org-1", null, null, null,
-                null, null, null, null, null, true, PageRequest.of(0, 10));
+                null, null, null, null, null, null, true, PageRequest.of(0, 10));
 
         verify(reportRepository).findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
                 eq("org-1"), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),

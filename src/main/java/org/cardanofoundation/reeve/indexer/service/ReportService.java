@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,19 +52,14 @@ public class ReportService {
 
     public Page<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency,
             List<String> reportTypes, List<String> intervalTypes, List<Integer> years, List<Integer> periods,
-            List<String> accountingRegimes, Boolean accountingRegimeNotStated, Boolean attestedOnly, Pageable pageable) {
+            List<String> periodKeys, List<String> accountingRegimes, Boolean accountingRegimeNotStated,
+            Boolean attestedOnly, Pageable pageable) {
         List<Interval> intervals = intervalTypes != null ?
             intervalTypes.stream()
                 .map(Interval::valueOf)
                 .toList() : null;
 
-        boolean filterByPeriodPairs = intervals != null && years != null && periods != null
-                && intervals.size() == years.size() && years.size() == periods.size();
-        List<String> periodKeys = filterByPeriodPairs
-                ? IntStream.range(0, intervals.size())
-                        .mapToObj(i -> intervals.get(i).name() + "-" + years.get(i) + "-" + periods.get(i))
-                        .toList()
-                : null;
+        List<String> keys = periodKeys == null || periodKeys.isEmpty() ? null : periodKeys;
         List<String> regimes = accountingRegimes == null || accountingRegimes.isEmpty() ? null : accountingRegimes;
         Boolean notStated = Boolean.TRUE.equals(accountingRegimeNotStated) ? true : null;
         Boolean attested = Boolean.TRUE.equals(attestedOnly) ? true : null;
@@ -90,11 +84,8 @@ public class ReportService {
 
         // finds all first reports (with min id of the latest version, grouped by organisation, subType, interval, year and period)
         Page<ReportEntity> firstReports = reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                organisationId, likePattern(blockChainHash), currency, reportTypes,
-                filterByPeriodPairs ? null : intervals,
-                filterByPeriodPairs ? null : years,
-                filterByPeriodPairs ? null : periods,
-                periodKeys, regimes, notStated, attested, pageable);
+                organisationId, likePattern(blockChainHash), currency, reportTypes, intervals, years, periods,
+                keys, regimes, notStated, attested, pageable);
 
         return firstReports.map(this::toView);
     }

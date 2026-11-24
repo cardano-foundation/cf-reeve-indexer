@@ -26,7 +26,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
             AND (:periods IS NULL OR r.period IN :periods)
             AND (:periodKeys IS NULL OR CONCAT(CAST(r.interval AS String), '-', CAST(r.year AS String), '-', CAST(r.period AS String)) IN :periodKeys)
             AND ((:accountingRegimes IS NULL AND :accountingRegimeNotStated IS NULL)
-                OR r.accountingRegime IN :accountingRegimes
+                OR (:accountingRegimes IS NOT NULL AND r.accountingRegime IN :accountingRegimes)
                 OR (:accountingRegimeNotStated = true AND (r.accountingRegime IS NULL
                     OR TRIM(r.accountingRegime) = ''
                     OR LOWER(TRIM(r.accountingRegime)) = 'not applicable')))

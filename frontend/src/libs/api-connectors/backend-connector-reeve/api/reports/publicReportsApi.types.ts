@@ -81,6 +81,7 @@ export interface GetPublicReportsRequestBody {
   blockChainHash?: string
   year?: number[]
   period?: number[]
+  periodKeys?: string[]
   accountingRegime?: string[]
   accountingRegimeNotStated?: boolean
   attestedOnly?: boolean
