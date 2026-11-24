@@ -251,6 +251,7 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
 
                             entity.setOrganisationId(rawMetadata.getOrg().getId());
                             entity.setTxHash(rawMetadata.getTxHash());
+                            entity.setBlockTime(rawMetadata.getBlockTime());
                             return entity;
                         }).toList();
                 transactionRepository.saveAll(transactionEntities);
@@ -266,7 +267,8 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         .subType(rawMetadata.getSubType()).ver(rawMetadata.getVer())
                         .accountingRegime(rawMetadata.getAccountingRegime())
                         .fields((String) rawMetadata.getData()).identityVerified(identityVerified)
-                        .metadataHash(rawMetadata.getMetadataHash()).build();
+                        .metadataHash(rawMetadata.getMetadataHash())
+                        .blockTime(rawMetadata.getBlockTime()).build();
                 reportRepository.saveAndFlush(reportEntity);
             }
             if (rawMetadata.getType() == ReeveTransactionType.REPORT_V2) {
@@ -278,7 +280,8 @@ public class ReeveMetadataStorage extends TxMetadataStorageImpl {
                         .subType(rawMetadata.getSubType()).ver(rawMetadata.getVer())
                         .accountingRegime(rawMetadata.getAccountingRegime())
                         // .fields((String) rawMetadata.getData()).identityVerified(identityVerified) // Fields stored in contract data
-                        .metadataHash(rawMetadata.getMetadataHash()).build();
+                        .metadataHash(rawMetadata.getMetadataHash())
+                        .blockTime(rawMetadata.getBlockTime()).build();
                 reportRepository.saveAndFlush(reportEntity);
             }
         });

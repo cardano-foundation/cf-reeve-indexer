@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.cardanofoundation.reeve.indexer.model.domain.document.CheckStatus;
 import org.cardanofoundation.reeve.indexer.model.domain.document.DocumentVerdict;
 import org.cardanofoundation.reeve.indexer.model.entity.DocumentEntity;
+import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 
 public interface DocumentRepository extends JpaRepository<DocumentEntity, String> {
 
@@ -77,4 +78,12 @@ public interface DocumentRepository extends JpaRepository<DocumentEntity, String
     // even index-walks condemned rows. The Pageable bounds how many eligible rows one tick loads.
     List<DocumentEntity> findByManifestCheckAndIpfsCheckAndIpfsRetryExhaustedFalse(
             CheckStatus manifestCheck, CheckStatus ipfsCheck, Pageable pageable);
+
+    @Query("""
+            SELECT NEW org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView(d.organisationId, MAX(d.blockTime))
+            FROM DocumentEntity d
+            WHERE d.blockTime IS NOT NULL AND d.organisationId IS NOT NULL
+            GROUP BY d.organisationId
+            """)
+    List<OrganisationLastUpdatedView> findLastUpdatedPerOrganisation();
 }

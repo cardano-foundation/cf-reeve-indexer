@@ -49,4 +49,22 @@ public class ReportSearchRequest {
         schema = @Schema(example = "3")
     )
     private List<Integer> period;
+
+    @ArraySchema(
+        arraySchema = @Schema(description = "List of exact periods to filter by, each as INTERVAL-YEAR-PERIOD with the interval type in capitals (MONTH, QUARTER, YEAR)"),
+        schema = @Schema(example = "QUARTER-2024-3")
+    )
+    private List<String> periodKeys;
+
+    @ArraySchema(
+        arraySchema = @Schema(description = "List of accounting standards to filter by"),
+        schema = @Schema(example = "IFRS")
+    )
+    private List<String> accountingRegime;
+
+    @Schema(description = "Also include reports without a stated accounting standard")
+    private Boolean accountingRegimeNotStated;
+
+    @Schema(description = "Only include reports with at least one verified identity attestation")
+    private Boolean attestedOnly;
 }

@@ -12,7 +12,9 @@ import org.springframework.data.repository.query.Param;
 
 import org.cardanofoundation.reeve.indexer.model.entity.TransactionEntity;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
+import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
+import org.cardanofoundation.reeve.indexer.model.view.TransactionsOverviewView;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, String> {
 
@@ -83,4 +85,21 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                     "WHERE t.organisationId = :orgId AND ti.eventCode IS NOT NULL"
     )
     Page<EventCodeView> findDistinctEventCodeNamePairsByOrganisationId(@Param("orgId") String orgId, Pageable pageable);
+
+    @Query("""
+            SELECT NEW org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView(t.organisationId, MAX(t.blockTime))
+            FROM TransactionEntity t
+            WHERE t.blockTime IS NOT NULL
+            GROUP BY t.organisationId
+            """)
+    List<OrganisationLastUpdatedView> findLastUpdatedPerOrganisation();
+
+    @Query("""
+            SELECT NEW org.cardanofoundation.reeve.indexer.model.view.TransactionsOverviewView(
+                MIN(t.accountingPeriod), MAX(t.accountingPeriod), COUNT(DISTINCT t.id), COUNT(ti), MAX(t.blockTime))
+            FROM TransactionEntity t
+            LEFT JOIN t.items ti
+            WHERE t.organisationId = :orgId
+            """)
+    TransactionsOverviewView findOverviewByOrganisationId(@Param("orgId") String orgId);
 }

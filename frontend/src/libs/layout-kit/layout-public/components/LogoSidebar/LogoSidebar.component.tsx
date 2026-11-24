@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import { EXTERNAL_URLS } from 'libs/const/urls.ts'
 import { LogoContainerStyled, LogoStyled } from 'libs/layout-kit/layout-public/components/LogoSidebar/LogoSidebar.styles.tsx'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
+import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { LogoIcon } from 'libs/ui-kit/components/LogoIcon/LogoIcon.tsx'
 
 interface LogoSidebarProps {
@@ -18,6 +19,13 @@ export const LogoSidebar = ({ isSidebarOpen }: LogoSidebarProps) => {
   return (
     <LogoContainerStyled $isSidebarOpen={isSidebarOpen}>
       <Grid container justifyContent="center" spacing={1}>
+        <Fade appear={false} in={isSidebarOpen} timeout={{ enter: 2000, exit: 0 }} unmountOnExit>
+          <Grid container justifyContent="center" size={12}>
+            <ButtonSecondary href={EXTERNAL_URLS.PRODUCT_PAGE} size="small">
+              {t({ id: 'landingProductPage' })}
+            </ButtonSecondary>
+          </Grid>
+        </Fade>
         <Fade appear={false} in={isSidebarOpen} timeout={{ enter: 2000, exit: 0 }} unmountOnExit>
           <Grid container spacing={1}>
             <Grid size="auto">

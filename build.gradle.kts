@@ -40,6 +40,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations")
     implementation("org.postgresql:postgresql")
     implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
+    implementation("com.opencsv:opencsv:5.11")
 
     // Keri
     implementation("id.veridian:signify:0.1.2-66227de-SNAPSHOT")

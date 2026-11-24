@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { useMediaQueries } from 'hooks'
+import { OrganisationEntity } from 'libs/api-connectors/backend-connector-reeve/api/organisation/organisationApi.types.ts'
 import { FieldOrganisations } from 'libs/form-kit/components/FieldOrganisations/FieldOrganisations.component.tsx'
 import { OrganisationFormSidebarStyled, OrganisationsFormStyled } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.styles.tsx'
 import { OrganisationFormValues } from 'libs/layout-kit/layout-public/components/OrganisationFormSidebar/OrganisationFormSidebar.types.ts'
@@ -10,15 +11,15 @@ import { useGetOrganisationsModel } from 'libs/models/organisation-model/GetOrga
 import { getOrgPath } from 'routes'
 
 interface OrganisationFormLayoutProps {
-  isSidebarOpen: boolean
+  isCollapsed: boolean
   items: { name: string; value: string }[]
   onOrgSelect: (orgId: string) => void
 }
 
-const OrganisationFormLayout = ({ isSidebarOpen, items, onOrgSelect }: OrganisationFormLayoutProps) => {
+const OrganisationFormLayout = ({ isCollapsed, items, onOrgSelect }: OrganisationFormLayoutProps) => {
   return (
     <OrganisationsFormStyled noValidate>
-      <FieldOrganisations items={items} hasChevron={isSidebarOpen} onSelect={onOrgSelect} />
+      <FieldOrganisations items={items} isCollapsed={isCollapsed} onSelect={onOrgSelect} />
     </OrganisationsFormStyled>
   )
 }
@@ -56,7 +57,7 @@ export const OrganisationFormSidebar = ({ initialValues, onSubmit, isSidebarOpen
     [pathname, navigate]
   )
 
-  const organisationOptions = (organisations ?? []).map((o: any) => ({
+  const organisationOptions = (organisations ?? []).map((o: OrganisationEntity) => ({
     name: o.name,
     value: o.id
   }))
@@ -73,7 +74,7 @@ export const OrganisationFormSidebar = ({ initialValues, onSubmit, isSidebarOpen
         }}
         onSubmit={onSubmit ?? (() => undefined)}
       >
-        {() => <OrganisationFormLayout isSidebarOpen={isSidebarOpen} items={organisationOptions} onOrgSelect={handleOrgSelect} />}
+        {() => <OrganisationFormLayout isCollapsed={!isMobile && !isSidebarOpen} items={organisationOptions} onOrgSelect={handleOrgSelect} />}
       </Formik>
     </OrganisationFormSidebarStyled>
   )

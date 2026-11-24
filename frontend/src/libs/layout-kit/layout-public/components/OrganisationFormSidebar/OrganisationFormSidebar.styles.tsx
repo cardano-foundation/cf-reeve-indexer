@@ -11,7 +11,7 @@ export const OrganisationFormSidebarStyled = styled(Box)<OrganisationFormSidebar
     display: flex;
     width: 100%;
     height: ${({ $isMobile }) => ($isMobile ? 'auto' : '7rem')};
-    padding: ${({ theme, $isMobile }) => ($isMobile ? theme.spacing(0.5, 0) : theme.spacing(3, 2, 3, 1))};
+    padding: ${({ theme, $isMobile }) => ($isMobile ? theme.spacing(0.5, 0) : theme.spacing(3, 2))};
     align-items: center;
     justify-content: center;
   }

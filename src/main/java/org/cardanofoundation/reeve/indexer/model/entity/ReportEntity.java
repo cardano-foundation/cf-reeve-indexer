@@ -64,4 +64,6 @@ public class ReportEntity {
 
     private String metadataHash;
 
+    private Long blockTime;
+
 }

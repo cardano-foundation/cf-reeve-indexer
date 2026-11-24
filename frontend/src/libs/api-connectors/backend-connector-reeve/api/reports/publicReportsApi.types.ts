@@ -43,7 +43,8 @@ export type ReportEntity = {
   year: number
   period: number
   ver: number
-  blockChainHash: string
+  txHash: string
+  blockTime: number | null
   identities: IdentityAttestationView[]
   data: NestedMap
   accountingRegime: string | null 
@@ -63,6 +64,7 @@ export interface IdentityAttestationView {
   claims: Record<string, unknown> | null
   lei: string | null
   txHash?: string
+  blockTime?: number | null
   credentialTxHash?: string
 }
 
@@ -79,12 +81,28 @@ export interface GetPublicReportsRequestBody {
   blockChainHash?: string
   year?: number[]
   period?: number[]
+  periodKeys?: string[]
+  accountingRegime?: string[]
+  accountingRegimeNotStated?: boolean
+  attestedOnly?: boolean
 }
 
 export interface GetPublicReportsRequest {
   parameters: GetPublicReportsRequestParameters
   body: GetPublicReportsRequestBody
 }
+
+export interface GetPublicReportByTxHashRequest {
+  organisationId: string
+  txHash: string
+}
+
+export interface GetPublicReportDownloadRequest {
+  organisationId: string
+  txHash: string
+}
+
+export type GetPublicReportDownloadResponse200 = string
 
 export interface GetPublicReportsResponse200 {
   success: boolean

@@ -1,8 +1,15 @@
 import { httpService } from 'libs/api-connectors/backend-connector-reeve/api/httpService.ts'
-import { GetPublicReportsResponse200, GetPublicReportsRequest, GetPublicReportsRequestBody } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import {
+  GetPublicReportByTxHashRequest,
+  GetPublicReportDownloadRequest,
+  GetPublicReportDownloadResponse200,
+  GetPublicReportsResponse200,
+  GetPublicReportsRequest,
+  GetPublicReportsRequestBody
+} from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 
 export const reportsApi = (baseUrl: string) => {
-  const { post } = httpService(baseUrl)
+  const { get, post } = httpService(baseUrl)
 
   const getPublicReports = (request: GetPublicReportsRequest) => {
     const {
@@ -31,7 +38,29 @@ export const reportsApi = (baseUrl: string) => {
     return post<GetPublicReportsResponse200, GetPublicReportsRequestBody>(`${url}${queryString}`, body, { Authorization: '' })
   }
 
+  const getReportByTxHash = (request: GetPublicReportByTxHashRequest) => {
+    const { organisationId, txHash } = request
+
+    const url = `api/v1/reports/by-tx/${encodeURIComponent(txHash)}`
+
+    const queryString = `?organisationId=${encodeURIComponent(organisationId)}`
+
+    return get<GetPublicReportsResponse200>(`${url}${queryString}`, null, { Authorization: '' })
+  }
+
+  const downloadReport = (request: GetPublicReportDownloadRequest) => {
+    const { organisationId, txHash } = request
+
+    const url = 'api/v1/reports/download'
+
+    const queryString = `?organisationId=${encodeURIComponent(organisationId)}&txHash=${encodeURIComponent(txHash)}`
+
+    return get<GetPublicReportDownloadResponse200>(`${url}${queryString}`, null, { Authorization: '' })
+  }
+
   return {
-    getPublicReports
+    getPublicReports,
+    getReportByTxHash,
+    downloadReport
   }
 }

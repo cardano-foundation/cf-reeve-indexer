@@ -118,6 +118,9 @@ public class EventEntity {
     @Column(name = "event_timestamp")
     private String eventTimestamp;
 
+    @Column(name = "block_time")
+    private Long blockTime;
+
     @Column(name = "ipfs_cid")
     private String ipfsCid;
 

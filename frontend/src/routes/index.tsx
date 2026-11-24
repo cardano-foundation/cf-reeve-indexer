@@ -1,4 +1,4 @@
-import { createBrowserRouter, createRoutesFromElements, Outlet, Route } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Navigate, Outlet, Route, ScrollRestoration } from 'react-router-dom'
 
 import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.component.tsx'
 import { ViewCardIssuance } from 'modules/card-issuance/view/ViewCardIssuance.component.tsx'
@@ -23,6 +23,7 @@ export const ROUTES = {
   CARD_ISSUANCE: 'cards',
   PUBLIC_REPORTS: 'reports',
   PUBLIC_REPORTS_WITH_ORG: 'reports/:organisationId',
+  PUBLIC_REPORT_DETAIL: 'reports/:organisationId/:txHash',
   PUBLIC_TRANSACTIONS: 'transactions',
   PUBLIC_TRANSACTIONS_WITH_ORG: 'transactions/:organisationId',
   PUBLIC_PROJECTS: 'projects',
@@ -59,15 +60,24 @@ export const getOrgPath = (path: 'reports' | 'transactions' | 'projects/events' 
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route element={<Outlet />} path={ROUTES.ROOT}>
+    <Route
+      element={
+        <>
+          <ScrollRestoration />
+          <Outlet />
+        </>
+      }
+      path={ROUTES.ROOT}
+    >
+      <Route index element={<ViewPublicLanding />} />
       <Route element={<LayoutPublic />}>
-        <Route index element={<ViewPublicLanding />} />
         {/* NOTE: [LOB-2061] revoke dashboard route since it requires additional changes */}
         {/* <Route element={<ViewPublicDashboard />} path={ROUTES.PUBLIC_DASHBOARD} /> */}
         {/* No ProtectedRoute: card issuance is permissionless and every card endpoint is public. */}
         <Route element={<ViewCardIssuance />} path={ROUTES.CARD_ISSUANCE} />
         <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS} />
         <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORTS_WITH_ORG} />
+        <Route element={<ProtectedRoute element={<ViewReportsPublic />} />} path={ROUTES.PUBLIC_REPORT_DETAIL} />
         <Route element={<ProtectedRoute element={<ViewPublicTransactions />} />} path={ROUTES.PUBLIC_TRANSACTIONS} />
         <Route element={<ProtectedRoute element={<ViewPublicTransactions />} />} path={ROUTES.PUBLIC_TRANSACTIONS_WITH_ORG} />
         <Route element={<Outlet />} path={ROUTES.PUBLIC_PROJECTS}>
@@ -85,6 +95,7 @@ export const router = createBrowserRouter(
           <Route element={<ViewPublicResourcesUserGuide />} path={ROUTES.PUBLIC_RESOURCES_USERGUIDE} />
         </Route>
       </Route>
+      <Route element={<Navigate to={PATHS.ROOT} replace />} path="*" />
     </Route>
   )
 )

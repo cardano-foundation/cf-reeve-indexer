@@ -179,6 +179,7 @@ public class FundingEventProcessor implements ReeveTypeProcessor {
                 .version(version)
                 .creationSlot(creationSlot)
                 .eventTimestamp(timestamp)
+                .blockTime(metadata.getBlockTime())
                 .ipfsCid(ipfsCid)
                 .metadataHash(metadata.getMetadataHash())
                 .totalAmount(event.getTotalAmount())

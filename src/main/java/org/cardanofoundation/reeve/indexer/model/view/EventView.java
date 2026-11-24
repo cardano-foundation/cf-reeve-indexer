@@ -62,6 +62,7 @@ public class EventView {
 
     private String version;
     private String ipfsCid;
+    private Long blockTime;
     private BigDecimal totalAmount;
     private List<EventAllocationView> allocations;
     private JsonNode customData;
@@ -100,6 +101,7 @@ public class EventView {
                 .date(entity.getDate())
                 .version(entity.getVersion())
                 .ipfsCid(entity.getIpfsCid())
+                .blockTime(entity.getBlockTime())
                 .totalAmount(entity.getTotalAmount())
                 .allocations(entity.getAllocations().stream()
                         .map(EventAllocationView::fromEntity)

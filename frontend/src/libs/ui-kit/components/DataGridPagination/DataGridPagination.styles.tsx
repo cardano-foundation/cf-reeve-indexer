@@ -12,6 +12,26 @@ export const SelectIconStyled = styled(({ ...props }) => <ArrowDown2 size={18} v
   }
 `
 
+export const PageInputStyled = styled.input`
+  width: 3rem;
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  background: ${({ theme }) => theme.palette.common.white};
+  border: 1px solid ${({ theme }) => theme.palette.divider};
+  border-radius: ${({ theme }) => theme.spacing(1)};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.palette.text.primary};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.palette.primary.main};
+    outline-offset: -1px;
+  }
+`
+
 export const GridPaginationStyled = styled(({ ...props }) => <GridPagination {...props} />)`
   && {
     display: flex;

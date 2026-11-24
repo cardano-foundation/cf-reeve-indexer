@@ -1,5 +1,7 @@
 import { httpService } from 'libs/api-connectors/backend-connector-reeve/api/httpService.ts'
 import {
+  GetOrganisationAccountingRegimesRequest,
+  GetOrganisationAccountingRegimesResponse200,
   GetOrganisationCostCentersRequest,
   GetOrganisationCostCentersResponse200,
   GetOrganisationCounterpartiesRequest,
@@ -14,9 +16,12 @@ import {
   GetOrganisationEventsResponse200,
   GetOrganisationProjectsRequest,
   GetOrganisationProjectsResponse200,
+  GetOrganisationsLastUpdatedResponse200,
   GetOrganisationsResponse200,
   GetOrganisationTransactionNumbersRequest,
   GetOrganisationTransactionNumbersResponse200,
+  GetOrganisationTransactionsOverviewRequest,
+  GetOrganisationTransactionsOverviewResponse200,
   GetOrganisationTransactionTypesRequest,
   GetOrganisationTransactionTypesResponse200,
   GetOrganisationVatCodesRequest,
@@ -28,6 +33,18 @@ export const organisationApi = (baseUrl: string) => {
 
   const getOrganisations = ({ hasAuthorizationHeader = true }: { hasAuthorizationHeader?: boolean } = {}) => {
     return get<GetOrganisationsResponse200>(`api/v1/organisations`, null, !hasAuthorizationHeader ? { Authorization: '' } : undefined)
+  }
+
+  const getOrganisationsLastUpdated = () => {
+    return get<GetOrganisationsLastUpdatedResponse200>(`api/v1/organisations/lastUpdated`)
+  }
+
+  const getOrganisationAccountingRegimes = (request: GetOrganisationAccountingRegimesRequest) => {
+    const {
+      parameters: { organisationId }
+    } = request
+
+    return get<GetOrganisationAccountingRegimesResponse200>(`api/v1/organisations/${organisationId}/accountingRegime`)
   }
 
   const getOrganisationCostCenters = (request: GetOrganisationCostCentersRequest) => {
@@ -96,6 +113,14 @@ export const organisationApi = (baseUrl: string) => {
     return get<GetOrganisationProjectsResponse200>(`api/v1/organisations/${organisationId}/projects`)
   }
 
+  const getOrganisationTransactionsOverview = (request: GetOrganisationTransactionsOverviewRequest) => {
+    const {
+      parameters: { organisationId }
+    } = request
+
+    return get<GetOrganisationTransactionsOverviewResponse200>(`api/v1/organisations/${organisationId}/transactionsOverview`)
+  }
+
   const getOrganisationTransactionTypes = (request: GetOrganisationTransactionTypesRequest) => {
     const {
       parameters: { organisationId }
@@ -114,6 +139,8 @@ export const organisationApi = (baseUrl: string) => {
 
   return {
     getOrganisations,
+    getOrganisationsLastUpdated,
+    getOrganisationAccountingRegimes,
     getOrganisationCostCenters,
     getOrganisationCounterparties,
     getOrganisationCounterpartyTypes,
@@ -122,6 +149,7 @@ export const organisationApi = (baseUrl: string) => {
     getOrganisationEvents,
     getOrganisationInternalNumbers,
     getOrganisationProjects,
+    getOrganisationTransactionsOverview,
     getOrganisationTransactionTypes,
     getOrganisationVatCodes
   }

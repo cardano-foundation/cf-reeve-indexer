@@ -3,10 +3,11 @@ import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import { GridColDef } from '@mui/x-data-grid'
+import dayjs from 'dayjs'
 import { ExportSquare } from 'iconsax-react'
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
-import { GetPublicReportsResponse200, IdentityAttestationView, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import { GetPublicReportsResponse200, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
 import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
@@ -14,16 +15,16 @@ import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { CellText } from 'libs/ui-kit/components/CellText/CellText.component.tsx'
 import { DataGridContainer } from 'libs/ui-kit/components/DataGrid/DataGridContainer.component.tsx'
-import { IdentityAttestationBadge } from 'libs/ui-kit/components/IdentityAttestationBadge/IdentityAttestationBadge.component.tsx'
 import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
-import { AttestationPendingBadge } from 'modules/public-reports/components/AttestationPendingBadge/AttestationPendingBadge.component.tsx'
+import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
+import { ModalAttestation } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.component.tsx'
+import type { SelectedAttestation } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.types'
+import { ReportAttestations } from 'modules/public-reports/components/ReportAttestations/ReportAttestations.component.tsx'
 import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
+import { useAttestationsLoading } from 'modules/public-reports/hooks/useAttestationKinds.ts'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
 import { getReportPeriod } from 'modules/public-reports/utils/payload.ts'
-
-// A report can carry two attestations (publisher and auditor); unfilled slots render as pending.
-const ATTESTATION_SLOTS = 2
 
 interface TableReportsPublicProps {
   data: GetPublicReportsResponse200 | null
@@ -43,6 +44,10 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
 
   const theme = useTheme()
 
+  const [selectedAttestation, setSelectedAttestation] = useState<SelectedAttestation | null>(null)
+
+  const isAttestationsLoading = useAttestationsLoading(data?.reports ?? [])
+
   const rowCountRef = useRef(data?.total || 0)
 
   const rowCount = useMemo(() => {
@@ -58,6 +63,19 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       field: 'subType',
       headerName: t({ id: 'report' }),
       valueFormatter: (value) => t({ id: value }),
+      hideable: false,
+      sortable: true,
+      flex: 1,
+      minWidth: 192
+    },
+    {
+      field: 'period',
+      headerName: t({ id: 'period' }),
+      valueGetter: (_, row) => {
+        const { intervalType, period, year } = row
+
+        return getReportPeriod(intervalType, period, year)
+      },
       hideable: false,
       sortable: true,
       flex: 1,
@@ -82,21 +100,22 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       minWidth: 192
     },
     {
-      field: 'period',
-      headerName: t({ id: 'period' }),
-      valueGetter: (_, row) => {
-        const { intervalType, period, year } = row
-
-        return getReportPeriod(intervalType, period, year)
-      },
+      field: 'attestations',
+      headerName: t({ id: 'attestation' }),
+      renderHeader: () => (
+        <Tooltip title={t({ id: 'attestationsHeaderInfo' })}>
+          <span className="MuiDataGrid-columnHeaderTitle">{t({ id: 'attestation' })}</span>
+        </Tooltip>
+      ),
+      renderCell: ({ row }) => <ReportAttestations report={row} isLoading={isAttestationsLoading} onSelect={(kind) => setSelectedAttestation({ report: row, kind })} />,
       hideable: false,
-      sortable: true,
+      sortable: false,
       flex: 1,
-      minWidth: 192
+      minWidth: 240
     },
     {
       field: 'txHash',
-      headerName: t({ id: 'blockchainHash' }),
+      headerName: t({ id: 'onChainRecord' }),
       renderCell: ({ value }) =>
         value ? (
           <Box alignItems="center" display="flex" gap={1}>
@@ -104,7 +123,7 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
               <Typography component="span" variant="body2">{`${value.slice(0, 4)}...${value.slice(-4)}`}</Typography>
             </Tooltip>
             <Tooltip title={t({ id: 'openInExplorer' })}>
-              <Link display="flex" href={`https://explorer.cardano.org/transaction/${value}`} rel="noreferrer" target="_blank">
+              <Link display="flex" href={`${EXPLORER_TX_URL}${encodeURIComponent(value)}`} rel="noreferrer" target="_blank">
                 <ExportSquare color={theme.palette.action.active} size={20} variant="Outline" />
               </Link>
             </Tooltip>
@@ -115,39 +134,16 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
       hideable: false,
       sortable: true,
       flex: 1,
-      minWidth: 192
+      minWidth: 144
     },
     {
-      field: 'attestations',
-      headerName: t({ id: 'attestations' }),
-      renderHeader: () => (
-        <Tooltip title={t({ id: 'attestationsHeaderInfo' })}>
-          <span className="MuiDataGrid-columnHeaderTitle">{t({ id: 'attestations' })}</span>
-        </Tooltip>
-      ),
-      renderCell: ({ row }) => (
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '4px', flexWrap: 'nowrap', alignItems: 'center' }}>
-          {row.identities?.map((item: IdentityAttestationView, index: number) => (
-            <IdentityAttestationBadge
-              key={index}
-              isVerified={item.identityVerified}
-              schemaName={item.schemaName}
-              schemaSaid={item.schemaSaid}
-              claims={item.claims}
-              lei={item.lei}
-              txHash={item.txHash}
-              credentialTxHash={item.credentialTxHash}
-            />
-          ))}
-          {Array.from({ length: Math.max(0, ATTESTATION_SLOTS - (row.identities?.length ?? 0)) }, (_, index) => (
-            <AttestationPendingBadge key={index} />
-          ))}
-        </div>
-      ),
+      field: 'blockTime',
+      headerName: t({ id: 'published' }),
+      valueFormatter: (value) => (value ? dayjs.unix(value).format('DD/MM/YYYY') : '-'),
       hideable: false,
       sortable: false,
       flex: 1,
-      minWidth: 120
+      minWidth: 144
     },
     {
       field: 'actions',
@@ -165,39 +161,44 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
   ]
 
   return (
-    <DataGridContainer>
-      <DataGridContainer.Toolbar>
-        <ReportsToolbar />
-      </DataGridContainer.Toolbar>
-      <DataGridContainer.Table
-        initialState={{
-          sorting: {
-            sortModel: [{ field: 'period', sort: 'desc' }]
-          }
-        }}
-        noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: organisationName })}
-        noRowsMessage={t({ id: 'nothingHereMessage' })}
-        paginationModel={{ page, pageSize: rowsPerPage }}
-        paginationMode="server"
-        sortingMode="server"
-        rowCount={rowCount}
-        columns={columns}
-        rows={data?.reports ?? []}
-        getRowId={(row) => `${row.organisationId}-${row.subType}-${row.intervalType}-${row.year}-${row.period}-${row.ver}-${row.txHash}`}
-        onPaginationModelChange={(model) => {
-          const { page, pageSize } = model
+    <>
+      <DataGridContainer>
+        <DataGridContainer.Toolbar>
+          <ReportsToolbar />
+        </DataGridContainer.Toolbar>
+        <DataGridContainer.Table
+          sx={{ '--DataGrid-overlayHeight': '20rem' }}
+          autoHeight
+          initialState={{
+            sorting: {
+              sortModel: [{ field: 'period', sort: 'desc' }]
+            }
+          }}
+          noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: organisationName })}
+          noRowsMessage={t({ id: 'nothingHereMessage' })}
+          paginationModel={{ page, pageSize: rowsPerPage }}
+          paginationMode="server"
+          sortingMode="server"
+          rowCount={rowCount}
+          columns={columns}
+          rows={data?.reports ?? []}
+          getRowId={(row) => `${row.organisationId}-${row.subType}-${row.intervalType}-${row.year}-${row.period}-${row.ver}-${row.txHash}`}
+          onPaginationModelChange={(model) => {
+            const { page, pageSize } = model
 
-          handlePagination(page, pageSize)
-        }}
-        onSortModelChange={(model) => {
-          const [current] = model
+            handlePagination(page, pageSize)
+          }}
+          onSortModelChange={(model) => {
+            const [current] = model
 
-          handleSorting(current.field, current.sort)
-        }}
-        hasFiltersSelected={hasFiltersSelected}
-        isLoading={isFetching}
-        disableColumnMenu
-      />
-    </DataGridContainer>
+            handleSorting(current.field, current.sort)
+          }}
+          hasFiltersSelected={hasFiltersSelected}
+          isLoading={isFetching}
+          disableColumnMenu
+        />
+      </DataGridContainer>
+      {selectedAttestation && <ModalAttestation {...selectedAttestation} onClose={() => setSelectedAttestation(null)} />}
+    </>
   )
 }

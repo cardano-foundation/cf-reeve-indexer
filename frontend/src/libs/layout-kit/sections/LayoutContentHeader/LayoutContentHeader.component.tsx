@@ -30,14 +30,14 @@ export const LayoutContentHeader = ({ children }: LayoutContentHeaderProps) => {
   return (
     <LayoutContentHeaderStyled component="header">
       <Grid container direction={{ xs: 'column', sm: 'row' }} height="100%" wrap="nowrap" gap={{ xs: 1, sm: 0 }} sx={{ flexGrow: 1 }}>
-        <Grid flexShrink={0} sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, sm: 3 } }}>
-          {children}
-        </Grid>
         {!isResources && isMobile && (
           <Grid size="grow">
             <OrganisationFormSidebar initialValues={initialValues} onSubmit={() => undefined} isSidebarOpen={isSidebarOpen} />
           </Grid>
         )}
+        <Grid flexShrink={0} sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, sm: 3 } }}>
+          {children}
+        </Grid>
       </Grid>
     </LayoutContentHeaderStyled>
   )

@@ -1,39 +1,48 @@
-import { useTheme, Box, MenuItem } from '@mui/material'
+import { useTheme, MenuItem } from '@mui/material'
 import Select, { SelectProps as SelectPropsMUI } from '@mui/material/Select'
-import { ArrowDown2 } from 'iconsax-react'
+import { Buliding } from 'iconsax-react'
+
+import { IconStyled } from 'features/mui/base/select/select.styles'
 import { OrganisationLabelStyled } from 'libs/form-kit/components/InputOrganisationsSelectField/InputOrganisationsSelectField.styles.tsx'
-import { SelectOption } from 'libs/ui-kit/components/InputSelect/InputSelect.component.tsx'
 import { Avatar } from 'libs/ui-kit/components/Avatar/Avatar.component.tsx'
+import { getAvatarColor } from 'libs/ui-kit/components/Avatar/Avatar.consts.ts'
+import { SelectOption } from 'libs/ui-kit/components/InputSelect/InputSelect.component.tsx'
 import { getInitials } from 'libs/utils/getInitials'
 
 type InputOrganisationsSelectFieldProps = SelectPropsMUI<string> & {
   items: SelectOption[]
   value: string
-  hasChevron?: boolean
+  isCollapsed?: boolean
   placeholder?: string
 }
 
-export const InputOrganisationsSelectField = ({ items, name, value, hasChevron = true, placeholder, ...props }: InputOrganisationsSelectFieldProps) => {
+export const InputOrganisationsSelectField = ({ items, name, value, isCollapsed = false, placeholder, ...props }: InputOrganisationsSelectFieldProps) => {
   const theme = useTheme()
+  const selectedName = items.find((item) => item.value === value)?.name
+
   return (
     <Select
       name={name}
       value={value}
       displayEmpty
+      SelectDisplayProps={{ 'aria-labelledby': undefined, 'aria-label': selectedName ? `${placeholder}: ${selectedName}` : placeholder }}
       renderValue={(value) => {
         if (!value) {
-          return placeholder
+          return isCollapsed ? <Buliding aria-hidden color={theme.palette.text.secondary} size={24} /> : placeholder
         }
-        const org = items.find((item) => item.value === value)
-        return (
-          <Box alignItems="center" display="flex" gap={1}>
-            <Avatar alt={org?.name} data-testid={org?.name}>
+        const index = items.findIndex((item) => item.value === value)
+        const org = items[index]
+        if (isCollapsed) {
+          return (
+            <Avatar alt={org?.name} data-testid={org?.name} background={getAvatarColor(index)}>
               {getInitials(org?.name)}
             </Avatar>
-            <OrganisationLabelStyled component="h2" variant="h2">
-              {org?.name}
-            </OrganisationLabelStyled>
-          </Box>
+          )
+        }
+        return (
+          <OrganisationLabelStyled component="h2" variant="h2">
+            {org?.name}
+          </OrganisationLabelStyled>
         )
       }}
       size="medium"
@@ -43,7 +52,7 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
         id: `field-${name}`,
         'data-testid': `field-${name}`
       }}
-      IconComponent={ArrowDown2}
+      IconComponent={IconStyled}
       MenuProps={{
         anchorOrigin: {
           vertical: 'bottom',
@@ -71,31 +80,23 @@ export const InputOrganisationsSelectField = ({ items, name, value, hasChevron =
       sx={{
         '&&': {
           padding: 0,
-          background: theme.palette.background.default,
-          borderRadius: '0.75rem',
-          boxShadow: `inset 0 -1px 0 ${theme.palette.divider}`,
-          color: theme.palette.text.primary,
-          '&:hover': {
-            boxShadow: `0 4px 12px rgba(16,24,40,0.04)`
-          }
+          background: theme.palette.common.white,
+          borderRadius: '0.5rem',
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)',
+          color: theme.palette.text.primary
         },
         '&& .MuiSelect-select': {
-          paddingTop: '18.5px',
-          paddingBottom: '18.5px',
-          paddingLeft: theme.spacing(2),
-          paddingRight: theme.spacing(2),
+          paddingTop: theme.spacing(1),
+          paddingBottom: theme.spacing(1),
+          paddingLeft: isCollapsed ? theme.spacing(1) : theme.spacing(2),
+          paddingRight: isCollapsed ? theme.spacing(1) : theme.spacing(2),
           display: 'flex',
           alignItems: 'center',
+          justifyContent: isCollapsed ? 'center' : 'flex-start',
           color: theme.palette.text.primary
         },
         '&& .MuiSelect-icon': {
-          width: hasChevron ? 18 : 0,
-          margin: theme.spacing(-0.5, 0, 0, 0),
-          right: 8,
-          color: theme.palette.text.secondary
-        },
-        '&& .MuiOutlinedInput-notchedOutline': {
-          display: 'none'
+          display: isCollapsed ? 'none' : undefined
         },
         '& .MuiMenuItem-root': {
           px: 2,

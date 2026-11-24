@@ -1,10 +1,16 @@
 package org.cardanofoundation.reeve.indexer.service;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +19,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
 
 import org.cardanofoundation.reeve.indexer.config.CredentialSchemaRegistry;
 import org.cardanofoundation.reeve.indexer.model.domain.Interval;
@@ -28,6 +36,7 @@ import org.cardanofoundation.reeve.indexer.model.repository.CredentialRepository
 import org.cardanofoundation.reeve.indexer.model.repository.ReportRepository;
 import org.cardanofoundation.reeve.indexer.model.response.IdentityAttestationView;
 import org.cardanofoundation.reeve.indexer.model.view.ReportView;
+import org.cardanofoundation.reeve.indexer.util.CsvSanitizer;
 
 @Service
 @Slf4j
@@ -41,12 +50,19 @@ public class ReportService {
     private final CredentialRepository credentialRepository;
     private final CredentialSchemaRegistry credentialSchemaRegistry;
 
-    public List<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency,
-            List<String> reportTypes, List<String> intervalTypes, List<Integer> years, List<Integer> periods, Pageable pageable) {
+    public Page<ReportView> findAllByTypeAndPeriod(String organisationId, String blockChainHash, String currency,
+            List<String> reportTypes, List<String> intervalTypes, List<Integer> years, List<Integer> periods,
+            List<String> periodKeys, List<String> accountingRegimes, Boolean accountingRegimeNotStated,
+            Boolean attestedOnly, Pageable pageable) {
         List<Interval> intervals = intervalTypes != null ?
             intervalTypes.stream()
                 .map(Interval::valueOf)
                 .toList() : null;
+
+        List<String> keys = periodKeys == null || periodKeys.isEmpty() ? null : periodKeys;
+        List<String> regimes = accountingRegimes == null || accountingRegimes.isEmpty() ? null : accountingRegimes;
+        Boolean notStated = Boolean.TRUE.equals(accountingRegimeNotStated) ? true : null;
+        Boolean attested = Boolean.TRUE.equals(attestedOnly) ? true : null;
 
         // That's a workaround to make sure that if the sorting contains period, we also sort by year and interval before
         // because period is not unique without them, so we need to make sure that the sorting is consistent with the way we group the reports later
@@ -67,37 +83,95 @@ public class ReportService {
         }
 
         // finds all first reports (with min id of the latest version, grouped by organisation, subType, interval, year and period)
-        List<ReportEntity> firstReports = reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
-                organisationId, likePattern(blockChainHash), currency, reportTypes, intervals, years, periods, pageable);
+        Page<ReportEntity> firstReports = reportRepository.findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriod(
+                organisationId, likePattern(blockChainHash), currency, reportTypes, intervals, years, periods,
+                keys, regimes, notStated, attested, pageable);
 
-        return firstReports.stream().map(report -> {
-            ReportView view;
-            try {
-                view = ReportView.fromEntity(report,
-                        organisationService.findById(report.getOrganisationId())
-                                .orElseThrow(),
-                        objectMapper);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+        return firstReports.map(this::toView);
+    }
 
-            // load all of the submissions of the same report (same version), each one may be signed by a different identity
-            var allReports = reportRepository.findByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVer(
-                    report.getOrganisationId(), report.getSubType(), report.getInterval(),
-                    report.getYear(), report.getPeriod(), report.getVer());
+    public List<ReportView> findByTxHash(String organisationId, String txHash) {
+        return reportRepository.findByTxHash(txHash)
+                .filter(report -> report.getOrganisationId().equals(organisationId))
+                .flatMap(report -> reportRepository
+                        .findFirstByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVerNotNullOrderByVerDescIdAsc(
+                                report.getOrganisationId(), report.getSubType(), report.getInterval(),
+                                report.getYear(), report.getPeriod())
+                        .filter(latest -> Objects.equals(latest.getVer(), report.getVer())))
+                .map(this::toView)
+                .stream()
+                .toList();
+    }
 
-            List<IdentityAttestationView> identities = allReports.stream()
-                    .filter(ReportEntity::isIdentityVerified)
-                    .map(r -> credentialRepository.findById(r.getIdentifier())
-                            .map(cred -> IdentityAttestationView.from(r.getIdentifier(), r.getTxHash(),
-                                    cred, credentialSchemaRegistry, objectMapper)))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .toList();
+    private ReportView toView(ReportEntity report) {
+        ReportView view;
+        try {
+            view = ReportView.fromEntity(report,
+                    organisationService.findById(report.getOrganisationId())
+                            .orElseThrow(),
+                    objectMapper);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
-            view.setIdentities(identities);
-            return view;
-        }).toList();
+        // load all of the submissions of the same report (same version), each one may be signed by a different identity
+        var allReports = reportRepository.findByOrganisationIdAndSubTypeAndIntervalAndYearAndPeriodAndVer(
+                report.getOrganisationId(), report.getSubType(), report.getInterval(),
+                report.getYear(), report.getPeriod(), report.getVer());
+
+        List<IdentityAttestationView> identities = allReports.stream()
+                .filter(ReportEntity::isIdentityVerified)
+                .map(r -> credentialRepository.findById(r.getIdentifier())
+                        .map(cred -> IdentityAttestationView.from(r.getIdentifier(), r.getTxHash(),
+                                r.getBlockTime(), cred, credentialSchemaRegistry, objectMapper)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+
+        view.setIdentities(identities);
+        return view;
+    }
+
+    public void downloadReportAsCsv(ReportView report, OutputStream outputStream) {
+        try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+            CSVWriter csvWriter = new CSVWriter(writer);
+            String[] header = {"Template name","Interval type","Period","Year","Field name","Amount","Currency"};
+            csvWriter.writeNext(header, false);
+            report.getData().forEach((name, value) -> writeLeafFieldsToCsv(csvWriter, report, name, value, ""));
+            csvWriter.flush();
+        } catch (Exception e) {
+            log.error("Failed to download reports", e);
+        }
+    }
+
+    private void writeLeafFieldsToCsv(CSVWriter csvWriter, ReportView report, String name, Object value, String prefix) {
+        if (value instanceof Map<?, ?> childFields) {
+            String newPrefix = prefix + name + ".";
+            childFields.forEach((childName, childValue) -> writeLeafFieldsToCsv(csvWriter, report, childName.toString(), childValue, newPrefix));
+        } else {
+            String[] data = {
+                    CsvSanitizer.sanitize(report.getSubType()),
+                    report.getIntervalType(),
+                    Objects.toString(report.getPeriod(), ""),
+                    Objects.toString(report.getYear(), ""),
+                    CsvSanitizer.sanitize(prefix + name),
+                    csvAmount(value),
+                    CsvSanitizer.sanitize(report.getCurrency())
+            };
+            csvWriter.writeNext(data, false);
+        }
+    }
+
+    private static String csvAmount(Object value) {
+        if (value == null) {
+            return "";
+        }
+        try {
+            new BigDecimal(value.toString());
+            return value.toString();
+        } catch (NumberFormatException e) {
+            return CsvSanitizer.sanitize(value.toString());
+        }
     }
 
     public Set<ReportEntity> findReportsInDateRange(String organisationId,

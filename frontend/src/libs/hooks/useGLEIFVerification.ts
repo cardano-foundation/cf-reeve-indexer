@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 
 interface GLEIFLegalEntity {
   legalName: string | { name?: string; language?: string }
@@ -32,8 +32,8 @@ interface GLEIFResponse {
 // Cross-checks an LEI against the GLEIF public registry. Only meaningful for the vLEI schema -
 // callers should only invoke this with a truthy `lei` (i.e. skip entirely for other credential
 // schemas), which the `enabled` flag below also guards against.
-export const useGLEIFVerification = (lei?: string | null) => {
-  return useQuery({
+export const getGLEIFVerificationQuery = (lei?: string | null) => {
+  return queryOptions({
     queryKey: ['gleif-verification', lei],
     queryFn: async (): Promise<GLEIFLegalEntity | null> => {
       if (!lei) return null
@@ -67,3 +67,9 @@ export const useGLEIFVerification = (lei?: string | null) => {
     retry: 1
   })
 }
+
+export const useGLEIFVerification = (lei?: string | null) => {
+  return useQuery(getGLEIFVerificationQuery(lei))
+}
+
+export const getLegalName = (entity?: GLEIFLegalEntity | null) => (typeof entity?.legalName === 'string' ? entity.legalName : entity?.legalName?.name)

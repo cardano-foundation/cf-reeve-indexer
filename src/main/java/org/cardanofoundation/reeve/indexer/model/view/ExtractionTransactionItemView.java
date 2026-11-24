@@ -32,6 +32,7 @@ public class ExtractionTransactionItemView {
 
     private String transactionType;
     private String blockChainHash;
+    private Long blockTime;
     private BigDecimal amountLcy;
     private BigDecimal amountFcy;
     private String fxRate;
@@ -55,6 +56,7 @@ public class ExtractionTransactionItemView {
                 .entryDate(entity.getTransaction().getDate())
                 .transactionType(entity.getTransaction().getType())
                 .blockChainHash(entity.getTransaction().getTxHash())
+                .blockTime(entity.getTransaction().getBlockTime())
                 .amountLcy(entity.getAmountLcy()).fxRate(entity.getFxRate())
                 .amountFcy(entity.getAmountFcy())
                 .documentNumber(entity.getDocumentNumber())

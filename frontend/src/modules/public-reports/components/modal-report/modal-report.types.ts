@@ -1,4 +1,16 @@
-import type { ReportApiResponse } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+import type { ReactNode } from 'react'
+
+import type { ReportApiResponse, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
+
+export interface ReportDetailsProps {
+  report: ReportEntity
+}
+
+export interface ReportDetailRow {
+  label: string
+  value: ReactNode
+  actions?: ReactNode
+}
 
 export type ModalReportProps = {
   report: ReportApiResponse

@@ -100,6 +100,7 @@ class FundingEventProcessorTest {
         assertEquals("1.0", saved.getVersion());
         assertEquals(123L, saved.getCreationSlot());
         assertEquals("metahash", saved.getMetadataHash());
+        assertEquals(1736899200L, saved.getBlockTime());
         assertEquals(0, new BigDecimal("85").compareTo(saved.getTotalAmount()));
         assertEquals(LocalDate.of(2025, 4, 3), saved.getDate());
         assertEquals(1, saved.getAllocations().size());
@@ -219,6 +220,7 @@ class FundingEventProcessorTest {
         ReeveMetadata metadata = new ReeveMetadata();
         metadata.setTxHash("tx1");
         metadata.setMetadataHash("metahash");
+        metadata.setBlockTime(1736899200L);
         metadata.setType(ReeveTransactionType.FUNDING);
         metadata.setOrg(Organisation.builder().id("org1").name("CF").build());
         metadata.setMetadata(Metadata.builder().version("1.0").creationSlot(123L)

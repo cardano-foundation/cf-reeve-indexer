@@ -66,7 +66,8 @@ export const CellStyled = styled(GridCell)`
       border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
       line-height: 1.5;
 
-      &:focus {
+      &:focus,
+      &:focus-within {
         outline: none;
       }
     }
