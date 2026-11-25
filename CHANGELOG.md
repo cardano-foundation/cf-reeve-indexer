@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.0](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.6.1...1.7.0) (2026-11-25)
+
+
+### Features
+
+* [LOB-2519] Read the report Standard from both the legacy and th… ([#110](https://github.com/cardano-foundation/cf-reeve-indexer/issues/110)) ([6d27efa](https://github.com/cardano-foundation/cf-reeve-indexer/commit/6d27efa47da973fb144fac1eb8778e79c4f20361))
+
+
+### Bug Fixes
+
+* disable csrf ([#111](https://github.com/cardano-foundation/cf-reeve-indexer/issues/111)) ([77bd55f](https://github.com/cardano-foundation/cf-reeve-indexer/commit/77bd55f048389c24187abda7b1966742e213d36e))
+
 ## [1.6.1](https://github.com/cardano-foundation/cf-reeve-indexer/compare/1.6.0...1.6.1) (2026-11-19)
 
 
