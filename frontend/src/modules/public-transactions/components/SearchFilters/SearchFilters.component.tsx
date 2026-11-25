@@ -9,7 +9,7 @@ import { useSearchFilters } from './SearchFilters.hooks'
 export const SearchFilters = () => {
   const { t } = useTranslations()
 
-  const { values, dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, options, transactionNumberSearchTerm, setTransactionNumberSearchTerm, debouncedTransactionNumberSearchTerm } = useSearchFilters()
+  const { values, dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate, options, isTransactionNumbersLoading, transactionNumberSearchTerm, setTransactionNumberSearchTerm, debouncedTransactionNumberSearchTerm } = useSearchFilters()
 
   const {
     costCenterOptions,
@@ -21,7 +21,8 @@ export const SearchFilters = () => {
     projectOptions,
     transactionNumberOptions,
     transactionTypeOptions,
-    vatCodeOptions
+    vatCodeOptions,
+    isOptionsLoading
   } = options
 
   return (
@@ -39,8 +40,9 @@ export const SearchFilters = () => {
             <FieldCombobox 
               label={t({ id: 'transactionNumber' })} 
               name="transactionNumber" 
-              options={transactionNumberOptions} 
-              multiple 
+              options={transactionNumberOptions}
+              loading={isTransactionNumbersLoading}
+              multiple
               noOptionsText={debouncedTransactionNumberSearchTerm ? t({ id: 'noOptionsTransactionNumber' }) : t({ id: 'transactionNumberSearchPlaceholder' })}
               inputValue={transactionNumberSearchTerm} 
               onInputChange={(_event, value, reason) => { 
@@ -48,17 +50,17 @@ export const SearchFilters = () => {
               filterOptions={(x) => x} />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'transactionType' })} name="transactionType" options={transactionTypeOptions} multiple />
+            <FieldCombobox label={t({ id: 'transactionType' })} name="transactionType" options={transactionTypeOptions} loading={isOptionsLoading} multiple />
           </Grid>
         </Grid>
         <Divider flexItem orientation="horizontal" />
         <Grid container size="grow" columnSpacing={2} rowSpacing={3}>
           <Typography variant="h3">{t({ id: 'transactionItems' })}</Typography>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'documentNumber' })} name="documentNumber" options={documentNumberOptions} multiple />
+            <FieldCombobox label={t({ id: 'documentNumber' })} name="documentNumber" options={documentNumberOptions} loading={isOptionsLoading} multiple />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'currency' })} name="currency" options={currencyOptions} multiple />
+            <FieldCombobox label={t({ id: 'currency' })} name="currency" options={currencyOptions} loading={isOptionsLoading} multiple />
           </Grid>
           <Grid size={6}>
             <FieldNumeric label={t({ id: 'minAmountFCY' })} name="minAmountFcy" />
@@ -73,22 +75,22 @@ export const SearchFilters = () => {
             <FieldNumeric label={t({ id: 'maxAmountLCY' })} name="maxAmountLcy" />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'vatCode' })} name="vatCode" options={vatCodeOptions} multiple />
+            <FieldCombobox label={t({ id: 'vatCode' })} name="vatCode" options={vatCodeOptions} loading={isOptionsLoading} multiple />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'costCenter' })} name="costCenter" options={costCenterOptions} multiple />
+            <FieldCombobox label={t({ id: 'costCenter' })} name="costCenter" options={costCenterOptions} loading={isOptionsLoading} multiple />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'projectCode' })} name="project" options={projectOptions} multiple />
+            <FieldCombobox label={t({ id: 'projectCode' })} name="project" options={projectOptions} loading={isOptionsLoading} multiple />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'counterparty' })} name="counterparty" options={counterpartyOptions} multiple />
+            <FieldCombobox label={t({ id: 'counterparty' })} name="counterparty" options={counterpartyOptions} loading={isOptionsLoading} multiple />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'counterpartyType' })} name="counterpartyType" options={counterpartyTypeOptions} multiple />
+            <FieldCombobox label={t({ id: 'counterpartyType' })} name="counterpartyType" options={counterpartyTypeOptions} loading={isOptionsLoading} multiple />
           </Grid>
           <Grid size={12}>
-            <FieldCombobox label={t({ id: 'event' })} name="event" options={eventOptions} multiple />
+            <FieldCombobox label={t({ id: 'event' })} name="event" options={eventOptions} loading={isOptionsLoading} multiple />
           </Grid>
         </Grid>
       </Grid>

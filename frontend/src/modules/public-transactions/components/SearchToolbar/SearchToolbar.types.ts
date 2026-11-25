@@ -18,5 +18,5 @@ export interface SearchToolbarProps {
 }
 
 export interface SearchQuickFiltersProps {
-  options: Pick<ReturnType<typeof useSearchFiltersOptions>, 'transactionNumberOptions' | 'transactionTypeOptions' | 'transactionNumberSearchTerm' | 'setTransactionNumberSearchTerm' | 'debouncedTransactionNumberSearchTerm'>
+  options: Pick<ReturnType<typeof useSearchFiltersOptions>, 'transactionNumberOptions' | 'transactionTypeOptions' | 'isOptionsLoading' | 'isTransactionNumbersLoading' | 'transactionNumberSearchTerm' | 'setTransactionNumberSearchTerm' | 'debouncedTransactionNumberSearchTerm'>
 }

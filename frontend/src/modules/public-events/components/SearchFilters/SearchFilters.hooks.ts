@@ -31,15 +31,18 @@ export const useSearchFiltersOptions = () => {
   const { selectedOrganisation } = useLayoutPublicContext()
   const isOrganisationSelected = Boolean(selectedOrganisation)
 
-  const { eventTypes } = useGetEventTypesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
-  const { projects } = useGetEventProjectsModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { eventTypes, isEventTypesFetching } = useGetEventTypesModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
+  const { projects, isProjectsFetching } = useGetEventProjectsModel({ parameters: { organisationId: selectedOrganisation } }, isOrganisationSelected)
 
   const eventTypeOptions = getAllEventTypeOptions(eventTypes)
   const projectOptions = getAllEventProjectOptions(projects)
 
+  const isOptionsLoading = !isOrganisationSelected || (isEventTypesFetching && !eventTypes) || (isProjectsFetching && !projects)
+
   return {
     eventTypeOptions,
-    projectOptions
+    projectOptions,
+    isOptionsLoading
   }
 }
 
@@ -60,7 +63,7 @@ export const useSearchDrawerFiltersForm = (lockedProjectId?: string | null) => {
 export const useSearchFilters = () => {
   const { values } = useFormikContext<SearchFiltersValues>()
 
-  const { eventTypeOptions, projectOptions } = useSearchFiltersOptions()
+  const { eventTypeOptions, projectOptions, isOptionsLoading } = useSearchFiltersOptions()
 
   const { dateFromMaxDate, dateFromMinDate, dateToMaxDate, dateToMinDate } = useDatesRange()
 
@@ -72,7 +75,8 @@ export const useSearchFilters = () => {
     dateToMinDate,
     options: {
       eventTypeOptions,
-      projectOptions
+      projectOptions,
+      isOptionsLoading
     }
   }
 }

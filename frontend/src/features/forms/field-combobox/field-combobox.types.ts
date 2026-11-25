@@ -6,7 +6,7 @@ export type FieldComboboxProps<
   FreeSolo extends boolean | undefined,
   ChipComponent extends React.ElementType = 'div'
 > = Pick<TextFieldProps, 'helperText' | 'label' | 'name' | 'disabled' | 'error' | 'required'> &
-  Pick<AutocompleteProps<Multiple, DisableClearable, FreeSolo, ChipComponent>, 'limitTags' | 'options' | 'onChange' | 'multiple' | 'onInputChange' | 'filterOptions' | 'inputValue' | 'noOptionsText'> & {
+  Pick<AutocompleteProps<Multiple, DisableClearable, FreeSolo, ChipComponent>, 'limitTags' | 'options' | 'onChange' | 'multiple' | 'onInputChange' | 'filterOptions' | 'inputValue' | 'noOptionsText' | 'loading'> & {
     name: NonNullable<TextFieldProps['name']>
     isGroupRendered?: boolean
   }
