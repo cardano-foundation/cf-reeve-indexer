@@ -1,13 +1,16 @@
 import { DRAWER_TYPES } from 'consts'
 import { TableToolbar } from 'features/common'
 import { FieldDateCombobox, FieldText, FieldCombobox } from 'features/forms'
-import { Badge, Divider, ToggleButton, ToggleButtonGroup } from 'features/mui/base'
+import { Badge, Box, Divider, ToggleButton } from 'features/mui/base'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
+import { ButtonIcon } from 'libs/ui-kit/components/ButtonIcon/ButtonIcon.component.tsx'
+import { Snackbar, SnackbarType } from 'libs/ui-kit/components/Snackbar/Snackbar.component.tsx'
+import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { DEFAULT_SEARCH_FILTERS_VALUES } from 'modules/public-transactions/components/SearchFilters/SearchFilters.consts'
 
-import { useSearchActionControls, useSearchQuickFilters, useSearchToolbar } from './SearchToolbar.hooks'
-import { SearchIconStyled, SortIconStyled } from './SearchToolbar.styles'
-import type { SearchQuickFiltersProps } from './SearchToolbar.types'
+import { useSearchActionControls, useSearchExport, useSearchQuickFilters, useSearchToolbar } from './SearchToolbar.hooks'
+import { ColumnsIconStyled, ColumnsToggleButtonStyled, ExportIconStyled, SearchIconStyled, SortIconStyled } from './SearchToolbar.styles'
+import type { SearchQuickFiltersProps, SearchToolbarProps } from './SearchToolbar.types'
 
 const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
   const { t } = useTranslations()
@@ -31,8 +34,11 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
         </TableToolbar.QuickFilters.Field>
       </TableToolbar.QuickFilters.FieldGroup>
       <TableToolbar.QuickFilters.Field>
-        <FieldCombobox 
-          label={t({ id: 'transactionNumber' })} 
+        <FieldCombobox label={t({ id: 'transactionType' })} limitTags={1} name="transactionType" options={transactionTypeOptions} loading={isOptionsLoading} multiple />
+      </TableToolbar.QuickFilters.Field>
+      <TableToolbar.QuickFilters.Field>
+        <FieldCombobox
+          label={t({ id: 'transactionNumber' })}
           limitTags={1} name="transactionNumber" 
           options={transactionNumberOptions}
           loading={isTransactionNumbersLoading}
@@ -43,15 +49,14 @@ const SearchQuickFilters = ({ options }: SearchQuickFiltersProps) => {
             if (reason !== 'reset') setTransactionNumberSearchTerm(value) }} 
           filterOptions={(x) => x} />
       </TableToolbar.QuickFilters.Field>
-      <TableToolbar.QuickFilters.Field>
-        <FieldCombobox label={t({ id: 'transactionType' })} limitTags={1} name="transactionType" options={transactionTypeOptions} loading={isOptionsLoading} multiple />
-      </TableToolbar.QuickFilters.Field>
     </TableToolbar.QuickFilters>
   )
 }
 
-const SearchActionControls = () => {
-  const { drawer, visibilityCount, hasFiltersTouched } = useSearchActionControls()
+const SearchActionControls = ({ columnsPanelId, isColumnsOpen, onColumnsToggle }: SearchToolbarProps) => {
+  const { t } = useTranslations()
+  const { drawer, visibilityCount, hasFiltersTouched, onDrawerClose } = useSearchActionControls()
+  const { isExportPending, handleExport, isSnackbarVisible, handleSnackbarClose } = useSearchExport()
 
   const { type, onDrawerOpen, isDrawerOpen } = drawer
 
@@ -59,20 +64,41 @@ const SearchActionControls = () => {
 
   return (
     <TableToolbar.ActionControls>
-      <ToggleButtonGroup aria-label="Public transactions toolbar control actions" value={type}>
+      <Box role="group" aria-label="Public transactions toolbar control actions" display="flex" alignItems="center" gap={1}>
+        <Tooltip title={t({ id: 'manageColumns' })}>
+          <ColumnsToggleButtonStyled
+            value="columns"
+            aria-controls={isColumnsOpen ? columnsPanelId : undefined}
+            aria-expanded={isColumnsOpen}
+            aria-haspopup="true"
+            aria-label={t({ id: 'manageColumns' })}
+            onClick={onColumnsToggle}
+            onPointerUp={(event) => {
+              if (isColumnsOpen) event.stopPropagation()
+            }}
+          >
+            <ColumnsIconStyled />
+          </ColumnsToggleButtonStyled>
+        </Tooltip>
+        <Tooltip title={t({ id: 'publicTransactionsExport' })}>
+          <ButtonIcon variant="outlined" aria-label={t({ id: 'publicTransactionsExport' })} aria-disabled={isExportPending} onClick={isExportPending ? undefined : handleExport}>
+            <ExportIconStyled />
+          </ButtonIcon>
+        </Tooltip>
         {visibilityCount < totalCount && (
           <Badge color="success" variant="dot" invisible={isDrawerOpen || !hasFiltersTouched}>
-            <ToggleButton value={DRAWER_TYPES.FILTERS} onClick={onDrawerOpen}>
+            <ToggleButton value={DRAWER_TYPES.FILTERS} selected={type === DRAWER_TYPES.FILTERS} onClick={isDrawerOpen ? onDrawerClose : onDrawerOpen}>
               <SortIconStyled />
             </ToggleButton>
           </Badge>
         )}
-      </ToggleButtonGroup>
+      </Box>
+      <Snackbar open={isSnackbarVisible} message={t({ id: 'publicTransactionsExportError' })} type={SnackbarType.ERROR} onClose={handleSnackbarClose} />
     </TableToolbar.ActionControls>
   )
 }
 
-export const SearchToolbar = () => {
+export const SearchToolbar = ({ columnsPanelId, isColumnsOpen, onColumnsToggle }: SearchToolbarProps) => {
   const { drawer, filters, options } = useSearchToolbar()
 
   const { hasFiltersTouched } = filters
@@ -80,7 +106,7 @@ export const SearchToolbar = () => {
   return (
     <TableToolbar {...{ drawer, hasFiltersTouched }}>
       <SearchQuickFilters {...{ options }} />
-      <SearchActionControls />
+      <SearchActionControls columnsPanelId={columnsPanelId} isColumnsOpen={isColumnsOpen} onColumnsToggle={onColumnsToggle} />
     </TableToolbar>
   )
 }

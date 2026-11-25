@@ -1,5 +1,15 @@
-import { Grid } from 'features/mui/base'
 import styled from 'styled-components'
+
+import { Modal } from 'features/common'
+import { Grid } from 'features/mui/base'
+
+export const ActionsStyled = styled(Modal.Actions)(
+  ({ theme }) => `
+  && {
+    border-top: 1px solid ${theme.palette.divider};
+  }
+`
+)
 
 export const ContentStyled = styled(Grid)(
   ({ theme }) => `

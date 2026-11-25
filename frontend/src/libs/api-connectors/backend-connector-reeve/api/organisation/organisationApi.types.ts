@@ -14,6 +14,13 @@ export interface OrganisationEntity {
   tax_id_number: string
 }
 
+export interface OrganisationLastUpdatedEntity {
+  organisationId: string
+  lastUpdated: number
+}
+
+export type OrganisationAccountingRegimeEntity = string
+
 export type OrganisationCostCenterEntity = string
 
 export type OrganisationCounterpartyEntity = string
@@ -44,11 +51,25 @@ interface GetOrganisationTransactionNumbersRequestParameters {
 
 export type OrganisationTransactionNumberEntity = string
 
+export interface OrganisationTransactionsOverviewEntity {
+  periodFrom: string | null
+  periodTo: string | null
+  transactionsCount: number
+  itemsCount: number
+  lastUpdated: number | null
+}
+
 export type OrganisationTransactionTypeEntity = string
 
 export type OrganisationVatCodeEntity = string
 
 export type GetOrganisationsResponse200 = OrganisationEntity[]
+
+export type GetOrganisationsLastUpdatedResponse200 = OrganisationLastUpdatedEntity[]
+
+export type GetOrganisationAccountingRegimesRequest = OrganisationEntityRequest
+
+export type GetOrganisationAccountingRegimesResponse200 = OrganisationAccountingRegimeEntity[]
 
 export type GetOrganisationCostCentersRequest = OrganisationEntityRequest
 
@@ -83,6 +104,10 @@ export type GetOrganisationTransactionNumbersRequest = {
 }
 
 export type GetOrganisationTransactionNumbersResponse200 = OrganisationTransactionNumberEntity[]
+
+export type GetOrganisationTransactionsOverviewRequest = OrganisationEntityRequest
+
+export type GetOrganisationTransactionsOverviewResponse200 = OrganisationTransactionsOverviewEntity
 
 export type GetOrganisationTransactionTypesRequest = OrganisationEntityRequest
 

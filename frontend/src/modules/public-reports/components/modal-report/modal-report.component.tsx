@@ -1,20 +1,34 @@
+import Link from '@mui/material/Link'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import dayjs from 'dayjs'
+import { Copy, DocumentDownload, ExportSquare, TickCircle } from 'iconsax-react'
 import { useState } from 'react'
 
 import { Modal } from 'features/common'
 import { ICONSAX_NAMES, IconsaxIcon } from 'features/iconsax'
-import { useTranslations } from 'libs/translations/hooks/useTranslations'
-
-import type { ModalReportProps } from './modal-report.types'
-import { getReportPeriod } from 'modules/public-reports/utils/payload'
-import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
 import { Grid, Divider, IconButton } from 'features/mui/base'
 import { NestedMap } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
-import Typography from '@mui/material/Typography'
+import { truncateHash } from 'libs/documents-kit/utils/format.ts'
+import { getLegalName, useGLEIFVerification } from 'libs/hooks/useGLEIFVerification'
+import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
+import { useTranslations } from 'libs/translations/hooks/useTranslations'
+import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
+import { Snackbar, SnackbarType } from 'libs/ui-kit/components/Snackbar/Snackbar.component.tsx'
+import { Tooltip } from 'libs/ui-kit/components/Tooltip/Tooltip.component.tsx'
 import { formatNumber } from 'libs/utils/format'
-import { ContentStyled } from './modal-report.styles'
-import { computeNestedSum } from './modal-report.utils'
-import { getLegacyReportConfig } from './modal-report.legacy-configs'
+import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
+import { DetailRow } from 'modules/public-reports/components/DetailRow/DetailRow.component.tsx'
+import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestationKinds.ts'
+import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
+import { getReportPeriod } from 'modules/public-reports/utils/payload'
+
+import { useModalReportCopyLink, useModalReportDownload } from './modal-report.hooks'
+import { getLegacyReportConfig } from './modal-report.legacy-configs'
+import { ActionsStyled, ContentStyled } from './modal-report.styles'
+import type { ModalReportProps, ReportDetailRow, ReportDetailsProps } from './modal-report.types'
+import { computeNestedSum } from './modal-report.utils'
 
 const createSafeT = (t: any) => (id?: string, variables?: Record<string, any>, fallback?: string) => {
   if (!id) return fallback || ''
@@ -36,6 +50,9 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const safeT = createSafeT(t)
 
   const { txHash, currency, period, intervalType, year, data, subType, accountingRegime } = report
+
+  const { isDownloadPending, handleDownload, isSnackbarVisible, handleSnackbarClose } = useModalReportDownload(report)
+  const { copyState, handleCopyLink } = useModalReportCopyLink(report)
 
   const titleText = safeT(
     'reportViewTitle',
@@ -64,11 +81,100 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
               <ChipAccountingRegime accountingRegime={accountingRegime} />
             </Grid>
           </Grid>
+          <ReportDetails report={report} />
           <Divider flexItem />
           <NestedGrid data={data} depth={0} safeT={safeT} reportHash={txHash} reportType={subType} />
         </ContentStyled>
       </Modal.Content>
+      <ActionsStyled>
+        <ButtonSecondary
+          startIcon={copyState === 'copied' ? <TickCircle size={20} variant="Outline" /> : <Copy size={20} variant="Outline" />}
+          onClick={() => void handleCopyLink()}
+        >
+          {copyState === 'copied' ? t({ id: 'copied' }) : copyState === 'failed' ? t({ id: 'copyFailed' }) : t({ id: 'reportCopyLink' })}
+        </ButtonSecondary>
+        <ButtonSecondary aria-disabled={isDownloadPending} startIcon={<DocumentDownload size={20} variant="Outline" />} onClick={isDownloadPending ? undefined : handleDownload}>
+          {t({ id: 'reportDownloadCsv' })}
+        </ButtonSecondary>
+      </ActionsStyled>
+      <Snackbar open={isSnackbarVisible} message={t({ id: 'publicTransactionsExportError' })} type={SnackbarType.ERROR} onClose={handleSnackbarClose} />
     </Modal>
+  )
+}
+
+const ReportDetails = ({ report }: ReportDetailsProps) => {
+  const { t } = useTranslations()
+  const organisationName = useSelectedOrganisationName()
+
+  const { identities, isLoading } = useAttestationKinds(report.identities)
+  const [publisher] = identities.organisation
+  const [auditor] = identities.auditor
+
+  const { data: auditorGleif } = useGLEIFVerification(auditor?.lei)
+  const auditorName = getLegalName(auditorGleif)
+
+  const isPublisherVerified = Boolean(publisher?.identityVerified)
+  const isAuditorVerified = Boolean(auditor?.identityVerified)
+
+  const identityId = isLoading
+    ? 'verifyingLEI'
+    : isPublisherVerified && isAuditorVerified
+      ? 'reportIdentityBothVerified'
+      : isPublisherVerified
+        ? 'reportIdentityPublisherVerified'
+        : isAuditorVerified
+          ? 'reportIdentityAuditorVerified'
+          : 'attestationPending'
+
+  const audited = isLoading
+    ? t({ id: 'verifyingLEI' })
+    : !auditor
+      ? t({ id: 'attestationPending' })
+      : t({ id: 'reportDateBy' }, { date: auditor.blockTime ? dayjs.unix(auditor.blockTime).format('DD/MM/YYYY') : '-', name: auditorName || auditor.schemaName })
+
+  const rows: ReportDetailRow[] = [
+    {
+      label: t({ id: 'published' }),
+      value: t({ id: 'reportDateBy' }, { date: report.blockTime ? dayjs.unix(report.blockTime).format('DD/MM/YYYY') : '-', name: organisationName })
+    },
+    { label: t({ id: 'reportAudited' }), value: audited },
+    { label: t({ id: 'reportIdentity' }), value: t({ id: identityId }) },
+    {
+      label: t({ id: 'onChainRecord' }),
+      value: report.txHash ? (
+        <Tooltip title={report.txHash}>
+          <span>{truncateHash(report.txHash, 4, 4)}</span>
+        </Tooltip>
+      ) : (
+        t({ id: 'none' })
+      ),
+      actions: report.txHash && (
+        <Tooltip title={t({ id: 'openInExplorer' })}>
+          <Link
+            aria-label={t({ id: 'openInExplorer' })}
+            color="inherit"
+            display="flex"
+            href={`${EXPLORER_TX_URL}${encodeURIComponent(report.txHash)}`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <ExportSquare size={20} variant="Outline" />
+          </Link>
+        </Tooltip>
+      )
+    }
+  ]
+
+  return (
+    <Stack spacing={1} width="100%">
+      {rows.map(({ label, value, actions }) => (
+        <DetailRow key={label} label={label} actions={actions}>
+          <Typography color="text.primary" variant="body1">
+            {value}
+          </Typography>
+        </DetailRow>
+      ))}
+    </Stack>
   )
 }
 

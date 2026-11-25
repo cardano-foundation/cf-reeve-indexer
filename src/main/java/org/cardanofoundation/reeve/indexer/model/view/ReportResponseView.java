@@ -20,8 +20,8 @@ public class ReportResponseView {
     private List<ReportView> reports;
     private Optional<ProblemDetail> error;
 
-    public static ReportResponseView createSuccess(List<ReportView> reports) {
-        return new ReportResponseView(true, reports.stream().count(), reports,
+    public static ReportResponseView createSuccess(List<ReportView> reports, long total) {
+        return new ReportResponseView(true, total, reports,
                 Optional.empty());
     }
 

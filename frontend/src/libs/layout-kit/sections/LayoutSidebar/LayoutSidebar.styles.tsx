@@ -7,6 +7,9 @@ interface LayoutSidebarStyledProps extends GridPropsMUI {
 
 export const LayoutSidebarStyled = styled(Grid)<LayoutSidebarStyledProps>`
   && {
+    view-transition-name: sidebar;
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
     max-width: ${({ $isSidebarOpen }) => ($isSidebarOpen ? '20rem' : '5.5rem')};

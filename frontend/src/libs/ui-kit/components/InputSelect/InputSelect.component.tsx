@@ -4,9 +4,9 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem'
 import Select, { SelectProps } from '@mui/material/Select'
-import { ArrowDown2 } from 'iconsax-react'
 import { isValidElement, ReactNode } from 'react'
 
+import { IconStyled } from 'features/mui/base/select/select.styles'
 import { opacityColors } from 'libs/ui-kit/theme/colors.ts'
 
 export interface SelectOption {
@@ -59,7 +59,7 @@ export const InputSelect = ({
             'data-testid': `field-${name}`
           }}
           disabled={disabled}
-          IconComponent={ArrowDown2}
+          IconComponent={IconStyled}
           renderValue={renderValue}
           MenuProps={{
             anchorOrigin: {
@@ -121,9 +121,6 @@ export const InputSelect = ({
               background: theme.palette.common.white,
               borderRadius: '0.5rem',
               boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)'
-            },
-            '& .MuiSelect-icon': {
-              margin: theme.spacing(-0.5, 0.25, 0, 0)
             }
           }}
           variant="outlined"

@@ -13,11 +13,13 @@ import { LayoutPublic } from 'libs/layout-kit/layout-public/LayoutPublic.compone
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
 import { EmptyStatePage } from 'libs/ui-kit/components/EmptyStatePage/EmptyStatePage.component'
 import { LegalDisclosureButton } from 'libs/ui-kit/components/LegalDisclosureButton/LegalDisclosureButton.component.tsx'
+import { Snackbar, SnackbarType } from 'libs/ui-kit/components/Snackbar/Snackbar.component.tsx'
 import { ModalReport } from 'modules/public-reports/components'
 import { PublicReportsContextProvider } from 'modules/public-reports/components/PublicReportsContext/PublicReportsContext.component'
 import { ReportsFilters } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.component'
 import { TableReportsPublic } from 'modules/public-reports/components/TablePublicReports/TablePublicReports.component'
 import { usePublicReports } from 'modules/public-reports/hooks/usePublicReports.ts'
+import { useSharedReport } from 'modules/public-reports/hooks/useSharedReport.ts'
 
 export const ViewReportsPublic = () => {
   const { t } = useTranslations()
@@ -44,7 +46,9 @@ export const ViewReportsPublic = () => {
 
   const { filters: drawerFilters, quickFilters, handleClearFilters, hasFiltersSelected, isApplyDisabled, isClearDisabled } = filters
 
-  const { report, handleReportViewOpen, handleReportViewClose, isReportViewOpen } = modal
+  const { report, handleReportViewOpen, isReportViewOpen } = modal
+
+  const { handleSharedReportClose, isSharedReportError, isSnackbarVisible, handleSnackbarClose } = useSharedReport(modal)
 
   return (
     <PublicReportsContextProvider value={{ filters, options }}>
@@ -54,7 +58,7 @@ export const ViewReportsPublic = () => {
         </Box>
         <LegalDisclosureButton />
       </LayoutPublic.Header>
-      <LayoutPublic.Main flexDirection="column" gap={6} hasMinContentHeight isHeightRestricted>
+      <LayoutPublic.Main flexDirection="column" gap={6} hasMinContentHeight>
         {hasEmptyPageState ? (
           <EmptyStatePage
             asset={<Box alt={t({ id: 'noPublicReportsMessage' })} component="img" maxWidth="47.5rem" src={publicReportsIllustration} width="100%" />}
@@ -62,9 +66,9 @@ export const ViewReportsPublic = () => {
             message={t({ id: 'noPublicReportsMessage' })}
           />
         ) : (
-          <Box display="flex" flexDirection="column" gap={1} height="100%" minHeight={0}>
+          <Box display="flex" flexDirection="column" gap={1}>
             <LegalDisclosureAttribution />
-            <Box display="flex" flexDirection="column" flex="1 1 0" minHeight="15rem">
+            <Box display="flex" flexDirection="column">
               <FormikProvider value={quickFilters}>
                 <TableReportsPublic
                   data={reports}
@@ -101,7 +105,8 @@ export const ViewReportsPublic = () => {
           </Grid>
         </LayoutPublic.Drawer.Footer>
       </LayoutPublic.Drawer>
-      {report && <ModalReport report={report} onClose={handleReportViewClose} isOpen={isReportViewOpen} />}
+      {report && <ModalReport report={report} onClose={handleSharedReportClose} isOpen={isReportViewOpen} />}
+      <Snackbar open={isSnackbarVisible} message={t({ id: isSharedReportError ? 'reportLoadError' : 'reportNotFound' })} type={SnackbarType.ERROR} onClose={handleSnackbarClose} />
     </PublicReportsContextProvider>
   )
 }

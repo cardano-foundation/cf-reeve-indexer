@@ -8,7 +8,7 @@ plugins {
 
 group = "org.cardanofoundation"
 // x-release-please-start-version
-version = "1.6.0"
+version = "1.6.1"
 // x-release-please-end
 
 java {
@@ -26,7 +26,7 @@ repositories {
 
         // Only search this repository for the specific dependency
         content {
-            includeModule("org.cardanofoundation", "signify")
+            includeModule("id.veridian", "signify")
         }
     }
 }
@@ -34,22 +34,26 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("com.bloxbean.cardano:yaci-store-spring-boot-starter:0.1.4")
+    implementation("com.bloxbean.cardano:yaci-store-spring-boot-starter:0.1.7")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     // Jackson annotations are useful for the generated classes
     implementation("com.fasterxml.jackson.core:jackson-annotations")
     implementation("org.postgresql:postgresql")
     implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
+    implementation("com.opencsv:opencsv:5.11")
 
     // Keri
-    implementation("org.cardanofoundation:signify:0.1.2-PR62-d6aea58")
+    implementation("id.veridian:signify:0.1.2-66227de-SNAPSHOT")
 
     // Yaci store
     implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")
-    implementation("com.bloxbean.cardano:yaci-store-metadata-spring-boot-starter:0.1.6")
-    implementation("com.bloxbean.cardano:yaci-store-utxo-spring-boot-starter:0.1.6")
-    implementation("com.bloxbean.cardano:yaci-store-script-spring-boot-starter:0.1.6")
-    implementation("com.bloxbean.cardano:yaci-store-assets-spring-boot-starter:0.1.6")
+    // NOTE: no tx-submission backend here on purpose. The indexer is a chain READER (yaci-store node
+    // sync) and submits nothing — cardano-client-backend-blockfrost was added solely for the card
+    // attestation's on-chain publish and was removed with it (2026-07-28 design).
+    implementation("com.bloxbean.cardano:yaci-store-metadata-spring-boot-starter:0.1.7")
+    implementation("com.bloxbean.cardano:yaci-store-utxo-spring-boot-starter:0.1.7")
+    implementation("com.bloxbean.cardano:yaci-store-script-spring-boot-starter:0.1.7")
+    implementation("com.bloxbean.cardano:yaci-store-assets-spring-boot-starter:0.1.7")
     implementation("com.bloxbean.cardano:aiken-java-binding:0.1.0")
 
     // implementation("org.zalando:problem-spring-web-starter:0.29.1")
@@ -92,3 +96,4 @@ spotless {
 tasks.bootJar {
     archiveClassifier = "all"
 }
+

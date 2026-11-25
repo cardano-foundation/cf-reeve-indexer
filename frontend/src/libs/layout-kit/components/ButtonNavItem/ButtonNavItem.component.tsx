@@ -15,10 +15,22 @@ interface ButtonNavItemProps {
   hasMainRoute?: boolean
   hasIconHighlighted?: boolean
   hasTooltip: boolean
+  hasViewTransition?: boolean
   isOpen?: boolean
 }
 
-export const ButtonNavItem = ({ icon: Icon, label, route, getCurrentPage, onClick, hasMainRoute = true, hasIconHighlighted, hasTooltip, isOpen }: ButtonNavItemProps) => {
+export const ButtonNavItem = ({
+  icon: Icon,
+  label,
+  route,
+  getCurrentPage,
+  onClick,
+  hasMainRoute = true,
+  hasIconHighlighted,
+  hasTooltip,
+  hasViewTransition,
+  isOpen
+}: ButtonNavItemProps) => {
   const theme = useTheme()
 
   const hasToggle = typeof onClick === 'function' && isOpen !== undefined
@@ -36,7 +48,7 @@ export const ButtonNavItem = ({ icon: Icon, label, route, getCurrentPage, onClic
         disableInteractive={!hasTooltip}
         disableTouchListener={!hasTooltip}
       >
-        <ListItemButtonStyled onClick={onClick} selected={isCurrentPage} {...(hasMainRoute ? { component: RouterLink, to: route } : {})}>
+        <ListItemButtonStyled onClick={onClick} selected={isCurrentPage} {...(hasMainRoute ? { component: RouterLink, to: route, viewTransition: hasViewTransition } : {})}>
           <ListItemIconStyled>
             <Icon color={isCurrentPage ? theme.palette.primary.main : theme.palette.action.active} variant={hasIconHighlighted || isCurrentPage ? 'Bold' : 'Outline'} />
           </ListItemIconStyled>

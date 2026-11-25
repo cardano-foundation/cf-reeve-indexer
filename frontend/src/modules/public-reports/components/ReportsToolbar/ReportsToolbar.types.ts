@@ -4,6 +4,8 @@ export interface ReportsQuickFiltersValues extends Record<string, unknown> {
   search: string
   report: string[]
   period: string[]
+  standard: string[]
+  attestedOnly: boolean
 }
 
 export interface ReportsQuickFiltersProps {

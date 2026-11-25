@@ -1,11 +1,14 @@
 package org.cardanofoundation.reeve.indexer.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -13,6 +16,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.cardanofoundation.reeve.indexer.model.domain.ReeveTransactionType;
 import org.cardanofoundation.reeve.indexer.model.domain.metadata.ReeveMetadata;
 
 public class ReeveMetadataDeserializerTest {
@@ -96,6 +100,38 @@ public class ReeveMetadataDeserializerTest {
     }
 
     @Test
+    void documentTypeKeepsRawDataNode() throws Exception {
+        String json = """
+            {"type":"DOCUMENT","org":{"id":"aabb"},
+             "metadata":{"version":"1.0"},
+             "data":{"id":"doc-1","ipfs_cid":"bafy123","content_hash":"%s",
+                     "plaintext_hash":"%s","envelope_version":1,"slot_count":2}}
+            """.formatted("a".repeat(64), "b".repeat(64));
+        ReeveMetadata metadata = new ObjectMapper().readValue(json, ReeveMetadata.class);
+        assertEquals(ReeveTransactionType.DOCUMENT, metadata.getType());
+        assertInstanceOf(JsonNode.class, metadata.getData());
+        JsonNode data = (JsonNode) metadata.getData();
+        assertEquals("doc-1", data.get("id").asText());
+        assertEquals(2, data.get("slot_count").asInt());
+    }
+
+    @Test
+    void documentTypeWithGarbageDataStillDeserialises() throws Exception {
+        String json = "{\"type\":\"DOCUMENT\",\"data\":\"not-an-object\"}";
+        ReeveMetadata metadata = new ObjectMapper().readValue(json, ReeveMetadata.class);
+        assertEquals(ReeveTransactionType.DOCUMENT, metadata.getType());
+        assertNotNull(metadata.getData()); // raw node preserved for the processor to judge
+    }
+
+    @Test
+    void documentTypeWithMissingDataDeserialises() throws Exception {
+        String json = "{\"type\":\"DOCUMENT\",\"org\":{\"id\":\"aabb\"}}";
+        ReeveMetadata metadata = new ObjectMapper().readValue(json, ReeveMetadata.class);
+        assertEquals(ReeveTransactionType.DOCUMENT, metadata.getType());
+        assertNull(metadata.getData());
+    }
+
+    @Test
     void testReportTypeWithAccountingRegimeDeserializesRegimeValue() throws Exception {
         String jsonWithRegime = """
                 {
@@ -175,5 +211,45 @@ public class ReeveMetadataDeserializerTest {
         assertEquals(1L, metadata.getVer());
         assertEquals("QUARTER", metadata.getInterval().name());
         assertTrue(((String) metadata.getData()).contains("profit_for_the_year"));
+    }
+
+    private ReeveMetadata reportWith(String regimeKeys) throws Exception {
+        String json = """
+                {
+                  "type": "REPORT",
+                  "ver": 1,
+                  "year": 2026,
+                  "subType": "INCOME_STATEMENT",
+                  "interval": "YEAR",
+                  %s
+                  "data": "test report data"
+                }
+                """.formatted(regimeKeys);
+        return objectMapper.readValue(json, ReeveMetadata.class);
+    }
+
+    @Test
+    void testReportWithStandardKeyDeserializesStandard() throws Exception {
+        // Metadata version 1.3+ publishes the value under "standard"
+        assertEquals("IFRS", reportWith("\"standard\": \"IFRS\",").getAccountingRegime());
+    }
+
+    @Test
+    void testReportWithBothKeysPrefersStandard() throws Exception {
+        assertEquals("IFRS",
+                reportWith("\"standard\": \"IFRS\", \"accounting_regime\": \"Swiss GAAP FER\",").getAccountingRegime());
+    }
+
+    @Test
+    void testReportWithBlankStandardFallsBackToLegacyKey() throws Exception {
+        assertEquals("IFRS", reportWith("\"standard\": \" \", \"accounting_regime\": \"IFRS\",").getAccountingRegime());
+        assertEquals("IFRS", reportWith("\"standard\": null, \"accounting_regime\": \"IFRS\",").getAccountingRegime());
+    }
+
+    @Test
+    void testReportWithBlankOrNullKeysDeserializesWithNullStandard() throws Exception {
+        assertNull(reportWith("\"standard\": \"\",").getAccountingRegime());
+        assertNull(reportWith("\"accounting_regime\": \"\",").getAccountingRegime());
+        assertNull(reportWith("\"standard\": null, \"accounting_regime\": null,").getAccountingRegime());
     }
 }

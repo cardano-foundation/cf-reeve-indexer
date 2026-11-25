@@ -35,6 +35,7 @@ export interface ActionControlsProps {
 export interface QuickFiltersProps {
   children: ReactNode
   isFirstFieldSkipped?: boolean
+  isLastFieldSkipped?: boolean
 }
 
 export interface TableToolbarProps {

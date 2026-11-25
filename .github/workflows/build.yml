@@ -58,12 +58,12 @@ jobs:
       - name: Run tests
         run: ./gradlew test
 
-      - name:  🌍 earthly (docker build and push)
+      - name: EarthBuild (docker build and push)
         run: |
-          earthly +docker-publish \
+          earth +docker-publish \
             --PUSH=${DOCKER_PUSH} \
             --DOCKER_REGISTRIES="${{ env.DOCKER_REGISTRIES_FILTERED }}" \
-            --DOCKER_IMAGES_EXTRA_TAGS="${EARTHLY_DOCKER_IMAGES_EXTRA_TAGS}"
+            --DOCKER_IMAGES_EXTRA_TAGS="${EARTH_DOCKER_IMAGES_EXTRA_TAGS}"
             
       - name: Set event dispatch type
         id: set-event-dispatch-type

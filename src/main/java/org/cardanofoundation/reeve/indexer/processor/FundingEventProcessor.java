@@ -49,6 +49,11 @@ public class FundingEventProcessor implements ReeveTypeProcessor {
 
     @Override
     public void process(ReeveMetadata metadata) {
+        if (metadata.getOrg() == null || metadata.getOrg().getId() == null) {
+            log.warn("FUNDING tx {} has no org section; skipping", metadata.getTxHash());
+            return;
+        }
+
         String txHash = metadata.getTxHash();
         String organisationId = metadata.getOrg().getId();
 
@@ -174,6 +179,7 @@ public class FundingEventProcessor implements ReeveTypeProcessor {
                 .version(version)
                 .creationSlot(creationSlot)
                 .eventTimestamp(timestamp)
+                .blockTime(metadata.getBlockTime())
                 .ipfsCid(ipfsCid)
                 .metadataHash(metadata.getMetadataHash())
                 .totalAmount(event.getTotalAmount())

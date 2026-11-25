@@ -1,6 +1,6 @@
 import { Form } from 'formik'
 
-import { FieldCombobox } from 'features/forms'
+import { FieldCheckbox, FieldCombobox } from 'features/forms'
 import { Grid } from 'features/mui/base'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
 
@@ -9,7 +9,7 @@ import type { ReportsFiltersProps } from './ReportsFilters.types'
 export const ReportsFilters = ({ options }: ReportsFiltersProps) => {
   const { t } = useTranslations()
 
-  const { periodOptions, reportOptions } = options
+  const { periodOptions, reportOptions, standardOptions } = options
 
   return (
     <Form id="public-reports-filters" noValidate>
@@ -19,6 +19,12 @@ export const ReportsFilters = ({ options }: ReportsFiltersProps) => {
         </Grid>
         <Grid size={12}>
           <FieldCombobox label={t({ id: 'period' })} name="period" options={periodOptions} multiple />
+        </Grid>
+        <Grid size={12}>
+          <FieldCombobox label={t({ id: 'standard' })} name="standard" options={standardOptions} multiple />
+        </Grid>
+        <Grid size={12}>
+          <FieldCheckbox label={t({ id: 'attestedOnly' })} name="attestedOnly" />
         </Grid>
       </Grid>
     </Form>

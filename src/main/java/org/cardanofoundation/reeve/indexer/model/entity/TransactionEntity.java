@@ -43,6 +43,8 @@ public class TransactionEntity {
     private LocalDate date;
     @Column(name = "ipfs", nullable = true)
     private String ipfs;
+    @Column(name = "block_time", nullable = true)
+    private Long blockTime;
     @OneToMany(mappedBy = "transaction", orphanRemoval = true, cascade = CascadeType.ALL)
     @Builder.Default
     private List<TransactionItemEntity> items = new ArrayList<>();

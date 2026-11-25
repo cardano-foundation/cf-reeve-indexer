@@ -1,5 +1,7 @@
 import { httpService } from 'libs/api-connectors/backend-connector-reeve/api/httpService.ts'
 import {
+  PostPublicTransactionsDownloadRequest,
+  PostPublicTransactionsDownloadResponse200,
   PostPublicTransactionsRequest,
   PostPublicTransactionsRequestBody,
   PostPublicTransactionsResponse200
@@ -35,7 +37,14 @@ export const transactionsApi = (baseUrl: string) => {
     return post<PostPublicTransactionsResponse200, PostPublicTransactionsRequestBody>(`${url}${queryString}`, body, { Authorization: '' })
   }
 
+  const downloadTransactions = (request: PostPublicTransactionsDownloadRequest) => {
+    const { body } = request
+
+    return post<PostPublicTransactionsDownloadResponse200, PostPublicTransactionsRequestBody>(`api/v1/transactions/download/${body.organisationId}`, body, { Authorization: '' })
+  }
+
   return {
-    getTransactions
+    getTransactions,
+    downloadTransactions
   }
 }

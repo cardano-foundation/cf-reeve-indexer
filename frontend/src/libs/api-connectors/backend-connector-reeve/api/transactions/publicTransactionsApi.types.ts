@@ -63,6 +63,12 @@ export interface PostPublicTransactionsRequest {
   parameters: PostPublicTransactionsRequestParameters
 }
 
+export interface PostPublicTransactionsDownloadRequest {
+  body: PostPublicTransactionsRequestBody
+}
+
+export type PostPublicTransactionsDownloadResponse200 = string
+
 export interface PostPublicTransactionsResponse200 {
   success: boolean
   total: number

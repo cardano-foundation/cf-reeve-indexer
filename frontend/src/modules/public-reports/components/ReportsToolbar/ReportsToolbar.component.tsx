@@ -1,6 +1,6 @@
 import { DRAWER_TYPES } from 'consts'
 import { TableToolbar } from 'features/common'
-import { FieldText, FieldCombobox } from 'features/forms'
+import { FieldCheckbox, FieldText, FieldCombobox } from 'features/forms'
 import { Badge, Divider, ToggleButton, ToggleButtonGroup } from 'features/mui/base'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
 import { DEFAULT_REPORTS_FILTERS_VALUES } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.consts'
@@ -15,19 +15,25 @@ const ReportsQuickFilters = ({ options }: ReportsQuickFiltersProps) => {
 
   useReportsQuickFilters()
 
-  const { periodOptions, reportOptions } = options
+  const { periodOptions, reportOptions, standardOptions } = options
 
   return (
-    <TableToolbar.QuickFilters isFirstFieldSkipped>
-      <TableToolbar.QuickFilters.Field maxWidth="20rem" width="100%">
-        <FieldText name="search" slotProps={{ input: { startAdornment: <SearchIconStyled /> } }} placeholder={t({ id: 'publicReportsSearchPlaceholder' })} type="text" />
-      </TableToolbar.QuickFilters.Field>
-      <Divider orientation="vertical" flexItem />
+    <TableToolbar.QuickFilters isLastFieldSkipped>
       <TableToolbar.QuickFilters.Field>
         <FieldCombobox label={t({ id: 'report' })} limitTags={1} name="report" options={reportOptions} multiple />
       </TableToolbar.QuickFilters.Field>
       <TableToolbar.QuickFilters.Field>
         <FieldCombobox label={t({ id: 'period' })} limitTags={1} name="period" options={periodOptions} multiple />
+      </TableToolbar.QuickFilters.Field>
+      <TableToolbar.QuickFilters.Field>
+        <FieldCombobox label={t({ id: 'standard' })} limitTags={1} name="standard" options={standardOptions} multiple />
+      </TableToolbar.QuickFilters.Field>
+      <TableToolbar.QuickFilters.Field alignItems="center" display="flex" width="auto">
+        <FieldCheckbox label={t({ id: 'attestedOnly' })} name="attestedOnly" />
+      </TableToolbar.QuickFilters.Field>
+      <Divider orientation="vertical" flexItem />
+      <TableToolbar.QuickFilters.Field maxWidth="20rem" width="100%">
+        <FieldText name="search" slotProps={{ input: { startAdornment: <SearchIconStyled /> } }} placeholder={t({ id: 'publicReportsSearchPlaceholder' })} type="text" />
       </TableToolbar.QuickFilters.Field>
     </TableToolbar.QuickFilters>
   )

@@ -1,5 +1,6 @@
 package org.cardanofoundation.reeve.indexer.processor;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -99,6 +100,7 @@ class FundingEventProcessorTest {
         assertEquals("1.0", saved.getVersion());
         assertEquals(123L, saved.getCreationSlot());
         assertEquals("metahash", saved.getMetadataHash());
+        assertEquals(1736899200L, saved.getBlockTime());
         assertEquals(0, new BigDecimal("85").compareTo(saved.getTotalAmount()));
         assertEquals(LocalDate.of(2025, 4, 3), saved.getDate());
         assertEquals(1, saved.getAllocations().size());
@@ -199,10 +201,26 @@ class FundingEventProcessorTest {
         assertEquals("dup", saved.get(1).getEventId());
     }
 
+    @Test
+    void processWithMissingOrgDoesNotThrowAndSkipsSave() {
+        FundingEvent event = FundingEvent.builder().id("e1").type("CUSTOM").build();
+        ReeveMetadata metadata = new ReeveMetadata();
+        metadata.setTxHash("tx1");
+        metadata.setMetadataHash("metahash");
+        metadata.setType(ReeveTransactionType.FUNDING);
+        metadata.setOrg(null);
+        metadata.setData(List.of(event));
+
+        assertDoesNotThrow(() -> processor.process(metadata));
+
+        verify(eventRepository, never()).saveAll(any());
+    }
+
     private ReeveMetadata metadataWith(Object data) {
         ReeveMetadata metadata = new ReeveMetadata();
         metadata.setTxHash("tx1");
         metadata.setMetadataHash("metahash");
+        metadata.setBlockTime(1736899200L);
         metadata.setType(ReeveTransactionType.FUNDING);
         metadata.setOrg(Organisation.builder().id("org1").name("CF").build());
         metadata.setMetadata(Metadata.builder().version("1.0").creationSlot(123L)

@@ -31,10 +31,15 @@ const QuickFiltersField = forwardRef<HTMLDivElement, QuickFiltersFieldProps>(({ 
 
 QuickFiltersField.displayName = 'QuickFilterField'
 
-const QuickFilters = ({ children, isFirstFieldSkipped = false }: QuickFiltersProps) => {
+const QuickFilters = ({ children, isFirstFieldSkipped = false, isLastFieldSkipped = false }: QuickFiltersProps) => {
   const { drawer, visibilityCount, childRefs, toolbarRef } = useQuickFilters()
 
   const { isDrawerOpen } = drawer
+
+  const items = Children.toArray(children)
+  const isFieldItem = (item: (typeof items)[number]) => (item as ReactElement)?.type === QuickFiltersField || (item as ReactElement)?.type === QuickFiltersFieldGroup
+  const fields = items.filter(isFieldItem)
+  const count = items.length - fields.length
 
   return (
     <QuickFiltersContext.Provider value={true}>
@@ -47,6 +52,7 @@ const QuickFilters = ({ children, isFirstFieldSkipped = false }: QuickFiltersPro
             spacing={2}
             wrap="nowrap"
             sx={(theme) => ({
+              ...(isLastFieldSkipped && { position: 'relative' }),
               '& .MuiFormHelperText-root': {
                 position: 'absolute',
                 top: '100%',
@@ -58,28 +64,32 @@ const QuickFilters = ({ children, isFirstFieldSkipped = false }: QuickFiltersPro
               }
             })}
           >
-            {Children.toArray(children).map((child, index, array) => {
-              const isField = (child as ReactElement)?.type === QuickFiltersField || (child as ReactElement)?.type === QuickFiltersFieldGroup
+            {items.map((child, index) => {
+              const isField = isFieldItem(child)
 
-              const count = array.reduce<number>(
-                (acc, child) => (!((child as ReactElement)?.type === QuickFiltersField || (child as ReactElement)?.type === QuickFiltersFieldGroup) ? acc + 1 : acc),
-                0
-              )
+              const fieldIndex = fields.indexOf(child)
+              const isLastField = isLastFieldSkipped && fieldIndex === fields.length - 1
+              const measureIndex = isLastField ? 0 : fieldIndex + 1
+
+              const isSkipped = (isFirstFieldSkipped && index === 0) || isLastField
+              const isVisible = isSkipped || (!isDrawerOpen && (isLastFieldSkipped ? measureIndex + 1 : index + 1 - count) <= visibilityCount)
 
               return isField
                 ? cloneElement(child as ReactElement<HTMLDivElement>, {
                     ref: (el: HTMLDivElement) => {
-                      if (el) childRefs.current[index] = el as HTMLDivElement
+                      if (el) childRefs.current[isLastFieldSkipped ? measureIndex : index] = el as HTMLDivElement
                     },
                     key: index,
                     sx: {
                       whiteSpace: 'nowrap',
-                      position: isFirstFieldSkipped && index === 0 ? 'static' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'static' : 'relative',
-                      visibility: isFirstFieldSkipped && index === 0 ? 'visible' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'visible' : 'hidden',
-                      pointerEvents: isFirstFieldSkipped && index === 0 ? 'auto' : !isDrawerOpen && index + 1 - count <= visibilityCount ? 'auto' : 'none'
+                      position: isVisible ? 'static' : isLastFieldSkipped ? 'absolute' : 'relative',
+                      visibility: isVisible ? 'visible' : 'hidden',
+                      pointerEvents: isVisible ? 'auto' : 'none'
                     }
                   })
-                : child
+                : isLastFieldSkipped && (isDrawerOpen || visibilityCount <= 1)
+                  ? null
+                  : child
             })}
           </Grid>
         </Form>

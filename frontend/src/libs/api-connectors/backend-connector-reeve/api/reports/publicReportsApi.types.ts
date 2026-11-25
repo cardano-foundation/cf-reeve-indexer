@@ -43,17 +43,29 @@ export type ReportEntity = {
   year: number
   period: number
   ver: number
-  blockChainHash: string
-  identities: LEIResponse[]
+  txHash: string
+  blockTime: number | null
+  identities: IdentityAttestationView[]
   data: NestedMap
   accountingRegime: string | null 
 }
 
-export interface LEIResponse {
-    identityVerified: boolean
-    lei: string
-    txHash?: string
-    credentialTxHash?: string
+/**
+ * Generic verified-identity attestation for a credential presented alongside a report or
+ * document. Schema-aware successor to the old LEI-hardcoded `LEIResponse`: GLEIF cross-checking
+ * only applies when `lei` is present (the vLEI schema); other schemas carry their attributes in
+ * `claims`. Shared with the documents API - see documentsApi.types.ts.
+ */
+export interface IdentityAttestationView {
+  identityVerified: boolean
+  aid: string
+  schemaSaid: string
+  schemaName: string
+  claims: Record<string, unknown> | null
+  lei: string | null
+  txHash?: string
+  blockTime?: number | null
+  credentialTxHash?: string
 }
 
 export interface GetPublicReportsRequestParameters {
@@ -69,12 +81,28 @@ export interface GetPublicReportsRequestBody {
   blockChainHash?: string
   year?: number[]
   period?: number[]
+  periodKeys?: string[]
+  accountingRegime?: string[]
+  accountingRegimeNotStated?: boolean
+  attestedOnly?: boolean
 }
 
 export interface GetPublicReportsRequest {
   parameters: GetPublicReportsRequestParameters
   body: GetPublicReportsRequestBody
 }
+
+export interface GetPublicReportByTxHashRequest {
+  organisationId: string
+  txHash: string
+}
+
+export interface GetPublicReportDownloadRequest {
+  organisationId: string
+  txHash: string
+}
+
+export type GetPublicReportDownloadResponse200 = string
 
 export interface GetPublicReportsResponse200 {
   success: boolean

@@ -20,7 +20,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import org.cardanofoundation.reeve.indexer.model.domain.Organisation;
 import org.cardanofoundation.reeve.indexer.model.view.CurrencyView;
 import org.cardanofoundation.reeve.indexer.model.view.EventCodeView;
+import org.cardanofoundation.reeve.indexer.model.view.OrganisationLastUpdatedView;
 import org.cardanofoundation.reeve.indexer.model.view.ProjectView;
+import org.cardanofoundation.reeve.indexer.model.view.TransactionsOverviewView;
 import org.cardanofoundation.reeve.indexer.service.OrganisationService;
 
 
@@ -41,12 +43,27 @@ public class OrganisationController {
         return ResponseEntity.ok(organisations);
     }
 
+    @GetMapping("/lastUpdated")
+    public ResponseEntity<List<OrganisationLastUpdatedView>> getLastUpdatedPerOrganisation() {
+        log.info("Fetching last updated per organisation");
+        List<OrganisationLastUpdatedView> lastUpdated = organisationService.getLastUpdatedPerOrganisation();
+        return ResponseEntity.ok(lastUpdated);
+    }
+
     @GetMapping("/{orgId}/currencies")
     public ResponseEntity<List<CurrencyView>> getCurrencies(
             @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
             @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         List<CurrencyView> currencies = organisationService.getCurrenciesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(currencies);
+    }
+
+    @GetMapping("/{orgId}/transactionsOverview")
+    public ResponseEntity<TransactionsOverviewView> getTransactionsOverview(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+        log.info("Fetching transactions overview for organisation: {}", orgId);
+        TransactionsOverviewView overview = organisationService.getTransactionsOverviewForOrganisation(orgId);
+        return ResponseEntity.ok(overview);
     }
 
     @GetMapping("/{orgId}/internalNumber")
@@ -64,6 +81,15 @@ public class OrganisationController {
         log.info("Fetching distinct transaction types for organisation: {}", orgId);
         List<String> transactionTypes = organisationService.getDistinctTransactionTypesForOrganisation(orgId, pageable);
         return ResponseEntity.ok(transactionTypes);
+    }
+
+    @GetMapping("/{orgId}/accountingRegime")
+    public ResponseEntity<List<String>> getAccountingRegimes(
+            @PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId,
+            @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
+        log.info("Fetching distinct accounting regimes for organisation: {}", orgId);
+        List<String> accountingRegimes = organisationService.getDistinctAccountingRegimesForOrganisation(orgId, pageable);
+        return ResponseEntity.ok(accountingRegimes);
     }
 
     @GetMapping("/{orgId}/documentNumber")
