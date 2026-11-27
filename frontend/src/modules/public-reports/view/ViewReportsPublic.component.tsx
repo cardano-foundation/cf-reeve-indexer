@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 
 import { publicReportsIllustration } from 'assets/images'
 import { ButtonPrimary, ButtonSecondary } from 'features/common'
+import { useMediaQueries } from 'hooks'
 import { LegalDisclosureAttribution } from 'libs/layout-kit/layout-public/components/LegalDisclosureAttribution/LegalDisclosureAttribution.component.tsx'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext.ts'
 import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
@@ -23,6 +24,7 @@ import { useSharedReport } from 'modules/public-reports/hooks/useSharedReport.ts
 
 export const ViewReportsPublic = () => {
   const { t } = useTranslations()
+  const { isTablet } = useMediaQueries()
   const { organisationId: orgIdFromPath } = useParams<{ organisationId: string }>()
   const [searchParams] = useSearchParams()
   const { organisations, setSelectedOrganisation } = useLayoutPublicContext()
@@ -51,7 +53,7 @@ export const ViewReportsPublic = () => {
   const { handleSharedReportClose, isSharedReportError, isSnackbarVisible, handleSnackbarClose } = useSharedReport(modal)
 
   return (
-    <PublicReportsContextProvider value={{ filters, options }}>
+    <PublicReportsContextProvider value={{ filters, options, sorting }}>
       <LayoutPublic.Header>
         <Box flex="1 1 auto" minWidth={0}>
           <LayoutPublic.Header.Details description={t({ id: 'publicInterfaceViewDescription' })} title={t({ id: 'reports' })} />
@@ -84,7 +86,7 @@ export const ViewReportsPublic = () => {
         )}
       </LayoutPublic.Main>
       <LayoutPublic.Drawer open={isFiltersDrawerOpen}>
-        <LayoutPublic.Drawer.Header title={t({ id: 'filters' })} onClose={handleDrawerClose} />
+        <LayoutPublic.Drawer.Header title={t({ id: isTablet ? 'filterAndSearch' : 'filters' })} onClose={handleDrawerClose} />
         <LayoutPublic.Drawer.Content>
           <FormikProvider value={drawerFilters}>
             <ReportsFilters {...{ options }} />
@@ -105,7 +107,7 @@ export const ViewReportsPublic = () => {
           </Grid>
         </LayoutPublic.Drawer.Footer>
       </LayoutPublic.Drawer>
-      {report && <ModalReport report={report} onClose={handleSharedReportClose} isOpen={isReportViewOpen} />}
+      {report && <ModalReport key={report.txHash} report={report} onClose={handleSharedReportClose} isOpen={isReportViewOpen} />}
       <Snackbar open={isSnackbarVisible} message={t({ id: isSharedReportError ? 'reportLoadError' : 'reportNotFound' })} type={SnackbarType.ERROR} onClose={handleSnackbarClose} />
     </PublicReportsContextProvider>
   )

@@ -45,9 +45,15 @@ const AttestationCopyButton = ({ label, value }: AttestationCopyButtonProps) => 
   const tooltipTitle = copyState === 'copied' ? t({ id: 'copied' }) : copyState === 'failed' ? t({ id: 'copyFailed' }) : copyLabel
 
   return (
-    <Tooltip title={tooltipTitle}>
+    <Tooltip title={tooltipTitle} disableTouchListener>
       <ActionButtonStyled aria-label={tooltipTitle} onClick={() => void handleCopy()}>
-        {copyState === 'copied' ? <TickCircle size={20} variant="Outline" /> : <Copy size={20} variant="Outline" />}
+        {copyState === 'copied' ? (
+          <TickCircle size={20} variant="Outline" />
+        ) : copyState === 'failed' ? (
+          <CloseCircle size={20} variant="Outline" />
+        ) : (
+          <Copy size={20} variant="Outline" />
+        )}
       </ActionButtonStyled>
     </Tooltip>
   )
@@ -57,7 +63,7 @@ const AttestationExplorerLink = ({ value }: AttestationExplorerLinkProps) => {
   const { t } = useTranslations()
 
   return (
-    <Tooltip title={t({ id: 'openInExplorer' })}>
+    <Tooltip title={t({ id: 'openInExplorer' })} disableTouchListener>
       <Link
         aria-label={t({ id: 'openInExplorer' })}
         borderRadius="50%"

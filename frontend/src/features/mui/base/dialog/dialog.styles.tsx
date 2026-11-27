@@ -16,6 +16,11 @@ export const DialogStyled = styled(DialogMUI)<DialogProps>(
       border-radius: ${theme.shape.borderRadius * 2}px;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
+
+    & .MuiDialog-container > .MuiDialog-paperFullScreen {
+      border: 0;
+      border-radius: 0;
+    }
   }
 `
 )

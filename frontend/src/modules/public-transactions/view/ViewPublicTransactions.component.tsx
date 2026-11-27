@@ -32,7 +32,7 @@ export const ViewPublicTransactions = () => {
   const organisationName = useSelectedOrganisationName()
 
   const { data, drawer, filters, options, pagination, sorting } = usePublicTransactions()
-  const { isMobile } = useMediaQueries()
+  const { isTablet } = useMediaQueries()
   const theme = useTheme()
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export const ViewPublicTransactions = () => {
         </Box>
         <LegalDisclosureButton />
       </LayoutPublic.Header>
-      {isMobile ? (
+      {isTablet ? (
         <LayoutPublic.Main flexDirection="column">
           <EmptyStatePage
             asset={<Monitor aria-hidden color={theme.palette.action.disabled} size={56} variant="Outline" />}

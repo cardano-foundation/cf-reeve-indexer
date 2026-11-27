@@ -31,7 +31,7 @@ export const useReportsQuickFilters = () => {
 export const useReportsToolbar = () => {
   const { type, handleDrawerOpen, isDrawerOpen } = useLayoutPublicContext()
 
-  const { filters, options } = usePublicReportsContext()
+  const { filters, options, sorting } = usePublicReportsContext()
 
-  return { drawer: { type, onDrawerOpen: handleDrawerOpen, isDrawerOpen }, filters, options }
+  return { drawer: { type, onDrawerOpen: handleDrawerOpen, isDrawerOpen }, filters, options, sorting }
 }

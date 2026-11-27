@@ -25,7 +25,7 @@ export const getReportStandardOptions = (accountingRegimes: OrganisationAccounti
   return [...standards]
     .sort((current, next) => current.localeCompare(next))
     .map<AutocompleteOption>((standard) => ({
-      label: standard === REPORT_STANDARD_NOT_STATED_VALUE ? intl.formatMessage({ id: 'unspecified' }) : intl.formatMessage({ id: standard, defaultMessage: standard }),
+      label: standard === REPORT_STANDARD_NOT_STATED_VALUE ? intl.formatMessage({ id: 'unspecified' }) : standard,
       value: standard
     }))
 }

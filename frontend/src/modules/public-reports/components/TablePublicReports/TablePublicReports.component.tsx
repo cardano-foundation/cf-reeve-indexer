@@ -7,8 +7,9 @@ import dayjs from 'dayjs'
 import { ExportSquare } from 'iconsax-react'
 import { useMemo, useRef, useState } from 'react'
 
+import { useMediaQueries } from 'hooks'
 import { GetPublicReportsResponse200, ReportEntity } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
-import { usePagination } from 'libs/hooks/usePagination'
+import { PAGINATION_CONFIG, usePagination } from 'libs/hooks/usePagination'
 import { useSorting } from 'libs/hooks/useSorting'
 import { useSelectedOrganisationName } from 'libs/layout-kit/layout-public/hooks/useSelectedOrganisationName.ts'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
@@ -21,6 +22,7 @@ import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAcco
 import { ModalAttestation } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.component.tsx'
 import type { SelectedAttestation } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.types'
 import { ReportAttestations } from 'modules/public-reports/components/ReportAttestations/ReportAttestations.component.tsx'
+import { ReportCards } from 'modules/public-reports/components/ReportCards/ReportCards.component.tsx'
 import { ReportsToolbar } from 'modules/public-reports/components/ReportsToolbar/ReportsToolbar.component'
 import { useAttestationsLoading } from 'modules/public-reports/hooks/useAttestationKinds.ts'
 import { formatCurrency } from 'modules/public-reports/utils/format.ts'
@@ -37,10 +39,11 @@ interface TableReportsPublicProps {
 
 export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasFiltersSelected, isFetching }: TableReportsPublicProps) => {
   const { page, rowsPerPage, handlePagination } = pagination
-  const { handleSorting } = sorting
+  const { sortBy, sortOrder, handleSorting } = sorting
 
   const { t } = useTranslations()
   const organisationName = useSelectedOrganisationName()
+  const { isTablet } = useMediaQueries()
 
   const theme = useTheme()
 
@@ -162,42 +165,61 @@ export const TableReportsPublic = ({ data, pagination, sorting, onViewOpen, hasF
 
   return (
     <>
-      <DataGridContainer>
-        <DataGridContainer.Toolbar>
-          <ReportsToolbar />
-        </DataGridContainer.Toolbar>
-        <DataGridContainer.Table
-          sx={{ '--DataGrid-overlayHeight': '20rem' }}
-          autoHeight
-          initialState={{
-            sorting: {
-              sortModel: [{ field: 'period', sort: 'desc' }]
-            }
-          }}
-          noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: organisationName })}
-          noRowsMessage={t({ id: 'nothingHereMessage' })}
-          paginationModel={{ page, pageSize: rowsPerPage }}
-          paginationMode="server"
-          sortingMode="server"
-          rowCount={rowCount}
-          columns={columns}
-          rows={data?.reports ?? []}
-          getRowId={(row) => `${row.organisationId}-${row.subType}-${row.intervalType}-${row.year}-${row.period}-${row.ver}-${row.txHash}`}
-          onPaginationModelChange={(model) => {
-            const { page, pageSize } = model
+      <Box
+        sx={{ background: { xs: `linear-gradient(${theme.palette.background.paper} calc(100% - ${theme.spacing(1)}), transparent)`, smw: 'none' } }}
+        mt={{ xs: -2, sm: -1, smw: 0 }}
+        pb={{ xs: 2, smw: 0 }}
+        position={{ xs: 'sticky', smw: 'static' }}
+        pt={{ xs: 2, smw: 0 }}
+        top={0}
+        zIndex="appBar"
+      >
+        <DataGridContainer>
+          <DataGridContainer.Toolbar>
+            <ReportsToolbar />
+          </DataGridContainer.Toolbar>
+          {!isTablet && (
+            <DataGridContainer.Table
+              sx={{ '--DataGrid-overlayHeight': '20rem' }}
+              autoHeight
+              sortModel={[{ field: sortBy, sort: sortOrder }]}
+              noRowsHint={t({ id: 'noPublicReportsHint' }, { organisation: organisationName })}
+              noRowsMessage={t({ id: 'nothingHereMessage' })}
+              paginationModel={{ page, pageSize: rowsPerPage }}
+              paginationMode="server"
+              sortingMode="server"
+              rowCount={rowCount}
+              columns={columns}
+              rows={data?.reports ?? []}
+              getRowId={(row) => `${row.organisationId}-${row.subType}-${row.intervalType}-${row.year}-${row.period}-${row.ver}-${row.txHash}`}
+              onPaginationModelChange={(model) => {
+                const { page, pageSize } = model
 
-            handlePagination(page, pageSize)
-          }}
-          onSortModelChange={(model) => {
-            const [current] = model
+                handlePagination(page, pageSize)
+              }}
+              onSortModelChange={(model) => {
+                const [current] = model
 
-            handleSorting(current.field, current.sort)
-          }}
+                handleSorting(current.field, current.sort)
+              }}
+              hasFiltersSelected={hasFiltersSelected}
+              isLoading={isFetching}
+              disableColumnMenu
+            />
+          )}
+        </DataGridContainer>
+      </Box>
+      {isTablet && (
+        <ReportCards
+          data={data}
           hasFiltersSelected={hasFiltersSelected}
-          isLoading={isFetching}
-          disableColumnMenu
+          isFetching={isFetching}
+          isAttestationsLoading={isAttestationsLoading}
+          onViewOpen={onViewOpen}
+          onAttestationSelect={(report, kind) => setSelectedAttestation({ report, kind })}
+          onLoadMore={() => handlePagination(0, rowsPerPage + PAGINATION_CONFIG.ROWS_PER_PAGE)}
         />
-      </DataGridContainer>
+      )}
       {selectedAttestation && <ModalAttestation {...selectedAttestation} onClose={() => setSelectedAttestation(null)} />}
     </>
   )

@@ -1,16 +1,18 @@
 import { ButtonClose } from 'features/common'
 import { Box, Typography } from 'features/mui/base'
+import { ButtonBack } from 'libs/ui-kit/components/ButtonBack/ButtonBack.component.tsx'
 
 import { ModalContext } from './modal.context'
 import { useModalContext } from './modal.hooks'
 import { ModalStyled, ModalActionsStyled, ModalContentStyled, ModalTitleStyled } from './modal.styles'
 import type { ModalActionsProps, ModalContentProps, ModalHeaderProps, ModalProps } from './modal.types'
 
-const ModalHeader = ({ children, hasCloseButton = false, subtitle, ...props }: ModalHeaderProps) => {
+const ModalHeader = ({ children, backButtonLabel, hasCloseButton = false, subtitle, ...props }: ModalHeaderProps) => {
   const { onClose } = useModalContext()
 
   return (
     <Box alignItems="center" display="flex" justifyContent="space-between" pt={2} pr={2} pb={1} pl={{ xs: 2, sm: 3 }}>
+      {backButtonLabel && <ButtonBack aria-label={backButtonLabel} sx={{ mr: 0.5 }} onClick={onClose} />}
       <Box display="flex" flex="1 1 auto" flexDirection="column" gap={0.25} minWidth={0}>
         <ModalTitleStyled id="dialog-title" noWrap {...props}>
           {children}

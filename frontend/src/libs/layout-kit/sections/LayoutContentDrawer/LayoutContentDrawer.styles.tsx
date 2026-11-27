@@ -12,6 +12,10 @@ export const LayoutContentDrawerStyled = styled(Drawer)`
       width: 100%;
       background-color: ${({ theme }) => theme.palette.background.default};
       overflow: hidden;
+
+      ${({ theme }) => theme.breakpoints.down('smw')} {
+        z-index: ${({ theme }) => theme.zIndex.drawer + 2};
+      }
     }
   }
 `

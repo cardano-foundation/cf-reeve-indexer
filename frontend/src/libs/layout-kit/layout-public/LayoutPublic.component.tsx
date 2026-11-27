@@ -1,6 +1,7 @@
 import { useMediaQuery, useTheme } from '@mui/material'
 import Grid from '@mui/material/Grid'
 
+import { LayoutPublicBackdrop } from 'libs/layout-kit/layout-public/components/LayoutPublicBackdrop/LayoutPublicBackdrop.component.tsx'
 import { LayoutPublicContextProvider } from 'libs/layout-kit/layout-public/components/LayoutPublicContext/LayoutPublicContext.component.tsx'
 import { LayoutPublicBottomNavigation } from 'libs/layout-kit/layout-public/sections/LayoutPublicBottomNavigation/LayoutPublicBottomNavigation.component.tsx'
 import { LayoutPublicSidebar } from 'libs/layout-kit/layout-public/sections/LayoutPublicSidebar/LayoutPublicSidebar.component.tsx'
@@ -20,6 +21,7 @@ export const LayoutPublic = () => {
       <Grid container direction={{ xs: 'column', sm: 'row' }} height="100%" size="grow" wrap="nowrap">
         {!isMobile && <LayoutPublicSidebar />}
         <LayoutPublicContent />
+        <LayoutPublicBackdrop />
         <CookieConsentBanner />
         {isMobile && <LayoutPublicBottomNavigation />}
       </Grid>

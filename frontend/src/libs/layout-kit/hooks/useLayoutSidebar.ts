@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-export const useLayoutSidebar = () => {
-  const [isSidebarOpen, setSidebarOpen] = useState(true)
+export const useLayoutSidebar = (isInitiallyOpen = true) => {
+  const [isSidebarOpen, setSidebarOpen] = useState(isInitiallyOpen)
 
   const handleCloseSidebar = () => {
     setSidebarOpen(false)

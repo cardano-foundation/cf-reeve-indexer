@@ -1,6 +1,6 @@
 import { useFormik } from 'formik'
-import { noop } from 'lodash'
 
+import { useMediaQueries } from 'hooks'
 import { useLayoutPublicContext } from 'libs/layout-kit/layout-public/hooks/useLayoutPublicContext'
 import { useGetOrganisationAccountingRegimesModel } from 'libs/models/organisation-model/GetOrganisationAccountingRegimes/GetOrganisationAccountingRegimes.service'
 import { getAllReportPeriodOptions, getAllReportTypeOptions } from 'libs/utils/formFieldOptions'
@@ -22,9 +22,14 @@ export const useReportsFiltersOptions = () => {
 }
 
 export const useReportsDrawerFiltersForm = () => {
+  const { handleDrawerClose } = useLayoutPublicContext()
+  const { isTablet } = useMediaQueries()
+
   const filters = useFormik({
     initialValues: DEFAULT_REPORTS_FILTERS_VALUES,
-    onSubmit: noop,
+    onSubmit: () => {
+      if (isTablet) handleDrawerClose()
+    },
     enableReinitialize: true,
     validateOnChange: true
   })

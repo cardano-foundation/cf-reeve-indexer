@@ -16,8 +16,11 @@ export const LayoutContentStyled = styled(Grid)<LayoutContentStyledProps>`
       padding 0.3s ease-in-out;
 
     ${({ theme }) => `
-      ${theme.breakpoints.down('sm')} {
+      ${theme.breakpoints.down('smw')} {
         margin: 0;
+      }
+
+      ${theme.breakpoints.down('sm')} {
         height: auto;
         min-height: 100%;
         overflow: initial;

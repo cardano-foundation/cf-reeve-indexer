@@ -43,7 +43,7 @@ export const ReportAttestations = ({ report, isLoading, onSelect }: ReportAttest
             {chip}
           </Skeleton>
         ) : (
-          <Tooltip key={kind} title={t({ id: 'viewAttestation' })}>
+          <Tooltip key={kind} title={t({ id: 'viewAttestation' })} disableTouchListener>
             {chip}
           </Tooltip>
         )

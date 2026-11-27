@@ -3,6 +3,7 @@ import Select, { SelectProps as SelectPropsMUI } from '@mui/material/Select'
 import { Buliding } from 'iconsax-react'
 
 import { IconStyled } from 'features/mui/base/select/select.styles'
+import { useMediaQueries } from 'hooks'
 import { OrganisationLabelStyled } from 'libs/form-kit/components/InputOrganisationsSelectField/InputOrganisationsSelectField.styles.tsx'
 import { Avatar } from 'libs/ui-kit/components/Avatar/Avatar.component.tsx'
 import { getAvatarColor } from 'libs/ui-kit/components/Avatar/Avatar.consts.ts'
@@ -18,6 +19,7 @@ type InputOrganisationsSelectFieldProps = SelectPropsMUI<string> & {
 
 export const InputOrganisationsSelectField = ({ items, name, value, isCollapsed = false, placeholder, ...props }: InputOrganisationsSelectFieldProps) => {
   const theme = useTheme()
+  const { isMobile } = useMediaQueries()
   const selectedName = items.find((item) => item.value === value)?.name
 
   return (
@@ -40,7 +42,7 @@ export const InputOrganisationsSelectField = ({ items, name, value, isCollapsed 
           )
         }
         return (
-          <OrganisationLabelStyled component="h2" variant="h2">
+          <OrganisationLabelStyled component="h2" variant={isMobile ? 'body1' : 'h2'}>
             {org?.name}
           </OrganisationLabelStyled>
         )
@@ -85,11 +87,11 @@ export const InputOrganisationsSelectField = ({ items, name, value, isCollapsed 
           boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)',
           color: theme.palette.text.primary
         },
-        '&& .MuiSelect-select': {
+        '&& .MuiSelect-select.MuiSelect-select': {
           paddingTop: theme.spacing(1),
           paddingBottom: theme.spacing(1),
           paddingLeft: isCollapsed ? theme.spacing(1) : theme.spacing(2),
-          paddingRight: isCollapsed ? theme.spacing(1) : theme.spacing(2),
+          paddingRight: isCollapsed ? theme.spacing(1) : theme.spacing(4),
           display: 'flex',
           alignItems: 'center',
           justifyContent: isCollapsed ? 'center' : 'flex-start',

@@ -1,8 +1,12 @@
+import { ArrowDown, ArrowUp } from 'iconsax-react'
+
 import { DRAWER_TYPES } from 'consts'
 import { TableToolbar } from 'features/common'
 import { FieldCheckbox, FieldText, FieldCombobox } from 'features/forms'
-import { Badge, Divider, ToggleButton, ToggleButtonGroup } from 'features/mui/base'
+import { Badge, Box, Divider, ToggleButton, ToggleButtonGroup } from 'features/mui/base'
+import { useMediaQueries } from 'hooks'
 import { useTranslations } from 'libs/translations/hooks/useTranslations'
+import { ButtonSecondary } from 'libs/ui-kit/components/ButtonSecondary/ButtonSecondary.component.tsx'
 import { DEFAULT_REPORTS_FILTERS_VALUES } from 'modules/public-reports/components/ReportsFilters/ReportsFilters.consts'
 
 import { DEFAULT_REPORTS_QUICK_FILTERS_VALUES } from './ReportsToolbar.consts'
@@ -64,10 +68,41 @@ const ReportsActionControls = () => {
   )
 }
 
+const ReportsCompactActionControls = () => {
+  const { t } = useTranslations()
+
+  const { drawer, filters, sorting } = useReportsToolbar()
+
+  const { sortBy, sortOrder, handleSorting } = sorting
+
+  const isOldest = sortBy === 'period' && sortOrder === 'asc'
+
+  return (
+    <Box display="flex" gap={1} justifyContent="space-between" width="100%">
+      <Badge color="success" variant="dot" invisible={!filters.hasFiltersSelected}>
+        <ButtonSecondary startIcon={<SortIconStyled />} onClick={(event) => drawer.onDrawerOpen(event, DRAWER_TYPES.FILTERS)}>
+          {t({ id: 'filterAndSearch' })}
+        </ButtonSecondary>
+      </Badge>
+      <ButtonSecondary
+        aria-label={t({ id: isOldest ? 'sortedByPeriodOldest' : 'sortedByPeriodNewest' })}
+        endIcon={isOldest ? <ArrowUp size={20} /> : <ArrowDown size={20} />}
+        onClick={() => handleSorting('period', isOldest ? 'desc' : 'asc')}
+      >
+        {t({ id: isOldest ? 'oldest' : 'newest' })}
+      </ButtonSecondary>
+    </Box>
+  )
+}
+
 export const ReportsToolbar = () => {
+  const { isTablet } = useMediaQueries()
+
   const { drawer, filters, options } = useReportsToolbar()
 
   const { hasFiltersTouched } = filters
+
+  if (isTablet) return <ReportsCompactActionControls />
 
   return (
     <TableToolbar {...{ drawer, hasFiltersTouched }}>

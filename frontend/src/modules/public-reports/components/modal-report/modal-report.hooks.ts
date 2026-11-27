@@ -27,12 +27,7 @@ export const useModalReportView = () => {
     handleModalReportOpen()
   }
 
-  const handleReportViewClose = () => {
-    setReport(null)
-    handleModalReportClose()
-  }
-
-  return { report, handleReportViewClose, handleReportViewOpen, isReportViewOpen: isModalReportOpen }
+  return { report, handleReportViewClose: handleModalReportClose, handleReportViewOpen, isReportViewOpen: isModalReportOpen }
 }
 
 export const useModalReportDownload = (report: ReportEntity) => {

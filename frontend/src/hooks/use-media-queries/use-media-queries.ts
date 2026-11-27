@@ -5,6 +5,7 @@ export const useMediaQueries = () => {
 
   const isDesktop = useMediaQuery(theme.breakpoints.down('xl'))
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.down('smw'))
 
-  return { isDesktop, isMobile }
+  return { isDesktop, isMobile, isTablet }
 }

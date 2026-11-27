@@ -7,7 +7,8 @@ import { useState } from 'react'
 
 import { Modal } from 'features/common'
 import { ICONSAX_NAMES, IconsaxIcon } from 'features/iconsax'
-import { Grid, Divider, IconButton } from 'features/mui/base'
+import { Box, Grid, Divider, IconButton } from 'features/mui/base'
+import { useMediaQueries } from 'hooks'
 import { NestedMap } from 'libs/api-connectors/backend-connector-reeve/api/reports/publicReportsApi.types'
 import { truncateHash } from 'libs/documents-kit/utils/format.ts'
 import { getLegalName, useGLEIFVerification } from 'libs/hooks/useGLEIFVerification'
@@ -20,13 +21,16 @@ import { formatNumber } from 'libs/utils/format'
 import { EXPLORER_TX_URL } from 'modules/public-events-auditor/utils/explorer.ts'
 import { ChipAccountingRegime } from 'modules/public-reports/components/ChipAccountingRegime/ChipAccountingRegime.component.tsx'
 import { DetailRow } from 'modules/public-reports/components/DetailRow/DetailRow.component.tsx'
+import { ModalAttestation } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.component.tsx'
+import type { AttestationKind } from 'modules/public-reports/components/ModalAttestation/ModalAttestation.types'
+import { ReportAttestations } from 'modules/public-reports/components/ReportAttestations/ReportAttestations.component.tsx'
 import { useAttestationKinds } from 'modules/public-reports/hooks/useAttestationKinds.ts'
 import { formatCurrency, snakeToNormal } from 'modules/public-reports/utils/format'
 import { getReportPeriod } from 'modules/public-reports/utils/payload'
 
 import { useModalReportCopyLink, useModalReportDownload } from './modal-report.hooks'
 import { getLegacyReportConfig } from './modal-report.legacy-configs'
-import { ActionsStyled, ContentStyled } from './modal-report.styles'
+import { ActionsStyled, ContentStyled, ModalContentStyled } from './modal-report.styles'
 import type { ModalReportProps, ReportDetailRow, ReportDetailsProps } from './modal-report.types'
 import { computeNestedSum } from './modal-report.utils'
 
@@ -49,6 +53,10 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   const { t } = useTranslations()
   const safeT = createSafeT(t)
 
+  const { isMobile } = useMediaQueries()
+
+  const [selectedAttestationKind, setSelectedAttestationKind] = useState<AttestationKind | null>(null)
+
   const { txHash, currency, period, intervalType, year, data, subType, accountingRegime } = report
 
   const { isDownloadPending, handleDownload, isSnackbarVisible, handleSnackbarClose } = useModalReportDownload(report)
@@ -65,27 +73,25 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
   )
 
   return (
-    <Modal aria-labelledby="modal-report-title" onClose={onClose} isOpen={isOpen}>
-      <Modal.Header id="modal-report-title" hasCloseButton>
+    <Modal aria-labelledby="modal-report-title" fullScreen={isMobile} onClose={onClose} isOpen={isOpen}>
+      <Modal.Header id="modal-report-title" backButtonLabel={isMobile ? t({ id: 'back' }) : undefined} hasCloseButton={!isMobile}>
         {safeT('reportDialogPreviewTitle', {}, 'Preview Report')}
       </Modal.Header>
-      <Modal.Content>
+      <ModalContentStyled>
         <ContentStyled container direction="column" spacing={2}>
-          <Grid container justifyContent="space-between" size={12} spacing={3}>
-            <Grid alignItems="center" container size="auto" spacing={2}>
-              <Typography id="modal-report-title" color="textPrimary" component="h5" variant="h3">
-                {titleText}
-              </Typography>
-            </Grid>
-            <Grid alignItems="center" container size="auto">
+          <Box alignItems="flex-start" display="flex" gap={3} justifyContent="space-between" width="100%">
+            <Typography id="modal-report-title" color="textPrimary" component="h5" variant="h3">
+              {titleText}
+            </Typography>
+            <Box display="flex" flex="none">
               <ChipAccountingRegime accountingRegime={accountingRegime} />
-            </Grid>
-          </Grid>
-          <ReportDetails report={report} />
+            </Box>
+          </Box>
+          <ReportDetails report={report} onAttestationSelect={setSelectedAttestationKind} />
           <Divider flexItem />
           <NestedGrid data={data} depth={0} safeT={safeT} reportHash={txHash} reportType={subType} />
         </ContentStyled>
-      </Modal.Content>
+      </ModalContentStyled>
       <ActionsStyled>
         <ButtonSecondary
           startIcon={copyState === 'copied' ? <TickCircle size={20} variant="Outline" /> : <Copy size={20} variant="Outline" />}
@@ -98,12 +104,14 @@ export const ModalReport = ({ report, onClose, isOpen }: ModalReportProps) => {
         </ButtonSecondary>
       </ActionsStyled>
       <Snackbar open={isSnackbarVisible} message={t({ id: 'publicTransactionsExportError' })} type={SnackbarType.ERROR} onClose={handleSnackbarClose} />
+      {selectedAttestationKind && <ModalAttestation report={report} kind={selectedAttestationKind} onClose={() => setSelectedAttestationKind(null)} />}
     </Modal>
   )
 }
 
-const ReportDetails = ({ report }: ReportDetailsProps) => {
+const ReportDetails = ({ report, onAttestationSelect }: ReportDetailsProps) => {
   const { t } = useTranslations()
+  const { isMobile } = useMediaQueries()
   const organisationName = useSelectedOrganisationName()
 
   const { identities, isLoading } = useAttestationKinds(report.identities)
@@ -138,18 +146,21 @@ const ReportDetails = ({ report }: ReportDetailsProps) => {
       value: t({ id: 'reportDateBy' }, { date: report.blockTime ? dayjs.unix(report.blockTime).format('DD/MM/YYYY') : '-', name: organisationName })
     },
     { label: t({ id: 'reportAudited' }), value: audited },
-    { label: t({ id: 'reportIdentity' }), value: t({ id: identityId }) },
+    {
+      label: t({ id: 'reportIdentity' }),
+      value: isMobile ? <ReportAttestations report={report} isLoading={isLoading} onSelect={onAttestationSelect} /> : t({ id: identityId })
+    },
     {
       label: t({ id: 'onChainRecord' }),
       value: report.txHash ? (
-        <Tooltip title={report.txHash}>
+        <Tooltip title={report.txHash} disableTouchListener>
           <span>{truncateHash(report.txHash, 4, 4)}</span>
         </Tooltip>
       ) : (
         t({ id: 'none' })
       ),
       actions: report.txHash && (
-        <Tooltip title={t({ id: 'openInExplorer' })}>
+        <Tooltip title={t({ id: 'openInExplorer' })} disableTouchListener>
           <Link
             aria-label={t({ id: 'openInExplorer' })}
             color="inherit"
@@ -169,7 +180,7 @@ const ReportDetails = ({ report }: ReportDetailsProps) => {
     <Stack spacing={1} width="100%">
       {rows.map(({ label, value, actions }) => (
         <DetailRow key={label} label={label} actions={actions}>
-          <Typography color="text.primary" variant="body1">
+          <Typography color="text.primary" component="div" variant="body1">
             {value}
           </Typography>
         </DetailRow>
@@ -237,7 +248,7 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
   }
 
   return (
-    <Grid container direction="column" spacing={2} sx={borderSX}>
+    <Grid container direction="column" spacing={{ xs: 1, sm: 2 }} sx={borderSX}>
       {entries.map(([key, value]) => {
         const isNested = typeof value === 'object' && value !== null
         const label = getLabel(key)
@@ -249,16 +260,16 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
           const isOpen = !collapsed[key]
           const totalSx = depth === 0 ? { textDecoration: 'underline', textDecorationStyle: 'double' } : isCollapsible ? { textDecoration: 'underline' } : undefined
           const total = (
-            <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '10rem' }} size="grow">
+            <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '10rem' }} size={{ xs: 'auto', sm: 'grow' }}>
               <Typography color={'text.primary'} component="span" variant="h3" sx={totalSx}>
                 {formatNumber(subtotal)}
               </Typography>
             </Grid>
           )
           return (
-            <Grid key={`nested-${key}`} container direction="column" spacing={2} sx={depth === 0 ? { mb: 4, '&:last-of-type': { mb: 0 } } : undefined}>
+            <Grid key={`nested-${key}`} container direction="column" spacing={{ xs: 1, sm: 2 }} sx={depth === 0 ? { mb: 4, '&:last-of-type': { mb: 0 } } : undefined}>
               <Grid alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }}>
-                <Grid alignItems="center" container size={{ xs: 12, sm: 'grow' }} spacing={1} wrap="nowrap">
+                <Grid alignItems="center" container size="grow" spacing={1} wrap="nowrap">
                   {isCollapsible && (
                     <IconButton
                       aria-label={safeT(isOpen ? 'collapseSubsection' : 'expandSubsection', { title: label })}
@@ -281,7 +292,7 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
                   <NestedGrid data={value as NestedMap} depth={depth + 1} safeT={safeT} reportHash={reportHash} reportType={reportType} />
 
                   <Grid alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }}>
-                    <Grid container size={{ xs: 12, sm: 'grow' }}>
+                    <Grid container size="grow">
                       <Typography color="textPrimary" component="span" variant="h3" sx={getLevelSx(depth)}>
                         {totalLabel}
                       </Typography>
@@ -296,10 +307,10 @@ const NestedGrid: React.FC<NestedGridProps> = ({ data, depth = 0, safeT, reportH
 
         return (
           <Grid key={`item-${key}`} alignItems="center" container size="grow" spacing={{ xs: 1, sm: 3 }}>
-            <Grid container size={{ xs: 12, sm: 'grow' }}>
+            <Grid container size="grow">
               <Typography component="span">{label}</Typography>
             </Grid>
-            <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '10rem' }} size="grow">
+            <Grid display="flex" justifyContent="flex-end" maxWidth={{ xs: '100%', sm: '10rem' }} size={{ xs: 'auto', sm: 'grow' }}>
               <Typography color={'text.primary'} component="span" variant="body1">
                 {formatNumber(Number.parseFloat(value as string))}
               </Typography>

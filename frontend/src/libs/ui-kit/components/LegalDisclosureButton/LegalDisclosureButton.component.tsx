@@ -1,5 +1,3 @@
-import { InfoCircle } from 'iconsax-react'
-
 import { ButtonSecondary, useModal } from 'features/common'
 import { useMediaQueries } from 'hooks'
 import { useTranslations } from 'libs/translations/hooks/useTranslations.ts'
@@ -18,7 +16,6 @@ export const LegalDisclosureButton = () => {
         color="inherit"
         onClick={handleModalOpen}
         size="small"
-        startIcon={<InfoCircle size={24} variant="Outline" />}
         sx={{ alignSelf: 'center', backgroundColor: 'background.default', borderColor: 'divider', color: 'text.secondary', flexShrink: 0, px: 1.5, py: 0.75 }}
       >
         {t({ id: 'legalDisclosureLink' })}

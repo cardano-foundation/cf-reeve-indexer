@@ -37,14 +37,14 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
 
   const timeoutId = useRef<number | null>(null)
 
-  const { isDesktop, isMobile } = useMediaQueries()
+  const { isDesktop, isMobile, isTablet } = useMediaQueries()
 
   const { pathname } = useLocationState()
 
   const navigate = useNavigate()
   const { organisations: availableOrganisations } = useGetOrganisationsModel()
 
-  const { handleCloseSidebar, handleOpenSidebar, handleToggleSidebar, isSidebarOpen } = useLayoutSidebar()
+  const { handleCloseSidebar, handleOpenSidebar, handleToggleSidebar, isSidebarOpen } = useLayoutSidebar(!isTablet)
 
   const { type, handleCloseDrawer, handleOpenDrawer, isDrawerOpen } = useLayoutDrawer()
 
@@ -67,12 +67,12 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   }, [handleToggleSidebar])
 
   const handleDrawerClose = useCallback(() => {
-    if (isDesktop && !isMobile && !isSidebarOpen) {
+    if (isDesktop && !isTablet && !isSidebarOpen) {
       handleOpenSidebar()
     }
 
     handleCloseDrawer()
-  }, [handleCloseDrawer, handleOpenSidebar, isDesktop, isMobile, isSidebarOpen])
+  }, [handleCloseDrawer, handleOpenSidebar, isDesktop, isTablet, isSidebarOpen])
 
   const handleDrawerOpen = useCallback(
     (event: MouseEvent<HTMLElement>, newValue: DrawerType) => {
@@ -104,6 +104,19 @@ export const LayoutPublicContextProvider = ({ children }: { children: ReactNode 
   useEffect(() => {
     if (isSidebarOpen) setToggledSection(isResourcesRoute ? MenuCategory.RESOURCES : null)
   }, [isResourcesRoute, isSidebarOpen, selectedOrganisation])
+
+  useEffect(() => {
+    if (isTablet) handleCloseSidebar()
+  }, [pathname])
+
+  useEffect(() => {
+    if (isTablet) {
+      handleCloseSidebar()
+      handleCloseDrawer()
+    } else if (!isDrawerOpen) {
+      handleOpenSidebar()
+    }
+  }, [isTablet])
 
   useEffect(() => {
     if (!availableOrganisations?.length) return
