@@ -80,7 +80,7 @@ const ReportsCompactActionControls = () => {
   return (
     <Box display="flex" gap={1} justifyContent="space-between" width="100%">
       <Badge color="success" variant="dot" invisible={!filters.hasFiltersSelected}>
-        <ButtonSecondary startIcon={<SortIconStyled />} onClick={(event) => drawer.onDrawerOpen(event, DRAWER_TYPES.FILTERS)}>
+        <ButtonSecondary value={DRAWER_TYPES.FILTERS} startIcon={<SortIconStyled />} onClick={(event) => drawer.onDrawerOpen(event, DRAWER_TYPES.FILTERS)}>
           {t({ id: 'filterAndSearch' })}
         </ButtonSecondary>
       </Badge>
